@@ -8,6 +8,7 @@
   },
   "keywords": [
     "express",
+    "body-parser",
     "postgress",
     "conabio",
     "snib"

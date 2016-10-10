@@ -7,6 +7,10 @@
 // call the packages we need
 var express    = require('express');
 var app        = express();        
+var bodyParser = require('body-parser');
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
 
 var config = require('./config')
 var port = process.env.PORT || 8080;        // set our port
@@ -22,7 +26,11 @@ verbsRouter.get('/', function(req, res) {
 });
 
 verbsRouter.route('/getGridIds')
-  .get(methodsVerbs.getGridIds)
+  .get(methodsVerbs.getGridIds);
+
+verbsRouter.route('/getSpecie')
+  .get(methodsVerbs.getSpecie)
+  .post(methodsVerbs.getSpecie);
 
 // Register our routes
 // all of our routes will be prefixed with /snib
