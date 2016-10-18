@@ -1,9 +1,6 @@
 
 // server.js
 
-// BASE SETUP
-// =============================================================================
-
 // call the packages we need
 var express    = require('express');
 var app        = express();        
@@ -11,6 +8,26 @@ var bodyParser = require('body-parser');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
+
+// error handling
+if (app.get('env') === 'development') {
+  app.use(function(err, req, res, next) {
+    res.status(err.code || 500)
+      .json({
+        status: 'error',
+        message: err
+      });
+  });
+}
+
+app.use(function(err, req, res, next) {
+  console.error(err.stack);
+  res.status(err.code || 500)
+    .send({
+      status: 'error',
+      message: err.message 
+    });
+});
 
 var config = require('./config')
 var port = process.env.PORT || 8080;        // set our port
@@ -31,6 +48,9 @@ verbsRouter.route('/getGridIds')
 verbsRouter.route('/getSpecie')
   .get(methodsVerbs.getSpecie)
   .post(methodsVerbs.getSpecie);
+
+verbsRouter.route('/getSpecie/:specieId')
+  .get(methodsVerbs.infoSpecie);
 
 // Register our routes
 // all of our routes will be prefixed with /snib
