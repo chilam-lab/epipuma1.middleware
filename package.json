@@ -9,7 +9,7 @@
   "keywords": [
     "express",
     "body-parser",
-    "postgress",
+    "pg-promise",
     "conabio",
     "snib"
   ],

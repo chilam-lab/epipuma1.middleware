@@ -9,30 +9,10 @@ var bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
-// error handling
-if (app.get('env') === 'development') {
-  app.use(function(err, req, res, next) {
-    res.status(err.code || 500)
-      .json({
-        status: 'error',
-        message: err
-      });
-  });
-}
-
-app.use(function(err, req, res, next) {
-  console.error(err.stack);
-  res.status(err.code || 500)
-    .send({
-      status: 'error',
-      message: err.message 
-    });
-});
-
 var config = require('./config')
 var port = process.env.PORT || 8080;        // set our port
 
-var methodsVerbs = require('./methods/verbs');
+var appContollers = require('./controllers/verbs');
 
 // Routes for our api
 var verbsRouter = express.Router();
@@ -43,14 +23,15 @@ verbsRouter.get('/', function(req, res) {
 });
 
 verbsRouter.route('/getGridIds')
-  .get(methodsVerbs.getGridIds);
+  .get(appContollers.getGridIds);
 
 verbsRouter.route('/getSpecie')
-  .get(methodsVerbs.getSpecie)
-  .post(methodsVerbs.getSpecie);
+  .get(appContollers.getSpeciesByName, appContollers.getSpecies)
+  .post(appContollers.getSpeciesByName, appContollers.getSpecies);
 
 verbsRouter.route('/getSpecie/:specieId')
-  .get(methodsVerbs.infoSpecie);
+  .get(appContollers.infoSpecie)
+  .post(appContollers.infoSpecie);
 
 // Register our routes
 // all of our routes will be prefixed with /snib
@@ -60,6 +41,26 @@ app.use('/snib', verbsRouter);
 var server = app.listen(port, function() {
   var port = server.address().port;
   console.log('Aplicación corriendo en el puerto %s', port);
+});
+
+// error handling
+if (app.get('env') === 'development') {
+  app.use(function(err, req, res, next) {
+    res.status(500)
+      .json({
+        status: 'error',
+        message: err
+      });
+  });
+}
+
+app.use(function(err, req, res, next) {
+  console.error(err.stack);
+  res.status(500)
+    .send({
+      status: 'error',
+      message: err.message 
+    });
 });
 
 module.exports = server;

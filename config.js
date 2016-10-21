@@ -8,8 +8,10 @@ config.db.user     = process.env.DBUSER || 'demouser';
 config.db.password = process.env.DBPWD || 'demopass';
 config.db.host     = process.env.DBHOST || 'snib.conabio.gob.mx';
 config.db.port     = process.env.DBPORT || '5434';
+config.db.application_name = 'expressMiddleware';
 // Configure pool of connections
-config.db.max      = 10;
-config.db.idleTimeoutmillis = 30000;
+// config.db.max      = 10;
+// config.db.idleTimeoutmillis = 30000;
+config.db.poolSize = 10;
 
 module.exports = config;
