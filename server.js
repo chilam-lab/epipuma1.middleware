@@ -2,9 +2,11 @@
 
 // call the packages we need
 var express = require('express')
+var cors = require('cors')
 var app = express()
 var bodyParser = require('body-parser')
 
+app.use(cors())
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended: true}))
 
