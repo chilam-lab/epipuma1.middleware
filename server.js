@@ -2,6 +2,9 @@
 
 // call the packages we need
 var express = require('express')
+var debug = require('debug')
+var log = debug('snib-middleware:log')
+var error = debug('snib-middleware:error')
 var cors = require('cors')
 var app = express()
 var bodyParser = require('body-parser')
@@ -66,11 +69,12 @@ app.use('/snib', verbsRouter)
 // Start the server
 var server = app.listen(port, function () {
   var port = server.address().port
-  console.log('Aplicación corriendo en el puerto %s', port)
+  log('Aplicación corriendo en el puerto %s', port)
 })
 
 // error handling
 if (app.get('env') === 'development') {
+  // eslint-disable-next-line
   app.use(function (err, req, res, next) {
     res.status(500)
       .json({
@@ -80,8 +84,9 @@ if (app.get('env') === 'development') {
   })
 }
 
+// eslint-disable-next-line
 app.use(function (err, req, res, next) {
-  console.error(err.stack)
+  error(err.stack)
   res.status(500)
     .send({
       status: 'error',
