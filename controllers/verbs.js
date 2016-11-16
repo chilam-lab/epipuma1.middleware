@@ -72,7 +72,7 @@ exports.getSpeciesByName = function (req, res, next) {
   var specie_name = getParam(req, 'nom_sp')
   var limit = getParam(req, 'limit', 20)
   if (specie_name) {
-    pool.any(queries.specie.getByName, {query_name: specie_name + ':*',
+    pool.any(queries.specie.getByName, {query_name: '^' + specie_name,
       limit: limit})
       .then(function (data) {
         res.json({'data': data})
