@@ -15,52 +15,8 @@ app.use(bodyParser.urlencoded({extended: true}))
 
 var port = process.env.PORT || 8080        // set our port
 
-var appCtrl = require('./controllers/verbs')
-
 // Routes for our api
-var verbsRouter = express.Router()
-
-// test route to make sure everything is
-// working (accessed at GET http://localhost:8080/snib)
-verbsRouter.get('/', function (req, res) {
-  res.json({data: {message: '¡Yey! Bienvenido al API de SNIB'}})
-})
-
-verbsRouter.route('/getGridIds')
-  .get(appCtrl.getGridIds)
-
-verbsRouter.route('/getSpecie')
-  .get(
-    appCtrl.getSpeciesByName, 
-    appCtrl.getSpecies
-  )
-  .post(
-    appCtrl.getSpeciesByName, 
-    appCtrl.getSpecies
-  )
-
-verbsRouter.route('/getSpecie/:specieId')
-  .get(appCtrl.infoSpecie)
-  .post(appCtrl.infoSpecie)
-
-verbsRouter.route('/getInteractionCount')
-  .get(appCtrl.getCountGridid)
-  .post(appCtrl.getCountGridid)
-
-verbsRouter.route('/getCountByGroup')
-  .get(appCtrl.getCountByGroup)
-  .post(appCtrl.getCountByGroup)
-
-verbsRouter.route('/getRasterVariables/:type/:layer')
-  .get(
-    appCtrl.getClimaLayer,
-    appCtrl.getTopoLayer
-  )
-verbsRouter.route('/getRasterVariables/:type/')
-  .get(
-    appCtrl.getClimaVars, 
-    appCtrl.getTopoVars
-  )
+var verbsRouter = require('./routes/router')
 
 // Register our routes
 // all of our routes will be prefixed with /snib
