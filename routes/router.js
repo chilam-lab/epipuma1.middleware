@@ -14,10 +14,12 @@ router.route('/getGridIds')
 
 router.route('/getSpecie')
   .get(
+    verbsCtrl.getGroupsByName,
     verbsCtrl.getSpeciesByName, 
     verbsCtrl.getSpecies
   )
   .post(
+    verbsCtrl.getGroupsByName,
     verbsCtrl.getSpeciesByName, 
     verbsCtrl.getSpecies
   )

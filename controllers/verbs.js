@@ -58,9 +58,37 @@ exports.getGridIds = function (req, res, next) {
 }
 
 /**
- * getSpeciesByName regresa la clasificación de las especies relacionadas
- * a la cadena `nom_sp`.
+ * getGroupByName regresa los taxones asociados a la cadena `q` en el
+ * nivel `field`.
  *
+ * Responde los taxones realcionados a la cadena `q` en el nivel 
+ * taxonomico `field`.
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ *
+ */
+exports.getGroupsByName = function (req, res, next) {
+  var specie_name = getParam(req, 'q')
+  var field = getParam(req, 'field')
+  var limit = getParam(req, 'limit', 20)
+  if (field) {
+    pool.any(queries.specie.getFieldByName, {field: field, 
+      query_name: '^' + specie_name, limit: limit})
+      .then(function (data) {
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        next(error)
+      })
+  } else {
+    next()
+  }
+}
+
+/**
+ * getSpeciesByName regresa la clasificación de las especies relacionadas
+ * a la cadena `q`
  * Responde la clasificación de las especies que están relacionadas con
  * una cadena enviada, `nom_sp`. Además se acepta el parámetro `limit`.
  *
@@ -69,10 +97,10 @@ exports.getGridIds = function (req, res, next) {
  *
  */
 exports.getSpeciesByName = function (req, res, next) {
-  var specie_name = getParam(req, 'nom_sp')
+  var specie_name = getParam(req, 'q')
   var limit = getParam(req, 'limit', 20)
   if (specie_name) {
-    pool.any(queries.specie.getByName, {query_name: '^' + specie_name,
+    pool.any(queries.specie.getByName, { query_name: '^' + specie_name, 
       limit: limit})
       .then(function (data) {
         res.json({'data': data})

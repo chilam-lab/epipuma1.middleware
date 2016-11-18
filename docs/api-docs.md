@@ -24,7 +24,8 @@ existe filtro
 
 | Name | Located in | Description | Required | Type |
 | ---- | ---------- | ----------- | -------- | ---- |
-| nom_sp | query | Palabra de búsqueda para el nombre de una especie | No | string |
+| q | query | Palabra de búsqueda para el nombre de una especie o grupo taxonómico  | No | string |
+| field | query | Nombre del grupo taxónomico que se está buscando  | No | string |
 | limit | query | Número de resultados que quiere que se despliegen | No | number |
 
 **Responses**
@@ -34,8 +35,9 @@ existe filtro
 | 200 | Success |
 
 ##### ***POST***
-**Description:** Regresa un conjunto especies filtrado por `nom_sp` o algunas si no
-existe filtro
+**Description:** Regresa un conjunto especies o taxones filtrado por `q` o algunas si no
+existe filtro. Para buscar sobre un nivel taxonómico debe de existir el 
+campo `field`
 
 
 **Parameters**

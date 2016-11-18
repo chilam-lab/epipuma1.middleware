@@ -35,9 +35,17 @@ paths:
         existe filtro
       parameters:
         -
-          name: nom_sp
+          name: q
           in: query
-          description: Palabra de búsqueda para el nombre de una especie
+          description: |
+            Palabra de búsqueda para el nombre de una especie o
+            grupo taxonómico
+          type: string
+        -
+          name: field
+          in: query
+          description: |
+            Nombre del grupo taxónomico que se está buscando
           type: string
         -
           name: limit
@@ -99,8 +107,9 @@ paths:
                   epitetovalido: rufus
     post:
       description: |
-        Regresa un conjunto especies filtrado por `nom_sp` o algunas si no
-        existe filtro
+        Regresa un conjunto especies o taxones filtrado por `q` o algunas si no
+        existe filtro. Para buscar sobre un nivel taxonómico debe de existir el 
+        campo `field`
       parameters:
         -
           name: payload
@@ -108,7 +117,9 @@ paths:
           schema:
             type: object
             properties:
-              nom_sp:
+              q:
+                type: string
+              field:
                 type: string
               limit:
                 type: number

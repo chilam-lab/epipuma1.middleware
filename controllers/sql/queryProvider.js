@@ -12,7 +12,8 @@ var queryProvider = {
   },
   specie: {
     getAll: sqlPath('specie/get_all.sql'),
-    getByName: sqlPath('specie/get_by_name.sql'),
+    getByName: sqlPath('specie/get_specie_by_name.sql'),
+    getFieldByName: sqlPath('specie/get_group_by_name.sql'),
     getInfo: sqlPath('specie/get_info_specie.sql')
   },
   interaction: {
