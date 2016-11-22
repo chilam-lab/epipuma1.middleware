@@ -25,7 +25,9 @@ existe filtro
 | Name | Located in | Description | Required | Type |
 | ---- | ---------- | ----------- | -------- | ---- |
 | q | query | Palabra de búsqueda para el nombre de una especie o grupo taxonómico  | No | string |
-| field | query | Nombre del grupo taxónomico que se está buscando  | No | string |
+| field | query | Nombre del grupo taxónomico en el que se hará la búsqueda  | No | string |
+| parentfield | query | Orden taxonómico superior al campo `field`. Este parametro se usa cuando se desea obtener el conteo de los distintos taxones en el orden `field`  | No |  |
+| parentvalue | query | Valor del campo `parentfield`.  | No |  |
 | limit | query | Número de resultados que quiere que se despliegen | No | number |
 
 **Responses**

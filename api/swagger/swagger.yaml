@@ -45,8 +45,20 @@ paths:
           name: field
           in: query
           description: |
-            Nombre del grupo taxónomico que se está buscando
+            Nombre del grupo taxónomico en el que se hará la búsqueda
           type: string
+        -
+          name: parentfield
+          in: query
+          description: | 
+            Orden taxonómico superior al campo `field`. Este parametro se
+            usa cuando se desea obtener el conteo de los distintos taxones
+            en el orden `field`
+        -
+          name: parentvalue
+          in: query
+          description: |
+            Valor del campo `parentfield`.
         -
           name: limit
           in: query

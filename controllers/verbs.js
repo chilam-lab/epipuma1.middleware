@@ -69,12 +69,20 @@ exports.getGridIds = function (req, res, next) {
  *
  */
 exports.getGroupsByName = function (req, res, next) {
-  var specie_name = getParam(req, 'q')
+  var query_name = getParam(req, 'q', '')
   var field = getParam(req, 'field')
+  var parent_field = getParam(req, 'parentfield', 'reinovalido')
+  var parent_field_value = getParam(req, 'parentvalue', '')
   var limit = getParam(req, 'limit', 20)
+
   if (field) {
-    pool.any(queries.specie.getFieldByName, {field: field, 
-      query_name: '^' + specie_name, limit: limit})
+    pool.any(queries.specie.getFieldByName, {
+      field: field,
+      query_name: '^' + query_name,
+      parentfield: parent_field,
+      parent_name: '^' + parent_field_value,
+      limit: limit}
+      )
       .then(function (data) {
         res.json({'data': data})
       })
