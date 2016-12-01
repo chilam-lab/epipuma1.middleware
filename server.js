@@ -2,12 +2,13 @@
 
 // call the packages we need
 var express = require('express')
+var cors = require('cors')
+var bodyParser = require('body-parser')
 var debug = require('debug')
+
 var log = debug('snib-middleware:log')
 var error = debug('snib-middleware:error')
-var cors = require('cors')
 var app = express()
-var bodyParser = require('body-parser')
 
 app.use(cors())
 app.use(bodyParser.json())
