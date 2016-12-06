@@ -10,6 +10,12 @@ var queryProvider = {
   grid: {
     getIds: sqlPath('grid/get_ids.sql')
   },
+  layers: {
+    getStatesMX: sqlPath('layers/get_states.sql')
+  },
+  users: {
+    getUser: sqlPath('users/getUserReg.sql')
+  },
   specie: {
     getAll: sqlPath('specie/get_all.sql'),
     getByName: sqlPath('specie/get_specie_by_name.sql'),

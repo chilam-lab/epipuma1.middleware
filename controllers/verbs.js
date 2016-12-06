@@ -37,6 +37,8 @@ var getParam = function (req, name, defaultValue) {
   return defaultValue
 }
 
+
+
 /**
  * GetGridIds de SNIB DB
  *
@@ -105,9 +107,14 @@ exports.getGroupsByName = function (req, res, next) {
  *
  */
 exports.getSpeciesByName = function (req, res, next) {
+  
+  console.log("getSpeciesByName");
+
   var specie_name = getParam(req, 'q')
   var limit = getParam(req, 'limit', 20)
+
   if (specie_name) {
+
     pool.any(queries.specie.getByName, { query_name: '^' + specie_name, 
       limit: limit})
       .then(function (data) {
@@ -151,6 +158,9 @@ exports.getSpecies = function (req, res, next) {
  *
  */
 exports.infoSpecie = function (req, res, next) {
+
+  console.log("infoSpecie");
+
   var specie_id = req.params.specieId
   debug(specie_id)
   var fecha_incio = moment(getParam(req, 'fechaincio', '1500'),
@@ -328,3 +338,127 @@ exports.getTopoVars = function (req, res, next) {
     next()
   }
 }
+
+
+
+/**
+ * getStates de SNIB DB
+ *
+ * Regresa un geojson de lso estados de la republica mexicana.
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ *
+ */
+exports.getStates = function (req, res, next) {
+
+  console.log("getStates");
+
+  pool.any(queries.layers.getStatesMX)
+    .then(function (data) {
+      res.json({'data': data})
+    })
+    .catch(function (error) {
+      next(error)
+    })
+}
+
+
+/**
+ * getUserReg de SNIB DB
+ *
+ * Verifica si existe el usuario por medio de su email
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ *
+ */
+exports.getUserReg = function (req, res, next) {
+
+  console.log("getUserReg");
+  
+  var user_email = getParam(req, 'email');
+
+  pool.any(queries.users.getUser, {email: user_email})
+    .then(function (data) {
+      res.json({'data': data})
+    })
+    .catch(function (error) {
+      next(error)
+    })
+}
+
+
+
+/**
+ * getUserReg de SNIB DB
+ *
+ * Verifica si existe el usuario por medio de su email
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ *
+ * COMMENT: Como aplciar el next cuando existen diferentes variables
+ */
+
+
+exports.getBasicGeoRel = function (req, res, next) {
+
+  console.log("getGeoRel");
+
+  
+  var id              = getParam(req, 'id');
+  var discardedids    = getParam(req, 'discardedids');
+  var tfilters        = getParam(req, 'tfilters');
+  var lim_inf   = getParam(req, 'lim_inf');
+  var lim_sup   = getParam(req, 'lim_sup');
+
+
+  var alpha = 0.01;
+  var N = 6473;
+  
+
+  // var idreg     = getParam(req, 'idreg');
+  // var idtime    = getParam(req, 'idtime');
+  // var apriori   = getParam(req, 'apriori');
+  // var min_occ   = getParam(req, 'min_occ');
+  // var mapa_prob = getParam(req, 'mapa_prob');
+  // var sfecha    = getParam(req, 'sfecha');
+
+  // if (discardedids) {
+
+      pool.any(queries.users.getUser, {
+        id: id,
+        N: N,
+        alpha: alpha,
+        tfilters: tfilters,
+
+
+
+
+
+
+
+      })
+      .then(function (data) {
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        next(error)
+      })
+
+  // }
+  // else{
+  //   next()
+  // }
+
+    
+}
+
+
+
+
+
+
+
+
