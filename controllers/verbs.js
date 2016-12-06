@@ -108,8 +108,6 @@ exports.getGroupsByName = function (req, res, next) {
  */
 exports.getSpeciesByName = function (req, res, next) {
   
-  console.log("getSpeciesByName");
-
   var specie_name = getParam(req, 'q')
   var limit = getParam(req, 'limit', 20)
 
@@ -158,8 +156,6 @@ exports.getSpecies = function (req, res, next) {
  *
  */
 exports.infoSpecie = function (req, res, next) {
-
-  console.log("infoSpecie");
 
   var specie_id = req.params.specieId
   debug(specie_id)
@@ -352,7 +348,7 @@ exports.getTopoVars = function (req, res, next) {
  */
 exports.getStates = function (req, res, next) {
 
-  console.log("getStates");
+  // console.log("getStates");
 
   pool.any(queries.layers.getStatesMX)
     .then(function (data) {
@@ -375,7 +371,7 @@ exports.getStates = function (req, res, next) {
  */
 exports.getUserReg = function (req, res, next) {
 
-  console.log("getUserReg");
+  // console.log("getUserReg");
   
   var user_email = getParam(req, 'email');
 
@@ -404,7 +400,7 @@ exports.getUserReg = function (req, res, next) {
 
 exports.getBasicGeoRel = function (req, res, next) {
 
-  console.log("getGeoRel");
+  // console.log("getBasicGeoRel");
 
   
   var id              = getParam(req, 'id');
