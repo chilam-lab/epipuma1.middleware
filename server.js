@@ -16,7 +16,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 var port = process.env.PORT || 8080        // set our port
 
-console.log("port: " + port);
+// console.log("port: " + port);
 
 // Routes for our api
 var verbsRouter = require('./routes/router');
@@ -28,7 +28,7 @@ app.use('/snib', verbsRouter);
 // Start the server
 var server = app.listen(port, function () {
   var port = server.address().port;
-  console.log('Aplicación corriendo en el puerto %s', port);
+  // console.log('Aplicación corriendo en el puerto %s', port);
   log('Aplicación corriendo en el puerto %s', port);
 
 });
