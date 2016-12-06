@@ -41,10 +41,28 @@ router.route('/getRasterVariables/:type/:layer')
     verbsCtrl.getClimaLayer,
     verbsCtrl.getTopoLayer
   )
+
 router.route('/getRasterVariables/:type/')
   .get(
     verbsCtrl.getClimaVars, 
     verbsCtrl.getTopoVars
   )
 
+router.route('/getStates')
+  .get(verbsCtrl.getStates)
+  .post(verbsCtrl.getStates)
+
+router.route('/getUserReg')
+  .get(verbsCtrl.getUserReg)
+  .post(verbsCtrl.getUserReg)
+
+router.route('/getBasicGeoRel')
+  .get(verbsCtrl.getBasicGeoRel)
+  .post(verbsCtrl.getBasicGeoRel)
+
 module.exports = router
+
+
+
+
+
