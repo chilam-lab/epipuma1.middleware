@@ -5,6 +5,7 @@
 var debug = require('debug')('verbs')
 var pgp = require('pg-promise')()
 var moment = require('moment')
+var verb_utils = require('./verb_utils')
 
 var config = require('../config.js')
 var queries = require('./sql/queryProvider.js')
@@ -387,69 +388,61 @@ exports.getUserReg = function (req, res, next) {
 
 
 /**
- * getUserReg de SNIB DB
+ * getBasicGeoRelBio de SNIB DB
  *
- * Verifica si existe el usuario por medio de su email
+ * Obtiene epsilon y score con especie objetivo y conjunto de variables bioticas
  *
  * @param {express.Request} req
  * @param {express.Response} res
  *
- * COMMENT: Como aplciar el next cuando existen diferentes variables
  */
 
 
-exports.getBasicGeoRel = function (req, res, next) {
+exports.getBasicGeoRelBio = function (req, res, next) {
 
-  // console.log("getBasicGeoRel");
+    // console.log("getBasicGeoRelBio");
+    
+    var spid       = getParam(req, 'id');
+    var tfilters   = getParam(req, 'tfilters');
+    var alpha      = 0.01;
+    var N          = 6473;  
 
-  
-  var id              = getParam(req, 'id');
-  var discardedids    = getParam(req, 'discardedids');
-  var tfilters        = getParam(req, 'tfilters');
-  var lim_inf   = getParam(req, 'lim_inf');
-  var lim_sup   = getParam(req, 'lim_sup');
+    // console.log(spid);
+    // console.log(tfilters);
 
-
-  var alpha = 0.01;
-  var N = 6473;
-  
-
-  // var idreg     = getParam(req, 'idreg');
-  // var idtime    = getParam(req, 'idtime');
-  // var apriori   = getParam(req, 'apriori');
-  // var min_occ   = getParam(req, 'min_occ');
-  // var mapa_prob = getParam(req, 'mapa_prob');
-  // var sfecha    = getParam(req, 'sfecha');
-
-  // if (discardedids) {
-
-      pool.any(queries.users.getUser, {
-        id: id,
-        N: N,
-        alpha: alpha,
-        tfilters: tfilters,
+    var whereVar = verb_utils.processBioFilters(tfilters, spid);
+    // console.log(whereVar);
 
 
-
-
-
-
-
-      })
-      .then(function (data) {
-        res.json({'data': data})
-      })
-      .catch(function (error) {
-        next(error)
-      })
-
-  // }
-  // else{
-  //   next()
-  // }
-
+    pool.any(queries.specie.getBasicGeoRelBio, {
+      spid: spid,
+      N: N,
+      alpha: alpha,
+      where_config: whereVar //'where sp_snib.spid <> 49405'
+    })
+    .then(function (data) {
+      res.json({'data': data})
+    })
+    .catch(function (error) {
+      // console.log(error);
+      next(error)
+    })
     
 }
+
+
+    // var lim_inf         = getParam(req, 'lim_inf');
+    // var lim_sup         = getParam(req, 'lim_sup');
+    // var discardedids    = getParam(req, 'discardedids');
+    // var idreg     = getParam(req, 'idreg');
+    // var idtime    = getParam(req, 'idtime');
+    // var apriori   = getParam(req, 'apriori');
+    // var min_occ   = getParam(req, 'min_occ');
+    // var mapa_prob = getParam(req, 'mapa_prob');
+    // var sfecha    = getParam(req, 'sfecha');
+
+
+
 
 
 
