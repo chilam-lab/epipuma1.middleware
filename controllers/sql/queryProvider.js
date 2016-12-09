@@ -20,7 +20,12 @@ var queryProvider = {
     getAll: sqlPath('specie/get_all.sql'),
     getByName: sqlPath('specie/get_specie_by_name.sql'),
     getFieldByName: sqlPath('specie/get_group_by_name.sql'),
-    getInfo: sqlPath('specie/get_info_specie.sql')
+    getInfo: sqlPath('specie/get_info_specie.sql'),
+
+    getBasicGeoRelBio: sqlPath('specie/get_basic_geo_rel_bio.sql'),
+    getBasicGeoRelRaster: sqlPath('specie/get_basic_geo_rel_raster.sql'),
+    getBasicGeoRelRaster: sqlPath('specie/get_basic_geo_rel.sql')
+
   },
   interaction: {
     getCount: sqlPath('interaction/count_interaction.sql')
