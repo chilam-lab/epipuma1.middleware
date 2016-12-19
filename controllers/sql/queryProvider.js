@@ -22,9 +22,9 @@ var queryProvider = {
     getFieldByName: sqlPath('specie/get_group_by_name.sql'),
     getInfo: sqlPath('specie/get_info_specie.sql'),
 
-    getBasicGeoRelBio: sqlPath('specie/get_basic_geo_rel_bio.sql'),
-    getBasicGeoRelRaster: sqlPath('specie/get_basic_geo_rel_raster.sql'),
-    getBasicGeoRelRaster: sqlPath('specie/get_basic_geo_rel.sql')
+    getGeoRel: sqlPath('specie/get_basic_geo_rel.sql'),
+    getGeoRelBio: sqlPath('specie/get_basic_geo_rel_bio.sql'),
+    getGeoRelRaster: sqlPath('specie/get_basic_geo_rel_raster.sql')
 
   },
   interaction: {

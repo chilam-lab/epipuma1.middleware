@@ -56,8 +56,29 @@ router.route('/getUserReg')
   .get(verbsCtrl.getUserReg)
   .post(verbsCtrl.getUserReg)
 
-router.route('/getBasicGeoRelBio')
-  .get(verbsCtrl.getBasicGeoRelBio)
-  .post(verbsCtrl.getBasicGeoRelBio)
+
+router.route('/getGeoRel')
+  .get(
+    verbsCtrl.getGeoRel_VAT,
+    verbsCtrl.getGeoRel_VMT,
+    verbsCtrl.getGeoRel_VA,
+    verbsCtrl.getGeoRel_VM,
+    verbsCtrl.getGeoRel_VT,
+    verbsCtrl.getGeoRel_V,
+    verbsCtrl.getGeoRel_A,
+    verbsCtrl.getGeoRel_M,
+    verbsCtrl.getGeoRel    
+  )
+  .post(
+    verbsCtrl.getGeoRel_VAT,
+    verbsCtrl.getGeoRel_VMT,
+    verbsCtrl.getGeoRel_VA,
+    verbsCtrl.getGeoRel_VM,
+    verbsCtrl.getGeoRel_VT,
+    verbsCtrl.getGeoRel_V,
+    verbsCtrl.getGeoRel_A,
+    verbsCtrl.getGeoRel_M,
+    verbsCtrl.getGeoRel
+  )
 
 module.exports = router

@@ -28,6 +28,7 @@ app.use('/snib', verbsRouter);
 // Start the server
 var server = app.listen(port, function () {
   var port = server.address().port;
+  
   // console.log('Aplicación corriendo en el puerto %s', port);
   log('Aplicación corriendo en el puerto %s', port);
 
