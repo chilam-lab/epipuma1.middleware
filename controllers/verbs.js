@@ -388,59 +388,601 @@ exports.getUserReg = function (req, res, next) {
 
 
 /**
- * getBasicGeoRelBio de SNIB DB
  *
- * Obtiene epsilon y score con especie objetivo y conjunto de variables bioticas
+ * getGeoRel_VAT de SNIB DB
+ *
+ * Obtiene epsilon y score con especie objetivo y conjunto de variables bioticas y raster, (Contempla todas las variables)
  *
  * @param {express.Request} req
  * @param {express.Response} res
  *
  */
 
+exports.getGeoRel_VAT = function (req, res, next) {
 
-exports.getBasicGeoRelBio = function (req, res, next) {
+    console.log("getGeoRel_VAT");
+    console.log(req.body);
 
-    // console.log("getBasicGeoRelBio");
+    var spid        = getParam(req, 'id');
+    var tfilters    = getParam(req, 'tfilters');
+    var alpha       = 0.01;
+    var N           = 6473;
+    var discardedFilterids;
+
+    // Siempre incluidos en query, nj >= 0
+    var min_occ       = getParam(req, 'min_occ', 0);
     
-    var spid       = getParam(req, 'id');
-    var tfilters   = getParam(req, 'tfilters');
-    var alpha      = 0.01;
-    var N          = 6473;  
 
-    // console.log(spid);
-    // console.log(tfilters);
+    // variables configurables
+    var hasBios         = getParam(req, 'hasBios');
+    var hasRaster       = getParam(req, 'hasRaster');
+    var discardedids    = getParam(req, 'discardedids', []);
+    var apriori         = getParam(req, 'apriori');
+    // var mapa_prob       = getParam(req, 'mapa_prob');
 
-    var whereVar = verb_utils.processBioFilters(tfilters, spid);
-    // console.log(whereVar);
+    // filtros por tiempo
+    var sfecha        = getParam(req, 'sfecha', false);
+    var fecha_incio   = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
+    var fecha_fin     = moment(getParam(req, 'lim_sup', Date.now()), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
+
+    // Si se realiza filtro de tiempo existen celdas descartadas por filtro
+    if(sfecha || 
+        fecha_incio != '1500' || 
+          fecha_fin != moment(Date.now(), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')){
+
+      discardedFilterids = getParam(req, 'discardedFilterids', []);
+    }
 
 
-    pool.any(queries.specie.getBasicGeoRelBio, {
-      spid: spid,
-      N: N,
-      alpha: alpha,
-      where_config: whereVar //'where sp_snib.spid <> 49405'
-    })
-    .then(function (data) {
-      res.json({'data': data})
-    })
-    .catch(function (error) {
-      // console.log(error);
-      next(error)
-    })
+    if (hasBios && hasRaster && discardedids.length > 0 && apriori && discardedFilterids.length > 0){
+
+      console.log("TVAT");
+      var whereVar = verb_utils.processBioFilters(tfilters, spid);
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+
+      // TODO:
+
+      
+    }
+    else if (hasBios && discardedids.length > 0 && apriori && discardedFilterids.length > 0){
+
+      console.log("BVAT");
+      var whereVar = verb_utils.processBioFilters(tfilters, spid);
+
+      // TODO:
+
+      
+    } 
+    else if (hasRaster && discardedids.length > 0 && apriori && discardedFilterids.length > 0){
+
+      console.log("RaVAT");
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+
+      // TODO:
+
+      
+    } 
+    else{
+
+      next();
+    }
+
+};
+
+
+exports.getGeoRel_VMT = function (req, res, next) {
+
+    console.log("getGeoRel_VMT");
+
+    var spid        = getParam(req, 'id');
+    var tfilters    = getParam(req, 'tfilters');
+    var alpha       = 0.01;
+    var N           = 6473;
+    var discardedFilterids;
+
+    // Siempre incluidos en query, nj >= 0
+    var min_occ       = getParam(req, 'min_occ', 0);
     
-}
+
+    // variables configurables
+    var hasBios         = getParam(req, 'hasBios');
+    var hasRaster       = getParam(req, 'hasRaster');
+    var discardedids    = getParam(req, 'discardedids', []);
+    // var apriori         = getParam(req, 'apriori');
+    var mapa_prob       = getParam(req, 'mapa_prob');
+
+    // filtros por tiempo
+    var sfecha        = getParam(req, 'sfecha', false);
+    var fecha_incio   = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
+    var fecha_fin     = moment(getParam(req, 'lim_sup', Date.now()), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
+
+    // Si se realiza filtro de tiempo existen celdas descartadas por filtro
+    if(sfecha || 
+        fecha_incio != '1500' || 
+          fecha_fin != moment(Date.now(), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')){
+
+      discardedFilterids = getParam(req, 'discardedFilterids',[]);
+    }
 
 
-    // var lim_inf         = getParam(req, 'lim_inf');
-    // var lim_sup         = getParam(req, 'lim_sup');
-    // var discardedids    = getParam(req, 'discardedids');
-    // var idreg     = getParam(req, 'idreg');
-    // var idtime    = getParam(req, 'idtime');
-    // var apriori   = getParam(req, 'apriori');
-    // var min_occ   = getParam(req, 'min_occ');
-    // var mapa_prob = getParam(req, 'mapa_prob');
-    // var sfecha    = getParam(req, 'sfecha');
+    if (hasBios && hasRaster && discardedids.length > 0 && mapa_prob && discardedFilterids.length > 0){
 
+      console.log("TVAT");
+      var whereVar = verb_utils.processBioFilters(tfilters, spid);
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+
+      // TODO:
+
+      
+    }
+    else if (hasBios && discardedids.length > 0 && mapa_prob && discardedFilterids.length > 0){
+
+      console.log("BVAT");
+      var whereVar = verb_utils.processBioFilters(tfilters, spid);
+
+      // TODO:
+
+      
+    } 
+    else if (hasRaster && discardedids.length > 0 && mapa_prob && discardedFilterids.length > 0){
+
+      console.log("RaVAT");
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+
+      // TODO:
+
+      
+    } 
+    else{
+
+      next();
+    }
+
+};
+
+
+exports.getGeoRel_VA = function (req, res, next) {
+
+    console.log("getGeoRel_VA");
+
+    var spid        = getParam(req, 'id');
+    var tfilters    = getParam(req, 'tfilters');
+    var alpha       = 0.01;
+    var N           = 6473;
+    var discardedFilterids;
+
+    // Siempre incluidos en query, nj >= 0
+    var min_occ       = getParam(req, 'min_occ', 0);
+    
+
+    // variables configurables
+    var hasBios         = getParam(req, 'hasBios');
+    var hasRaster       = getParam(req, 'hasRaster');
+    var discardedids    = getParam(req, 'discardedids', []);
+    var apriori         = getParam(req, 'apriori');
+    
+
+    if (hasBios && hasRaster && discardedids.length > 0 && apriori ){
+
+      console.log("TVA");
+      var whereVar = verb_utils.processBioFilters(tfilters, spid);
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+
+      // TODO:
+
+      
+    }
+    else if (hasBios && discardedids.length > 0 && apriori ){
+
+      console.log("BVA");
+      var whereVar = verb_utils.processBioFilters(tfilters, spid);
+
+      // TODO:
+
+      
+    } 
+    else if (hasRaster && discardedids.length > 0 && apriori ){
+
+      console.log("RaVA");
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+
+      // TODO:
+
+      
+    } 
+    else{
+
+      next();
+    }
+
+};
+
+
+exports.getGeoRel_VM = function (req, res, next) {
+
+    console.log("getGeoRel_VM");
+
+    var spid        = getParam(req, 'id');
+    var tfilters    = getParam(req, 'tfilters');
+    var alpha       = 0.01;
+    var N           = 6473;
+    var discardedFilterids;
+
+    // Siempre incluidos en query, nj >= 0
+    var min_occ       = getParam(req, 'min_occ', 0);
+    
+
+    // variables configurables
+    var hasBios         = getParam(req, 'hasBios');
+    var hasRaster       = getParam(req, 'hasRaster');
+    var discardedids    = getParam(req, 'discardedids', []);
+    var mapa_prob       = getParam(req, 'mapa_prob');
+    
+
+    if (hasBios && hasRaster && discardedids.length > 0 && mapa_prob ){
+
+      console.log("TVAT");
+      var whereVar = verb_utils.processBioFilters(tfilters, spid);
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+
+      // TODO:
+
+      
+    }
+    else if (hasBios && discardedids.length > 0 && mapa_prob ){
+
+      console.log("BVAT");
+      var whereVar = verb_utils.processBioFilters(tfilters, spid);
+
+      // TODO:
+
+      
+    } 
+    else if (hasRaster && discardedids.length > 0 && mapa_prob ){
+
+      console.log("RaVAT");
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+
+      // TODO:
+
+      
+    } 
+    else{
+
+      next();
+    }
+
+};
+
+
+
+exports.getGeoRel_VT = function (req, res, next) {
+
+    console.log("getGeoRel_VT");
+
+    var spid        = getParam(req, 'id');
+    var tfilters    = getParam(req, 'tfilters');
+    var alpha       = 0.01;
+    var N           = 6473;
+    var discardedFilterids;
+
+    // Siempre incluidos en query, nj >= 0
+    var min_occ       = getParam(req, 'min_occ', 0);
+    
+
+    // variables configurables
+    var hasBios         = getParam(req, 'hasBios');
+    var hasRaster       = getParam(req, 'hasRaster');
+    var discardedids    = getParam(req, 'discardedids', []);
+    
+    // filtros por tiempo
+    var sfecha        = getParam(req, 'sfecha', false);
+    var fecha_incio   = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
+    var fecha_fin     = moment(getParam(req, 'lim_sup', Date.now()), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
+
+    // Si se realiza filtro de tiempo existen celdas descartadas por filtro
+    if(sfecha || 
+        fecha_incio != '1500' || 
+          fecha_fin != moment(Date.now(), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')){
+
+      discardedFilterids = getParam(req, 'discardedFilterids');
+    }
+    
+
+    if (hasBios && hasRaster && discardedids.length > 0 && discardedFilterids.length > 0 ){
+
+      console.log("TVT");
+      var whereVar = verb_utils.processBioFilters(tfilters, spid);
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+
+      // TODO:
+
+      
+    }
+    else if (hasBios && discardedids.length > 0 && discardedFilterids.length > 0 ){
+
+      console.log("BVT");
+      var whereVar = verb_utils.processBioFilters(tfilters, spid);
+
+      // TODO:
+
+      
+    } 
+    else if (hasRaster && discardedids.length > 0 && discardedFilterids.length > 0 ){
+
+      console.log("RaVT");
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+
+      // TODO:
+
+      
+    } 
+    else{
+
+      next();
+    }
+
+};
+
+
+exports.getGeoRel_V = function (req, res, next) {
+
+    console.log("getGeoRel_V");
+
+    var spid        = getParam(req, 'id');
+    var tfilters    = getParam(req, 'tfilters');
+    var alpha       = 0.01;
+    var N           = 6473;
+
+    // Siempre incluidos en query, nj >= 0
+    var min_occ       = getParam(req, 'min_occ', 0);
+    
+
+    // variables configurables
+    var hasBios         = getParam(req, 'hasBios');
+    var hasRaster       = getParam(req, 'hasRaster');
+    var discardedids    = getParam(req, 'discardedids', []);
+    
+    
+    if (hasBios && hasRaster && discardedids.length > 0 ){
+
+      console.log("TV");
+      var whereVar = verb_utils.processBioFilters(tfilters, spid);
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+
+      // TODO:
+
+      
+    }
+    else if (hasBios && discardedids.length > 0 ){
+
+      console.log("BVT");
+      var whereVar = verb_utils.processBioFilters(tfilters, spid);
+
+      // TODO:
+
+      
+    } 
+    else if (hasRaster && discardedids.length > 0 ){
+
+      console.log("RaVT");
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+
+      // TODO:
+
+      
+    } 
+    else{
+
+      next();
+    }
+
+};
+
+
+exports.getGeoRel_A = function (req, res, next) {
+
+    console.log("getGeoRel_A");
+
+    var spid        = getParam(req, 'id');
+    var tfilters    = getParam(req, 'tfilters');
+    var alpha       = 0.01;
+    var N           = 6473;
+
+    // Siempre incluidos en query, nj >= 0
+    var min_occ       = getParam(req, 'min_occ', 0);
+
+    // variables configurables
+    var hasBios         = getParam(req, 'hasBios');
+    var hasRaster       = getParam(req, 'hasRaster');
+    var apriori         = getParam(req, 'apriori');
+    
+    
+    if (hasBios && hasRaster && apriori ){
+
+      console.log("TA");
+      var whereVar = verb_utils.processBioFilters(tfilters, spid);
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+
+      // TODO:
+
+      
+    }
+    else if (hasBios && apriori ){
+
+      console.log("BA");
+      var whereVar = verb_utils.processBioFilters(tfilters, spid);
+
+      // TODO:
+
+      
+    } 
+    else if (hasRaster && apriori ){
+
+      console.log("RaA");
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+
+      // TODO:
+
+      
+    } 
+    else{
+
+      next();
+    }
+
+};
+
+
+exports.getGeoRel_M = function (req, res, next) {
+
+    console.log("getGeoRel_M");
+
+    var spid        = getParam(req, 'id');
+    var tfilters    = getParam(req, 'tfilters');
+    var alpha       = 0.01;
+    var N           = 6473;
+
+    // Siempre incluidos en query, nj >= 0
+    var min_occ       = getParam(req, 'min_occ', 0);
+
+    // variables configurables
+    var hasBios         = getParam(req, 'hasBios');
+    var hasRaster       = getParam(req, 'hasRaster');
+    var mapa_prob       = getParam(req, 'mapa_prob');
+    
+    
+    if (hasBios && hasRaster && mapa_prob ){
+
+      console.log("TA");
+      var whereVar = verb_utils.processBioFilters(tfilters, spid);
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+
+      // TODO:
+
+      
+    }
+    else if (hasBios && mapa_prob ){
+
+      console.log("BA");
+      var whereVar = verb_utils.processBioFilters(tfilters, spid);
+
+      // TODO:
+
+      
+    } 
+    else if (hasRaster && mapa_prob ){
+
+      console.log("RaA");
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+
+      // TODO:
+
+      
+    } 
+    else{
+
+      next();
+    }
+
+};
+
+
+exports.getGeoRel = function (req, res, next) {
+
+    console.log("getGeoRel");
+
+    var spid        = getParam(req, 'id');
+    var tfilters    = getParam(req, 'tfilters');
+    var alpha       = 0.01;
+    var N           = 6473;
+
+    // Siempre incluidos en query, nj >= 0
+    var min_occ       = getParam(req, 'min_occ', 0);
+
+    // variables configurables
+    var hasBios         = getParam(req, 'hasBios');
+    var hasRaster       = getParam(req, 'hasRaster');
+
+    console.log(hasBios);
+    console.log(hasRaster);
+    
+    
+    if (hasBios === 'true' && hasRaster === 'true' ){
+
+      console.log("T");
+      var whereVar = verb_utils.processBioFilters(tfilters, spid);
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+
+      pool.any(queries.specie.getGeoRel, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config: whereVar,
+        where_config_raster: whereVarRaster
+      })
+      .then(function (data) {
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        console.log(error);
+        next(error)
+      })
+
+      
+    }
+    else if (hasBios === 'true'){
+
+      console.log("B");
+      var whereVar = verb_utils.processBioFilters(tfilters, spid);
+
+      pool.any(queries.specie.getGeoRelBio, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config: whereVar
+      })
+      .then(function (data) {
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        // console.log(error);
+        next(error)
+      })
+
+      
+    } 
+    else if (hasRaster === 'true'){
+
+      console.log("Ra");
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      console.log(whereVarRaster);
+
+      pool.any(queries.specie.getGeoRelRaster, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config_raster: whereVarRaster
+      })
+      .then(function (data) {
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        console.log(error);
+        next(error)
+      })
+
+      
+    } 
+    else{
+
+      next();
+    }
+
+};
 
 
 
