@@ -24,7 +24,17 @@ var queryProvider = {
 
     getGeoRel: sqlPath('specie/get_basic_geo_rel.sql'),
     getGeoRelBio: sqlPath('specie/get_basic_geo_rel_bio.sql'),
-    getGeoRelRaster: sqlPath('specie/get_basic_geo_rel_raster.sql')
+    getGeoRelRaster: sqlPath('specie/get_basic_geo_rel_raster.sql'),
+    
+    getGeoRelBioV: sqlPath('specie/get_geo_rel_BV.sql'),
+    getGeoRelRasterV: sqlPath('specie/get_geo_rel_RaV.sql'),
+    getGeoRelV: sqlPath('specie/get_geo_rel_V.sql'),
+
+    getGeoRelBioT: sqlPath('specie/get_geo_rel_BT.sql'),
+    getGeoRelRasterT: sqlPath('specie/get_geo_rel_RaT.sql'),
+    getGeoRelT: sqlPath('specie/get_geo_rel_T.sql'),
+
+    getGeoRelBioVT: sqlPath('specie/get_geo_rel_BVT.sql')
 
   },
   interaction: {

@@ -39,7 +39,6 @@ var verbs_utils = {
 		}
 
 		return whereVar;
-
 	},
 
 	processRasterFilters: function(tfilters_total, spid){
@@ -133,9 +132,42 @@ var verbs_utils = {
 		}
 
 		return whereVar;
+	},
 
+	processDateRecords: function(lim_inf, lim_sup, sfecha){
+
+		var filterDates = "";
+
+		console.log(lim_inf);
+		console.log(lim_sup);
+		console.log(sfecha);
+
+		if(lim_inf || !sfecha){
+
+			filterDates += "where (snib.especievalida = '' or snib.especievalida is null)  or ";
+
+			if(lim_inf){
+				filterDates +=  "((EXTRACT(EPOCH FROM to_timestamp(fechacolecta, 'YYYY-MM--DD')) * 1000) < " + lim_inf + " " +
+							"or " + 
+							"(EXTRACT(EPOCH FROM to_timestamp(fechacolecta, 'YYYY-MM--DD')) * 1000) > " + lim_sup + " ) ";
+				if(!sfecha){
+					console.log("Filtros y sin fecha");
+					// los valores nulos y vacios de fechacolecta son menores al valor establecido en la condicion de tiempo anteior 
+				}
+				else{
+					console.log("Solo filtros");
+					filterDates += " and (fechacolecta <> '' and fechacolecta is not null)  ";
+				}
+			}
+			if(lim_inf == undefined && !sfecha){
+				console.log("Solo registros sin fecha");
+				filterDates += " (fechacolecta = '' or fechacolecta is null) ";
+			}
+		}
+
+		return filterDates;
 	}
-	
+
 }
 
 module.exports = verbs_utils
