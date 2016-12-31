@@ -25,6 +25,8 @@ select
 	cal.familiavalida 
 	-- cal.label 
 from sp_occ as cel, ( 	
+		
+
 		select 
 			reinovalido,
 			phylumdivisionvalido,
@@ -109,6 +111,8 @@ from sp_occ as cel, (
 		$<where_config_raster:raw>
 		-- where  layer = 'bio01'
 		-- order by spid */
+		
+		
 ) as cal
 where cel.spid = $<spid> -- 49405 
 group by cal.spid, cal.reinovalido, cal.phylumdivisionvalido, cal.clasevalida,ordenvalido, cal.familiavalida, cal.generovalido, epitetovalido,  cal.label,  cal.nj,  cel.occ,  n 
