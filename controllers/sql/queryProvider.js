@@ -17,14 +17,27 @@ var queryProvider = {
     getUser: sqlPath('users/getUserReg.sql')
   },
   specie: {
+    
     getAll: sqlPath('specie/get_all.sql'),
     getByName: sqlPath('specie/get_specie_by_name.sql'),
     getFieldByName: sqlPath('specie/get_group_by_name.sql'),
     getInfo: sqlPath('specie/get_info_specie.sql'),
 
-    getBasicGeoRelBio: sqlPath('specie/get_basic_geo_rel_bio.sql'),
-    getBasicGeoRelRaster: sqlPath('specie/get_basic_geo_rel_raster.sql'),
-    getBasicGeoRelRaster: sqlPath('specie/get_basic_geo_rel.sql')
+    getGeoRel: sqlPath('specie/get_basic_geo_rel.sql'),
+    getGeoRelBio: sqlPath('specie/get_basic_geo_rel_bio.sql'),
+    getGeoRelRaster: sqlPath('specie/get_basic_geo_rel_raster.sql'),
+    
+    getGeoRelBioV: sqlPath('specie/get_geo_rel_BV.sql'),
+    getGeoRelRasterV: sqlPath('specie/get_geo_rel_RaV.sql'),
+    getGeoRelV: sqlPath('specie/get_geo_rel_V.sql'),
+
+    getGeoRelBioT: sqlPath('specie/get_geo_rel_BT.sql'),
+    getGeoRelRasterT: sqlPath('specie/get_geo_rel_RaT.sql'),
+    getGeoRelT: sqlPath('specie/get_geo_rel_T.sql'),
+
+    getGeoRelBioVT: sqlPath('specie/get_geo_rel_BVT.sql'),
+    getGeoRelVT: sqlPath('specie/get_geo_rel_TVT.sql'),
+    getGeoRelRaVT: sqlPath('specie/get_geo_rel_RaVT.sql')
 
   },
   interaction: {
