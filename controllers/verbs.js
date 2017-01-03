@@ -431,8 +431,11 @@ exports.getGeoRel_VT = function (req, res, next) {
     var discardedFilterids = getParam(req, 'discardedFilterids');
     //}
 
+    var discardedids_total = discardedFilterids.concat(discardedids); 
     // console.log(discardedids);
     // console.log(discardedFilterids);
+
+    var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
 
 
     if (hasBios === 'true' && hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 && discardedFilterids != undefined ){
@@ -441,7 +444,28 @@ exports.getGeoRel_VT = function (req, res, next) {
       var whereVar = verb_utils.processBioFilters(tfilters, spid);
       var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
 
-      // TODO:
+
+      pool.any(queries.specie.getGeoRelVT, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config: whereVar,
+        where_config_raster: whereVarRaster,
+        arg_gridids: discardedids.toString(),
+        arg_gridfilterids: discardedFilterids.toString(),
+        arg_gridids_total: discardedids_total.toString(),
+        filter_dates: filterDates
+      })
+      .then(function (data) {
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        
+        console.log(error);
+        next(error)
+
+      })
 
       
     }
@@ -451,24 +475,26 @@ exports.getGeoRel_VT = function (req, res, next) {
       var whereVar = verb_utils.processBioFilters(tfilters, spid);
 
       
-      // pool.any(queries.specie.getGeoRelBioVT, {
-      //   spid: spid,
-      //   N: N,
-      //   alpha: alpha,
-      //   min_occ: min_occ,
-      //   where_config: whereVar,
-      //   arg_gridids: discardedids.toString(),
-      //   arg_gridfilterids: discardedFilterids.toString()
-      // })
-      // .then(function (data) {
-      //   res.json({'data': data})
-      // })
-      // .catch(function (error) {
+      pool.any(queries.specie.getGeoRelBioVT, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config: whereVar,
+        arg_gridids: discardedids.toString(),
+        arg_gridfilterids: discardedFilterids.toString(),
+        arg_gridids_total: discardedids_total.toString(),
+        filter_dates: filterDates
+      })
+      .then(function (data) {
+        res.json({'data': data})
+      })
+      .catch(function (error) {
         
-      //   console.log(error);
-      //   next(error)
+        console.log(error);
+        next(error)
 
-      // })
+      })
 
       
     } 
@@ -477,7 +503,26 @@ exports.getGeoRel_VT = function (req, res, next) {
       console.log("RaVT");
       var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
 
-      // TODO:
+      pool.any(queries.specie.getGeoRelRaVT, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config_raster: whereVarRaster,
+        arg_gridids: discardedids.toString(),
+        arg_gridfilterids: discardedFilterids.toString(),
+        arg_gridids_total: discardedids_total.toString(),
+        filter_dates: filterDates
+      })
+      .then(function (data) {
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        
+        console.log(error);
+        next(error)
+
+      })
 
       
     } 
