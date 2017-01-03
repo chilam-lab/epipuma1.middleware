@@ -98,15 +98,17 @@ with first_rawdata as(
 			cal.spid, cal.reinovalido, cal.phylumdivisionvalido, cal.clasevalida,ordenvalido, cal.familiavalida, 
 			cal.generovalido,epitetovalido,  cal.label,  cal.nj,  cel.occ,  n
 ), 
+-- obtiene las especies y el numero de celdas que son descartadas por el filtro de tiempo del grupo de especies 
+-- que estan relacionadas con la especie objetivo
 gridspddiscarded as ( 
 	select 	snib.spid, count(distinct snib.gridid) as num_gridids, 
 			array_agg(distinct snib.gridid) as arg_discarded 
 	from snib 
 	join first_rawdata on snib.spid = first_rawdata.spid
 	$<filter_dates:raw>
-	
 	group by snib.spid 
 ), 
+-- De las celdas descartadas, se obtienen las celdas y las especies donde existe relacion con la especie objetivo
 gridObj as ( 
 	select sp_grid_terrestre.gridid, 
 			( animalia || plantae || fungi || protoctista || prokaryotae || animalia_exoticas || plantae_exoticas 
@@ -125,9 +127,13 @@ gridObj as (
 			|| bio08 || bio09 || bio10 || bio11 || bio12 || bio13 || bio14 || bio15 || bio16 || bio17 || bio18 || bio19 || elevacion 
 			|| pendiente || topidx ) @> ARRAY[$<spid:value>] 
 ), 
+-- obtiene el numero de celdas descartadas con presencia de la especie objetivo
 gridObjSize as ( 
 	select count(*) as ni_length from gridObj 
 ), 
+-- Para nj: del numero de celdas descartadas con presencia de las especies con relacion a la especie objetivo se descuentan al numero totla 
+-- de las espcies
+-- Para n: el numero total de celdas que compone la malla se mantiene sin alteraciones
 getval_n_nj as ( 
 	select 	first_rawdata.reinovalido, first_rawdata.phylumdivisionvalido, first_rawdata.clasevalida, first_rawdata.ordenvalido, 
 			first_rawdata.familiavalida, first_rawdata.generovalido, first_rawdata.epitetovalido, first_rawdata.spid,  

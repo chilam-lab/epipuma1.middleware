@@ -17,6 +17,7 @@ var queryProvider = {
     getUser: sqlPath('users/getUserReg.sql')
   },
   specie: {
+    
     getAll: sqlPath('specie/get_all.sql'),
     getByName: sqlPath('specie/get_specie_by_name.sql'),
     getFieldByName: sqlPath('specie/get_group_by_name.sql'),
@@ -34,7 +35,9 @@ var queryProvider = {
     getGeoRelRasterT: sqlPath('specie/get_geo_rel_RaT.sql'),
     getGeoRelT: sqlPath('specie/get_geo_rel_T.sql'),
 
-    getGeoRelBioVT: sqlPath('specie/get_geo_rel_BVT.sql')
+    getGeoRelBioVT: sqlPath('specie/get_geo_rel_BVT.sql'),
+    getGeoRelVT: sqlPath('specie/get_geo_rel_TVT.sql'),
+    getGeoRelRaVT: sqlPath('specie/get_geo_rel_RaVT.sql')
 
   },
   interaction: {

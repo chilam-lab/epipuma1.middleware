@@ -1,5 +1,4 @@
 with first_rawdata as( 
-
 	select cal.spid,
 			cal.reinovalido,
 			cal.phylumdivisionvalido,
@@ -16,7 +15,6 @@ with first_rawdata as(
 
 	from sp_occ as cel, 
 	(
-	
 		select 
 			reinovalido,
 			phylumdivisionvalido,
@@ -101,8 +99,6 @@ with first_rawdata as(
 		$<where_config_raster:raw>
 		-- where  layer = 'bio01'
 		-- order by spid */ 
-	
-	
 ) as cal 
 where cel.spid =  $<spid> -- 49405  
 group by 
@@ -120,17 +116,23 @@ group by
 	n 
 	
 ), 
-
+-- obtiene las especies de las celdas descartadas
 gridspddiscarded as ( 
 	select 	gridid, 
-			( animalia || plantae || fungi || protoctista || prokaryotae || animalia_exoticas || plantae_exoticas || fungi_exoticas || protoctista_exoticas || prokaryotae_exoticas || bio01 || bio02 || bio03 || bio04 || bio05 || bio06 || bio07 || bio08 || bio09 || bio10 || bio11 || bio12 || bio13 || bio14 || bio15 || bio16 || bio17 || bio18 || bio19 || elevacion || pendiente || topidx  ) as spids 
+			( 	animalia || plantae || fungi || protoctista || prokaryotae || animalia_exoticas || plantae_exoticas || fungi_exoticas || 
+				protoctista_exoticas || prokaryotae_exoticas || bio01 || bio02 || bio03 || bio04 || bio05 || bio06 || bio07 || bio08 || 
+				bio09 || bio10 || bio11 || bio12 || bio13 || bio14 || bio15 || bio16 || bio17 || bio18 || bio19 || elevacion || pendiente || 
+				topidx  ) as spids 
 	from sp_grid_terrestre 
 	where gridid in ($<arg_gridids:raw>) 
 ), 
-
+-- obtiene las celdas y especies donde existe relacion con la especie objetivo de las celdas que fueorn descartadas
 gridObj as ( 
 	select 	sp_grid_terrestre.gridid, 
-			( animalia || plantae || fungi || protoctista || prokaryotae || animalia_exoticas || plantae_exoticas || fungi_exoticas || protoctista_exoticas || prokaryotae_exoticas || bio01 || bio02 || bio03 || bio04 || bio05 || bio06 || bio07 || bio08 || bio09 || bio10 || bio11 || bio12 || bio13 || bio14 || bio15 || bio16 || bio17 || bio18 || bio19 || elevacion || pendiente || topidx  ) spids 
+			( 	animalia || plantae || fungi || protoctista || prokaryotae || animalia_exoticas || plantae_exoticas || fungi_exoticas || 
+				protoctista_exoticas || prokaryotae_exoticas || bio01 || bio02 || bio03 || bio04 || bio05 || bio06 || bio07 || bio08 || 
+				bio09 || bio10 || bio11 || bio12 || bio13 || bio14 || bio15 || bio16 || bio17 || bio18 || bio19 || elevacion || pendiente || 
+				topidx  ) spids 
 	from sp_grid_terrestre 
 	join ( 
 		select unnest( ARRAY[$<arg_gridids:raw>] ) as gridid 
@@ -141,11 +143,13 @@ gridObj as (
 			|| bio09 || bio10 || bio11 || bio12 || bio13 || bio14 || bio15 || bio16 || bio17 || bio18 || bio19 || elevacion || pendiente 
 			|| topidx ) @> ARRAY[$<spid:value>] 
 ), 
-
+-- obtiene el numero de celdas descartadas donde existe relacion con la especie objetivo
 gridObjSize as ( 
 	select count(*) as ni_length from gridObj 
 ), 
-
+-- Para nj: obtiene el numero de presencias de cada especie que se encuentra dentro del conjutno de celdas descartadas.
+-- la suma es descontada al numero total de realciones de la especie con la especie objetivo.
+-- Para n: se descuenta el numeor total de celdas descartadas al numero total de celdas que compone la malla
 getval_n_nj as ( 
 	select 	first_rawdata.reinovalido, first_rawdata.phylumdivisionvalido, first_rawdata.clasevalida, first_rawdata.ordenvalido, first_rawdata.familiavalida, first_rawdata.generovalido, first_rawdata.epitetovalido, first_rawdata.spid,  first_rawdata.label,  
 			(first_rawdata.nj - sum(case when gridspddiscarded.gridid is NULL  then 0 else 1 end)) as dis_nj,  
@@ -157,7 +161,9 @@ getval_n_nj as (
 				first_rawdata.label,  nj,  n 
 	order by spid 
 ), 
-
+-- Para ni: se descuenta el numero de celdas de la especie objetivo menos el numero de celdas descartadas donde existe su presencia
+-- Para nij: de las espcies relacionadas con la especie objetivo (first_raw_data), se busca si esta dentro de las especies de las celdas descartadas
+-- donde existe presencia tambien de la especie objetivo. Se suman las coincidencias y se resta al valor total de nij
 getval_ni_nij as ( 
 	select 	first_rawdata.reinovalido, first_rawdata.phylumdivisionvalido, first_rawdata.clasevalida, first_rawdata.ordenvalido, first_rawdata.familiavalida, first_rawdata.generovalido, first_rawdata.epitetovalido, first_rawdata.spid,  first_rawdata.label,  
 			(first_rawdata.nij - sum(case when gridObj.gridid is NULL  then 0 else 1 end)) as dis_nij, 
@@ -169,8 +175,6 @@ getval_ni_nij as (
 	group by first_rawdata.reinovalido, first_rawdata.phylumdivisionvalido, first_rawdata.clasevalida, first_rawdata.ordenvalido, first_rawdata.familiavalida, first_rawdata.generovalido, first_rawdata.epitetovalido, spid, first_rawdata.label, nij, ni, gridObjSize.ni_length 
 	order by spid 
 ) 
-
-
 select	getval_n_nj.reinovalido, 
 		getval_n_nj.phylumdivisionvalido, 
 		getval_n_nj.clasevalida, 
