@@ -420,25 +420,22 @@ exports.getGeoRel_VT = function (req, res, next) {
     var hasBios         = getParam(req, 'hasBios');
     var hasRaster       = getParam(req, 'hasRaster');
     var discardedids    = getParam(req, 'discardedids', []);
+    var discardedFilterids = getParam(req, 'discardedFilterids');
     
     // filtros por tiempo
     var sfecha        = getParam(req, 'sfecha', false);
     var fecha_incio   = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
     var fecha_fin     = moment(getParam(req, 'lim_sup', Date.now()), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
 
-    // Si se realiza filtro de tiempo existen celdas descartadas por filtro
-    //if(sfecha || fecha_incio != '1500' || fecha_fin != moment(Date.now(), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')){
-    var discardedFilterids = getParam(req, 'discardedFilterids');
-    //}
-
-    var discardedids_total = discardedFilterids.concat(discardedids); 
-    // console.log(discardedids);
-    // console.log(discardedFilterids);
-
-    var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
-
 
     if (hasBios === 'true' && hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 && discardedFilterids != undefined ){
+
+
+      
+      var discardedids_total = discardedFilterids.concat(discardedids); 
+      var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
+
+
 
       console.log("TVT");
       var whereVar = verb_utils.processBioFilters(tfilters, spid);
@@ -474,6 +471,9 @@ exports.getGeoRel_VT = function (req, res, next) {
       console.log("BVT");
       var whereVar = verb_utils.processBioFilters(tfilters, spid);
 
+      var discardedids_total = discardedFilterids.concat(discardedids); 
+      var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
+
       
       pool.any(queries.specie.getGeoRelBioVT, {
         spid: spid,
@@ -502,6 +502,9 @@ exports.getGeoRel_VT = function (req, res, next) {
 
       console.log("RaVT");
       var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+
+      var discardedids_total = discardedFilterids.concat(discardedids); 
+      var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
 
       pool.any(queries.specie.getGeoRelRaVT, {
         spid: spid,
@@ -710,13 +713,14 @@ exports.getGeoRel_T = function (req, res, next) {
     var fecha_fin         = moment(getParam(req, 'lim_sup', Date.now()), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
     var discardedFilterids = getParam(req, 'discardedFilterids');
 
-    var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
+    
     
     if (hasBios === "true" && hasRaster === "true" && discardedFilterids != undefined && discardedFilterids.length > 0){
 
       console.log("TT");
       var whereVar = verb_utils.processBioFilters(tfilters, spid);
       var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
 
       pool.any(queries.specie.getGeoRelT, {
         spid: spid,
@@ -744,6 +748,7 @@ exports.getGeoRel_T = function (req, res, next) {
 
       console.log("BT");
       var whereVar = verb_utils.processBioFilters(tfilters, spid);
+      var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
 
       pool.any(queries.specie.getGeoRelBioT, {
           spid: spid,
@@ -768,6 +773,7 @@ exports.getGeoRel_T = function (req, res, next) {
 
       console.log("RaT");
       var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
 
       pool.any(queries.specie.getGeoRelRasterT, {
           spid: spid,
@@ -823,8 +829,8 @@ exports.getGeoRel = function (req, res, next) {
     var hasBios         = getParam(req, 'hasBios');
     var hasRaster       = getParam(req, 'hasRaster');
 
-    console.log(hasBios);
-    console.log(hasRaster);
+    // console.log(hasBios);
+    // console.log(hasRaster);
     
     
     if (hasBios === 'true' && hasRaster === 'true' ){
@@ -877,7 +883,7 @@ exports.getGeoRel = function (req, res, next) {
 
       console.log("Ra");
       var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
-      console.log(whereVarRaster);
+      // console.log(whereVarRaster);
 
       pool.any(queries.specie.getGeoRelRaster, {
         spid: spid,
