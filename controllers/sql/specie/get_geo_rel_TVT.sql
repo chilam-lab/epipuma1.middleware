@@ -224,7 +224,7 @@ getval_ni_nij as (
 	group by 	first_rawdata.reinovalido, first_rawdata.phylumdivisionvalido, first_rawdata.clasevalida, first_rawdata.ordenvalido, first_rawdata.familiavalida, first_rawdata.generovalido, first_rawdata.epitetovalido, spid, first_rawdata.label, 
 				nij, ni, gridObjSize.ni_length
 	order by spid 
-) 
+)
 select getval_n_nj.reinovalido, getval_n_nj.phylumdivisionvalido, getval_n_nj.clasevalida, getval_n_nj.ordenvalido, 
 		getval_n_nj.familiavalida, getval_n_nj.generovalido, getval_n_nj.epitetovalido, getval_n_nj.spid,  
 		case when dis_nj - dis_nij >= 0 then dis_nij else dis_nj end as nij, 
@@ -235,4 +235,3 @@ from getval_n_nj
 join getval_ni_nij 
 on getval_n_nj.spid = getval_ni_nij.spid  
 order by epsilon
-	
