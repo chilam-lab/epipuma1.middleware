@@ -40,6 +40,21 @@ var queryProvider = {
     getGeoRelRaVT: sqlPath('specie/get_geo_rel_RaVT.sql')
 
   },
+  getFreq: {
+
+    getFreqBio: sqlPath('getFreq/get_basic_freq_bio.sql'),
+    getFreqRaster: sqlPath('getFreq/get_basic_freq_raster.sql'),
+    getFreq: sqlPath('getFreq/get_basic_freq.sql'),
+
+    getFreqBioV: sqlPath('getFreq/get_freq_BV.sql'),
+    getFreqRasterV: sqlPath('getFreq/get_freq_RaV.sql'),
+    getFreqV: sqlPath('getFreq/get_freq_V.sql'),
+
+    getFreqBioT: sqlPath('getFreq/get_freq_BT.sql'),
+    getFreqRasterT: sqlPath('getFreq/get_freq_RaT.sql'),
+    getFreqT: sqlPath('getFreq/get_freq_T.sql')
+
+  },
   interaction: {
     getCount: sqlPath('interaction/count_interaction.sql')
   },

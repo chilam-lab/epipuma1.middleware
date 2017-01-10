@@ -89,4 +89,36 @@ router.route('/getGeoRel')
     verbsCtrl.getGeoRel 
   )
 
+  // getGeoRel no realiza calculo utilizando apriori o mapa de probavilidad, 
+// se descartan estos casos
+router.route('/getFreq')
+  .get(
+    // verbsCtrl.getGeoRel_VAT,
+    // verbsCtrl.getGeoRel_VMT,
+    // verbsCtrl.getGeoRel_VA,
+    // verbsCtrl.getGeoRel_VM,
+    // verbsCtrl.getGeoRel_VT,
+    // verbsCtrl.getGeoRel_TA,
+    // verbsCtrl.getGeoRel_TM,
+    verbsCtrl.getFreq_V,
+    // verbsCtrl.getGeoRel_A,
+    // verbsCtrl.getGeoRel_M,
+    verbsCtrl.getFreq_T,
+    verbsCtrl.getFreq    
+  )
+  .post(
+    // verbsCtrl.getGeoRel_VAT,
+    // verbsCtrl.getGeoRel_VMT,
+    // verbsCtrl.getGeoRel_VA,
+    // verbsCtrl.getGeoRel_VM,
+    // verbsCtrl.getGeoRel_VT,
+    // verbsCtrl.getGeoRel_TA,
+    // verbsCtrl.getGeoRel_TM,
+    verbsCtrl.getFreq_V,
+    // verbsCtrl.getGeoRel_A,
+    // verbsCtrl.getGeoRel_M,
+    verbsCtrl.getFreq_T,
+    verbsCtrl.getFreq 
+  )
+
 module.exports = router
