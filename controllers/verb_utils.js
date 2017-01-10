@@ -142,7 +142,7 @@ var verbs_utils = {
 		// console.log(lim_sup);
 		// console.log(sfecha);
 
-		if(lim_inf || !sfecha){
+		if(lim_inf || sfecha === "false"){
 
 			filterDates += "where (snib.especievalida = '' or snib.especievalida is null)  or ";
 
@@ -150,7 +150,7 @@ var verbs_utils = {
 				filterDates +=  "((EXTRACT(EPOCH FROM to_timestamp(fechacolecta, 'YYYY-MM--DD')) * 1000) < " + lim_inf + " " +
 							"or " + 
 							"(EXTRACT(EPOCH FROM to_timestamp(fechacolecta, 'YYYY-MM--DD')) * 1000) > " + lim_sup + " ) ";
-				if(!sfecha){
+				if(sfecha === "false"){
 					// console.log("Filtros y sin fecha");
 					// los valores nulos y vacios de fechacolecta son menores al valor establecido en la condicion de tiempo anteior 
 				}
@@ -159,7 +159,7 @@ var verbs_utils = {
 					filterDates += " and (fechacolecta <> '' and fechacolecta is not null)  ";
 				}
 			}
-			if(lim_inf == undefined && !sfecha){
+			if(lim_inf == undefined && sfecha === "false"){
 				// console.log("Solo registros sin fecha");
 				filterDates += " (fechacolecta = '' or fechacolecta is null) ";
 			}
