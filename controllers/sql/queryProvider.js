@@ -52,7 +52,25 @@ var queryProvider = {
 
     getFreqBioT: sqlPath('getFreq/get_freq_BT.sql'),
     getFreqRasterT: sqlPath('getFreq/get_freq_RaT.sql'),
-    getFreqT: sqlPath('getFreq/get_freq_T.sql')
+    getFreqT: sqlPath('getFreq/get_freq_T.sql'),
+
+    getFreqBioVT: sqlPath('getFreq/get_freq_BVT.sql'),
+    getFreqRaVT: sqlPath('getFreq/get_freq_RaVT.sql'),
+    getFreqVT: sqlPath('getFreq/get_freq_TVT.sql')
+
+  },
+  getFreqCelda: {
+
+    getFreqCeldaBio: sqlPath('getFreqCelda/get_basic_freq_celda_bio.sql'),
+    getFreqCeldaRaster: sqlPath('getFreqCelda/get_basic_freq_celda_raster.sql'),
+    getFreqCelda: sqlPath('getFreqCelda/get_basic_freq_celda.sql'),
+
+    getFreqCeldaBioT: sqlPath('getFreqCelda/get_freq_celda_BT.sql'),
+    getFreqCeldaRaT: sqlPath('getFreqCelda/get_freq_celda_RaT.sql'),
+    getFreqCeldaT: sqlPath('getFreqCelda/get_freq_celda_T.sql'),
+
+    getFreqCeldaBioV: sqlPath('getFreqCelda/get_freq_celda_BV.sql')
+
 
   },
   interaction: {

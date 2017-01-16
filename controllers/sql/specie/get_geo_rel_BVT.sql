@@ -92,6 +92,8 @@ gridObj as (
 gridObjSize as ( 
 	select count(*) as ni_length from gridObj 
 ), 
+
+
 -- Para nj: del numero de celdas descartadas con presencia de las especies con relacion a la especie objetivo (num_gridids)
 -- + el numero de presencias de cada especie que se encuentra dentro del conjutno de celdas descartadas.
 -- es descontada al numero total de especies.
@@ -120,6 +122,9 @@ gridObjSize as (
 			first_rawdata.label,  nj,  n, num_gridids 
 	order by dis_nj desc 
 ),
+
+
+
 -- obtiene el numero de celdas donde existe correlacion entre la especie objetivo y las especies realcionadas 
 -- del conjunto de celdas descartadas por filtros de tiempo, se obtien lso nij ha descartar por filtro de tiempo
 -- TODO: Verificar si gridObj ya contempla los nij descartados por esta seccion!!
