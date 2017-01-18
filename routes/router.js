@@ -92,12 +92,14 @@ router.route('/getFreq')
 router.route('/getFreqCelda')
   .get(
     // verbsCtrl.getFreq_VT,
+    verbsCtrl.getFreqCelda_A,
     verbsCtrl.getFreqCelda_V,
     verbsCtrl.getFreqCelda_T,
     verbsCtrl.getFreqCelda    
   )
   .post(
     // verbsCtrl.getFreq_VT,
+    verbsCtrl.getFreqCelda_A,
     verbsCtrl.getFreqCelda_V,
     verbsCtrl.getFreqCelda_T,
     verbsCtrl.getFreqCelda 
