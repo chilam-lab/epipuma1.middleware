@@ -52,7 +52,53 @@ var queryProvider = {
 
     getFreqBioT: sqlPath('getFreq/get_freq_BT.sql'),
     getFreqRasterT: sqlPath('getFreq/get_freq_RaT.sql'),
-    getFreqT: sqlPath('getFreq/get_freq_T.sql')
+    getFreqT: sqlPath('getFreq/get_freq_T.sql'),
+
+    getFreqBioVT: sqlPath('getFreq/get_freq_BVT.sql'),
+    getFreqRaVT: sqlPath('getFreq/get_freq_RaVT.sql'),
+    getFreqVT: sqlPath('getFreq/get_freq_TVT.sql')
+
+
+
+  },
+  getFreqCelda: {
+
+    getFreqCeldaBio: sqlPath('getFreqCelda/get_basic_freq_celda_bio.sql'),
+    getFreqCeldaRaster: sqlPath('getFreqCelda/get_basic_freq_celda_raster.sql'),
+    getFreqCelda: sqlPath('getFreqCelda/get_basic_freq_celda.sql'),
+
+    getFreqCeldaBioT: sqlPath('getFreqCelda/get_freq_celda_BT.sql'),
+    getFreqCeldaRaT: sqlPath('getFreqCelda/get_freq_celda_RaT.sql'),
+    getFreqCeldaT: sqlPath('getFreqCelda/get_freq_celda_T.sql'),
+
+    getFreqCeldaBioV: sqlPath('getFreqCelda/get_freq_celda_BV.sql'),
+    getFreqCeldaRaV: sqlPath('getFreqCelda/get_freq_celda_RaV.sql'),
+    getFreqCeldaV: sqlPath('getFreqCelda/get_freq_celda_V.sql'),
+
+    getFreqCeldaBioA: sqlPath('getFreqCelda/get_freq_celda_BA.sql'),
+    getFreqCeldaRaA: sqlPath('getFreqCelda/get_freq_celda_RaA.sql'),
+    getFreqCeldaA: sqlPath('getFreqCelda/get_freq_celda_A.sql'),
+
+    getFreqCeldaBioTA: sqlPath('getFreqCelda/get_freq_celda_BTA.sql'),
+    getFreqCeldaRaTA: sqlPath('getFreqCelda/get_freq_celda_RaTA.sql'),
+    getFreqCeldaTA: sqlPath('getFreqCelda/get_freq_celda_TA.sql'),
+
+    // por desarrollar
+    getFreqCeldaBioVT: sqlPath('getFreqCelda/get_freq_celda_BVT.sql'),
+    getFreqCeldaRaVT: sqlPath('getFreqCelda/get_freq_celda_RaVT.sql'),
+    getFreqCeldaVT: sqlPath('getFreqCelda/get_freq_celda_VT.sql'),
+
+    getFreqCeldaBioVA: sqlPath('getFreqCelda/get_freq_celda_BVA.sql'),
+    getFreqCeldaRaVA: sqlPath('getFreqCelda/get_freq_celda_RaVA.sql'),
+    getFreqCeldaVA: sqlPath('getFreqCelda/get_freq_celda_VA.sql'),
+
+
+    getFreqCeldaBioVTA: sqlPath('getFreqCelda/get_freq_celda_BVTA.sql'),
+    getFreqCeldaRaVTA: sqlPath('getFreqCelda/get_freq_celda_RaVTA.sql'),
+    getFreqCeldaVTA: sqlPath('getFreqCelda/get_freq_celda_VTA.sql')
+
+    
+
 
   },
   interaction: {
