@@ -1412,6 +1412,400 @@ exports.getFreq = function (req, res, next) {
 /*********************************************************************/
 
 
+
+exports.getFreqCelda_VTA = function (req, res, next) {
+
+    console.log("getFreqCelda_VTA");
+    
+    var spid        = getParam(req, 'id');
+    var tfilters    = getParam(req, 'tfilters');
+    var alpha       = 0.01;
+    var N           = 6473;
+    var discardedFilterids;
+
+    // Siempre incluidos en query, nj >= 0
+    var min_occ       = getParam(req, 'min_occ', 0);
+    
+
+    // variables configurables
+    var hasBios         = getParam(req, 'hasBios');
+    var hasRaster       = getParam(req, 'hasRaster');
+    var discardedids    = getParam(req, 'discardedids', []);
+    var discardedFilterids = getParam(req, 'discardedFilterids');
+    var apriori         = getParam(req, 'apriori');
+
+    
+
+    // filtros por tiempo
+    var sfecha        = getParam(req, 'sfecha', false);
+    var fecha_incio   = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
+    var fecha_fin     = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
+
+
+
+    if (hasBios === 'true' && hasRaster === 'true' && apriori === 'apriori' && discardedids != undefined  && discardedids.length > 0 && discardedFilterids != undefined && discardedFilterids.length > 0){
+
+      console.log("TVTA");
+      
+      var whereVar = verb_utils.processBioFilters(tfilters, spid);
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      var discardedids_total = discardedFilterids.concat(discardedids); 
+      var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
+
+      pool.any(queries.getFreqCelda.getFreqCeldaBioVTA, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config: whereVar,
+        where_config_raster: whereVarRaster,
+        arg_gridids: discardedids.toString(),
+        arg_gridfilterids: discardedFilterids.toString(),
+        arg_gridids_total: discardedids_total.toString(),
+        filter_dates: filterDates
+      })
+      .then(function (data) {
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        console.log(error);
+        next(error)
+      })
+
+      
+    }
+    else if (hasBios === 'true' && apriori === 'apriori' && discardedids != undefined  && discardedids.length > 0 && discardedFilterids != undefined && discardedFilterids.length > 0){
+
+      console.log("BVTA");
+
+      var whereVar = verb_utils.processBioFilters(tfilters, spid);
+      var discardedids_total = discardedFilterids.concat(discardedids); 
+      var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
+
+      pool.any(queries.getFreqCelda.getFreqCeldaBioVTA, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config: whereVar,
+        arg_gridids: discardedids.toString(),
+        arg_gridfilterids: discardedFilterids.toString(),
+        arg_gridids_total: discardedids_total.toString(),
+        filter_dates: filterDates
+      })
+      .then(function (data) {
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        console.log(error);
+        next(error)
+      })
+
+      
+    } 
+    else if (hasRaster === 'true' && apriori === 'apriori' && discardedids != undefined  && discardedids.length > 0 && discardedids.length > 0 && discardedFilterids != undefined ){
+
+      console.log("RaVTA");
+      
+
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      var discardedids_total = discardedFilterids.concat(discardedids); 
+      var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
+
+      pool.any(queries.getFreqCelda.getFreqCeldaRaVTA, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config_raster: whereVarRaster,
+        arg_gridids: discardedids.toString(),
+        arg_gridfilterids: discardedFilterids.toString(),
+        arg_gridids_total: discardedids_total.toString(),
+        filter_dates: filterDates
+      })
+      .then(function (data) {
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        console.log(error);
+        next(error)
+      })
+
+      
+    } 
+    else{
+
+      next();
+    }
+
+};
+
+
+/**
+ *
+ * getFreqCelda_VA de SNIB DB, considerando validacion y apriori
+ *
+ * Obtiene la frecuencia del score por celda obtenido de las especies
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ *
+ */
+
+exports.getFreqCelda_VA = function (req, res, next) {
+
+
+    console.log("getFreqCelda_VA");
+
+    var spid        = getParam(req, 'id');
+    var tfilters    = getParam(req, 'tfilters');
+    var alpha       = 0.01;
+    var N           = 6473;
+    var discardedFilterids;
+
+    // Siempre incluidos en query, nj >= 0
+    var min_occ       = getParam(req, 'min_occ', 0);
+    
+
+    // variables configurables
+    var hasBios         = getParam(req, 'hasBios');
+    var hasRaster       = getParam(req, 'hasRaster');
+    var discardedids    = getParam(req, 'discardedids', []);
+    var apriori         = getParam(req, 'apriori');
+    
+    
+    if (hasBios === 'true' && hasRaster === 'true' && apriori === 'apriori' && discardedids != undefined  && discardedids.length > 0 ){
+
+      console.log("TVA");
+
+      var whereVar = verb_utils.processBioFilters(tfilters, spid);
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+
+      pool.any(queries.getFreqCelda.getFreqCeldaVA, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config: whereVar,
+        where_config_raster: whereVarRaster,
+        arg_gridids: discardedids.toString()
+      })
+      .then(function (data) {
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        
+        console.log(error);
+        next(error)
+
+      })
+
+      
+    }
+    else if (hasBios === 'true' && apriori === 'apriori' && discardedids != undefined && discardedids.length > 0 ){
+
+      console.log("BVA");
+      
+      var whereVar = verb_utils.processBioFilters(tfilters, spid);
+      
+
+      pool.any(queries.getFreqCelda.getFreqCeldaBioVA, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config: whereVar,
+        arg_gridids: discardedids.toString()
+      })
+      .then(function (data) {
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        console.log(error);
+        next(error)
+      })
+
+      
+    } 
+    else if (hasRaster === 'true' && apriori === 'apriori' && discardedids != undefined && discardedids.length > 0 ){
+
+      console.log("RaVA");
+      
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+
+      
+      pool.any(queries.getFreqCelda.getFreqCeldaRaVA, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config_raster: whereVarRaster,
+        arg_gridids: discardedids.toString()
+      })
+      .then(function (data) {
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        console.log(error);
+        next(error)
+      })
+
+      
+    } 
+    else{
+
+      next();
+    }
+
+};
+
+
+
+
+/**
+ *
+ * getFreqCelda_VT de SNIB DB, considerando validacion y tiempo
+ *
+ * Obtiene la frecuencia del score por celda obtenido de las especies
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ *
+ */
+
+exports.getFreqCelda_VT = function (req, res, next) {
+
+
+    console.log("getFreqCelda_VT");
+
+    var spid        = getParam(req, 'id');
+    var tfilters    = getParam(req, 'tfilters');
+    var alpha       = 0.01;
+    var N           = 6473;
+    var discardedFilterids;
+
+
+    // Siempre incluidos en query, nj >= 0
+    var min_occ       = getParam(req, 'min_occ', 0);
+    
+
+    // variables configurables
+    var hasBios         = getParam(req, 'hasBios');
+    var hasRaster       = getParam(req, 'hasRaster');
+    var discardedids    = getParam(req, 'discardedids', []);
+    var discardedFilterids = getParam(req, 'discardedFilterids');
+    
+    // filtros por tiempo
+    var sfecha        = getParam(req, 'sfecha', false);
+    var fecha_incio   = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
+    var fecha_fin     = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
+
+
+    if (hasBios === 'true' && hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 && discardedFilterids != undefined ){
+
+      console.log("TVT");
+
+      var whereVar = verb_utils.processBioFilters(tfilters, spid);
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+
+      var discardedids_total = discardedFilterids.concat(discardedids); 
+      var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
+      
+
+      pool.any(queries.getFreqCelda.getFreqCeldaVT, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config: whereVar,
+        where_config_raster: whereVarRaster,
+        arg_gridids: discardedids.toString(),
+        arg_gridfilterids: discardedFilterids.toString(),
+        arg_gridids_total: discardedids_total.toString(),
+        filter_dates: filterDates
+      })
+      .then(function (data) {
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        
+        console.log(error);
+        next(error)
+
+      })
+
+      
+    }
+    else if (hasBios === 'true' && discardedids != undefined && discardedids.length > 0 && discardedFilterids != undefined ){
+
+      console.log("BVT");
+      
+      var whereVar = verb_utils.processBioFilters(tfilters, spid);
+      var discardedids_total = discardedFilterids.concat(discardedids); 
+      var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
+
+
+      pool.any(queries.getFreqCelda.getFreqCeldaBioVT, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config: whereVar,
+        arg_gridids: discardedids.toString(),
+        arg_gridfilterids: discardedFilterids.toString(),
+        arg_gridids_total: discardedids_total.toString(),
+        filter_dates: filterDates
+      })
+      .then(function (data) {
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        
+        console.log(error);
+        next(error)
+
+      })
+
+      
+    } 
+    else if (hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 && discardedFilterids != undefined ){
+
+      console.log("RaVT");
+      
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      var discardedids_total = discardedFilterids.concat(discardedids); 
+      var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
+
+      
+      pool.any(queries.getFreqCelda.getFreqCeldaRaVT, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config_raster: whereVarRaster,
+        arg_gridids: discardedids.toString(),
+        arg_gridfilterids: discardedFilterids.toString(),
+        arg_gridids_total: discardedids_total.toString(),
+        filter_dates: filterDates
+      })
+      .then(function (data) {
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        console.log(error);
+        next(error)
+      })
+
+      
+    } 
+    else{
+
+      next();
+    }
+
+};
+
+
 /**
  *
  * getFreqCelda_TA de SNIB DB, mapa probabilidad
@@ -1464,22 +1858,26 @@ exports.getFreqCelda_TA = function (req, res, next) {
             whereVar = " epitetovalido <> '' ";
         }
         var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+        var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
 
-        //     pool.any(queries.getFreqCelda.getFreqCeldaM, {
-        //         spid: spid,
-        //         N: N,
-        //         alpha: alpha,
-        //         min_occ: min_occ,
-        //         where_config: whereVar,
-        //         where_config_raster: whereVarRaster
-        //     })
-        //     .then(function (data) {
-        //         res.json({'data': data})
-        //     })
-        //     .catch(function (error) {
-        //         console.log(error);
-        //         next(error)
-        // })
+        pool.any(queries.getFreqCelda.getFreqCeldaTA, {
+            spid: spid,
+            N: N,
+            alpha: alpha,
+            min_occ: min_occ,
+            where_config: whereVar,
+            where_config_raster: whereVarRaster,
+            filter_dates: filterDates,
+            arg_gridids: discardedFilterids.toString()
+
+        })
+        .then(function (data) {
+            res.json({'data': data})
+        })
+        .catch(function (error) {
+            console.log(error);
+            next(error)
+        })
 
       
     }
@@ -1526,21 +1924,24 @@ exports.getFreqCelda_TA = function (req, res, next) {
       console.log("RaTA");
       
       var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
 
-          // pool.any(queries.getFreqCelda.getFreqCeldaRaM, {
-          //     spid: spid,
-          //     N: N,
-          //     alpha: alpha,
-          //     min_occ: min_occ,
-          //     where_config_raster: whereVarRaster
-          // })
-          // .then(function (data) {
-          //     res.json({'data': data})
-          // })
-          // .catch(function (error) {
-          //     console.log(error);
-          //     next(error)
-          // })
+          pool.any(queries.getFreqCelda.getFreqCeldaRaTA, {
+              spid: spid,
+              N: N,
+              alpha: alpha,
+              min_occ: min_occ,
+              where_config_raster: whereVarRaster,
+              filter_dates: filterDates,
+              arg_gridids: discardedFilterids.toString()
+          })
+          .then(function (data) {
+              res.json({'data': data})
+          })
+          .catch(function (error) {
+              console.log(error);
+              next(error)
+          })
       
     } 
     else{
@@ -2140,16 +2541,12 @@ exports.getFreqCelda = function (req, res, next) {
 
 // };
 
-// /**
-//  *
-//  * getGeoRel_VAT de SNIB DB, validacion, mapa y tiempo
-//  *
-//  * Obtiene epsilon y score con especie objetivo y conjunto de variables bioticas y raster.
-//  *
-//  * @param {express.Request} req
-//  * @param {express.Response} res
-//  *
-//  */
+
+
+
+
+
+
 
 // exports.getGeoRel_VMT = function (req, res, next) {
 
@@ -2222,84 +2619,7 @@ exports.getFreqCelda = function (req, res, next) {
 // };
 
 
-// /**
-//  *
-//  * getGeoRel_VAT de SNIB DB, validacion y apriori
-//  *
-//  * Obtiene epsilon y score con especie objetivo y conjunto de variables bioticas y raster.
-//  *
-//  * @param {express.Request} req
-//  * @param {express.Response} res
-//  *
-//  */
 
-// exports.getGeoRel_VA = function (req, res, next) {
-
-//     console.log("getGeoRel_VA");
-
-//     var spid        = getParam(req, 'id');
-//     var tfilters    = getParam(req, 'tfilters');
-//     var alpha       = 0.01;
-//     var N           = 6473;
-//     var discardedFilterids;
-
-//     // Siempre incluidos en query, nj >= 0
-//     var min_occ       = getParam(req, 'min_occ', 0);
-    
-
-//     // variables configurables
-//     var hasBios         = getParam(req, 'hasBios');
-//     var hasRaster       = getParam(req, 'hasRaster');
-//     var discardedids    = getParam(req, 'discardedids', []);
-//     var apriori         = getParam(req, 'apriori');
-    
-
-//     if (hasBios && hasRaster && discardedids.length > 0 && apriori ){
-
-//       console.log("TVA");
-//       var whereVar = verb_utils.processBioFilters(tfilters, spid);
-//       var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
-
-//       // TODO:
-
-      
-//     }
-//     else if (hasBios && discardedids.length > 0 && apriori ){
-
-//       console.log("BVA");
-//       var whereVar = verb_utils.processBioFilters(tfilters, spid);
-
-//       // TODO:
-
-      
-//     } 
-//     else if (hasRaster && discardedids.length > 0 && apriori ){
-
-//       console.log("RaVA");
-//       var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
-
-//       // TODO:
-
-      
-//     } 
-//     else{
-
-//       next();
-//     }
-
-// };
-
-
-// /**
-//  *
-//  * getGeoRel_VAT de SNIB DB, validacion y mapa
-//  *
-//  * Obtiene epsilon y score con especie objetivo y conjunto de variables bioticas y raster.
-//  *
-//  * @param {express.Request} req
-//  * @param {express.Response} res
-//  *
-//  */
 
 // exports.getGeoRel_VM = function (req, res, next) {
 
@@ -2359,100 +2679,7 @@ exports.getFreqCelda = function (req, res, next) {
 
 
 
-// /**
-//  *
-//  * getGeoRel_VAT de SNIB DB, tiempo y apriori
-//  *
-//  * Obtiene epsilon y score con especie objetivo y conjunto de variables bioticas y raster.
-//  *
-//  * @param {express.Request} req
-//  * @param {express.Response} res
-//  *
-//  */
 
-// exports.getGeoRel_TA = function (req, res, next) {
-
-//     console.log("getGeoRel_TA");
-
-//     var spid        = getParam(req, 'id');
-//     var tfilters    = getParam(req, 'tfilters');
-//     var alpha       = 0.01;
-//     var N           = 6473;
-//     var discardedFilterids;
-
-//     // Siempre incluidos en query, nj >= 0
-//     var min_occ       = getParam(req, 'min_occ', 0);
-    
-
-//     // variables configurables
-//     var hasBios         = getParam(req, 'hasBios');
-//     var hasRaster       = getParam(req, 'hasRaster');
-//     // var discardedids    = getParam(req, 'discardedids', []);
-//     var apriori         = getParam(req, 'apriori');
-
-    
-//     // filtros por tiempo
-//     var sfecha        = getParam(req, 'sfecha', false);
-//     var fecha_incio   = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
-//     var fecha_fin     = moment(getParam(req, 'lim_sup', Date.now()), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
-
-//     // Si se realiza filtro de tiempo existen celdas descartadas por filtro
-//     if(sfecha || 
-//         fecha_incio != '1500' || 
-//           fecha_fin != moment(Date.now(), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')){
-
-//       discardedFilterids = getParam(req, 'discardedFilterids');
-//     }
-    
-
-
-
-//     if (hasBios && hasRaster && apriori && discardedFilterids.length > 0 ){
-
-//       console.log("TTA");
-//       var whereVar = verb_utils.processBioFilters(tfilters, spid);
-//       var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
-
-//       // TODO:
-
-      
-//     }
-//     else if (hasBios && apriori && discardedFilterids.length > 0 ){
-
-//       console.log("BTA");
-//       var whereVar = verb_utils.processBioFilters(tfilters, spid);
-
-//       // TODO:
-
-      
-//     } 
-//     else if (hasRaster && apriori && discardedFilterids.length > 0 ){
-
-//       console.log("RaTA");
-//       var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
-
-//       // TODO:
-
-      
-//     } 
-//     else{
-
-//       next();
-//     }
-
-// };
-
-
-
-// *
-//  *
-//  * getGeoRel_VAT de SNIB DB, tiempo y mapa
-//  *
-//  * Obtiene epsilon y score con especie objetivo y conjunto de variables bioticas y raster.
-//  *
-//  * @param {express.Request} req
-//  * @param {express.Response} res
-//  *
  
 
 // exports.getGeoRel_TM = function (req, res, next) {
@@ -2528,80 +2755,7 @@ exports.getFreqCelda = function (req, res, next) {
 // };
 
 
-// /**
-//  *
-//  * getGeoRel_VAT de SNIB DB, apriori
-//  *
-//  * Obtiene epsilon y score con especie objetivo y conjunto de variables bioticas y raster.
-//  *
-//  * @param {express.Request} req
-//  * @param {express.Response} res
-//  *
-//  */
 
-// exports.getGeoRel_A = function (req, res, next) {
-
-//     console.log("getGeoRel_A");
-
-//     var spid        = getParam(req, 'id');
-//     var tfilters    = getParam(req, 'tfilters');
-//     var alpha       = 0.01;
-//     var N           = 6473;
-
-//     // Siempre incluidos en query, nj >= 0
-//     var min_occ       = getParam(req, 'min_occ', 0);
-
-//     // variables configurables
-//     var hasBios         = getParam(req, 'hasBios');
-//     var hasRaster       = getParam(req, 'hasRaster');
-//     var apriori         = getParam(req, 'apriori');
-    
-    
-//     if (hasBios && hasRaster && apriori ){
-
-//       console.log("TA");
-//       var whereVar = verb_utils.processBioFilters(tfilters, spid);
-//       var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
-
-//       // TODO:
-
-      
-//     }
-//     else if (hasBios && apriori ){
-
-//       console.log("BA");
-//       var whereVar = verb_utils.processBioFilters(tfilters, spid);
-
-//       // TODO:
-
-      
-//     } 
-//     else if (hasRaster && apriori ){
-
-//       console.log("RaA");
-//       var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
-
-//       // TODO:
-
-      
-//     } 
-//     else{
-
-//       next();
-//     }
-
-// };
-
-
-// *
-//  *
-//  * getGeoRel_VAT de SNIB DB, mapa
-//  *
-//  * Obtiene epsilon y score con especie objetivo y conjunto de variables bioticas y raster.
-//  *
-//  * @param {express.Request} req
-//  * @param {express.Response} res
-//  *
  
 
 // exports.getGeoRel_M = function (req, res, next) {

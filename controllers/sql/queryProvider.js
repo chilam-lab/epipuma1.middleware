@@ -81,7 +81,23 @@ var queryProvider = {
 
     getFreqCeldaBioTA: sqlPath('getFreqCelda/get_freq_celda_BTA.sql'),
     getFreqCeldaRaTA: sqlPath('getFreqCelda/get_freq_celda_RaTA.sql'),
-    getFreqCeldaTA: sqlPath('getFreqCelda/get_freq_celda_TA.sql')
+    getFreqCeldaTA: sqlPath('getFreqCelda/get_freq_celda_TA.sql'),
+
+    // por desarrollar
+    getFreqCeldaBioVT: sqlPath('getFreqCelda/get_freq_celda_BVT.sql'),
+    getFreqCeldaRaVT: sqlPath('getFreqCelda/get_freq_celda_RaVT.sql'),
+    getFreqCeldaVT: sqlPath('getFreqCelda/get_freq_celda_VT.sql'),
+
+    getFreqCeldaBioVA: sqlPath('getFreqCelda/get_freq_celda_BVA.sql'),
+    getFreqCeldaRaVA: sqlPath('getFreqCelda/get_freq_celda_RaVA.sql'),
+    getFreqCeldaVA: sqlPath('getFreqCelda/get_freq_celda_VA.sql'),
+
+
+    getFreqCeldaBioVTA: sqlPath('getFreqCelda/get_freq_celda_BVTA.sql'),
+    getFreqCeldaRaVTA: sqlPath('getFreqCelda/get_freq_celda_RaVTA.sql'),
+    getFreqCeldaVTA: sqlPath('getFreqCelda/get_freq_celda_VTA.sql')
+
+    
 
 
   },
