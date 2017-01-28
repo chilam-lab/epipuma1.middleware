@@ -111,4 +111,51 @@ router.route('/getFreqCelda')
     verbsCtrl.getFreqCelda 
   )
 
+
+  router.route('/getFreqMap')
+  .get(
+    // verbsCtrl.getFreqCelda_VTA,
+    // verbsCtrl.getFreqCelda_VA,
+    // verbsCtrl.getFreqCelda_VT,
+    // verbsCtrl.getFreqCelda_TA,
+    verbsCtrl.getFreqMap_M,
+    verbsCtrl.getFreqMap_A,
+    // verbsCtrl.getFreqMap_V, // la validacion no es considerada en el mapa
+    verbsCtrl.getFreqMap_T,
+    verbsCtrl.getFreqMap    
+  )
+  .post(
+    // verbsCtrl.getFreqCelda_VTA,
+    // verbsCtrl.getFreqCelda_VA,
+    // verbsCtrl.getFreqCelda_VT,
+    // verbsCtrl.getFreqCelda_TA,
+    verbsCtrl.getFreqMap_M,
+    verbsCtrl.getFreqMap_A,
+    // verbsCtrl.getFreqMap_V, // la validacion no es considerada en el mapa
+    verbsCtrl.getFreqMap_T,
+    verbsCtrl.getFreqMap 
+  )
+
+  router.route('/getScoreDecil')
+  .get(
+    // verbsCtrl.getFreqCelda_VTA,
+    // verbsCtrl.getFreqCelda_VA,
+    // verbsCtrl.getFreqCelda_VT,
+    // verbsCtrl.getFreqCelda_TA,
+    // verbsCtrl.getFreqCelda_A,
+    // verbsCtrl.getFreqCelda_V,
+    // verbsCtrl.getFreqCelda_T,
+    verbsCtrl.getScoreDecil   
+  )
+  .post(
+    // verbsCtrl.getFreqCelda_VTA,
+    // verbsCtrl.getFreqCelda_VA,
+    // verbsCtrl.getFreqCelda_VT,
+    // verbsCtrl.getFreqCelda_TA,
+    // verbsCtrl.getFreqCelda_A,
+    // verbsCtrl.getFreqCelda_V,
+    // verbsCtrl.getFreqCelda_T,
+    verbsCtrl.getScoreDecil   
+  )
+
 module.exports = router

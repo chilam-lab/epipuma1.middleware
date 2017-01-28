@@ -97,10 +97,37 @@ var queryProvider = {
     getFreqCeldaRaVTA: sqlPath('getFreqCelda/get_freq_celda_RaVTA.sql'),
     getFreqCeldaVTA: sqlPath('getFreqCelda/get_freq_celda_VTA.sql')
 
-    
+  },
+  getFreqMap: {
 
+    getFreqMapBio: sqlPath('getFreqMap/get_basic_freq_map_bio.sql'),
+    getFreqMapRaster: sqlPath('getFreqMap/get_basic_freq_map_raster.sql'),
+    getFreqMap: sqlPath('getFreqMap/get_basic_freq_map.sql'),
+
+    getFreqMapBioT: sqlPath('getFreqMap/get_freq_map_BT.sql'),
+    getFreqMapRaT: sqlPath('getFreqMap/get_freq_map_RaT.sql'),
+    getFreqMapT: sqlPath('getFreqMap/get_freq_map_T.sql'),
+
+    // getFreqMapBioV: sqlPath('getFreqMap/get_freq_map_BV.sql'),
+    // getFreqMapRaV: sqlPath('getFreqMap/get_freq_map_RaV.sql'),
+    // getFreqMapV: sqlPath('getFreqMap/get_freq_map_V.sql')
+
+    getFreqMapBioA: sqlPath('getFreqMap/get_freq_map_BA.sql'),
+    getFreqMapRaA: sqlPath('getFreqMap/get_freq_map_RaA.sql'),
+    getFreqMapA: sqlPath('getFreqMap/get_freq_map_A.sql'),
+
+    getFreqMapBioM: sqlPath('getFreqMap/get_freq_map_BM.sql')
+    // getFreqMapRaM: sqlPath('getFreqMap/get_freq_map_RaM.sql'),
+    // getFreqMapM: sqlPath('getFreqMap/get_freq_map_M.sql')
 
   },
+
+  getScoreDecil: {
+
+    getScoreDecilBio: sqlPath('getFreqMap/get_basic_score_decil_bio.sql')
+
+  },
+
   interaction: {
     getCount: sqlPath('interaction/count_interaction.sql')
   },
@@ -113,6 +140,8 @@ var queryProvider = {
     getClimaLayer: sqlPath('rasters/get_clima_layer.sql'),
     getTopoLayer: sqlPath('rasters/get_topo_layer.sql')
   }
+
+
 }
 
 module.exports = queryProvider
