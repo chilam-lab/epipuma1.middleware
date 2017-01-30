@@ -2456,7 +2456,300 @@ exports.getFreqCelda = function (req, res, next) {
 /*********************************************************************/
 
 
+/**
+ *
+ * getFreqMap_TM de SNIB DB, tiempo y mapa probabilidad
+ *
+ * Obtiene la suma de socre por celda para desplegar en el mapa
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ *
+ */
 
+exports.getFreqMap_TM = function (req, res, next) {
+
+    console.log("getFreqMap_TM");
+
+    var spid        = getParam(req, 'id');
+    var tfilters    = getParam(req, 'tfilters');
+    var alpha       = 0.01;
+    var N           = 6473;
+    var maxscore    = 700;
+
+    // Siempre incluidos en query, nj >= 0
+    var min_occ       = getParam(req, 'min_occ', 0);
+
+    // variables configurables
+    var hasBios         = getParam(req, 'hasBios');
+    var hasRaster       = getParam(req, 'hasRaster');
+    var mapa_prob         = getParam(req, 'mapa_prob');
+
+
+    // filtros por tiempo
+    var sfecha            = getParam(req, 'sfecha', false);
+    var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
+    var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
+    var discardedFilterids = getParam(req, 'discardedFilterids');
+
+
+
+    
+    if (hasBios === 'true' && hasRaster === 'true' && mapa_prob === 'mapa_prob' && discardedFilterids != undefined && discardedFilterids.length > 0){
+
+        console.log("TTM");
+
+        var whereVar = "";
+        
+        if(tfilters.length>0){
+            whereVar = verb_utils.processBioFilters(tfilters, spid);
+            whereVar = whereVar + " and epitetovalido <> '' ";
+        }
+        else{
+            whereVar = " epitetovalido <> '' ";
+        }
+        var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+        var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
+
+        pool.any(queries.getFreqMap.getFreqMapTM, {
+            spid: spid,
+            N: N,
+            alpha: alpha,
+            min_occ: min_occ,
+            maxscore: maxscore,
+            where_config: whereVar,
+            where_config_raster: whereVarRaster,
+            filter_dates: filterDates,
+            arg_gridids: discardedFilterids.toString()
+
+        })
+        .then(function (data) {
+            res.json({'data': data})
+        })
+        .catch(function (error) {
+            console.log(error);
+            next(error)
+        })
+
+      
+    }
+    else if (hasBios === 'true' && mapa_prob === 'mapa_prob' && discardedFilterids != undefined && discardedFilterids.length > 0){
+
+        console.log("BTM");
+
+        var whereVar = "";
+
+        if(tfilters.length>0){
+            whereVar = verb_utils.processBioFilters(tfilters, spid);
+            whereVar = whereVar + " and epitetovalido <> '' ";
+        }
+        else{
+            whereVar = " epitetovalido <> '' ";
+        }
+
+        var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
+
+
+        pool.any(queries.getFreqMap.getFreqMapBioTM, {
+            
+            spid: spid,
+            N: N,
+            alpha: alpha,
+            maxscore: maxscore,
+            min_occ: min_occ,
+            where_config: whereVar,
+            filter_dates: filterDates,
+            arg_gridids: discardedFilterids.toString()
+
+        })
+        .then(function (data) {
+          res.json({'data': data})
+        })
+        .catch(function (error) {
+          console.log(error);
+          next(error)
+        })
+
+      
+    } 
+    else if (hasRaster === 'true' && mapa_prob === 'mapa_prob' && discardedFilterids != undefined && discardedFilterids.length > 0){
+
+      console.log("RaTM");
+      
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
+
+          pool.any(queries.getFreqMap.getFreqMapRaTM, {
+              spid: spid,
+              N: N,
+              alpha: alpha,
+              maxscore: maxscore,
+              min_occ: min_occ,
+              where_config_raster: whereVarRaster,
+              filter_dates: filterDates,
+              arg_gridids: discardedFilterids.toString()
+          })
+          .then(function (data) {
+              res.json({'data': data})
+          })
+          .catch(function (error) {
+              console.log(error);
+              next(error)
+          })
+      
+    } 
+    else{
+
+      next();
+    }
+
+};
+
+
+/**
+ *
+ * getFreqMap_TA de SNIB DB, tiempo y apriori
+ *
+ * Obtiene la suma de socre por celda para desplegar en el mapa
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ *
+ */
+
+exports.getFreqMap_TA = function (req, res, next) {
+
+    console.log("getFreqMap_TA");
+
+    var spid        = getParam(req, 'id');
+    var tfilters    = getParam(req, 'tfilters');
+    var alpha       = 0.01;
+    var N           = 6473;
+
+    // Siempre incluidos en query, nj >= 0
+    var min_occ       = getParam(req, 'min_occ', 0);
+
+    // variables configurables
+    var hasBios         = getParam(req, 'hasBios');
+    var hasRaster       = getParam(req, 'hasRaster');
+    var apriori         = getParam(req, 'apriori');
+
+
+    // filtros por tiempo
+    var sfecha            = getParam(req, 'sfecha', false);
+    var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
+    var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
+    var discardedFilterids = getParam(req, 'discardedFilterids');
+
+
+
+    
+    if (hasBios === 'true' && hasRaster === 'true' && apriori === 'apriori' && discardedFilterids != undefined && discardedFilterids.length > 0){
+
+        console.log("TTA");
+
+        var whereVar = "";
+        
+        if(tfilters.length>0){
+            whereVar = verb_utils.processBioFilters(tfilters, spid);
+            whereVar = whereVar + " and epitetovalido <> '' ";
+        }
+        else{
+            whereVar = " epitetovalido <> '' ";
+        }
+        var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+        var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
+
+        pool.any(queries.getFreqMap.getFreqMapTA, {
+            spid: spid,
+            N: N,
+            alpha: alpha,
+            min_occ: min_occ,
+            where_config: whereVar,
+            where_config_raster: whereVarRaster,
+            filter_dates: filterDates,
+            arg_gridids: discardedFilterids.toString()
+
+        })
+        .then(function (data) {
+            res.json({'data': data})
+        })
+        .catch(function (error) {
+            console.log(error);
+            next(error)
+        })
+
+      
+    }
+    else if (hasBios === 'true' && apriori === 'apriori' && discardedFilterids != undefined && discardedFilterids.length > 0){
+
+        console.log("BTA");
+
+        var whereVar = "";
+
+        if(tfilters.length>0){
+            whereVar = verb_utils.processBioFilters(tfilters, spid);
+            whereVar = whereVar + " and epitetovalido <> '' ";
+        }
+        else{
+            whereVar = " epitetovalido <> '' ";
+        }
+
+        var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
+
+
+        pool.any(queries.getFreqMap.getFreqMapBioTA, {
+            
+            spid: spid,
+            N: N,
+            alpha: alpha,
+            min_occ: min_occ,
+            where_config: whereVar,
+            filter_dates: filterDates,
+            arg_gridids: discardedFilterids.toString()
+
+        })
+        .then(function (data) {
+          res.json({'data': data})
+        })
+        .catch(function (error) {
+          console.log(error);
+          next(error)
+        })
+
+      
+    } 
+    else if (hasRaster === 'true' && apriori === 'apriori' && discardedFilterids != undefined && discardedFilterids.length > 0){
+
+      console.log("RaTA");
+      
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
+
+          pool.any(queries.getFreqMap.getFreqMapRaTA, {
+              spid: spid,
+              N: N,
+              alpha: alpha,
+              min_occ: min_occ,
+              where_config_raster: whereVarRaster,
+              filter_dates: filterDates,
+              arg_gridids: discardedFilterids.toString()
+          })
+          .then(function (data) {
+              res.json({'data': data})
+          })
+          .catch(function (error) {
+              console.log(error);
+              next(error)
+          })
+      
+    } 
+    else{
+
+      next();
+    }
+
+};
 
 
 /**
@@ -2470,8 +2763,6 @@ exports.getFreqCelda = function (req, res, next) {
  *
  */
 
-// TODO: REGENERAR QUERY!! NO TRAE LOS FILTROS DEL PROBABILIDAD
-
 exports.getFreqMap_M = function (req, res, next) {
 
     console.log("getFreqMap_M");
@@ -2480,6 +2771,7 @@ exports.getFreqMap_M = function (req, res, next) {
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     var N           = 6473;
+    var maxscore    = 700;
 
     // Siempre incluidos en query, nj >= 0
     var min_occ       = getParam(req, 'min_occ', 0);
@@ -2492,7 +2784,7 @@ exports.getFreqMap_M = function (req, res, next) {
     
     if (hasBios === 'true' && hasRaster === 'true' && mapa_prob === 'mapa_prob' ){
 
-        console.log("TA");
+        console.log("TM");
 
         var whereVar = "";
         
@@ -2509,6 +2801,7 @@ exports.getFreqMap_M = function (req, res, next) {
                 spid: spid,
                 N: N,
                 alpha: alpha,
+                maxscore: maxscore,
                 min_occ: min_occ,
                 where_config: whereVar,
                 where_config_raster: whereVarRaster
@@ -2525,7 +2818,7 @@ exports.getFreqMap_M = function (req, res, next) {
     }
     else if (hasBios === 'true' && mapa_prob === 'mapa_prob' ){
 
-      console.log("BA");
+      console.log("BM");
 
       var whereVar = "";
 
@@ -2541,6 +2834,7 @@ exports.getFreqMap_M = function (req, res, next) {
           spid: spid,
           N: N,
           alpha: alpha,
+          maxscore: maxscore,
           min_occ: min_occ,
           where_config: whereVar
       })
@@ -2556,7 +2850,7 @@ exports.getFreqMap_M = function (req, res, next) {
     } 
     else if (hasRaster === 'true' && mapa_prob === 'mapa_prob' ){
 
-      console.log("RaA");
+      console.log("RaM");
 
       var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
 
@@ -2564,6 +2858,7 @@ exports.getFreqMap_M = function (req, res, next) {
               spid: spid,
               N: N,
               alpha: alpha,
+              maxscore: maxscore,
               min_occ: min_occ,
               where_config_raster: whereVarRaster
           })
@@ -2709,127 +3004,6 @@ exports.getFreqMap_A = function (req, res, next) {
 
 };
 
-
-/**
- *  NO ES DESPLEGADO EL PROCESO DE VALIDACION EN EL MAPA
- * getFreqMap_V de SNIB DB, con validación
- *
- * Obtiene la suma de socre por celda para desplegar en el mapa
- *
- * @param {express.Request} req
- * @param {express.Response} res
- *
- */
-
-
-// exports.getFreqMap_V = function (req, res, next) {
-
-//     console.log("getFreqMap_V");
-
-//     var spid        = getParam(req, 'id');
-//     var tfilters    = getParam(req, 'tfilters');
-//     var alpha       = 0.01;
-//     var N           = 6473;
-
-//     // Siempre incluidos en query, nj >= 0
-//     var min_occ       = getParam(req, 'min_occ', 0);
-
-//     // variables configurables
-//     var hasBios         = getParam(req, 'hasBios');
-//     var hasRaster       = getParam(req, 'hasRaster');
-//     var discardedids    = getParam(req, 'discardedids', []);
-    
-//     if ( hasBios === 'true' && hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 ){
-
-//       console.log("TV");
-//       var whereVar = "";
-//       if(tfilters.length>0){
-//           whereVar = verb_utils.processBioFilters(tfilters, spid);
-//           whereVar = whereVar + " and epitetovalido <> '' ";
-//       }
-//       else{
-//           whereVar = " epitetovalido <> '' ";
-//       }
-//       var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
-
-//       // pool.any(queries.getFreqCelda.getFreqCeldaV, {
-//       //     spid: spid,
-//       //     N: N,
-//       //     alpha: alpha,
-//       //     min_occ: min_occ,
-//       //     where_config: whereVar,
-//       //     where_config_raster: whereVarRaster,
-//       //     arg_gridids: discardedids.toString()
-//       // })
-//       // .then(function (data) {
-//       //     res.json({'data': data})
-//       // })
-//       // .catch(function (error) {
-//       //     console.log(error);
-//       //     next(error)
-//       // })
-
-      
-//     }
-//     else if (hasBios === 'true' && discardedids != undefined && discardedids.length > 0 ){
-
-//       console.log("BV");
-
-//       var whereVar = "";
-//       if(tfilters.length > 0){
-//           whereVar = verb_utils.processBioFilters(tfilters, spid);
-//           whereVar = whereVar + " and epitetovalido <> '' ";
-//       }
-//       else{
-//           whereVar = " epitetovalido <> '' ";
-//       }
-
-//       pool.any(queries.getFreqMap.getFreqMapBioV, {
-//           spid: spid,
-//           N: N,
-//           alpha: alpha,
-//           min_occ: min_occ,
-//           where_config: whereVar,
-//           arg_gridids: discardedids.toString()
-//       })
-//       .then(function (data) {
-//         res.json({'data': data})
-//       })
-//       .catch(function (error) {
-//         console.log(error);
-//         next(error)
-//       })
-
-      
-//     } 
-//     else if (hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 ){
-
-//       console.log("RaV");
-//       var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
-
-//       // pool.any(queries.getFreqCelda.getFreqCeldaRaV, {
-//       //     spid: spid,
-//       //     N: N,
-//       //     alpha: alpha,
-//       //     min_occ: min_occ,
-//       //     where_config_raster: whereVarRaster,
-//       //     arg_gridids: discardedids.toString()
-//       // })
-//       // .then(function (data) {
-//       //     res.json({'data': data})
-//       // })
-//       // .catch(function (error) {
-//       //     console.log(error);
-//       //     next(error)
-//       // })
-      
-//     } 
-//     else{
-
-//       next();
-//     }
-
-// };
 
 
 
@@ -3089,6 +3263,129 @@ exports.getFreqMap = function (req, res, next) {
 };
 
 
+
+/**
+ *  NO ES DESPLEGADO EL PROCESO DE VALIDACION EN EL MAPA
+ * getFreqMap_V de SNIB DB, con validación
+ *
+ * Obtiene la suma de socre por celda para desplegar en el mapa
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ *
+ */
+
+
+/** 
+*
+* exports.getFreqMap_V = function (req, res, next) {
+
+//     console.log("getFreqMap_V");
+
+//     var spid        = getParam(req, 'id');
+//     var tfilters    = getParam(req, 'tfilters');
+//     var alpha       = 0.01;
+//     var N           = 6473;
+
+//     // Siempre incluidos en query, nj >= 0
+//     var min_occ       = getParam(req, 'min_occ', 0);
+
+//     // variables configurables
+//     var hasBios         = getParam(req, 'hasBios');
+//     var hasRaster       = getParam(req, 'hasRaster');
+//     var discardedids    = getParam(req, 'discardedids', []);
+    
+//     if ( hasBios === 'true' && hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 ){
+
+//       console.log("TV");
+//       var whereVar = "";
+//       if(tfilters.length>0){
+//           whereVar = verb_utils.processBioFilters(tfilters, spid);
+//           whereVar = whereVar + " and epitetovalido <> '' ";
+//       }
+//       else{
+//           whereVar = " epitetovalido <> '' ";
+//       }
+//       var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+
+//       // pool.any(queries.getFreqCelda.getFreqCeldaV, {
+//       //     spid: spid,
+//       //     N: N,
+//       //     alpha: alpha,
+//       //     min_occ: min_occ,
+//       //     where_config: whereVar,
+//       //     where_config_raster: whereVarRaster,
+//       //     arg_gridids: discardedids.toString()
+//       // })
+//       // .then(function (data) {
+//       //     res.json({'data': data})
+//       // })
+//       // .catch(function (error) {
+//       //     console.log(error);
+//       //     next(error)
+//       // })
+
+      
+//     }
+//     else if (hasBios === 'true' && discardedids != undefined && discardedids.length > 0 ){
+
+//       console.log("BV");
+
+//       var whereVar = "";
+//       if(tfilters.length > 0){
+//           whereVar = verb_utils.processBioFilters(tfilters, spid);
+//           whereVar = whereVar + " and epitetovalido <> '' ";
+//       }
+//       else{
+//           whereVar = " epitetovalido <> '' ";
+//       }
+
+//       pool.any(queries.getFreqMap.getFreqMapBioV, {
+//           spid: spid,
+//           N: N,
+//           alpha: alpha,
+//           min_occ: min_occ,
+//           where_config: whereVar,
+//           arg_gridids: discardedids.toString()
+//       })
+//       .then(function (data) {
+//         res.json({'data': data})
+//       })
+//       .catch(function (error) {
+//         console.log(error);
+//         next(error)
+//       })
+
+      
+//     } 
+//     else if (hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 ){
+
+//       console.log("RaV");
+//       var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+
+//       // pool.any(queries.getFreqCelda.getFreqCeldaRaV, {
+//       //     spid: spid,
+//       //     N: N,
+//       //     alpha: alpha,
+//       //     min_occ: min_occ,
+//       //     where_config_raster: whereVarRaster,
+//       //     arg_gridids: discardedids.toString()
+//       // })
+//       // .then(function (data) {
+//       //     res.json({'data': data})
+//       // })
+//       // .catch(function (error) {
+//       //     console.log(error);
+//       //     next(error)
+//       // })
+      
+//     } 
+//     else{
+
+//       next();
+//     }
+
+// };*/
 
 
 
@@ -3505,60 +3802,6 @@ exports.getScoreDecil = function (req, res, next) {
 
 
 
- 
-
-// exports.getGeoRel_M = function (req, res, next) {
-
-//     console.log("getGeoRel_M");
-
-//     var spid        = getParam(req, 'id');
-//     var tfilters    = getParam(req, 'tfilters');
-//     var alpha       = 0.01;
-//     var N           = 6473;
-
-//     // Siempre incluidos en query, nj >= 0
-//     var min_occ       = getParam(req, 'min_occ', 0);
-
-//     // variables configurables
-//     var hasBios         = getParam(req, 'hasBios');
-//     var hasRaster       = getParam(req, 'hasRaster');
-//     var mapa_prob       = getParam(req, 'mapa_prob');
-    
-    
-//     if (hasBios && hasRaster && mapa_prob ){
-
-//       console.log("TM");
-//       var whereVar = verb_utils.processBioFilters(tfilters, spid);
-//       var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
-
-//       // TODO:
-
-      
-//     }
-//     else if (hasBios && mapa_prob ){
-
-//       console.log("BM");
-//       var whereVar = verb_utils.processBioFilters(tfilters, spid);
-
-//       // TODO:
-
-      
-//     } 
-//     else if (hasRaster && mapa_prob ){
-
-//       console.log("RaM");
-//       var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
-
-//       // TODO:
-
-      
-//     } 
-//     else{
-
-//       next();
-//     }
-
-// };
 
 
 
