@@ -117,8 +117,9 @@ router.route('/getFreqCelda')
     // verbsCtrl.getFreqCelda_VTA,
     // verbsCtrl.getFreqCelda_VA,
     // verbsCtrl.getFreqCelda_VT,
-    // verbsCtrl.getFreqCelda_TA,
-    verbsCtrl.getFreqMap_M,
+    verbsCtrl.getFreqMap_TM,
+    verbsCtrl.getFreqMap_TA,
+    verbsCtrl.getFreqMap_M, // Mapa y apriori no existe, si se da esta selcción se manda a mapa probabilidad
     verbsCtrl.getFreqMap_A,
     // verbsCtrl.getFreqMap_V, // la validacion no es considerada en el mapa
     verbsCtrl.getFreqMap_T,
@@ -128,8 +129,9 @@ router.route('/getFreqCelda')
     // verbsCtrl.getFreqCelda_VTA,
     // verbsCtrl.getFreqCelda_VA,
     // verbsCtrl.getFreqCelda_VT,
-    // verbsCtrl.getFreqCelda_TA,
-    verbsCtrl.getFreqMap_M,
+    verbsCtrl.getFreqMap_TM,
+    verbsCtrl.getFreqMap_TA,
+    verbsCtrl.getFreqMap_M, // Mapa y apriori no existe, si se da esta selcción se manda a mapa probabilidad
     verbsCtrl.getFreqMap_A,
     // verbsCtrl.getFreqMap_V, // la validacion no es considerada en el mapa
     verbsCtrl.getFreqMap_T,

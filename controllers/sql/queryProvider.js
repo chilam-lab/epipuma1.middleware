@@ -116,9 +116,17 @@ var queryProvider = {
     getFreqMapRaA: sqlPath('getFreqMap/get_freq_map_RaA.sql'),
     getFreqMapA: sqlPath('getFreqMap/get_freq_map_A.sql'),
 
-    getFreqMapBioM: sqlPath('getFreqMap/get_freq_map_BM.sql')
-    // getFreqMapRaM: sqlPath('getFreqMap/get_freq_map_RaM.sql'),
-    // getFreqMapM: sqlPath('getFreqMap/get_freq_map_M.sql')
+    getFreqMapBioM: sqlPath('getFreqMap/get_freq_map_BM.sql'),
+    getFreqMapRaM: sqlPath('getFreqMap/get_freq_map_RaM.sql'),
+    getFreqMapM: sqlPath('getFreqMap/get_freq_map_M.sql'),
+
+    getFreqMapBioTA: sqlPath('getFreqMap/get_freq_map_BTA.sql'),
+    getFreqMapRaTA: sqlPath('getFreqMap/get_freq_map_RaTA.sql'),
+    getFreqMapTA: sqlPath('getFreqMap/get_freq_map_TA.sql'),
+
+    getFreqMapBioTM: sqlPath('getFreqMap/get_freq_map_BTM.sql'),
+    getFreqMapRaTM: sqlPath('getFreqMap/get_freq_map_RaTM.sql'),
+    getFreqMapTM: sqlPath('getFreqMap/get_freq_map_TM.sql')
 
   },
 
