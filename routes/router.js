@@ -57,7 +57,7 @@ router.route('/getUserReg')
   .post(verbsCtrl.getUserReg)
 
 
-// getGeoRel no realiza calculo utilizando apriori o mapa de probavilidad, 
+// getGeoRel no realiza calculo utilizando apriori o mapa de probabilidad, 
 // se descartan estos casos
 router.route('/getGeoRel')
   .get(
@@ -73,7 +73,7 @@ router.route('/getGeoRel')
     verbsCtrl.getGeoRel 
   )
 
-// getFreq no realiza calculo utilizando apriori o mapa de probavilidad, 
+// getFreq no realiza calculo utilizando apriori o mapa de probabilidad, 
 // se descartan estos casos
 router.route('/getFreq')
   .get(
@@ -109,6 +109,48 @@ router.route('/getFreqCelda')
     verbsCtrl.getFreqCelda_V,
     verbsCtrl.getFreqCelda_T,
     verbsCtrl.getFreqCelda 
+  )
+
+  // La validacion no es considerada en el mapa
+  // Mapa de probabilidad y apriori no existe, si se da esta selcción se manda a mapa probabilidad
+  router.route('/getFreqMap')
+  .get(
+    verbsCtrl.getFreqMap_TM,
+    verbsCtrl.getFreqMap_TA,
+    verbsCtrl.getFreqMap_M, 
+    verbsCtrl.getFreqMap_A,
+    verbsCtrl.getFreqMap_T,
+    verbsCtrl.getFreqMap    
+  )
+  .post(
+    verbsCtrl.getFreqMap_TM,
+    verbsCtrl.getFreqMap_TA,
+    verbsCtrl.getFreqMap_M, 
+    verbsCtrl.getFreqMap_A,
+    verbsCtrl.getFreqMap_T,
+    verbsCtrl.getFreqMap 
+  )
+
+  router.route('/getScoreDecil')
+  .get(
+    // verbsCtrl.getFreqCelda_VTA,
+    // verbsCtrl.getFreqCelda_VA,
+    // verbsCtrl.getFreqCelda_VT,
+    // verbsCtrl.getFreqCelda_TA,
+    // verbsCtrl.getFreqCelda_A,
+    verbsCtrl.getScoreDecil_V,
+    verbsCtrl.getScoreDecil_T,
+    verbsCtrl.getScoreDecil   
+  )
+  .post(
+    // verbsCtrl.getFreqCelda_VTA,
+    // verbsCtrl.getFreqCelda_VA,
+    // verbsCtrl.getFreqCelda_VT,
+    // verbsCtrl.getFreqCelda_TA,
+    // verbsCtrl.getFreqCelda_A,
+    verbsCtrl.getScoreDecil_V,
+    verbsCtrl.getScoreDecil_T,
+    verbsCtrl.getScoreDecil   
   )
 
 module.exports = router
