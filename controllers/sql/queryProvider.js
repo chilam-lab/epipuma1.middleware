@@ -21,25 +21,30 @@ var queryProvider = {
     getAll: sqlPath('specie/get_all.sql'),
     getByName: sqlPath('specie/get_specie_by_name.sql'),
     getFieldByName: sqlPath('specie/get_group_by_name.sql'),
-    getInfo: sqlPath('specie/get_info_specie.sql'),
-
-    getGeoRel: sqlPath('specie/get_basic_geo_rel.sql'),
-    getGeoRelBio: sqlPath('specie/get_basic_geo_rel_bio.sql'),
-    getGeoRelRaster: sqlPath('specie/get_basic_geo_rel_raster.sql'),
-    
-    getGeoRelBioV: sqlPath('specie/get_geo_rel_BV.sql'),
-    getGeoRelRasterV: sqlPath('specie/get_geo_rel_RaV.sql'),
-    getGeoRelV: sqlPath('specie/get_geo_rel_V.sql'),
-
-    getGeoRelBioT: sqlPath('specie/get_geo_rel_BT.sql'),
-    getGeoRelRasterT: sqlPath('specie/get_geo_rel_RaT.sql'),
-    getGeoRelT: sqlPath('specie/get_geo_rel_T.sql'),
-
-    getGeoRelBioVT: sqlPath('specie/get_geo_rel_BVT.sql'),
-    getGeoRelVT: sqlPath('specie/get_geo_rel_TVT.sql'),
-    getGeoRelRaVT: sqlPath('specie/get_geo_rel_RaVT.sql')
+    getInfo: sqlPath('specie/get_info_specie.sql')
 
   },
+
+  getGeoRel: {
+
+    getGeoRel: sqlPath('getGeoRel/get_basic_geo_rel.sql'),
+    getGeoRelBio: sqlPath('getGeoRel/get_basic_geo_rel_bio.sql'),
+    getGeoRelRaster: sqlPath('getGeoRel/get_basic_geo_rel_raster.sql'),
+    
+    getGeoRelBioV: sqlPath('getGeoRel/get_geo_rel_BV.sql'),
+    getGeoRelRasterV: sqlPath('getGeoRel/get_geo_rel_RaV.sql'),
+    getGeoRelV: sqlPath('getGeoRel/get_geo_rel_V.sql'),
+
+    getGeoRelBioT: sqlPath('getGeoRel/get_geo_rel_BT.sql'),
+    getGeoRelRasterT: sqlPath('getGeoRel/get_geo_rel_RaT.sql'),
+    getGeoRelT: sqlPath('getGeoRel/get_geo_rel_T.sql'),
+
+    getGeoRelBioVT: sqlPath('getGeoRel/get_geo_rel_BVT.sql'),
+    getGeoRelVT: sqlPath('getGeoRel/get_geo_rel_TVT.sql'),
+    getGeoRelRaVT: sqlPath('getGeoRel/get_geo_rel_RaVT.sql')
+
+  },
+
   getFreq: {
 
     getFreqBio: sqlPath('getFreq/get_basic_freq_bio.sql'),
@@ -57,8 +62,6 @@ var queryProvider = {
     getFreqBioVT: sqlPath('getFreq/get_freq_BVT.sql'),
     getFreqRaVT: sqlPath('getFreq/get_freq_RaVT.sql'),
     getFreqVT: sqlPath('getFreq/get_freq_TVT.sql')
-
-
 
   },
   getFreqCelda: {
@@ -132,21 +135,37 @@ var queryProvider = {
 
   getScoreDecil: {
 
-    getScoreDecilBio: sqlPath('getFreqMap/get_basic_score_decil_bio.sql')
+    getScoreDecilBio: sqlPath('getScoreDecil/get_basic_score_decil_bio.sql'),
+    getScoreDecilRaster: sqlPath('getScoreDecil/get_basic_score_decil_raster.sql'),
+    getScoreDecil: sqlPath('getScoreDecil/get_basic_score_decil.sql'),
+
+    getScoreDecilBioT: sqlPath('getScoreDecil/get_score_decil_BT.sql'),
+    getScoreDecilRaT: sqlPath('getScoreDecil/get_score_decil_RaT.sql'),
+    getScoreDecilT: sqlPath('getScoreDecil/get_score_decil_T.sql'),
+
+    getScoreDecilBioV: sqlPath('getScoreDecil/get_score_decil_BV.sql'),
+    getScoreDecilRaV: sqlPath('getScoreDecil/get_score_decil_RaV.sql'),
+    getScoreDecilV: sqlPath('getScoreDecil/get_score_decil_V.sql')
 
   },
 
   interaction: {
+
     getCount: sqlPath('interaction/count_interaction.sql')
+
   },
   snibinfo: {
+
     getCountByGroup: sqlPath('snib/entries_by_groups.sql')
+
   },
   rasters: {
+
     getClimaVariables: sqlPath('rasters/get_clima_vars.sql'),
     getTopoVariables: sqlPath('rasters/get_topo_vars.sql'),
     getClimaLayer: sqlPath('rasters/get_clima_layer.sql'),
     getTopoLayer: sqlPath('rasters/get_topo_layer.sql')
+
   }
 
 
