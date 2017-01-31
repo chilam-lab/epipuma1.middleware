@@ -166,6 +166,52 @@ var verbs_utils = {
 		}
 
 		return filterDates;
+	},
+
+	processTitleGroup: function(groupid, tfilters){
+
+
+		var title_valor = "";
+
+
+		if(groupid != undefined){
+
+			// group_item = 0 ->> root
+			if (tfilters[0].type == 4){
+				title_valor = JSON.stringify({"title":"Grupo Bio " + groupid, "type": tfilters[0].type , "group_item": tfilters[0].group_item, "is_parent":true });
+			}
+			else if (tfilters[0].type == 0){
+				title_valor = JSON.stringify({"title":"Grupo Abio " + groupid, "type": tfilters[0].type , "group_item": tfilters[0].group_item, "is_parent":true });
+				// title_valor = "Grupo Abio " + groupid;
+			}
+			else { // if (tfilters[0].type == 1){
+				title_valor = JSON.stringify({"title":"Grupo Topo " + groupid, "type": tfilters[0].type , "group_item": tfilters[0].group_item, "is_parent":true });
+				// title_valor = "Grupo Abio " + groupid;
+			}
+
+		}
+		else if (tfilters[0].value){
+
+			// console.log("title: " + tfilters[0].value);
+			// console.log("title: " + tfilters[0].label);
+			// console.log(group_item);
+
+			if (tfilters[0].type == 4){
+				title_valor = JSON.stringify({"title":tfilters[0].value, "type":tfilters[0].type , "group_item": tfilters[0].group_item, "is_parent":false });
+			}
+			else{
+				title_valor = JSON.stringify({"title":tfilters[0].label, "type":tfilters[0].type , "group_item": tfilters[0].group_item, "is_parent":false });
+			}
+
+		}
+
+		// console.log("title_valor: " + title_valor);
+		return JSON.parse(title_valor);
+
+
+
+
+
 	}
 
 }
