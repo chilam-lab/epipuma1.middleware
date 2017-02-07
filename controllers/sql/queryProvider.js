@@ -145,7 +145,27 @@ var queryProvider = {
 
     getScoreDecilBioV: sqlPath('getScoreDecil/get_score_decil_BV.sql'),
     getScoreDecilRaV: sqlPath('getScoreDecil/get_score_decil_RaV.sql'),
-    getScoreDecilV: sqlPath('getScoreDecil/get_score_decil_V.sql')
+    getScoreDecilV: sqlPath('getScoreDecil/get_score_decil_V.sql'),
+
+    getScoreDecilBioA: sqlPath('getScoreDecil/get_score_decil_BA.sql'),
+    getScoreDecilRaA: sqlPath('getScoreDecil/get_score_decil_RaA.sql'),
+    getScoreDecilA: sqlPath('getScoreDecil/get_score_decil_A.sql'),
+
+    getScoreDecilBioTA: sqlPath('getScoreDecil/get_score_decil_BTA.sql'),
+    getScoreDecilRaTA: sqlPath('getScoreDecil/get_score_decil_RaTA.sql'),
+    getScoreDecilTA: sqlPath('getScoreDecil/get_score_decil_TA.sql'),
+
+    getScoreDecilBioVA: sqlPath('getScoreDecil/get_score_decil_BVA.sql'),
+    getScoreDecilRaVA: sqlPath('getScoreDecil/get_score_decil_RaVA.sql'),
+    getScoreDecilVA: sqlPath('getScoreDecil/get_score_decil_VA.sql'),
+
+    getScoreDecilBioVT: sqlPath('getScoreDecil/get_score_decil_BVT.sql'),
+    getScoreDecilRaVT: sqlPath('getScoreDecil/get_score_decil_RaVT.sql'),
+    getScoreDecilVT: sqlPath('getScoreDecil/get_score_decil_VT.sql'),
+
+    getScoreDecilBioVTA: sqlPath('getScoreDecil/get_score_decil_BVTA.sql'),
+    getScoreDecilRaVTA: sqlPath('getScoreDecil/get_score_decil_RaVTA.sql'),
+    getScoreDecilVTA: sqlPath('getScoreDecil/get_score_decil_VTA.sql')
 
   },
 

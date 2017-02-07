@@ -3269,6 +3269,818 @@ exports.getFreqMap = function (req, res, next) {
 
 
 
+
+
+/**
+ *
+ * getScoreDecil_VTA de SNIB DB, con validacion, tiempo y apriori
+ *
+ * Obtiene el score por celda agrupado por decil
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ *
+ */
+
+
+exports.getScoreDecil_VTA = function (req, res, next) {
+
+    console.log("getScoreDecil_VTA");
+
+    var spid        = getParam(req, 'id');
+    var tfilters    = getParam(req, 'tfilters');
+    var alpha       = 0.01;
+    var N           = 6473;
+
+    // Siempre incluidos en query, nj >= 0
+    var min_occ       = getParam(req, 'min_occ', 0);
+
+    // variables configurables
+    var hasBios         = getParam(req, 'hasBios');
+    var hasRaster       = getParam(req, 'hasRaster');
+    var apriori         = getParam(req, 'apriori');
+    
+    var groupid        = getParam(req, 'groupid');
+    var title_valor = verb_utils.processTitleGroup(groupid, tfilters);
+
+    var discardedids    = getParam(req, 'discardedids', []);
+
+    // filtros por tiempo
+    var sfecha            = getParam(req, 'sfecha', false);
+    var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
+    var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
+    var discardedFilterids = getParam(req, 'discardedFilterids');
+
+
+
+    if (hasBios === 'true' && hasRaster === 'true' && apriori === 'apriori' && discardedids != undefined && discardedids.length > 0 && discardedFilterids != undefined && discardedFilterids.length > 0){
+
+      console.log("TVTA");
+
+      if(tfilters.length>0){
+        whereVar = verb_utils.processBioFilters(tfilters, spid);
+        whereVar = whereVar + " and epitetovalido <> '' ";
+      }
+      else{
+        whereVar = " epitetovalido <> '' ";
+      }
+
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      var discardedids_total = discardedFilterids.concat(discardedids); 
+      var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
+      
+      pool.any(queries.getScoreDecil.getScoreDecilVTA, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config: whereVar,
+        where_config_raster: whereVarRaster,
+        arg_gridids: discardedids.toString(),
+        arg_gridfilterids: discardedFilterids.toString(),
+        arg_gridids_total: discardedids_total.toString(),
+        filter_dates: filterDates
+      })
+      .then(function (data) {
+
+        for(i = 0; i < data.length; i++){
+          item = data[i];
+          item["title"] = title_valor;
+        }
+
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        console.log(error);
+        next(error)
+      })
+
+      
+    }
+    else if (hasBios === 'true' && apriori === 'apriori' && discardedids != undefined && discardedids.length > 0 && discardedFilterids != undefined && discardedFilterids.length > 0){
+
+      console.log("BVTA");
+      var whereVar = "";
+      
+      if(tfilters.length>0){
+        whereVar = verb_utils.processBioFilters(tfilters, spid);
+        whereVar = whereVar + " and epitetovalido <> '' ";
+      }
+      else{
+        whereVar = " epitetovalido <> '' ";
+      }
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      var discardedids_total = discardedFilterids.concat(discardedids); 
+      var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
+      
+      pool.any(queries.getScoreDecil.getScoreDecilBioVTA, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config: whereVar,
+        where_config_raster: whereVarRaster,
+        arg_gridids: discardedids.toString(),
+        arg_gridfilterids: discardedFilterids.toString(),
+        arg_gridids_total: discardedids_total.toString(),
+        filter_dates: filterDates
+      })
+      .then(function (data) {
+
+        for(i = 0; i < data.length; i++){
+          item = data[i];
+          item["title"] = title_valor;
+        }
+
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+
+        console.log(error);
+        next(error)
+
+      })
+
+      
+    } 
+    else if (hasRaster === 'true' && apriori === 'apriori' && discardedids != undefined && discardedids.length > 0 && discardedFilterids != undefined && discardedFilterids.length > 0){
+
+      console.log("RaVTA");
+
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      var discardedids_total = discardedFilterids.concat(discardedids); 
+      var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
+      
+
+      pool.any(queries.getScoreDecil.getScoreDecilRaVTA, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config_raster: whereVarRaster,
+        arg_gridids: discardedids.toString(),
+        arg_gridfilterids: discardedFilterids.toString(),
+        arg_gridids_total: discardedids_total.toString(),
+        filter_dates: filterDates
+      })
+      .then(function (data) {
+
+        for(i = 0; i < data.length; i++){
+          item = data[i];
+          item["title"] = title_valor;
+        }
+
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        console.log(error);
+        next(error)
+      })
+      
+    } 
+    else{
+
+      next();
+    }
+
+};
+
+
+
+
+
+/**
+ *
+ * getScoreDecil_VT de SNIB DB, con validacion y tiempo
+ *
+ * Obtiene el score por celda agrupado por decil
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ *
+ */
+
+
+exports.getScoreDecil_VT = function (req, res, next) {
+
+    console.log("getScoreDecil_VT");
+
+    var spid        = getParam(req, 'id');
+    var tfilters    = getParam(req, 'tfilters');
+    var alpha       = 0.01;
+    var N           = 6473;
+
+    // Siempre incluidos en query, nj >= 0
+    var min_occ       = getParam(req, 'min_occ', 0);
+
+    // variables configurables
+    var hasBios         = getParam(req, 'hasBios');
+    var hasRaster       = getParam(req, 'hasRaster');
+    
+    var groupid        = getParam(req, 'groupid');
+    var title_valor = verb_utils.processTitleGroup(groupid, tfilters);
+
+    var discardedids    = getParam(req, 'discardedids', []);
+
+    // filtros por tiempo
+    var sfecha            = getParam(req, 'sfecha', false);
+    var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
+    var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
+    var discardedFilterids = getParam(req, 'discardedFilterids');
+
+
+
+    if (hasBios === 'true' && hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 && discardedFilterids != undefined && discardedFilterids.length > 0){
+
+      console.log("TVT");
+
+      if(tfilters.length>0){
+        whereVar = verb_utils.processBioFilters(tfilters, spid);
+        whereVar = whereVar + " and epitetovalido <> '' ";
+      }
+      else{
+        whereVar = " epitetovalido <> '' ";
+      }
+
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      var discardedids_total = discardedFilterids.concat(discardedids); 
+      var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
+
+      
+      pool.any(queries.getScoreDecil.getScoreDecilVT, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config: whereVar,
+        where_config_raster: whereVarRaster,
+        arg_gridids: discardedids.toString(),
+        arg_gridfilterids: discardedFilterids.toString(),
+        arg_gridids_total: discardedids_total.toString(),
+        filter_dates: filterDates
+      })
+      .then(function (data) {
+
+        for(i = 0; i < data.length; i++){
+          item = data[i];
+          item["title"] = title_valor;
+        }
+
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        console.log(error);
+        next(error)
+      })
+
+      
+    }
+    else if (hasBios === 'true' && discardedids != undefined && discardedids.length > 0 && discardedFilterids != undefined && discardedFilterids.length > 0){
+
+      console.log("BVT");
+      var whereVar = "";
+      
+      if(tfilters.length>0){
+        whereVar = verb_utils.processBioFilters(tfilters, spid);
+        whereVar = whereVar + " and epitetovalido <> '' ";
+      }
+      else{
+        whereVar = " epitetovalido <> '' ";
+      }
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      var discardedids_total = discardedFilterids.concat(discardedids); 
+      var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
+      
+      pool.any(queries.getScoreDecil.getScoreDecilBioVT, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config: whereVar,
+        where_config_raster: whereVarRaster,
+        arg_gridids: discardedids.toString(),
+        arg_gridfilterids: discardedFilterids.toString(),
+        arg_gridids_total: discardedids_total.toString(),
+        filter_dates: filterDates
+      })
+      .then(function (data) {
+
+        for(i = 0; i < data.length; i++){
+          item = data[i];
+          item["title"] = title_valor;
+        }
+
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+
+        console.log(error);
+        next(error)
+
+      })
+
+      
+    } 
+    else if (hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 && discardedFilterids != undefined && discardedFilterids.length > 0){
+
+      console.log("RaVT");
+
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      var discardedids_total = discardedFilterids.concat(discardedids); 
+      var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
+      
+
+      pool.any(queries.getScoreDecil.getScoreDecilRaVT, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config_raster: whereVarRaster,
+        arg_gridids: discardedids.toString(),
+        arg_gridfilterids: discardedFilterids.toString(),
+        arg_gridids_total: discardedids_total.toString(),
+        filter_dates: filterDates
+      })
+      .then(function (data) {
+
+        for(i = 0; i < data.length; i++){
+          item = data[i];
+          item["title"] = title_valor;
+        }
+
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        console.log(error);
+        next(error)
+      })
+      
+    } 
+    else{
+
+      next();
+    }
+
+};
+
+
+
+/**
+ *
+ * getScoreDecil_VA de SNIB DB, con validacion y apriori
+ *
+ * Obtiene el score por celda agrupado por decil
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ *
+ */
+
+
+exports.getScoreDecil_VA = function (req, res, next) {
+
+    console.log("getScoreDecil_VA");
+
+    var spid        = getParam(req, 'id');
+    var tfilters    = getParam(req, 'tfilters');
+    var alpha       = 0.01;
+    var N           = 6473;
+
+    // Siempre incluidos en query, nj >= 0
+    var min_occ       = getParam(req, 'min_occ', 0);
+
+    // variables configurables
+    var hasBios         = getParam(req, 'hasBios');
+    var hasRaster       = getParam(req, 'hasRaster');
+    
+    var groupid        = getParam(req, 'groupid');
+    var title_valor = verb_utils.processTitleGroup(groupid, tfilters);
+
+    var apriori         = getParam(req, 'apriori');
+    var discardedids    = getParam(req, 'discardedids', []);
+
+
+    if (hasBios === 'true' && hasRaster === 'true' && apriori === 'apriori' && discardedids != undefined && discardedids.length > 0 ){
+
+      console.log("TVA");
+      if(tfilters.length>0){
+        whereVar = verb_utils.processBioFilters(tfilters, spid);
+        whereVar = whereVar + " and epitetovalido <> '' ";
+      }
+      else{
+        whereVar = " epitetovalido <> '' ";
+      }
+
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      
+      pool.any(queries.getScoreDecil.getScoreDecilVA, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config: whereVar,
+        where_config_raster: whereVarRaster,
+        arg_gridids: discardedids.toString()
+      })
+      .then(function (data) {
+
+        for(i = 0; i < data.length; i++){
+          item = data[i];
+          item["title"] = title_valor;
+        }
+
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        console.log(error);
+        next(error)
+      })
+
+      
+    }
+    else if (hasBios === 'true' && apriori === 'apriori' && discardedids != undefined && discardedids.length > 0 ){
+
+      console.log("BVA");
+      var whereVar = "";
+      
+      if(tfilters.length>0){
+        whereVar = verb_utils.processBioFilters(tfilters, spid);
+        whereVar = whereVar + " and epitetovalido <> '' ";
+      }
+      else{
+        whereVar = " epitetovalido <> '' ";
+      }
+
+      pool.any(queries.getScoreDecil.getScoreDecilBioVA, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config: whereVar,
+        arg_gridids: discardedids.toString()
+      })
+      .then(function (data) {
+
+        for(i = 0; i < data.length; i++){
+          item = data[i];
+          item["title"] = title_valor;
+        }
+
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+
+        console.log(error);
+        next(error)
+
+      })
+
+      
+    } 
+    else if (hasRaster === 'true' && apriori === 'apriori' && discardedids != undefined && discardedids.length > 0 ){
+
+      console.log("RaVA");
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+
+      pool.any(queries.getScoreDecil.getScoreDecilRaVA, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config_raster: whereVarRaster,
+        arg_gridids: discardedids.toString()
+      })
+      .then(function (data) {
+
+        for(i = 0; i < data.length; i++){
+          item = data[i];
+          item["title"] = title_valor;
+        }
+
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        console.log(error);
+        next(error)
+      })
+      
+    } 
+    else{
+
+      next();
+    }
+
+};
+
+
+/**
+ *
+ * getScoreDecil_TA de SNIB DB, con tiempo y apriori
+ *
+ * Obtiene el score por celda agrupado por decil
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ *
+ */
+
+
+exports.getScoreDecil_TA = function (req, res, next) {
+
+    console.log("getScoreDecil_TA");
+
+    var spid        = getParam(req, 'id');
+    var tfilters    = getParam(req, 'tfilters');
+    var alpha       = 0.01;
+    var N           = 6473;
+
+    // Siempre incluidos en query, nj >= 0
+    var min_occ       = getParam(req, 'min_occ', 0);
+
+    // variables configurables
+    var hasBios         = getParam(req, 'hasBios');
+    var hasRaster       = getParam(req, 'hasRaster');
+    
+    var groupid        = getParam(req, 'groupid');
+    var title_valor = verb_utils.processTitleGroup(groupid, tfilters);
+
+    var apriori         = getParam(req, 'apriori');
+
+
+    // filtros por tiempo
+    var sfecha            = getParam(req, 'sfecha', false);
+    var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
+    var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
+    var discardedFilterids = getParam(req, 'discardedFilterids');
+
+    
+    if (hasBios === 'true' && hasRaster === 'true' && apriori === 'apriori' && discardedFilterids != undefined && discardedFilterids.length > 0){
+
+      console.log("TTA");
+      if(tfilters.length>0){
+        whereVar = verb_utils.processBioFilters(tfilters, spid);
+        whereVar = whereVar + " and epitetovalido <> '' ";
+      }
+      else{
+        whereVar = " epitetovalido <> '' ";
+      }
+
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
+
+      pool.any(queries.getScoreDecil.getScoreDecilTA, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config: whereVar,
+        where_config_raster: whereVarRaster,
+        filter_dates: filterDates,
+        arg_gridids: discardedFilterids.toString()
+      })
+      .then(function (data) {
+
+        for(i = 0; i < data.length; i++){
+          item = data[i];
+          item["title"] = title_valor;
+        }
+
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        console.log(error);
+        next(error)
+      })
+
+      
+    }
+    else if (hasBios === 'true' && apriori === 'apriori' && discardedFilterids != undefined && discardedFilterids.length > 0){
+
+      console.log("BTA");
+      var whereVar = "";
+      
+      if(tfilters.length>0){
+        whereVar = verb_utils.processBioFilters(tfilters, spid);
+        whereVar = whereVar + " and epitetovalido <> '' ";
+      }
+      else{
+        whereVar = " epitetovalido <> '' ";
+      }
+
+      var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
+
+
+      pool.any(queries.getScoreDecil.getScoreDecilBioTA, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config: whereVar,
+        filter_dates: filterDates,
+        arg_gridids: discardedFilterids.toString()
+      })
+      .then(function (data) {
+
+        for(i = 0; i < data.length; i++){
+          item = data[i];
+          item["title"] = title_valor;
+        }
+
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+
+        console.log(error);
+        next(error)
+
+      })
+
+      
+    } 
+    else if (hasRaster === 'true' && apriori === 'apriori' && discardedFilterids != undefined && discardedFilterids.length > 0){
+
+      console.log("RaTA");
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
+      
+
+      pool.any(queries.getScoreDecil.getScoreDecilRaTA, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config_raster: whereVarRaster,
+        filter_dates: filterDates,
+        arg_gridids: discardedFilterids.toString()
+      })
+      .then(function (data) {
+
+        for(i = 0; i < data.length; i++){
+          item = data[i];
+          item["title"] = title_valor;
+        }
+
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        console.log(error);
+        next(error)
+      })
+      
+    } 
+    else{
+
+      next();
+    }
+
+};
+
+
+
+/**
+ *
+ * getScoreDecil_A de SNIB DB, con validación
+ *
+ * Obtiene el score por celda agrupado por decil
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ *
+ */
+
+
+exports.getScoreDecil_A = function (req, res, next) {
+
+    console.log("getScoreDecil_A");
+
+    var spid        = getParam(req, 'id');
+    var tfilters    = getParam(req, 'tfilters');
+    var alpha       = 0.01;
+    var N           = 6473;
+
+    // Siempre incluidos en query, nj >= 0
+    var min_occ       = getParam(req, 'min_occ', 0);
+
+    // variables configurables
+    var hasBios         = getParam(req, 'hasBios');
+    var hasRaster       = getParam(req, 'hasRaster');
+    var apriori         = getParam(req, 'apriori');
+
+    var groupid        = getParam(req, 'groupid');
+    var title_valor = verb_utils.processTitleGroup(groupid, tfilters);
+
+
+    if (hasBios === 'true' && hasRaster === 'true' && apriori === 'apriori' ){
+
+      console.log("TA");
+      if(tfilters.length>0){
+        whereVar = verb_utils.processBioFilters(tfilters, spid);
+        whereVar = whereVar + " and epitetovalido <> '' ";
+      }
+      else{
+        whereVar = " epitetovalido <> '' ";
+      }
+
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+
+      pool.any(queries.getScoreDecil.getScoreDecilA, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config: whereVar,
+        where_config_raster: whereVarRaster
+      })
+      .then(function (data) {
+
+        for(i = 0; i < data.length; i++){
+          item = data[i];
+          item["title"] = title_valor;
+        }
+
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        console.log(error);
+        next(error)
+      })
+
+      
+    }
+    else if (hasBios === 'true' && apriori === 'apriori' ){
+
+      console.log("BA");
+      var whereVar = "";
+      
+      if(tfilters.length>0){
+        whereVar = verb_utils.processBioFilters(tfilters, spid);
+        whereVar = whereVar + " and epitetovalido <> '' ";
+      }
+      else{
+        whereVar = " epitetovalido <> '' ";
+      }
+
+
+      pool.any(queries.getScoreDecil.getScoreDecilBioA, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config: whereVar
+      })
+      .then(function (data) {
+
+        for(i = 0; i < data.length; i++){
+          item = data[i];
+          item["title"] = title_valor;
+        }
+
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        console.log(error);
+        next(error)
+      })
+
+      
+    } 
+    else if (hasRaster === 'true' && apriori === 'apriori' ){
+
+      console.log("RaA");
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      
+
+      pool.any(queries.getScoreDecil.getScoreDecilRaA, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config_raster: whereVarRaster
+      })
+      .then(function (data) {
+
+        for(i = 0; i < data.length; i++){
+          item = data[i];
+          item["title"] = title_valor;
+        }
+
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        console.log(error);
+        next(error)
+      })
+      
+    } 
+    else{
+
+      next();
+    }
+
+};
+
+
+
 /**
  *
  * getScoreDecil_V de SNIB DB, con validación
@@ -3305,7 +4117,7 @@ exports.getScoreDecil_V = function (req, res, next) {
     
     if ( hasBios === 'true' && hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 ){
 
-      console.log("T");
+      console.log("TV");
       if(tfilters.length>0){
         whereVar = verb_utils.processBioFilters(tfilters, spid);
         whereVar = whereVar + " and epitetovalido <> '' ";
@@ -3343,7 +4155,7 @@ exports.getScoreDecil_V = function (req, res, next) {
     }
     else if (hasBios === 'true' && discardedids != undefined && discardedids.length > 0 ){
 
-      console.log("B");
+      console.log("BV");
       var whereVar = "";
       
       if(tfilters.length>0){
@@ -3381,7 +4193,7 @@ exports.getScoreDecil_V = function (req, res, next) {
     } 
     else if (hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 ){
 
-      console.log("Ra");
+      console.log("RaV");
       var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
       
 
@@ -3457,7 +4269,7 @@ exports.getScoreDecil_T = function (req, res, next) {
     
     if (hasBios === "true" && hasRaster === "true" && discardedFilterids != undefined && discardedFilterids.length > 0){
 
-      console.log("T");
+      console.log("TT");
       if(tfilters.length>0){
         whereVar = verb_utils.processBioFilters(tfilters, spid);
         whereVar = whereVar + " and epitetovalido <> '' ";
@@ -3497,7 +4309,7 @@ exports.getScoreDecil_T = function (req, res, next) {
     }
     else if (hasBios === 'true' && discardedFilterids != undefined && discardedFilterids.length > 0){
 
-      console.log("B");
+      console.log("BT");
       var whereVar = "";
       
       if(tfilters.length>0){
@@ -3537,7 +4349,7 @@ exports.getScoreDecil_T = function (req, res, next) {
     } 
     else if (hasRaster === 'true' && discardedFilterids != undefined && discardedFilterids.length > 0){
 
-      console.log("Ra");
+      console.log("RaT");
       var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
       var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
 
@@ -3700,170 +4512,6 @@ exports.getScoreDecil = function (req, res, next) {
 
 };
 
-
-
-
-
-// *************** Funciones por ser definidas 
-
-// /**
-//  *
-//  * getGeoRel_VAT de SNIB DB, validacion, apriori y tiempo
-//  *
-//  * Obtiene epsilon y score con especie objetivo y conjunto de variables bioticas y raster, (Contempla todas las variables)
-//  *
-//  * @param {express.Request} req
-//  * @param {express.Response} res
-//  *
-//  */
-
-// exports.getGeoRel_VAT = function (req, res, next) {
-
-//     console.log("getGeoRel_VAT");
-//     console.log(req.body);
-
-//     var spid        = getParam(req, 'id');
-//     var tfilters    = getParam(req, 'tfilters');
-//     var alpha       = 0.01;
-//     var N           = 6473;
-//     var discardedFilterids;
-
-//     // Siempre incluidos en query, nj >= 0
-//     var min_occ       = getParam(req, 'min_occ', 0);
-    
-
-//     // variables configurables
-//     var hasBios         = getParam(req, 'hasBios');
-//     var hasRaster       = getParam(req, 'hasRaster');
-//     var discardedids    = getParam(req, 'discardedids', []);
-//     var apriori         = getParam(req, 'apriori');
-//     // var mapa_prob       = getParam(req, 'mapa_prob');
-
-//     // filtros por tiempo
-//     var sfecha        = getParam(req, 'sfecha', false);
-//     var fecha_incio   = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
-//     var fecha_fin     = moment(getParam(req, 'lim_sup', Date.now()), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
-
-//     // Si se realiza filtro de tiempo existen celdas descartadas por filtro
-//     if(sfecha || 
-//         fecha_incio != '1500' || 
-//           fecha_fin != moment(Date.now(), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')){
-
-//       discardedFilterids = getParam(req, 'discardedFilterids', []);
-//     }
-
-
-//     if (hasBios && hasRaster && discardedids.length > 0 && apriori && discardedFilterids.length > 0){
-
-//       console.log("TVAT");
-//       var whereVar = verb_utils.processBioFilters(tfilters, spid);
-//       var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
-
-//       // TODO:
-
-      
-//     }
-//     else if (hasBios && discardedids.length > 0 && apriori && discardedFilterids.length > 0){
-
-//       console.log("BVAT");
-//       var whereVar = verb_utils.processBioFilters(tfilters, spid);
-
-//       // TODO:
-
-      
-//     } 
-//     else if (hasRaster && discardedids.length > 0 && apriori && discardedFilterids.length > 0){
-
-//       console.log("RaVAT");
-//       var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
-
-//       // TODO:
-
-      
-//     } 
-//     else{
-
-//       next();
-//     }
-
-// };
-
-
-
-
-
-
-
-
-// exports.getGeoRel_VMT = function (req, res, next) {
-
-//     console.log("getGeoRel_VMT");
-
-//     var spid        = getParam(req, 'id');
-//     var tfilters    = getParam(req, 'tfilters');
-//     var alpha       = 0.01;
-//     var N           = 6473;
-//     var discardedFilterids;
-
-//     // Siempre incluidos en query, nj >= 0
-//     var min_occ       = getParam(req, 'min_occ', 0);
-    
-
-//     // variables configurables
-//     var hasBios         = getParam(req, 'hasBios');
-//     var hasRaster       = getParam(req, 'hasRaster');
-//     var discardedids    = getParam(req, 'discardedids', []);
-//     // var apriori         = getParam(req, 'apriori');
-//     var mapa_prob       = getParam(req, 'mapa_prob');
-
-//     // filtros por tiempo
-//     var sfecha        = getParam(req, 'sfecha', false);
-//     var fecha_incio   = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
-//     var fecha_fin     = moment(getParam(req, 'lim_sup', Date.now()), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
-
-//     // Si se realiza filtro de tiempo existen celdas descartadas por filtro
-//     if(sfecha || 
-//         fecha_incio != '1500' || 
-//           fecha_fin != moment(Date.now(), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')){
-
-//       discardedFilterids = getParam(req, 'discardedFilterids',[]);
-//     }
-
-
-//     if (hasBios && hasRaster && discardedids.length > 0 && mapa_prob && discardedFilterids.length > 0){
-
-//       console.log("TVAT");
-//       var whereVar = verb_utils.processBioFilters(tfilters, spid);
-//       var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
-
-//       // TODO:
-
-      
-//     }
-//     else if (hasBios && discardedids.length > 0 && mapa_prob && discardedFilterids.length > 0){
-
-//       console.log("BVAT");
-//       var whereVar = verb_utils.processBioFilters(tfilters, spid);
-
-//       // TODO:
-
-      
-//     } 
-//     else if (hasRaster && discardedids.length > 0 && mapa_prob && discardedFilterids.length > 0){
-
-//       console.log("RaVAT");
-//       var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
-
-//       // TODO:
-
-      
-//     } 
-//     else{
-
-//       next();
-//     }
-
-// };
 
 
 

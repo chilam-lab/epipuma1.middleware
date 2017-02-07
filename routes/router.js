@@ -133,21 +133,21 @@ router.route('/getFreqCelda')
 
   router.route('/getScoreDecil')
   .get(
-    // verbsCtrl.getFreqCelda_VTA,
-    // verbsCtrl.getFreqCelda_VA,
-    // verbsCtrl.getFreqCelda_VT,
-    // verbsCtrl.getFreqCelda_TA,
-    // verbsCtrl.getFreqCelda_A,
+    verbsCtrl.getScoreDecil_VTA,
+    verbsCtrl.getScoreDecil_VT,
+    verbsCtrl.getScoreDecil_VA,
+    verbsCtrl.getScoreDecil_TA,
+    verbsCtrl.getScoreDecil_A,
     verbsCtrl.getScoreDecil_V,
     verbsCtrl.getScoreDecil_T,
     verbsCtrl.getScoreDecil   
   )
   .post(
-    // verbsCtrl.getFreqCelda_VTA,
-    // verbsCtrl.getFreqCelda_VA,
-    // verbsCtrl.getFreqCelda_VT,
-    // verbsCtrl.getFreqCelda_TA,
-    // verbsCtrl.getFreqCelda_A,
+    verbsCtrl.getScoreDecil_VTA,
+    verbsCtrl.getScoreDecil_VT,
+    verbsCtrl.getScoreDecil_VA,
+    verbsCtrl.getScoreDecil_TA,
+    verbsCtrl.getScoreDecil_A,
     verbsCtrl.getScoreDecil_V,
     verbsCtrl.getScoreDecil_T,
     verbsCtrl.getScoreDecil   
