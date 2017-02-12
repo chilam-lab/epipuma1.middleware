@@ -186,6 +186,15 @@ var queryProvider = {
     getClimaLayer: sqlPath('rasters/get_clima_layer.sql'),
     getTopoLayer: sqlPath('rasters/get_topo_layer.sql')
 
+  },
+
+  getUtilGeoportal: {
+
+    getGridSpeciesBio: sqlPath('getUtilGeoportal/get_basic_grid_species_bio.sql'),
+    getGridSpeciesRaster: sqlPath('getUtilGeoportal/get_basic_grid_species_raster.sql'),
+    getGridSpecies: sqlPath('getUtilGeoportal/get_basic_grid_species.sql')
+    
+
   }
 
 
