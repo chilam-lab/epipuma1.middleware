@@ -56,8 +56,8 @@ gridspddiscarded as (
 	from snib 
 	join first_rawdata 
 	on snib.spid = first_rawdata.spid
-	-- $<filter_dates:raw>
-	where (snib.especievalida = '' or snib.especievalida is null)  or ((EXTRACT(EPOCH FROM to_timestamp(fechacolecta, 'YYYY-MM--DD')) * 1000) < 631173600000 or (EXTRACT(EPOCH FROM to_timestamp(fechacolecta, 'YYYY-MM--DD')) * 1000) > 1577858400000 )  and (fechacolecta <> '' and fechacolecta is not null) 
+	$<filter_dates:raw>
+	--where (snib.especievalida = '' or snib.especievalida is null)  or ((EXTRACT(EPOCH FROM to_timestamp(fechacolecta, 'YYYY-MM--DD')) * 1000) < 631173600000 or (EXTRACT(EPOCH FROM to_timestamp(fechacolecta, 'YYYY-MM--DD')) * 1000) > 1577858400000 )  and (fechacolecta <> '' and fechacolecta is not null) 
 	group by snib.spid 
 ), 
 gridObj as ( 
@@ -138,29 +138,14 @@ rawdata as(
 			dis_ni as ni, 
 			dis_nj as nj, 
 			dis_n as n,
-			case when dis_nij > dis_nj
-			then 
-				CASE WHEN dis_nj <> 0 then round(cast(get_epsilon(dis_nj::integer, dis_nj::integer, dis_ni::integer, dis_n::integer) as numeric),2) else 0 end
-			when dis_nij > dis_ni
-			then 
-				CASE WHEN dis_nj <> 0 then round(cast(get_epsilon(dis_nj::integer, dis_ni::integer, dis_ni::integer, dis_n::integer) as numeric),2) else 0 end
-			else
-				CASE WHEN dis_nj <> 0 then round(cast(get_epsilon(dis_nj::integer, dis_nij::integer, dis_ni::integer, dis_n::integer) as numeric),2) else 0 end
-			end 
-			as epsilon,
-			case when dis_nij > dis_nj
-			then
-				CASE WHEN dis_nj <> 0 then ln( get_score($<alpha>, dis_nj::integer, dis_nj::integer, dis_ni::integer, dis_n::integer) ) else 0 end
-			when dis_nij > dis_ni
-			then
-				CASE WHEN dis_nj <> 0 then ln( get_score($<alpha>, dis_nj::integer, dis_ni::integer, dis_ni::integer, dis_n::integer) ) else 0 end
-			else
-				CASE WHEN dis_nj <> 0 then ln( get_score($<alpha>, dis_nj::integer, dis_nij::integer, dis_ni::integer, dis_n::integer) ) else 0 end
-			end 
+			round(cast(get_epsilon(dis_nj::integer, dis_nij::integer, dis_ni::integer, dis_n::integer) as numeric),2) 
+			as epsilon,			
+			round( cast(  ln(get_score($<alpha>, cast(dis_nj as integer), cast(dis_nij as integer), cast(dis_ni as integer), cast(dis_n as integer) ) )as numeric), 2) 
 			as score
 	from getval_n_nj  
 	join getval_ni_nij 
 	on getval_n_nj.spid = getval_ni_nij.spid  
+	where dis_nij <= dis_nj and dis_nij <= dis_ni and dis_nj <> 0
 	order by score
 	--order by nij desc, nj desc
 ), 
@@ -177,6 +162,10 @@ prenorm as (
 				) as spid, 
 				gridid 
 		from gsptierra 
+		-- SE RESTAN LAS CELDA-ESPECIE QUE SON DESCARTDAS POR TIEMPO
+		except 
+		select spid, unnest(gridspddiscarded.arg_discarded) as gridid
+		from gridspddiscarded
 	) as gsp 
 	INNER JOIN rawdata 
 	ON rawdata.spid = gsp.spid  

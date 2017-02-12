@@ -4266,6 +4266,9 @@ exports.getScoreDecil_T = function (req, res, next) {
     var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
     var discardedFilterids = getParam(req, 'discardedFilterids');
 
+    // console.log(fecha_incio);
+    // console.log(fecha_fin);
+
     
     if (hasBios === "true" && hasRaster === "true" && discardedFilterids != undefined && discardedFilterids.length > 0){
 
@@ -4497,6 +4500,140 @@ exports.getScoreDecil = function (req, res, next) {
           item["title"] = title_valor;
         }
 
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        console.log(error);
+        next(error)
+      })
+      
+    } 
+    else{
+
+      next();
+    }
+
+};
+
+/*********************************************************************/
+
+
+
+
+
+
+/**
+ *
+ * getGridSpecies de SNIB DB, con validacion, tiempo y apriori
+ *
+ * Obtiene el score por celda agrupado por decil
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ *
+ */
+
+ exports.getGridSpecies = function (req, res, next) {
+
+    console.log("getGridSpecies");
+
+
+    var spid        = getParam(req, 'id');
+    var tfilters    = getParam(req, 'tfilters');
+    var alpha       = 0.01;
+    var N           = 6473;
+
+    // Siempre incluidos en query, nj >= 0
+    var min_occ       = getParam(req, 'min_occ', 0);
+
+    // variables configurables
+    var hasBios         = getParam(req, 'hasBios');
+    var hasRaster       = getParam(req, 'hasRaster');
+
+    var idGrid       = getParam(req, 'idGrid');
+
+    // console.log(idGrid);
+    // var groupid        = getParam(req, 'groupid');
+    // var title_valor = verb_utils.processTitleGroup(groupid, tfilters);
+    
+    if (hasBios === 'true' && hasRaster === 'true'){
+
+      console.log("T");
+      if(tfilters.length>0){
+        whereVar = verb_utils.processBioFilters(tfilters, spid);
+        whereVar = whereVar + " and epitetovalido <> '' ";
+      }
+      else{
+        whereVar = " epitetovalido <> '' ";
+      }
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+
+      pool.any(queries.getUtilGeoportal.getGridSpecies, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config: whereVar,
+        where_config_raster: whereVarRaster,
+        idGrid: idGrid
+      })
+      .then(function (data) {
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        console.log(error);
+        next(error)
+      })
+
+      
+    }
+    else if (hasBios === 'true'){
+
+      console.log("B");
+
+      if(tfilters.length>0){
+        whereVar = verb_utils.processBioFilters(tfilters, spid);
+        whereVar = whereVar + " and epitetovalido <> '' ";
+      }
+      else{
+        whereVar = " epitetovalido <> '' ";
+      }
+      // var whereVar = verb_utils.processBioFilters(tfilters, spid);
+      // console.log(whereVar);
+
+      pool.any(queries.getUtilGeoportal.getGridSpeciesBio, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config: whereVar,
+        idGrid: idGrid
+      })
+      .then(function (data) {
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        console.log(error);
+        next(error)
+      })
+
+      
+    } 
+    else if (hasRaster === 'true'){
+
+      console.log("Ra");
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      // console.log(whereVarRaster);
+
+      pool.any(queries.getUtilGeoportal.getGridSpeciesRaster, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config_raster: whereVarRaster,
+        idGrid: idGrid
+      })
+      .then(function (data) {
         res.json({'data': data})
       })
       .catch(function (error) {

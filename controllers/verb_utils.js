@@ -165,6 +165,8 @@ var verbs_utils = {
 			}
 		}
 
+		// console.log(filterDates);
+
 		return filterDates;
 	},
 

@@ -153,4 +153,12 @@ router.route('/getFreqCelda')
     verbsCtrl.getScoreDecil   
   )
 
+  router.route("/getUtilGeoportal")
+  .get(
+      verbsCtrl.getGridSpecies
+  )
+  .post(
+    verbsCtrl.getGridSpecies
+  )
+
 module.exports = router
