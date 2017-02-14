@@ -98,12 +98,12 @@ rawdata as(
 			as epsilon,
 			case when dis_nij > dis_nj
 			then
-				CASE WHEN dis_nj <> 0 then ln( get_score($<alpha>, dis_nj::integer, dis_nj::integer, dis_ni::integer, dis_n::integer) ) else 0 end
+				CASE WHEN dis_nj <> 0 then round( cast(  ln(get_score($<alpha>, cast(dis_nj as integer), cast(dis_nij as integer), cast(dis_ni as integer), cast(dis_n as integer) ) )as numeric), 2) else 0 end
 			when dis_nij > dis_ni
 			then
-				CASE WHEN dis_nj <> 0 then ln( get_score($<alpha>, dis_nj::integer, dis_ni::integer, dis_ni::integer, dis_n::integer) ) else 0 end
+				CASE WHEN dis_nj <> 0 then round( cast(  ln(get_score($<alpha>, cast(dis_nj as integer), cast(dis_nij as integer), cast(dis_ni as integer), cast(dis_n as integer) ) )as numeric), 2) else 0 end
 			else
-				CASE WHEN dis_nj <> 0 then ln( get_score($<alpha>, dis_nj::integer, dis_nij::integer, dis_ni::integer, dis_n::integer) ) else 0 end
+				CASE WHEN dis_nj <> 0 then round( cast(  ln(get_score($<alpha>, cast(dis_nj as integer), cast(dis_nij as integer), cast(dis_ni as integer), cast(dis_n as integer) ) )as numeric), 2) else 0 end
 			end 
 			as score
 	from getval_n_nj  
