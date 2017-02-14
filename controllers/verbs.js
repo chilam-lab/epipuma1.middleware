@@ -4547,10 +4547,10 @@ exports.getScoreDecil = function (req, res, next) {
     var min_occ       = getParam(req, 'min_occ', 0);
 
     // variables configurables
-    var hasBios         = getParam(req, 'hasBios');
-    var hasRaster       = getParam(req, 'hasRaster');
+    var hasBios     = getParam(req, 'hasBios');
+    var hasRaster   = getParam(req, 'hasRaster');
 
-    var idGrid       = getParam(req, 'idGrid');
+    var idGrid      = getParam(req, 'idGrid');
 
     // console.log(idGrid);
     // var groupid        = getParam(req, 'groupid');
