@@ -147,7 +147,7 @@ var verbs_utils = {
 			filterDates += "where (snib.especievalida = '' or snib.especievalida is null)  or ";
 
 			if(lim_inf){
-				filterDates +=  "((EXTRACT(EPOCH FROM to_timestamp(fechacolecta, 'YYYY-MM--DD')) * 1000) < " + lim_inf + " " +
+				filterDates +=  "(( EXTRACT( EPOCH FROM to_timestamp(fechacolecta, 'YYYY-MM--DD') ) * 1000 ) < " + lim_inf + " " +
 							"or " + 
 							"(EXTRACT(EPOCH FROM to_timestamp(fechacolecta, 'YYYY-MM--DD')) * 1000) > " + lim_sup + " ) ";
 				if(sfecha === "false"){
