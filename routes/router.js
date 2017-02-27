@@ -155,9 +155,19 @@ router.route('/getFreqCelda')
 
   router.route("/getUtilGeoportal")
   .get(
+      // verbsCtrl.getGridSpecies_TM,
+      // verbsCtrl.getGridSpecies_TA,
+      verbsCtrl.getGridSpecies_M, 
+      verbsCtrl.getGridSpecies_A,
+      verbsCtrl.getGridSpecies_T,
       verbsCtrl.getGridSpecies
   )
   .post(
+    // verbsCtrl.getGridSpecies_TM,
+    // verbsCtrl.getGridSpecies_TA,
+    verbsCtrl.getGridSpecies_M, 
+    verbsCtrl.getGridSpecies_A,
+    verbsCtrl.getGridSpecies_T,
     verbsCtrl.getGridSpecies
   )
 
