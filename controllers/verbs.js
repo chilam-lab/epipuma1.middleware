@@ -4526,6 +4526,293 @@ exports.getScoreDecil = function (req, res, next) {
 
 
 
+
+/**
+ *
+ * getGridSpecies_TM de SNIB DB, mapa prob con tiempo
+ *
+ * Obtiene el score por celda agrupado por decil
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ *
+ */
+
+ exports.getGridSpecies_TM = function (req, res, next) {
+
+    console.log("getGridSpecies_TM");
+
+    var spid        = getParam(req, 'id');
+    var tfilters    = getParam(req, 'tfilters');
+    var alpha       = 0.01;
+    var N           = 6473;
+
+    // Siempre incluidos en query, nj >= 0
+    var min_occ       = getParam(req, 'min_occ', 0);
+
+    // variables configurables
+    var hasBios     = getParam(req, 'hasBios');
+    var hasRaster   = getParam(req, 'hasRaster');
+    var idGrid      = getParam(req, 'idGrid');
+
+    var mapa_prob       = getParam(req, 'mapa_prob');
+
+    
+    // filtros por tiempo
+    var sfecha            = getParam(req, 'sfecha', false);
+    var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
+    var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
+    var discardedFilterids = getParam(req, 'discardedFilterids');
+
+    
+    if (hasBios === 'true' && hasRaster === 'true' && mapa_prob === 'mapa_prob' && discardedFilterids != undefined && discardedFilterids.length > 0){
+
+      console.log("T");
+
+      var whereVar = "";
+      if(tfilters.length>0){
+        whereVar = verb_utils.processBioFilters(tfilters, spid);
+        whereVar = whereVar + " and epitetovalido <> '' ";
+      }
+      else{
+        whereVar = " epitetovalido <> '' ";
+      }
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
+
+      pool.any(queries.getUtilGeoportal.getGridSpeciesTM, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config: whereVar,
+        where_config_raster: whereVarRaster,
+        idGrid: idGrid,
+        filter_dates: filterDates,
+        arg_gridids: discardedFilterids.toString()
+      })
+      .then(function (data) {
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        console.log(error);
+        next(error)
+      })
+
+      
+    }
+    else if (hasBios === 'true' && mapa_prob === 'mapa_prob' && discardedFilterids != undefined && discardedFilterids.length > 0){
+
+      console.log("B");
+
+      var whereVar = "";
+      if(tfilters.length>0){
+        whereVar = verb_utils.processBioFilters(tfilters, spid);
+        whereVar = whereVar + " and epitetovalido <> '' ";
+      }
+      else{
+        whereVar = " epitetovalido <> '' ";
+      }
+      var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
+      
+      pool.any(queries.getUtilGeoportal.getGridSpeciesBioTM, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config: whereVar,
+        idGrid: idGrid,
+        filter_dates: filterDates,
+        arg_gridids: discardedFilterids.toString()
+      })
+      .then(function (data) {
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        console.log(error);
+        next(error)
+      })
+
+      
+    } 
+    else if (hasRaster === 'true' && mapa_prob === 'mapa_prob' && discardedFilterids != undefined && discardedFilterids.length > 0){
+
+      console.log("Ra");
+
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
+
+      pool.any(queries.getUtilGeoportal.getGridSpeciesRaTM, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config_raster: whereVarRaster,
+        idGrid: idGrid,
+        filter_dates: filterDates,
+        arg_gridids: discardedFilterids.toString()
+      })
+      .then(function (data) {
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        console.log(error);
+        next(error)
+      })
+      
+    } 
+    else{
+
+      next();
+    }
+
+};
+
+
+/**
+ *
+ * getGridSpecies_TA de SNIB DB, con tiempo
+ *
+ * Obtiene el score por celda agrupado por decil
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ *
+ */
+
+ exports.getGridSpecies_TA = function (req, res, next) {
+
+    console.log("getGridSpecies_TA");
+
+    var spid        = getParam(req, 'id');
+    var tfilters    = getParam(req, 'tfilters');
+    var alpha       = 0.01;
+    var N           = 6473;
+
+    // Siempre incluidos en query, nj >= 0
+    var min_occ       = getParam(req, 'min_occ', 0);
+
+    // variables configurables
+    var hasBios     = getParam(req, 'hasBios');
+    var hasRaster   = getParam(req, 'hasRaster');
+    var idGrid      = getParam(req, 'idGrid');
+
+    var apriori     = getParam(req, 'apriori');
+
+    // filtros por tiempo
+    var sfecha            = getParam(req, 'sfecha', false);
+    var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
+    var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
+    var discardedFilterids = getParam(req, 'discardedFilterids');
+
+    
+    if (hasBios === 'true' && hasRaster === 'true' && apriori === 'apriori' && discardedFilterids != undefined && discardedFilterids.length > 0){
+
+      console.log("T");
+
+      var whereVar = "";
+      if(tfilters.length>0){
+        whereVar = verb_utils.processBioFilters(tfilters, spid);
+        whereVar = whereVar + " and epitetovalido <> '' ";
+      }
+      else{
+        whereVar = " epitetovalido <> '' ";
+      }
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
+
+      pool.any(queries.getUtilGeoportal.getGridSpeciesTA, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config: whereVar,
+        where_config_raster: whereVarRaster,
+        idGrid: idGrid,
+        filter_dates: filterDates,
+        arg_gridids: discardedFilterids.toString()
+      })
+      .then(function (data) {
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        console.log(error);
+        next(error)
+      })
+
+      
+    }
+    else if (hasBios === 'true' && apriori === 'apriori' && discardedFilterids != undefined && discardedFilterids.length > 0){
+
+      console.log("B");
+
+      var whereVar = "";
+      if(tfilters.length>0){
+        whereVar = verb_utils.processBioFilters(tfilters, spid);
+        whereVar = whereVar + " and epitetovalido <> '' ";
+      }
+      else{
+        whereVar = " epitetovalido <> '' ";
+      }
+      var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
+      
+      pool.any(queries.getUtilGeoportal.getGridSpeciesBioTA, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config: whereVar,
+        idGrid: idGrid,
+        filter_dates: filterDates,
+        arg_gridids: discardedFilterids.toString()
+      })
+      .then(function (data) {
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        console.log(error);
+        next(error)
+      })
+
+      
+    } 
+    else if (hasRaster === 'true' && apriori === 'apriori' && discardedFilterids != undefined && discardedFilterids.length > 0){
+
+      console.log("Ra");
+
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      var filterDates = verb_utils.processDateRecords(fecha_incio, fecha_fin, sfecha);
+
+      pool.any(queries.getUtilGeoportal.getGridSpeciesRaTA, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config_raster: whereVarRaster,
+        idGrid: idGrid,
+        filter_dates: filterDates,
+        arg_gridids: discardedFilterids.toString()
+      })
+      .then(function (data) {
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        console.log(error);
+        next(error)
+      })
+      
+    } 
+    else{
+
+      next();
+    }
+
+};
+
+
+
+
+
 /**
  *
  * getGridSpecies_M de SNIB DB, con mapa prob
