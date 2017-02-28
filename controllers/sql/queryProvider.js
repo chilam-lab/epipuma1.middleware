@@ -204,7 +204,16 @@ var queryProvider = {
 
     getGridSpeciesBioM: sqlPath('getUtilGeoportal/get_grid_species_BM.sql'),
     getGridSpeciesRaM: sqlPath('getUtilGeoportal/get_grid_species_RaM.sql'),
-    getGridSpeciesM: sqlPath('getUtilGeoportal/get_grid_species_M.sql')
+    getGridSpeciesM: sqlPath('getUtilGeoportal/get_grid_species_M.sql'),
+
+    getGridSpeciesBioTA: sqlPath('getUtilGeoportal/get_grid_species_BTA.sql'),
+    getGridSpeciesRaTA: sqlPath('getUtilGeoportal/get_grid_species_RaTA.sql'),
+    getGridSpeciesTA: sqlPath('getUtilGeoportal/get_grid_species_TA.sql'),
+
+    getGridSpeciesBioTM: sqlPath('getUtilGeoportal/get_grid_species_BTM.sql'),
+    getGridSpeciesRaTM: sqlPath('getUtilGeoportal/get_grid_species_RaTM.sql'),
+    getGridSpeciesTM: sqlPath('getUtilGeoportal/get_grid_species_TM.sql')
+
     
 
   }
