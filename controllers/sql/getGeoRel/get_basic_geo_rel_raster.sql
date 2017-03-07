@@ -41,6 +41,8 @@ select
 	CASE WHEN cal.nj <> 0 then round( cast(  ln(get_score($<alpha>, cast(cal.nj as integer), cast(sum(cal.Nij) as integer), cast(cel.occ as integer), cast($<N> as integer) ) )as numeric), 2) else 0 end as score*/ 
 from sp_occ as cel, 
 ( 
+
+
 	select 
 		cast('' as text) as reinovalido,
 		cast('' as text) as phylumdivisionvalido,
@@ -79,6 +81,9 @@ from sp_occ as cel,
 	-- layer = "bio01"
 	$<where_config_raster:raw>
 	order by spid 
+	
+	
+	
 ) as cal 
 where cel.spid =  $<spid>  
 group by 
