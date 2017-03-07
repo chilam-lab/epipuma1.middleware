@@ -882,7 +882,6 @@ exports.getGeoRel = function (req, res, next) {
         console.log(error);
         next(error)
       })
-
       
     } 
     else if (hasRaster === 'true'){
@@ -5337,6 +5336,450 @@ exports.getScoreDecil = function (req, res, next) {
 
 };
 
+
+
+
+
+
+
+/************************************************************* VERBOS PARA EL NUEVO SERVIDOR */
+
+
+/**
+ *
+ * Servidor Niche: getGrididsNiche
+ *
+ * Obtiene las variables bioticas que coinciden a una cadena dada
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ *
+ */
+
+
+exports.getGrididsNiche = function (req, res, next) {
+
+  
+  if(getParam(req, 'qtype') === "getGridids"){
+
+      console.log(getParam(req, 'qtype'));
+      console.log("getGrididsNiche");
+
+      pool.any(queries.getGrididsNiche.getGridids, {})
+          .then(function (data) {
+            // console.log(data);
+            res.json({'data': data})
+      })
+          .catch(function (error) {
+            console.log(error);
+            next(error)
+      })
+
+  }
+  else{
+      next();
+  }
+
+  
+
+};
+
+
+/**
+ *
+ * Servidor Niche: getSpeciesNiche
+ *
+ * Obtiene las variables bioticas que coinciden a una cadena dada
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ *
+ */
+
+
+exports.getSpeciesNiche = function (req, res, next) {
+
+  if(getParam(req, 'qtype') === "getSpecies"){
+
+      console.log(getParam(req, 'qtype'));
+      console.log("getSpeciesNiche");
+
+      var spid              = getParam(req, 'id');
+      var sfecha            = getParam(req, 'sfecha', false);
+      var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
+      var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
+
+      // console.log(spid);
+      // console.log(sfecha);
+      // console.log(fecha_incio.format('YYYY'));
+      // console.log(fecha_fin.format('YYYY'));
+      // console.log(moment().format('YYYY-MM-DD'));
+
+
+      if( (parseInt(fecha_incio.format('YYYY')) != 1500 || parseInt(fecha_fin.format('YYYY')) != parseInt(moment().format('YYYY')) ) && sfecha === "false"){
+        console.log("rango y sin fecha");
+        pool.any(queries.getSpeciesNiche.getSpeciesSDR, {
+                spid: spid,
+                lim_inf: fecha_incio.format('YYYY-MM-DD'),
+                lim_sup: fecha_fin.format('YYYY-MM-DD')
+          })
+          .then(function (data) {
+                // console.log(data);
+                res.json({'data': data})
+          })
+          .catch(function (error) {
+                console.log(error);
+                next(error)
+          })
+      }
+      else if( parseInt(fecha_incio.format('YYYY')) == 1500 && parseInt(fecha_fin.format('YYYY')) == parseInt(moment().format('YYYY'))  && sfecha === "false"){
+          console.log("solo sin fecha");
+          pool.any(queries.getSpeciesNiche.getSpeciesSD, {
+                spid: spid
+          })
+          .then(function (data) {
+                // console.log(data);
+                res.json({'data': data})
+          })
+          .catch(function (error) {
+                console.log(error);
+                next(error)
+          })
+      }
+      else if( parseInt(fecha_incio.format('YYYY')) != 1500 || parseInt(fecha_fin.format('YYYY')) != parseInt(moment().format('YYYY')) ){
+          console.log("solo rango");
+          pool.any(queries.getSpeciesNiche.getSpeciesR, {
+                spid: spid,
+                lim_inf: fecha_incio.format('YYYY-MM-DD'),
+                lim_sup: fecha_fin.format('YYYY-MM-DD')
+          })
+          .then(function (data) {
+                // console.log(data);
+                res.json({'data': data})
+          })
+          .catch(function (error) {
+                console.log(error);
+                next(error)
+          })
+      }
+      else{
+          console.log("sin filtros");
+          pool.any(queries.getSpeciesNiche.getSpecies, {
+                spid: spid
+          })
+          .then(function (data) {
+                // console.log(data);
+                res.json({'data': data})
+          })
+          .catch(function (error) {
+                console.log(error);
+                next(error)
+          })
+      }
+
+
+      
+
+
+      
+      
+      
+      
+
+  }
+  else{
+
+    next();
+
+  }
+      
+
+  
+
+};
+
+/**
+ *
+ * Servidor Niche: getEntListNiche
+ *
+ * Obtiene las variables bioticas que coinciden a una cadena dada
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ *
+ */
+
+
+exports.getEntListNiche = function (req, res, next) {
+
+  
+  if(getParam(req, 'qtype') === "getEntList"){
+
+      console.log(getParam(req, 'qtype'));
+      console.log("getEntListNiche");
+
+      var str     = getParam(req, 'searchStr');
+      var source  = parseInt(getParam(req, 'source'));
+      var nivel  = getParam(req, 'nivel');
+      var limit   = 15; // numero de resultados a desplegar
+       var columnas = verb_utils.getColumns(source, nivel);
+
+      console.log(nivel);
+      console.log(str);
+      console.log(columnas);
+
+      pool.any(queries.getEntListNiche.getEntList, {
+            str: str,
+            columnas: columnas,
+            nivel: nivel
+      })
+          .then(function (data) {
+            // console.log(data);
+            res.json({'data': data})
+      })
+          .catch(function (error) {
+            console.log(error);
+            next(error)
+      })
+
+  }
+  else{
+      next();
+  }
+
+  
+
+};
+
+
+/*********************************************************************/
+
+
+
+
+/**
+ *
+ * Servidor Niche: getGeoRelNiche_V de SNIB DB, con validación
+ *
+ * Obtiene epsilon y score de la relación de especie objetivo y conjunto de variables bioticas y raster.
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ *
+ */
+
+exports.getGeoRelNiche_V = function (req, res, next) {
+
+    console.log("getGeoRelNiche_V");
+
+    var spid        = getParam(req, 'id');
+    var tfilters    = getParam(req, 'tfilters');
+    var alpha       = 0.01;
+    var N           = 14707; // Verificar N, que se esta contemplando
+
+    // Siempre incluidos en query, nj >= 0
+    var min_occ       = getParam(req, 'min_occ', 0);
+
+    // variables configurables
+    var hasBios         = getParam(req, 'hasBios');
+    var hasRaster       = getParam(req, 'hasRaster');
+    var discardedids    = getParam(req, 'discardedids', []);
+
+    // console.log(discardedids);
+
+    
+    if ( hasBios === 'true' && hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 ){
+
+      console.log("V");
+      var whereVar = verb_utils.processBioFilters(tfilters, spid);
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+
+      pool.any(queries.getGeoRelNiche.getGeoRelV, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config: whereVar,
+        where_config_raster: whereVarRaster,
+        arg_gridids: discardedids.toString()
+      })
+      .then(function (data) {
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        console.log(error);
+        next(error)
+      })
+
+      
+    }
+    else if (hasBios === 'true' && discardedids != undefined && discardedids.length > 0 ){
+
+      console.log("B");
+      var whereVar = verb_utils.processBioFilters(tfilters, spid);
+      // console.log(whereVar);
+
+      pool.any(queries.getGeoRelNiche.getGeoRelBioV, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config: whereVar,
+        arg_gridids: discardedids.toString()
+      })
+      .then(function (data) {
+        // console.log(data.length);
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        console.log(error);
+        next(error)
+      })
+      
+    } 
+    else if (hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 ){
+
+      console.log("Ra");
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      // console.log(whereVarRaster);
+
+      pool.any(queries.getGeoRelNiche.getGeoRelRaV, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config_raster: whereVarRaster,
+        arg_gridids: discardedids.toString()
+      })
+      .then(function (data) {
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        console.log(error);
+        next(error)
+      })
+
+      
+    } 
+    else{
+
+      next();
+    }
+
+};
+
+
+
+
+
+/**
+ *
+ * Servidor Niche: getGeoRelNiche de SNIB DB, sin filtros
+ *
+ * Obtiene epsilon y score de la relación de especie objetivo y conjunto de variables bioticas y raster.
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ *
+ */
+
+exports.getGeoRelNiche = function (req, res, next) {
+
+    console.log("getGeoRelNiche");
+
+    var spid        = getParam(req, 'id');
+    var tfilters    = getParam(req, 'tfilters');
+    var alpha       = 0.01;
+    var N           = 14707; // Verificar N, que se esta contemplando
+
+    // Siempre incluidos en query, nj >= 0
+    var min_occ       = getParam(req, 'min_occ', 0);
+
+    // variables configurables
+    var hasBios         = getParam(req, 'hasBios');
+    var hasRaster       = getParam(req, 'hasRaster');
+
+    // console.log(hasBios);
+    // console.log(hasRaster);
+    
+    
+    if (hasBios === 'true' && hasRaster === 'true' ){
+
+      console.log("T");
+      var whereVar = verb_utils.processBioFilters(tfilters, spid);
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+
+      pool.any(queries.getGeoRelNiche.getGeoRel, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config: whereVar,
+        where_config_raster: whereVarRaster
+      })
+      .then(function (data) {
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        console.log(error);
+        next(error)
+      })
+
+      
+    }
+    else if (hasBios === 'true'){
+
+      console.log("B");
+      var whereVar = verb_utils.processBioFilters(tfilters, spid);
+
+      console.log(whereVar);
+
+      pool.any(queries.getGeoRelNiche.getGeoRelBio, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config: whereVar
+      })
+      .then(function (data) {
+        // console.log(data);
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        console.log(error);
+        next(error)
+      })
+      
+    } 
+    else if (hasRaster === 'true'){
+
+      console.log("Ra");
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      // console.log(whereVarRaster);
+
+      pool.any(queries.getGeoRelNiche.getGeoRelRaster, {
+        spid: spid,
+        N: N,
+        alpha: alpha,
+        min_occ: min_occ,
+        where_config_raster: whereVarRaster
+      })
+      .then(function (data) {
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        console.log(error);
+        next(error)
+      })
+
+      
+    } 
+    else{
+
+      next();
+    }
+
+};
 
 
 
