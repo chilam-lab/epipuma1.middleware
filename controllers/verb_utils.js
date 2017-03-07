@@ -210,9 +210,16 @@ var verbs_utils = {
 		// console.log("title_valor: " + title_valor);
 		return JSON.parse(title_valor);
 
+	},
 
+	getColumns: function(issource, nivel){
 
-
+		if(issource == 1){
+			return "spid, reinovalido, phylumdivisionvalido, clasevalida, ordenvalido, familiavalida, generovalido, especievalidabusqueda";
+		}
+		else{
+			return "distinct " + nivel + " ";
+		}
 
 	}
 

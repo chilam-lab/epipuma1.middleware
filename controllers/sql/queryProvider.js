@@ -216,6 +216,50 @@ var queryProvider = {
 
     
 
+  },
+
+
+  /************************************************************* VERBOS PARA EL NUEVO SERVIDOR */
+
+  getSpeciesNiche: {
+
+    getSpecies: sqlPath('niche/especie/getSpecies.sql'),
+    getSpeciesSD: sqlPath('niche/especie/getSpecies_sdate.sql'),
+    getSpeciesR: sqlPath('niche/especie/getSpecies_range.sql'),
+    getSpeciesSDR: sqlPath('niche/especie/getSpecies_sdr.sql')
+    
+  },
+
+  getEntListNiche: {
+
+    getEntList: sqlPath('niche/especie/getEntList.sql')
+    
+  },
+
+  getGrididsNiche: {
+
+    getGridids: sqlPath('niche/especie/getGridids.sql')
+    
+  },
+
+  getGeoRelNiche: {
+
+    getGeoRel: sqlPath('niche/getGeoRel/get_geo_rel.sql'),
+    getGeoRelBio: sqlPath('niche/getGeoRel/get_geo_rel_bio.sql'),
+    getGeoRelRaster: sqlPath('niche/getGeoRel/get_geo_rel_raster.sql'),
+    
+    getGeoRelBioV: sqlPath('niche/getGeoRel/get_geo_rel_BV.sql'),
+    getGeoRelRaV: sqlPath('niche/getGeoRel/get_geo_rel_RaV.sql'),
+    getGeoRelV: sqlPath('niche/getGeoRel/get_geo_rel_V.sql')
+
+    // getGeoRelBioT: sqlPath('getGeoRel/get_geo_rel_BT.sql'),
+    // getGeoRelRasterT: sqlPath('getGeoRel/get_geo_rel_RaT.sql'),
+    // getGeoRelT: sqlPath('getGeoRel/get_geo_rel_T.sql'),
+
+    // getGeoRelBioVT: sqlPath('getGeoRel/get_geo_rel_BVT.sql'),
+    // getGeoRelVT: sqlPath('getGeoRel/get_geo_rel_TVT.sql'),
+    // getGeoRelRaVT: sqlPath('getGeoRel/get_geo_rel_RaVT.sql')
+
   }
 
 
