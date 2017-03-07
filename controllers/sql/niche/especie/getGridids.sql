@@ -1,0 +1,1 @@
+SELECT gridid FROM grid_20km WHERE intset(19) && countries;

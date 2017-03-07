@@ -171,4 +171,35 @@ router.route('/getFreqCelda')
     verbsCtrl.getGridSpecies
   )
 
+  /************************************************************* VERBOS PARA EL NUEVO SERVIDOR */
+
+  router.route('/niche/especie')
+  .get(
+    verbsCtrl.getGrididsNiche,  
+    verbsCtrl.getSpeciesNiche,  
+    verbsCtrl.getEntListNiche  
+  )
+  .post(
+    verbsCtrl.getGrididsNiche,  
+    verbsCtrl.getSpeciesNiche,
+    verbsCtrl.getEntListNiche
+  )
+
+  
+  router.route('/niche/getGeoRel')
+    .get(
+      // verbsCtrl.getGeoRel_VT,
+      verbsCtrl.getGeoRelNiche_V,
+      // verbsCtrl.getGeoRel_T,
+      verbsCtrl.getGeoRelNiche    
+    )
+    .post(
+      // verbsCtrl.getGeoRel_VT,
+      verbsCtrl.getGeoRelNiche_V,
+      // verbsCtrl.getGeoRel_T,
+      verbsCtrl.getGeoRelNiche
+    )
+
+
+
 module.exports = router

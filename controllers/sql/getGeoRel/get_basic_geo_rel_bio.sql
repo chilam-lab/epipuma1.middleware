@@ -30,6 +30,7 @@ select
 	
 from sp_occ as cel, 
 ( 
+
 	select 
 		reinovalido,phylumdivisionvalido,clasevalida,ordenvalido,familiavalida,generovalido,epitetovalido, 
 		(generovalido || ' ' || epitetovalido)  as label, 
@@ -70,6 +71,7 @@ from sp_occ as cel,
 	order by spid 
 ) as cal
 where cel.spid =  $<spid> 
+-- AND nij = <$min_occ>
 group by 	--cal.spid, 
 			cal.reinovalido, cal.phylumdivisionvalido, cal.clasevalida,ordenvalido, cal.familiavalida, cal.generovalido, epitetovalido,  
 			-- cal.label,  
