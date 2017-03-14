@@ -89,6 +89,7 @@ router.route('/getFreq')
     verbsCtrl.getFreq 
   )
 
+
 router.route('/getFreqCelda')
   .get(
     verbsCtrl.getFreqCelda_VTA,
@@ -131,6 +132,7 @@ router.route('/getFreqCelda')
     verbsCtrl.getFreqMap 
   )
 
+  
   router.route('/getScoreDecil')
   .get(
     verbsCtrl.getScoreDecil_VTA,
@@ -171,34 +173,132 @@ router.route('/getFreqCelda')
     verbsCtrl.getGridSpecies
   )
 
-  /************************************************************* VERBOS PARA EL NUEVO SERVIDOR */
 
-  router.route('/niche/especie')
-  .get(
-    verbsCtrl.getGrididsNiche,  
-    verbsCtrl.getSpeciesNiche,  
-    verbsCtrl.getEntListNiche  
-  )
-  .post(
-    verbsCtrl.getGrididsNiche,  
-    verbsCtrl.getSpeciesNiche,
-    verbsCtrl.getEntListNiche
-  )
+/**************************************************************************************************************************/
+/**************************************************************************************************************************/
+/**************************************************************************************************************************/
+/************************************************************* VERBOS PARA EL NUEVO SERVIDOR ******************************/
 
-  
+
   router.route('/niche/getGeoRel')
     .get(
-      // verbsCtrl.getGeoRel_VT,
+      verbsCtrl.getGeoRelNiche_VT,
       verbsCtrl.getGeoRelNiche_V,
-      // verbsCtrl.getGeoRel_T,
+      verbsCtrl.getGeoRelNiche_T,
       verbsCtrl.getGeoRelNiche    
     )
     .post(
-      // verbsCtrl.getGeoRel_VT,
+      verbsCtrl.getGeoRelNiche_VT,
       verbsCtrl.getGeoRelNiche_V,
-      // verbsCtrl.getGeoRel_T,
+      verbsCtrl.getGeoRelNiche_T,
       verbsCtrl.getGeoRelNiche
     )
+
+  
+
+  router.route('/niche/getFreq')
+    .get(
+      verbsCtrl.getFreqNiche_VT,
+      verbsCtrl.getFreqNiche_V,
+      verbsCtrl.getFreqNiche_T,
+      verbsCtrl.getFreqNiche    
+    )
+    .post(
+      verbsCtrl.getFreqNiche_VT,
+      verbsCtrl.getFreqNiche_V,
+      verbsCtrl.getFreqNiche_T,
+      verbsCtrl.getFreqNiche 
+    )
+
+  
+  router.route('/niche/getFreqMap')
+    .get(
+      // verbsCtrl.getFreqMap_TM,
+      // verbsCtrl.getFreqMap_TA,
+      verbsCtrl.getFreqMapNiche_M,
+      verbsCtrl.getFreqMapNiche_A,
+      verbsCtrl.getFreqMapNiche_T,
+      verbsCtrl.getFreqMapNiche    
+    )
+    .post(
+      // verbsCtrl.getFreqMap_TM,
+      // verbsCtrl.getFreqMap_TA,
+      verbsCtrl.getFreqMapNiche_M,
+      verbsCtrl.getFreqMapNiche_A,
+      verbsCtrl.getFreqMapNiche_T,
+      verbsCtrl.getFreqMapNiche 
+    )
+
+
+
+  router.route('/niche/getFreqCelda')
+    .get(
+      // verbsCtrl.getFreqCelda_VTA,
+      // verbsCtrl.getFreqCelda_VA,
+      // verbsCtrl.getFreqCelda_VT,
+      // verbsCtrl.getFreqCelda_TA,
+      verbsCtrl.getFreqCeldaNiche_A,
+      verbsCtrl.getFreqCeldaNiche_V,
+      verbsCtrl.getFreqCeldaNiche_T,
+      verbsCtrl.getFreqCeldaNiche    
+    )
+    .post(
+      // verbsCtrl.getFreqCelda_VTA,
+      // verbsCtrl.getFreqCelda_VA,
+      // verbsCtrl.getFreqCelda_VT,
+      // verbsCtrl.getFreqCelda_TA,
+      verbsCtrl.getFreqCeldaNiche_A,
+      verbsCtrl.getFreqCeldaNiche_V,
+      verbsCtrl.getFreqCeldaNiche_T,
+      verbsCtrl.getFreqCeldaNiche 
+    )
+
+
+  router.route('/niche/getScoreDecil')
+    .get(
+      // verbsCtrl.getScoreDecil_VTA,
+      // verbsCtrl.getScoreDecil_VT,
+      // verbsCtrl.getScoreDecil_VA,
+      // verbsCtrl.getScoreDecil_TA,
+      // verbsCtrl.getScoreDecil_A,
+      verbsCtrl.getScoreDecilNiche_V,
+      verbsCtrl.getScoreDecilNiche_T,
+      verbsCtrl.getScoreDecilNiche   
+    )
+    .post(
+      // verbsCtrl.getScoreDecil_VTA,
+      // verbsCtrl.getScoreDecil_VT,
+      // verbsCtrl.getScoreDecil_VA,
+      // verbsCtrl.getScoreDecil_TA,
+      // verbsCtrl.getScoreDecil_A,
+      verbsCtrl.getScoreDecilNiche_V,
+      verbsCtrl.getScoreDecilNiche_T,
+      verbsCtrl.getScoreDecilNiche   
+    )
+
+
+
+  router.route('/niche/especie')
+    .get(
+      verbsCtrl.getCountGridid,  
+      verbsCtrl.getGrididsNiche,  
+      verbsCtrl.getSpeciesNiche,  
+      verbsCtrl.getEntListNiche  
+    )
+    .post(
+      verbsCtrl.getCountGridid,  
+      verbsCtrl.getGrididsNiche,  
+      verbsCtrl.getSpeciesNiche,
+      verbsCtrl.getEntListNiche
+    )
+
+  
+  
+
+
+
+
+  
 
 
 

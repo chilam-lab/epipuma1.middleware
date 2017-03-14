@@ -22,37 +22,67 @@ target AS (
 			cast('' as text) familiavalida,
 			cells 
 	FROM raster_bins 
-	$<where_config_raster:raw>	 
+	$<where_config_raster:raw>	
 ),
+-- el arreglo contiene las celdas donde la especie objetivo debe ser descartada 
 filter_ni AS (
-		SELECT 	spid, 
-				icount( cells - array[$<arg_gridids:raw>] ) as ni,
-				cells - array[$<arg_gridids:raw>] as cells
-				--icount( cells & array[ 573324, 581126, 507259 ] ) as d_ni
-		FROM source 
-), 
-filter_nj AS(
-		select 	spid, 
-				icount(cells - array[$<arg_gridids:raw>]) as nj,
-				cells - array[$<arg_gridids:raw>] as cells
-				--icount(cells & array[ 573324, 581126, 507259 ] ) AS d_nj
-		FROM target 
+	SELECT 	spid,
+			array_agg(distinct gridid) as ids_ni,
+			icount(array_agg(distinct gridid)) as ni
+	FROM snib 
+			where --snib.fechacolecta <> ''
+			/*((
+			cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)>= cast( 2000  as integer)
+			and 
+			cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)<= cast( 2020  as integer)
+			)
+			or snib.fechacolecta = '')*/
+			(case when $<caso> = 1 
+				  then 
+				  		fechacolecta <> '' 
+				  when $<caso> = 2 
+				  then
+				  		cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)>= cast( $<lim_inf>  as integer)
+						and 
+						cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)<= cast( $<lim_sup>  as integer)
+				  else
+				  		((
+						cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)>= cast( $<lim_inf>  as integer)
+						and 
+						cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)<= cast( $<lim_sup>  as integer)
+						)
+						or snib.fechacolecta = '')
+			end) = true
+			--and spid = 33553
+			and spid = $<spid>
+			--and especievalidabusqueda <> ''
+	group by spid
+),
+filter_nj AS (
+		-- climaticas no tienen tiempo para ser descartadas
+		SELECT 	
+			spid, 
+			cells as ids_nj,
+			icount(cells) as nj
+		FROM target
 ),
 filter_nij AS(
 		select 	filter_nj.spid, 
-				icount(filter_ni.cells & filter_nj.cells ) AS niyj
-				--icount(source.cells & target.cells & array[573324, 581126, 507259 ]) AS d_niyj
-		FROM filter_ni, filter_nj
+				icount(filter_ni.ids_ni & filter_nj.ids_nj) AS niyj
+		FROM filter_ni, filter_nj --, source, target
+		--where filter_ni.spid = source.spid
+		--and filter_nj.spid = target.spid
 ),
 counts AS (
 	SELECT 	--source.spid as source_spid,
+			target.spid,
 			target.generovalido,
 			target.especievalidabusqueda,			
-			filter_nij.niyj, 
-			filter_ni.ni,
 			filter_nj.nj,
-			$<N> - icount(array[$<arg_gridids:raw>]) as n,
-			--14707 - icount(array[573324, 581126, 507259 ]) as n,
+			filter_ni.ni,
+			filter_nij.niyj,
+			$<N> as n,
+			--14707 as n,
 			target.reinovalido,
 			target.phylumdivisionvalido,
 			target.clasevalida,
@@ -62,11 +92,13 @@ counts AS (
 	where 	
 			target.spid <> $<spid>
 			--target.spid <> 33553
-			and source.spid = filter_ni.spid
+			--and source.spid = filter_ni.spid
 			and target.spid = filter_nj.spid
 			and target.spid = filter_nij.spid
 			and filter_nj.nj > $<min_occ:raw>
-			--and (icount(target.cells) - filter_nj.d_nj) > 0
+			--and filter_nj.nj > 0
+			--and filter_nj.nj < filter_nij.niyj
+			order by spid
 ) 
 SELECT 	--counts.source_spid,
 		--counts.source,

@@ -25,7 +25,11 @@ target AS (
 	union
 	
 	SELECT  cast('' as text) generovalido,
-			(label || ' ' || tag) especievalidabusqueda,
+			case when type = 1 then
+			layer
+			else
+			(label || ' ' || tag) 
+			end as especievalidabusqueda,
 			bid as spid,
 			cast('' as text) reinovalido,
 			cast('' as text) phylumdivisionvalido,
