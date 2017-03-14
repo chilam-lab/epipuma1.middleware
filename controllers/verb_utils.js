@@ -1,3 +1,5 @@
+var moment = require('moment')
+
 var verbs_utils = {
 
 	processBioFilters: function(tfilters_total, spid){
@@ -144,7 +146,7 @@ var verbs_utils = {
 
 		if(lim_inf || sfecha === "false"){
 
-			filterDates += "where (snib.especievalida = '' or snib.especievalida is null)  or ";
+			filterDates += "where (snib.especievalidabusqueda = '' or snib.especievalidabusqueda is null)  or ";
 
 			if(lim_inf){
 				filterDates +=  "(( EXTRACT( EPOCH FROM to_timestamp(fechacolecta, 'YYYY-MM--DD') ) * 1000 ) < " + lim_inf + " " +
@@ -220,6 +222,34 @@ var verbs_utils = {
 		else{
 			return "distinct " + nivel + " ";
 		}
+
+	},
+
+	getTimeCase: function(fecha_incio, fecha_fin, sfecha){
+
+		// console.log(fecha_incio.format('YYYY'));
+		// console.log(fecha_fin.format('YYYY'));
+		// console.log(sfecha);
+
+		var caso;
+
+	    if( (parseInt(fecha_incio.format('YYYY')) != 1500 || parseInt(fecha_fin.format('YYYY')) != parseInt(moment().format('YYYY')) ) && sfecha === "false"){
+	        console.log("rango y sin fecha");
+	        caso = 2;
+	    }
+	    else if( parseInt(fecha_incio.format('YYYY')) == 1500 && parseInt(fecha_fin.format('YYYY')) == parseInt(moment().format('YYYY'))  && sfecha === "false"){
+	        console.log("solo sin fecha");
+	        caso = 1;
+	    }
+	    else if( parseInt(fecha_incio.format('YYYY')) != 1500 || parseInt(fecha_fin.format('YYYY')) != parseInt(moment().format('YYYY')) ){
+	        console.log("solo rango");
+	        caso = 3;
+	    }
+	   
+
+	    // console.log(caso);
+	    
+	    return caso;
 
 	}
 
