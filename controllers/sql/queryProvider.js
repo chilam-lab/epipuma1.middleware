@@ -219,7 +219,11 @@ var queryProvider = {
   },
 
 
-  /************************************************************* VERBOS PARA EL NUEVO SERVIDOR */
+/**************************************************************************************************************************/
+/**************************************************************************************************************************/
+/**************************************************************************************************************************/
+/************************************************************* VERBOS PARA EL NUEVO SERVIDOR ******************************/
+
 
   getSpeciesNiche: {
 
@@ -242,6 +246,12 @@ var queryProvider = {
     
   },
 
+  getCountGridid: {
+
+    getCount: sqlPath('niche/especie/getCountGridid.sql')
+    
+  },
+
   getGeoRelNiche: {
 
     getGeoRel: sqlPath('niche/getGeoRel/get_geo_rel.sql'),
@@ -250,17 +260,141 @@ var queryProvider = {
     
     getGeoRelBioV: sqlPath('niche/getGeoRel/get_geo_rel_BV.sql'),
     getGeoRelRaV: sqlPath('niche/getGeoRel/get_geo_rel_RaV.sql'),
-    getGeoRelV: sqlPath('niche/getGeoRel/get_geo_rel_V.sql')
+    getGeoRelV: sqlPath('niche/getGeoRel/get_geo_rel_V.sql'),
 
-    // getGeoRelBioT: sqlPath('getGeoRel/get_geo_rel_BT.sql'),
-    // getGeoRelRasterT: sqlPath('getGeoRel/get_geo_rel_RaT.sql'),
-    // getGeoRelT: sqlPath('getGeoRel/get_geo_rel_T.sql'),
+    getGeoRelBioT: sqlPath('niche/getGeoRel/get_geo_rel_BT.sql'),
+    getGeoRelRaT: sqlPath('niche/getGeoRel/get_geo_rel_RaT.sql'),
+    getGeoRelT: sqlPath('niche/getGeoRel/get_geo_rel_T.sql'),
 
-    // getGeoRelBioVT: sqlPath('getGeoRel/get_geo_rel_BVT.sql'),
-    // getGeoRelVT: sqlPath('getGeoRel/get_geo_rel_TVT.sql'),
-    // getGeoRelRaVT: sqlPath('getGeoRel/get_geo_rel_RaVT.sql')
+    getGeoRelBioVT: sqlPath('niche/getGeoRel/get_geo_rel_BVT.sql'),
+    getGeoRelVT: sqlPath('niche/getGeoRel/get_geo_rel_VT.sql'),
+    getGeoRelRaVT: sqlPath('niche/getGeoRel/get_geo_rel_RaVT.sql')
 
-  }
+  },
+
+  getFreqNiche: {
+
+    getFreqBio: sqlPath('niche/getFreq/get_freq_bio.sql'),
+    getFreqRaster: sqlPath('niche/getFreq/get_freq_raster.sql'),
+    getFreq: sqlPath('niche/getFreq/get_freq.sql'),
+
+    getFreqBioV: sqlPath('niche/getFreq/get_freq_BV.sql'),
+    getFreqRasterV: sqlPath('niche/getFreq/get_freq_RaV.sql'),
+    getFreqV: sqlPath('niche/getFreq/get_freq_V.sql'),
+
+    getFreqBioT: sqlPath('niche/getFreq/get_freq_BT.sql'),
+    getFreqRasterT: sqlPath('niche/getFreq/get_freq_RaT.sql'),
+    getFreqT: sqlPath('niche/getFreq/get_freq_T.sql'),
+
+    getFreqBioVT: sqlPath('niche/getFreq/get_freq_BVT.sql'),
+    getFreqRaVT: sqlPath('niche/getFreq/get_freq_RaVT.sql'),
+    getFreqVT: sqlPath('niche/getFreq/get_freq_VT.sql')
+
+  },
+
+  getFreqMapNiche: {
+
+    getFreqMapBio: sqlPath('niche/getFreqMap/get_freq_map_bio.sql'),
+    getFreqMapRaster: sqlPath('niche/getFreqMap/get_freq_map_raster.sql'),
+    getFreqMap: sqlPath('niche/getFreqMap/get_freq_map.sql'),
+
+    getFreqMapBioT: sqlPath('niche/getFreqMap/get_freq_map_BT.sql'),
+    getFreqMapRaT: sqlPath('niche/getFreqMap/get_freq_map_RaT.sql'),
+    getFreqMapT: sqlPath('niche/getFreqMap/get_freq_map_T.sql'),
+
+    getFreqMapBioA: sqlPath('niche/getFreqMap/get_freq_map_BA.sql'),
+    getFreqMapRaA: sqlPath('niche/getFreqMap/get_freq_map_RaA.sql'),
+    getFreqMapA: sqlPath('niche/getFreqMap/get_freq_map_A.sql'),
+
+    getFreqMapBioM: sqlPath('niche/getFreqMap/get_freq_map_BM.sql'),
+    getFreqMapRaM: sqlPath('niche/getFreqMap/get_freq_map_RaM.sql'),
+    getFreqMapM: sqlPath('niche/getFreqMap/get_freq_map_M.sql')
+
+    // getFreqMapBioTA: sqlPath('niche/getFreqMap/get_freq_map_BTA.sql'),
+    // getFreqMapRaTA: sqlPath('niche/getFreqMap/get_freq_map_RaTA.sql'),
+    // getFreqMapTA: sqlPath('niche/getFreqMap/get_freq_map_TA.sql'),
+
+    // getFreqMapBioTM: sqlPath('niche/getFreqMap/get_freq_map_BTM.sql'),
+    // getFreqMapRaTM: sqlPath('niche/getFreqMap/get_freq_map_RaTM.sql'),
+    // getFreqMapTM: sqlPath('niche/getFreqMap/get_freq_map_TM.sql')
+
+  },
+
+  getFreqCeldaNiche: {
+
+    getFreqCeldaBio: sqlPath('niche/getFreqCelda/get_freq_celda_bio.sql'),
+    getFreqCeldaRaster: sqlPath('niche/getFreqCelda/get_freq_celda_raster.sql'),
+    getFreqCelda: sqlPath('niche/getFreqCelda/get_freq_celda.sql'),
+
+    getFreqCeldaBioT: sqlPath('niche/getFreqCelda/get_freq_celda_BT.sql'),
+    getFreqCeldaRaT: sqlPath('niche/getFreqCelda/get_freq_celda_RaT.sql'),
+    getFreqCeldaT: sqlPath('niche/getFreqCelda/get_freq_celda_T.sql'),
+
+    getFreqCeldaBioV: sqlPath('niche/getFreqCelda/get_freq_celda_BV.sql'),
+    getFreqCeldaRaV: sqlPath('niche/getFreqCelda/get_freq_celda_RaV.sql'),
+    getFreqCeldaV: sqlPath('niche/getFreqCelda/get_freq_celda_V.sql'),
+
+    getFreqCeldaBioA: sqlPath('niche/getFreqCelda/get_freq_celda_BA.sql'),
+    getFreqCeldaRaA: sqlPath('niche/getFreqCelda/get_freq_celda_RaA.sql'),
+    getFreqCeldaA: sqlPath('niche/getFreqCelda/get_freq_celda_A.sql')
+
+    // getFreqCeldaBioTA: sqlPath('getFreqCelda/get_freq_celda_BTA.sql'),
+    // getFreqCeldaRaTA: sqlPath('getFreqCelda/get_freq_celda_RaTA.sql'),
+    // getFreqCeldaTA: sqlPath('getFreqCelda/get_freq_celda_TA.sql'),
+
+    // // por desarrollar
+    // getFreqCeldaBioVT: sqlPath('getFreqCelda/get_freq_celda_BVT.sql'),
+    // getFreqCeldaRaVT: sqlPath('getFreqCelda/get_freq_celda_RaVT.sql'),
+    // getFreqCeldaVT: sqlPath('getFreqCelda/get_freq_celda_VT.sql'),
+
+    // getFreqCeldaBioVA: sqlPath('getFreqCelda/get_freq_celda_BVA.sql'),
+    // getFreqCeldaRaVA: sqlPath('getFreqCelda/get_freq_celda_RaVA.sql'),
+    // getFreqCeldaVA: sqlPath('getFreqCelda/get_freq_celda_VA.sql'),
+
+
+    // getFreqCeldaBioVTA: sqlPath('getFreqCelda/get_freq_celda_BVTA.sql'),
+    // getFreqCeldaRaVTA: sqlPath('getFreqCelda/get_freq_celda_RaVTA.sql'),
+    // getFreqCeldaVTA: sqlPath('getFreqCelda/get_freq_celda_VTA.sql')
+
+  },
+
+
+  getScoreDecilNiche: {
+
+    getScoreDecilBio: sqlPath('niche/getScoreDecil/get_score_decil_bio.sql'),
+    getScoreDecilRaster: sqlPath('niche/getScoreDecil/get_score_decil_raster.sql'),
+    getScoreDecil: sqlPath('niche/getScoreDecil/get_score_decil.sql'),
+
+    getScoreDecilBioT: sqlPath('niche/getScoreDecil/get_score_decil_BT.sql'),
+    getScoreDecilRaT: sqlPath('niche/getScoreDecil/get_score_decil_RaT.sql'),
+    getScoreDecilT: sqlPath('niche/getScoreDecil/get_score_decil_T.sql'),
+
+    getScoreDecilBioV: sqlPath('niche/getScoreDecil/get_score_decil_BV.sql'),
+    getScoreDecilRaV: sqlPath('niche/getScoreDecil/get_score_decil_RaV.sql'),
+    getScoreDecilV: sqlPath('niche/getScoreDecil/get_score_decil_V.sql')
+
+    // getScoreDecilBioA: sqlPath('niche/getScoreDecil/get_score_decil_BA.sql'),
+    // getScoreDecilRaA: sqlPath('niche/getScoreDecil/get_score_decil_RaA.sql'),
+    // getScoreDecilA: sqlPath('niche/getScoreDecil/get_score_decil_A.sql'),
+
+    // getScoreDecilBioTA: sqlPath('getScoreDecil/get_score_decil_BTA.sql'),
+    // getScoreDecilRaTA: sqlPath('getScoreDecil/get_score_decil_RaTA.sql'),
+    // getScoreDecilTA: sqlPath('getScoreDecil/get_score_decil_TA.sql'),
+
+    // getScoreDecilBioVA: sqlPath('getScoreDecil/get_score_decil_BVA.sql'),
+    // getScoreDecilRaVA: sqlPath('getScoreDecil/get_score_decil_RaVA.sql'),
+    // getScoreDecilVA: sqlPath('getScoreDecil/get_score_decil_VA.sql'),
+
+    // getScoreDecilBioVT: sqlPath('getScoreDecil/get_score_decil_BVT.sql'),
+    // getScoreDecilRaVT: sqlPath('getScoreDecil/get_score_decil_RaVT.sql'),
+    // getScoreDecilVT: sqlPath('getScoreDecil/get_score_decil_VT.sql'),
+
+    // getScoreDecilBioVTA: sqlPath('getScoreDecil/get_score_decil_BVTA.sql'),
+    // getScoreDecilRaVTA: sqlPath('getScoreDecil/get_score_decil_RaVTA.sql'),
+    // getScoreDecilVTA: sqlPath('getScoreDecil/get_score_decil_VTA.sql')
+
+  },
+
 
 
 }

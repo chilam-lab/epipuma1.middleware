@@ -25,29 +25,29 @@ target AS (
 ),
 filter_ni AS (
 		SELECT 	spid, 
-				icount( cells & array[$<arg_gridids:raw>] ) as d_ni
-				--icount( cells & array[ 573324, 581126, 507259 ] ) as d_ni
+				icount( cells - array[$<arg_gridids:raw>] ) as ni,
+				cells - array[$<arg_gridids:raw> ]  as cells
 		FROM source 
 ), 
 filter_nj AS(
 		select 	spid, 
-				icount(cells & array[$<arg_gridids:raw>]) AS d_nj
-				--icount(cells & array[ 573324, 581126, 507259 ] ) AS d_nj
+				icount(cells - array[$<arg_gridids:raw>]) AS nj,
+				cells - array[ $<arg_gridids:raw> ]  AS cells
 		FROM target 
 ),
 filter_nij AS(
-		select 	target.spid, 
-				icount(source.cells & target.cells & array[$<arg_gridids:raw>]) AS d_niyj
+		select 	filter_nj.spid, 
+				icount(filter_ni.cells & filter_nj.cells) AS niyj
 				--icount(source.cells & target.cells & array[573324, 581126, 507259 ]) AS d_niyj
-		FROM source, target
+		FROM filter_ni, filter_nj
 ),
 counts AS (
 	SELECT 	--source.spid as source_spid,
 			target.generovalido,
 			target.especievalidabusqueda,			
-			icount(target.cells & source.cells) - filter_nij.d_niyj AS niyj, 
-			icount(source.cells) - filter_ni.d_ni  AS ni,
-			icount(target.cells) - filter_nj.d_nj  AS nj,
+			filter_nij.niyj, 
+			filter_ni.ni,
+			filter_nj.nj,
 			$<N> - icount(array[$<arg_gridids:raw>]) as n,
 			--14707 - icount(array[573324, 581126, 507259 ]) as n,
 			target.reinovalido,
@@ -62,7 +62,7 @@ counts AS (
 			and source.spid = filter_ni.spid
 			and target.spid = filter_nj.spid
 			and target.spid = filter_nij.spid
-			and (icount(target.cells) - filter_nj.d_nj) > $<min_occ:raw>
+			and filter_nj.nj > $<min_occ:raw>
 			--and (icount(target.cells) - filter_nj.d_nj) > 0
 ) 
 SELECT 	--counts.source_spid,
