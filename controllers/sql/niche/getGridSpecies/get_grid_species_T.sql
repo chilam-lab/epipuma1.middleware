@@ -1,28 +1,36 @@
-/*getFreqMap sin filtros*/
-/* 	TODO: SOURCE Y TARGET PUEDEN SER DESCARTADAS DE LAS QUIERIES DE TIEMPO!! */
+/*getGridSpecies sin filtros*/
 WITH source AS (
 	SELECT spid, cells 
 	FROM sp_snib 
 	WHERE 
-		spid = $<spid>
+		spid = $<spid>		
 		--spid = 33553
 		and especievalidabusqueda <> ''
 ),
 target AS (
-	SELECT  spid,
-			cells 
+	SELECT  especievalidabusqueda,
+			spid,
+			cells,
+			0 as tipo
 	FROM sp_snib 
 	--WHERE clasevalida = 'Mammalia'
 	$<where_config:raw>	 
 	and especievalidabusqueda <> ''
-	
 	union
-	
-	SELECT  bid as spid,
-			cells 
+	SELECT  case when type = 1 then
+			layer
+			else
+			(label || ' ' || tag) 
+			end as especievalidabusqueda,
+			bid as spid,
+			cells,
+			1 as tipo
 	FROM raster_bins 
 	$<where_config_raster:raw>	 
+	--where layer = 'bio01'	 
 ),
+
+
 -- el arreglo contiene las celdas donde la especie objetivo debe ser descartada 
 filter_ni AS (
 	SELECT 	spid,
@@ -30,12 +38,6 @@ filter_ni AS (
 			icount(array_agg(distinct gridid)) as ni
 	FROM snib 
 			where --snib.fechacolecta <> ''
-			/*((
-			cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)>= cast( 2000  as integer)
-			and 
-			cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)<= cast( 2020  as integer)
-			)
-			or snib.fechacolecta = '')*/
 			(case when $<caso> = 1 
 				  then 
 				  		fechacolecta <> '' 
@@ -59,17 +61,13 @@ filter_ni AS (
 ),
 filter_nj AS (
 	SELECT 	
-		snib.spid, 
+		snib.spid,
+		target.especievalidabusqueda,
 		array_agg(distinct gridid) as ids_nj,
-		icount(array_agg(distinct gridid)) as nj
+		icount(array_agg(distinct gridid)) as nj,
+		0 as tipo
 	FROM snib, target
 	where --snib.fechacolecta <> ''
-		/*((
-		cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)>= cast( 2000  as integer)
-		and 
-		cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)<= cast( 2020  as integer)
-		)
-		or snib.fechacolecta = '')*/
 		(case when $<caso> = 1 
 			  then 
 			  		fechacolecta <> '' 
@@ -88,13 +86,19 @@ filter_nj AS (
 		end) = true
 		and snib.spid = target.spid
 		and snib.especievalidabusqueda <> ''
-	group by snib.spid
+	group by snib.spid, target.especievalidabusqueda
 	
 	union
 	
 	SELECT  bid as spid,
+			case when type = 1 then
+			layer
+			else
+			(label || ' ' || tag) 
+			end as especievalidabusqueda,
 			cells as ids_nj,
-			icount(cells) as nj
+			icount(cells) as nj,
+			1 as tipo
 	FROM raster_bins 
 	$<where_config_raster:raw>
 ),
@@ -105,8 +109,12 @@ filter_nij AS(
 	--where filter_ni.spid = source.spid
 	--and filter_nj.spid = target.spid
 ),
+
+
 counts AS (
-	SELECT 	target.spid,
+	SELECT 	filter_nj.spid,
+			filter_nj.tipo,
+			filter_nj.especievalidabusqueda,
 			filter_nj.ids_nj as cells,
 			filter_nj.nj,
 			filter_ni.ni,
@@ -126,7 +134,14 @@ counts AS (
 			order by spid
 ),
 rawdata as (
-	SELECT 	counts.cells,
+	SELECT 	counts.spid,
+			counts.cells,
+			counts.tipo,
+			counts.especievalidabusqueda,
+			counts.niyj as nij,
+			counts.nj,
+			counts.ni,
+			counts.n,
 			round( cast(  ln(   
 				get_score(
 					$<alpha>,
@@ -138,8 +153,45 @@ rawdata as (
 				)
 			)as numeric), 2) as score
 	FROM counts 
+),
+grid_spid as (
+	SELECT gridid,
+	unnest( 
+			--animalia||plantae||fungi||protoctista||prokaryotae||
+			--bio01||bio02||bio03||bio04||bio05||bio06|| bio07||bio08||bio09||bio10||bio11||bio12||bio13||bio14||bio15||bio16||bio17||bio18||bio19
+			$<categorias:raw>
+			) as spid
+	FROM grid_20km_mx 
+	where ST_Intersects( the_geom, ST_GeomFromText('POINT($<long:raw> $<lat:raw>)',4326))
+	--where ST_Intersects( the_geom, ST_GeomFromText('POINT(-96.3720703125 19.27718395845517)',4326))
+),
+gridsps as ( 
+	select 	gridid, 
+			spid,
+			especievalidabusqueda as nom_sp,
+			label
+	from ( 
+		select 	gridid, 
+				grid_spid.spid, 
+				case when tipo = 0
+				then especievalidabusqueda
+				else ''
+				end as especievalidabusqueda,
+				case when tipo = 1
+				then especievalidabusqueda
+				else ''
+				end as label
+		from rawdata 
+		join grid_spid 
+		on grid_spid.spid = rawdata.spid 
+		and rawdata.cells @> array [grid_spid.gridid]
+	--) 
+	) as total 
+	--where 	especievalidabusqueda <> ''  
+	order by spid 
 )
-select unnest(cells) as gridid, sum(score) as tscore 
-from rawdata
-group by gridid
-order by tscore desc
+select gridsps.*,  score 
+from gridsps  
+join rawdata 
+on gridsps.spid = rawdata.spid 
+order by score desc

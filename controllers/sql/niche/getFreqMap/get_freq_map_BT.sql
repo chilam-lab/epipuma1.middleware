@@ -23,12 +23,6 @@ filter_ni AS (
 			icount(array_agg(distinct gridid)) as ni
 	FROM snib 
 			where --snib.fechacolecta <> ''
-			/*((
-			cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)>= cast( 2000  as integer)
-			and 
-			cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)<= cast( 2020  as integer)
-			)
-			or snib.fechacolecta = '')*/
 			(case when $<caso> = 1 
 				  then 
 				  		fechacolecta <> '' 
@@ -57,12 +51,6 @@ filter_nj AS (
 		icount(array_agg(distinct gridid)) as nj
 	FROM snib, target
 	where --snib.fechacolecta <> ''
-		/*((
-		cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)>= cast( 2000  as integer)
-		and 
-		cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)<= cast( 2020  as integer)
-		)
-		or snib.fechacolecta = '')*/
 		(case when $<caso> = 1 
 			  then 
 			  		fechacolecta <> '' 
@@ -100,8 +88,7 @@ counts AS (
 			filter_ni.ni,
 			filter_nij.niyj,
 			$<N> as n
-			--14707 as n,
-			
+			--14707 as n
 	FROM target, filter_ni, filter_nj, filter_nij
 	where 	
 			target.spid <> $<spid>
@@ -115,7 +102,8 @@ counts AS (
 			order by spid
 ),
 rawdata as (
-	SELECT 	counts.cells,
+	SELECT 	counts.spid,
+			counts.cells,
 			round( cast(  ln(   
 					get_score(
 						$<alpha>,
@@ -128,8 +116,11 @@ rawdata as (
 					)
 				)as numeric), 2) as score
 	FROM counts 
+	--where spid = 33894
+	--order by spid
 )
 select unnest(cells) as gridid, sum(score) as tscore 
 from rawdata
+--where gridid = 588869
 group by gridid
 order by tscore desc

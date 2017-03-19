@@ -51,15 +51,15 @@ basic_score as (
 	group by gridid
 	order by tscore desc
 ),
-allgridis as(
+/*allgridis as(
 	select gridid from grid_20km_mx
-),
+),*/
 apriori as (
 	select ln( rawdata.ni / ( $<N> - rawdata.ni::numeric) ) as val
 	--select ln( rawdata.ni / ( 14707 - rawdata.ni::numeric) ) as val
 	from rawdata limit 1
 )
-select 	allgridis.gridid, 
+select 	.gridid, 
 		case when tscore <= -$<maxscore>
 		--case when tscore <= -700
 		then 
@@ -68,10 +68,13 @@ select 	allgridis.gridid,
 		--when tscore >= 700
 		then 
 			1 
-		else COALESCE( exp(tscore) / (1 + exp(tscore)) , exp(val) / (1 + exp(val)) )  
+		else exp(tscore+val) / (1 + exp(tscore+val))  --COALESCE( , exp(val) / (1 + exp(val)) )  
 		end as tscore 
-from basic_score
-right join allgridis
-on basic_score.gridid = allgridis.gridid,
+from basic_score,
+--right join allgridis
+--on basic_score.gridid = allgridis.gridid,
 apriori
 order by tscore desc
+
+
+

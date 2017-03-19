@@ -1,9 +1,9 @@
 with rawdata as ( 
 	select 
 		cal.spid, sum(cal.Nij) as nij,  cal.nj,  cel.occ as ni,
-		$<N> as n,
-		-- 6473 as n  , 
-		CASE WHEN cal.Nj <> 0 then ln( get_score($<alpha>, cal.Nj::integer, sum(cal.Nij)::integer, cel.occ::integer, $<N>::integer) ) else 0 end as score 
+		--$<N> as n,
+		 6473 as n  , 
+		CASE WHEN cal.Nj <> 0 then ln( get_score(0.01, cal.Nj::integer, sum(cal.Nij)::integer, cel.occ::integer, 6473::integer) ) else 0 end as score 
 		from sp_occ as cel, ( 
 			select 	w2.spid as spid, 
 					w2.Nij as Nij, 
@@ -16,8 +16,8 @@ with rawdata as (
 						unnest(nbanimalia_counts||nbplantae_counts||nbfungi_counts||nbprotoctista_counts||nbprokaryotae_counts||nbanimalia_exoticas_counts||nbplantae_exoticas_counts||nbfungi_exoticas_counts||nbprotoctista_exoticas_counts||nbprokaryotae_exoticas_counts) as counts, 
 						unnest(nbanimalia_spids||nbplantae_spids||nbfungi_spids||nbprotoctista_spids||nbprokaryotae_spids||nbanimalia_exoticas_spids||nbplantae_exoticas_spids||nbfungi_exoticas_spids||nbprotoctista_exoticas_spids||nbprokaryotae_exoticas_spids) as spids, occ 
 					from sp_occ 
-					--where spid = 49405 
-					 where spid = $<spid> 
+					where spid = 49405 
+					-- where spid = $<spid> 
 				) as d 
 				group by spids, occ 
 			) as a 
@@ -28,20 +28,19 @@ with rawdata as (
 			ON a.spids = b.spids 
 		) as w2 
 		ON sp_snib.spid = w2.spid
-		 $<where_config:raw>
-		--where sp_snib.spid <> 49405 and clasevalida = 'Mammalia' and epitetovalido <> ''    
+		 --$<where_config:raw>
+		where sp_snib.spid <> 49405 and clasevalida = 'Mammalia' and epitetovalido <> ''    
 		order by spid  
 		) as cal 
-		where cel.spid =  $<spid> -- 49405 
+		where cel.spid =  49405 
 		group by 	cal.spid, cal.nj, cel.occ, n 
 		ORDER BY spid DESC 
 ),
-
 grid_spid as ( 
 	SELECT gridid, 
 			unnest( animalia||plantae||fungi||protoctista||prokaryotae||bio01||bio02||bio03||bio04||bio05||bio06|| bio07||bio08||bio09||bio10||bio11||bio12||bio13||bio14||bio15||bio16||bio17||bio18||bio19 ||elevacion || pendiente || topidx ) as spid 
 	FROM public.grid_sp 
-	where gridid = $<idGrid> 
+	where gridid = 49405 
 ), 
 gridsps as ( 
 	select gridid, spid, nom_sp, rango, label 
@@ -75,13 +74,14 @@ ind_scores as (
 	order by score desc 
 ),
 cell_value as ( 
-	select gridsps.gridid, (sum(score) + ln(rawdata.ni / (rawdata.n - rawdata.ni::numeric))) as cell_val 
+	select 	gridsps.gridid, 
+			(sum(score) + ln(rawdata.ni / (rawdata.n - rawdata.ni::numeric))) as cell_val 
 	from gridsps  
 	join rawdata 
 	on gridsps.spid = rawdata.spid 
 	group by gridsps.gridid, rawdata.ni, rawdata.n  
 	union 
-	select gridid, score 
+	select gridid, score
 	from apriori 
 )
 select ind_scores.*, cell_val as apriori 

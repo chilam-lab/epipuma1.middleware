@@ -20,7 +20,9 @@ counts AS (
 			target.cells,
 			icount(source.cells & target.cells) AS niyj,
 			icount(target.cells) AS nj,
-			icount(source.cells) AS ni
+			icount(source.cells) AS ni,
+			$<N> as n
+			--14707 as n
 	FROM source,target
 	where 
 	target.spid <> $<spid>
@@ -31,6 +33,7 @@ counts AS (
 rawdata as (
 	SELECT 	counts.cells,
 			counts.ni,
+			counts.n,
 			round( cast(  ln(   
 					get_score(
 						$<alpha>,
@@ -38,8 +41,7 @@ rawdata as (
 						cast(counts.nj as integer), 
 						cast(counts.niyj as integer), 
 						cast(counts.ni as integer), 
-						cast($<N> as integer)
-						--cast(14707 as integer)
+						cast(counts.n as integer)
 					)
 				)as numeric), 2) as score
 	FROM counts 
@@ -55,7 +57,7 @@ allgridis as(
 	select gridid from grid_20km_mx
 ),
 apriori as (
-	select ln( rawdata.ni / ( $<N> - rawdata.ni::numeric) ) as val 
+	select ln( rawdata.ni / ( rawdata.n - rawdata.ni::numeric) ) as val 
 	from rawdata limit 1
 )
 select 	allgridis.gridid, 

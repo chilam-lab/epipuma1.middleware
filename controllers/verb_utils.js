@@ -14,6 +14,11 @@ var verbs_utils = {
 			}
 		}
 
+		var filter_disj = "";
+		if(spid){
+			filter_disj = "sp_snib.spid <> " + spid + " and ";
+		}
+
 
 		for (var i = 0; i < tfilters.length; i++){
 
@@ -21,10 +26,10 @@ var verbs_utils = {
 					
 				// si existe mas de un elemento deben ir entre parentesis, ej: and (familiavalida = 'Felidae' or familiavalida = 'Canidae')
 				if(tfilters.length > 1){
-					whereVar = whereVar + " where sp_snib.spid <> " + spid + " and (" + tfilters[i].field + " = \'" + tfilters[i].value + "\'";
+					whereVar = whereVar + " where " + filter_disj + " (" + tfilters[i].field + " = \'" + tfilters[i].value + "\'";
 				}
 				else{
-					whereVar = whereVar + " where sp_snib.spid <> " + spid + " and " + tfilters[i].field + " = \'" + tfilters[i].value + "\'";	
+					whereVar = whereVar + " where " + filter_disj + tfilters[i].field + " = \'" + tfilters[i].value + "\'";	
 				}
 				
 				first_bio = false;
@@ -59,7 +64,6 @@ var verbs_utils = {
 			}
 
 		}
-
 
 		for (var i = 0; i < tfilters.length; i++){
 
@@ -251,7 +255,47 @@ var verbs_utils = {
 	    
 	    return caso;
 
-	}
+	},
+
+	getRasterCategories: function(tfilters_total){
+
+		var categorias = "";
+		var abio = false, topo = false, suelo = false, bio = false;
+
+		for (var i = 0; i < tfilters_total.length; i++){
+
+
+			if(tfilters_total[i].type == 4 && bio==false){
+				if(i>0) 
+					categorias += "||";
+				categorias += "animalia||plantae||fungi||protoctista||prokaryotae";
+				bio = true;
+			}	
+			else if(tfilters_total[i].type == 0 && abio==false){
+				if(i>0) 
+					categorias += "||";
+				categorias += "bio01||bio02||bio03||bio04||bio05||bio06||bio07||bio08||bio09||bio10||bio11||bio12||bio13||bio14||bio15||bio16||bio17||bio18||bio19";
+				abio = true;
+			}
+			else if(tfilters_total[i].type == 2 && topo==false){
+				if(i>0) 
+					categorias += "||";
+				categorias += "elevacion||pendiente||topidx";
+				topo = true;
+			}
+			else if(tfilters_total[i].type == 1 && suelo==false){
+				if(i>0) 
+					categorias += "||";
+				categorias += "mexca || mexce || mexco || mexk || mexmg || mexmo || mexna || mexph || mexras";
+				suelo = true;
+			}
+
+		}
+
+		// console.log(categorias);
+		
+		return categorias;
+	},
 
 }
 
