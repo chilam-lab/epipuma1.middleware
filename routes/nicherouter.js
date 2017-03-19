@@ -15,6 +15,8 @@ router.all('/', function(req, res) {
 /************************************************************* VERBOS PARA EL NUEVO SERVIDOR ******************************/
 
 
+/************************************************************* VERBOS PARA NICHO ******************************/
+
   router.route('/getGeoRel')
     .get(
       verbsCtrl.getGeoRelNiche_VT,
@@ -112,13 +114,51 @@ router.all('/', function(req, res) {
     )
 
 
+  router.route('/getGridSpecies')
+    .get(
+      verbsCtrl.getGridSpeciesNiche_M,
+      verbsCtrl.getGridSpeciesNiche_A,
+      verbsCtrl.getGridSpeciesNiche_T,
+      verbsCtrl.getGridSpeciesNiche        
+    )
+    .post(
+      verbsCtrl.getGridSpeciesNiche_M,
+      verbsCtrl.getGridSpeciesNiche_A,
+      verbsCtrl.getGridSpeciesNiche_T,
+      verbsCtrl.getGridSpeciesNiche        
+    )
+
+
+/************************************************************* VERBOS PARA REDES ******************************/
+
+
+router.route('/getEdges')
+  .get(
+    verbsCtrl.getEdgesNiche
+  )
+  .post(
+    verbsCtrl.getEdgesNiche
+  )
+
+router.route('/getNodes')
+  .get(
+    verbsCtrl.getNodesNiche
+  )
+  .post(
+    verbsCtrl.getNodesNiche
+  )
+
+
+
+/************************************************************* VERBOS ÚTILES ******************************/
 
   router.route('/especie')
     .get(
       verbsCtrl.getCountGridid,  
       verbsCtrl.getGrididsNiche,  
-      verbsCtrl.getSpeciesNiche,  
-      verbsCtrl.getEntListNiche  
+      verbsCtrl.getSpeciesNiche,
+      verbsCtrl.getEntListNiche
+      
     )
     .post(
       verbsCtrl.getCountGridid,  

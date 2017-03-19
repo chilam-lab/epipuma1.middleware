@@ -12,6 +12,7 @@ target AS (
 			cells 
 	FROM raster_bins 
 	$<where_config_raster:raw>
+	--where layer = 'bio01'	 
 ),
 counts AS (
 	SELECT 	target.spid,
@@ -41,9 +42,10 @@ rawdata as (
 				)
 			)as numeric), 2) as score
 	FROM counts 
-	--ORDER BY epsilon desc
 )
 select unnest(cells) as gridid, sum(score) as tscore 
 from rawdata
 group by gridid
 order by tscore desc
+
+--celda:588870 score: -0.72
