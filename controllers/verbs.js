@@ -8274,8 +8274,6 @@ exports.getGridSpeciesNiche_T = function (req, res, next) {
 
 
 
-
-
 /************************************************************* VERBOS PARA REDES ******************************/
 
 
@@ -8932,11 +8930,19 @@ exports.getCountGridid = function (req, res, next) {
       console.log("getCountGridid");
 
       var spids = getParam(req, 'spids');
+      var isNicho = getParam(req, 'nicho');
+
+      // Si la peticion es de nicho, se requieren los spids
+      var coleccion = "";
+      if(isNicho === 'true'){
+         coleccion = "(animalia || plantae || fungi || protoctista || prokaryotae || bio01 || bio02 || bio03 || bio04 || bio05 || bio06 || bio07 || bio08 ||bio09 || bio10 || bio11 || bio12 || bio13 || bio14 || bio15 || bio16 ||bio17 || bio18 || bio19 || elevacion || pendiente || topidx) as spids,";
+      }
 
       // console.log(spids);
 
       pool.any(queries.getCountGridid.getCount, {
-        spids: spids.toString()
+        spids: spids.toString(),
+        coleccion: coleccion
       })
           .then(function (data) {
             // console.log(data);
