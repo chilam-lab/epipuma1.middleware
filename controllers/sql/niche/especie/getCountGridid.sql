@@ -19,7 +19,7 @@ cont_spid as(
 	order by cont desc
 )
 select	distinct gridid_sp.gridid,
-		--(animalia || plantae || fungi || protoctista || prokaryotae || bio01 || bio02 || bio03 || bio04 || bio05 || bio06 || bio07 || bio08 ||bio09 || bio10 || bio11 || bio12 || bio13 || bio14 || bio15 || bio16 ||bio17 || bio18 || bio19 || elevacion || pendiente || topidx) as spids,
+		$<coleccion:raw>
 		cont
 from gridid_sp
 left join grid_20km_mx

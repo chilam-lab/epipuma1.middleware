@@ -19,6 +19,7 @@ target AS (
 			cells 
 	FROM sp_snib 
 	--WHERE clasevalida = 'Mammalia'
+	--WHERE ordenvalido = 'Carnivora'
 	$<where_config:raw>	 
 	and especievalidabusqueda <> ''
 ),
@@ -60,6 +61,8 @@ counts AS (
 			icount(filter_ni.cells & filter_nj.cells) AS niyj,
 			filter_nj.nj,
 			filter_ni.ni,
+			$<N> as n,
+			--14707 as n,
 			filter_nj.reinovalido,
 			filter_nj.phylumdivisionvalido,
 			filter_nj.clasevalida,
@@ -79,8 +82,7 @@ rawdata as (
 			counts.niyj as nij,
 			counts.nj,
 			counts.ni,
-			$<N> as n,
-			--14707 as n,
+			counts.n,
 			counts.reinovalido,
 			counts.phylumdivisionvalido,
 			counts.clasevalida,
@@ -93,8 +95,7 @@ rawdata as (
 				cast(counts.nj as integer), 
 				cast(counts.niyj as integer), 
 				cast(counts.ni as integer), 
-				cast($<N> as integer)
-				--cast(14707 as integer)
+				cast(counts.n as integer)
 			)as numeric), 2)  as epsilon,
 			round( cast(  ln(   
 				get_score(
@@ -103,8 +104,7 @@ rawdata as (
 					cast(counts.nj as integer), 
 					cast(counts.niyj as integer), 
 					cast(counts.ni as integer), 
-					cast($<N> as integer)
-					--cast(14707 as integer)
+					cast(counts.n as integer)
 				)
 			)as numeric), 2) as score
 	FROM counts 
