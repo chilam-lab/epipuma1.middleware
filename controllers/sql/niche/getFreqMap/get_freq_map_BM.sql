@@ -59,7 +59,7 @@ apriori as (
 	--select ln( rawdata.ni / ( 14707 - rawdata.ni::numeric) ) as val
 	from rawdata limit 1
 )
-select 	.gridid, 
+select 	gridid, 
 		case when tscore <= -$<maxscore>
 		--case when tscore <= -700
 		then 
