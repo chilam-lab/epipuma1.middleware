@@ -1,6 +1,6 @@
 /*getFreqDecil sin filtros*/
 WITH source AS (
-	SELECT spid, cells 
+	SELECT spid, $<res_celda:raw> as cells 
 	FROM sp_snib 
 	WHERE 
 		spid = $<spid>
@@ -16,7 +16,7 @@ target AS (
 			clasevalida,
 			ordenvalido,
 			familiavalida,
-			cells 
+			$<res_celda:raw> as cells 
 	FROM sp_snib 
 	--WHERE clasevalida = 'Mammalia'
 	$<where_config:raw>	 
@@ -34,7 +34,7 @@ target AS (
 			cast('' as text) clasevalida,
 			cast('' as text) ordenvalido,
 			cast('' as text) familiavalida,
-			cells 
+			$<res_celda:raw> as cells 
 	FROM raster_bins
 	--where layer = 'bio01'
 	$<where_config_raster:raw>	
@@ -136,7 +136,7 @@ basic_score as (
 	order by tscore desc
 ),
 allgridis as(
-	select gridid from grid_20km_mx
+	select $<res_grid:raw> as gridid from grid_16km_aoi
 ),
 prenorm as (
 	select 	allgridis.gridid,

@@ -1,6 +1,6 @@
 /*getGeoRel sin filtros*/
 WITH source AS (
-	SELECT spid, cells 
+	SELECT spid, $<res_celda:raw> as cells 
 	FROM sp_snib 
 	WHERE 
 		spid = $<spid>
@@ -9,15 +9,15 @@ WITH source AS (
 ),
 target AS (
 	SELECT  bid as spid,
-			cells 
+			$<res_celda:raw>  as cells
 	FROM raster_bins 
 	$<where_config_raster:raw>	
 ),
 -- el arreglo contiene las celdas donde la especie objetivo debe ser descartada 
 filter_ni AS (
 	SELECT 	spid,
-			array_agg(distinct gridid) as ids_ni,
-			icount(array_agg(distinct gridid)) as ni
+			array_agg(distinct $<res_grid:raw>) as ids_ni,
+			icount(array_agg(distinct $<res_grid:raw>)) as ni
 	FROM snib 
 			where --snib.fechacolecta <> ''
 			/*((

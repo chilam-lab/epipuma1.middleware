@@ -1,6 +1,6 @@
 /*getGridSpecies sin filtros*/
 WITH source AS (
-	SELECT spid, cells 
+	SELECT spid, $<res_celda:raw> as cells 
 	FROM sp_snib 
 	WHERE 
 		spid = $<spid>
@@ -16,7 +16,7 @@ target AS (
 			clasevalida,
 			ordenvalido,
 			familiavalida,
-			cells 
+			$<res_celda:raw> as cells 
 	FROM sp_snib 
 	--WHERE clasevalida = 'Mammalia'
 	$<where_config:raw>	 
@@ -25,8 +25,8 @@ target AS (
 -- el arreglo contiene las celdas donde la especie objetivo debe ser descartada 
 filter_ni AS (
 	SELECT 	spid,
-			array_agg(distinct gridid) as ids_ni,
-			icount(array_agg(distinct gridid)) as ni
+			array_agg(distinct $<res_grid:raw>) as ids_ni,
+			icount(array_agg(distinct $<res_grid:raw>)) as ni
 	FROM snib 
 			where --snib.fechacolecta <> ''
 			(case when $<caso> = 1 
@@ -53,8 +53,8 @@ filter_ni AS (
 filter_nj AS (
 	SELECT 	
 		snib.spid, 
-		array_agg(distinct gridid) as ids_nj,
-		icount(array_agg(distinct gridid)) as nj
+		array_agg(distinct $<res_grid:raw>) as ids_nj,
+		icount(array_agg(distinct $<res_grid:raw>)) as nj
 	FROM snib, target
 	where --snib.fechacolecta <> ''
 		(case when $<caso> = 1 
@@ -145,11 +145,41 @@ rawdata as (
 	--where spid = 33894
 	--order by spid
 ),
+grid_selected as (
+	SELECT 
+		$<res_grid:raw> as gridid
+		--gridid_16km as gridid
+	FROM grid_16km_aoi 
+	where ST_Intersects( the_geom, ST_GeomFromText('POINT($<long:raw> $<lat:raw>)',4326))
+	--where ST_Intersects( the_geom, ST_GeomFromText('POINT(-96.3720703125 19.27718395845517)',4326))
+)
+select gridid, 
+		spid, 
+		especievalidabusqueda as nom_sp, 
+		rango, 
+		label,
+		score
+from ( 
+	select 	gridid, 
+			rawdata.spid, 
+			rawdata.score, 
+			especievalidabusqueda, 
+			'' as rango, 
+			'' as label 
+	from rawdata 
+	join grid_selected 
+	on intset(grid_selected.gridid) && rawdata.cells 
+) as total 
+where 	especievalidabusqueda <> '' 
+order by score desc  
+
+/*
+
 -- mismos resultados hasta aqui
 grid_spid as (
-	SELECT gridid,
+	SELECT $<res_grid:raw> as gridid,
 	unnest( $<categorias:raw> ) as spid
-	FROM grid_20km_mx 
+	FROM grid_16km_aoi 
 	where ST_Intersects( the_geom, ST_GeomFromText('POINT($<long:raw> $<lat:raw>)',4326))
 	--where ST_Intersects( the_geom, ST_GeomFromText('POINT(-96.3720703125 19.27718395845517)',4326))
 	--order by spid
@@ -178,4 +208,5 @@ from gridsps
 join rawdata 
 on gridsps.spid = rawdata.spid 
 order by score desc
+*/
 

@@ -1,6 +1,6 @@
 /*getMap sin filtros*/
 WITH source AS (
-	SELECT spid, cells 
+	SELECT spid, $<res_celda:raw> as cells 
 	FROM sp_snib 
 	WHERE 
 		spid = $<spid>
@@ -9,7 +9,7 @@ WITH source AS (
 ),
 target AS (
 	SELECT  bid as spid,
-			cells 
+			$<res_celda:raw> as cells 
 	FROM raster_bins 
 	$<where_config_raster:raw>
 ),
@@ -18,7 +18,8 @@ counts AS (
 			target.cells,
 			icount(source.cells & target.cells) AS niyj,
 			icount(target.cells) AS nj,
-			icount(source.cells) AS ni
+			icount(source.cells) AS ni,
+			$<N> as n,
 	FROM source,target
 	where 
 	target.spid <> $<spid>
@@ -36,7 +37,7 @@ rawdata as (
 						cast(counts.nj as integer), 
 						cast(counts.niyj as integer), 
 						cast(counts.ni as integer), 
-						cast($<N> as integer)
+						cast(counts.n as integer)
 						--cast(14707 as integer)
 					)
 				)as numeric), 2) as score

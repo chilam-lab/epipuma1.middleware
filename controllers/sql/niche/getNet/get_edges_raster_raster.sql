@@ -1,14 +1,14 @@
 /*getGeoRel sin filtros*/
 with source AS (
 	SELECT  bid as spid,
-			cells 
+			$<res_celda:raw> AS cells 
 	FROM raster_bins
 	--where layer = 'bio01'
 	$<where_config_source_raster:raw>	 	 
 ),
 target AS (
 	SELECT  bid as spid,
-			cells 
+			$<res_celda:raw> AS cells 
 	FROM raster_bins
 	--where layer = 'bio01'
 	$<where_config_target_raster:raw>	  
