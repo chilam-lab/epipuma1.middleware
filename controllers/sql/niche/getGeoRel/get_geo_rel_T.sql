@@ -1,6 +1,6 @@
 /*getGeoRel con proceso de validación*/
 WITH source AS (
-	SELECT spid, cells 
+	SELECT spid, $<res_celda:raw> as cells  
 	FROM sp_snib 
 	WHERE 
 		spid = $<spid>
@@ -16,7 +16,7 @@ target AS (
 			clasevalida,
 			ordenvalido,
 			familiavalida,
-			cells 
+			$<res_celda:raw> as cells  
 	FROM sp_snib 
 	--WHERE clasevalida = 'Mammalia'
 	$<where_config:raw>	 
@@ -36,15 +36,15 @@ target AS (
 			cast('' as text) clasevalida,
 			cast('' as text) ordenvalido,
 			cast('' as text) familiavalida,
-			cells 
+			$<res_celda:raw> as cells  
 	FROM raster_bins 
 	$<where_config_raster:raw>	 
 ),
 -- el arreglo contiene las celdas donde la especie objetivo debe ser descartada 
 filter_ni AS (
 	SELECT 	spid,
-			array_agg(distinct gridid) as ids_ni,
-			icount(array_agg(distinct gridid)) as ni
+			array_agg(distinct $<res_grid:raw>) as ids_ni,
+			icount(array_agg(distinct $<res_grid:raw>)) as ni
 	FROM snib 
 			where --snib.fechacolecta <> ''
 			/*((
@@ -77,8 +77,8 @@ filter_ni AS (
 filter_nj AS (
 		SELECT 	
 			snib.spid, 
-			array_agg(distinct gridid) as ids_nj,
-			icount(array_agg(distinct gridid)) as nj
+			array_agg(distinct $<res_grid:raw> ) as ids_nj,
+			icount(array_agg(distinct $<res_grid:raw>)) as nj
 		FROM snib, target
 		where --snib.fechacolecta <> ''
 			/*((

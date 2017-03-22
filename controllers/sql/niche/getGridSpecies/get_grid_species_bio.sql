@@ -1,6 +1,6 @@
 /*getGridSpecies sin filtros*/
 WITH source AS (
-	SELECT spid, cells 
+	SELECT spid, $<res_celda:raw> as cells 
 	FROM sp_snib 
 	WHERE 
 		spid = $<spid>
@@ -16,7 +16,7 @@ target AS (
 			clasevalida,
 			ordenvalido,
 			familiavalida,
-			cells 
+			$<res_celda:raw> as cells 
 	FROM sp_snib 
 	--WHERE clasevalida = 'Mammalia'
 	$<where_config:raw>	 
@@ -24,11 +24,13 @@ target AS (
 ),
 counts AS (
 	SELECT 	target.spid,
+			target.cells,
 			target.generovalido,
 			target.especievalidabusqueda,
 			icount(source.cells & target.cells) AS niyj,
 			icount(target.cells) AS nj,
 			icount(source.cells) AS ni,
+			$<N> as n,
 			target.reinovalido,
 			target.phylumdivisionvalido,
 			target.clasevalida,
@@ -43,14 +45,14 @@ counts AS (
 ),
 rawdata as (
 	SELECT 	counts.spid,
+			counts.cells,
 			--counts.source,
 			--counts.generovalido,
 			counts.especievalidabusqueda,
 			counts.niyj as nij,
 			counts.nj,
 			counts.ni,
-			$<N> as n,
-			--14707 as n,
+			counts.n,
 			counts.reinovalido,
 			counts.phylumdivisionvalido,
 			counts.clasevalida,
@@ -63,12 +65,40 @@ rawdata as (
 					cast(counts.nj as integer), 
 					cast(counts.niyj as integer), 
 					cast(counts.ni as integer), 
-					cast($<N> as integer)
-					--cast(14707 as integer)
+					cast(counts.n as integer)
 				)
 			)as numeric), 2) as score
 	FROM counts 
 ),
+grid_selected as (
+	SELECT 
+		$<res_grid:raw> as gridid
+		--gridid_16km as gridid
+	FROM grid_16km_aoi 
+	where ST_Intersects( the_geom, ST_GeomFromText('POINT($<long:raw> $<lat:raw>)',4326))
+	--where ST_Intersects( the_geom, ST_GeomFromText('POINT(-96.3720703125 19.27718395845517)',4326))
+)
+select gridid, 
+		spid, 
+		especievalidabusqueda as nom_sp, 
+		rango, 
+		label,
+		score
+from ( 
+	select 	gridid, 
+			rawdata.spid, 
+			rawdata.score, 
+			especievalidabusqueda, 
+			'' as rango, 
+			'' as label 
+	from rawdata 
+	join grid_selected 
+	on intset(grid_selected.gridid) && rawdata.cells 
+) as total 
+where 	especievalidabusqueda <> '' 
+order by score desc  
+
+/*
 grid_spid as (
 	SELECT gridid,
 	unnest( $<categorias:raw>
@@ -102,4 +132,4 @@ from gridsps
 join rawdata 
 on gridsps.spid = rawdata.spid 
 order by score desc
-
+*/

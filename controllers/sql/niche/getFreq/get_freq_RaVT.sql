@@ -1,6 +1,6 @@
 /*getFreq con proceso de validación y tiempo*/
 WITH source AS (
-	SELECT spid, cells 
+	SELECT spid, $<res_celda:raw> as cells  
 	FROM sp_snib 
 	WHERE 
 		spid = $<spid>
@@ -9,14 +9,14 @@ WITH source AS (
 ),
 target AS (
 	SELECT  bid as spid,
-			cells 
+			$<res_celda:raw> as cells  
 	FROM raster_bins 
 	$<where_config_raster:raw>
 ),
 -- celdas de ni resultantes despues de filtro de tiempo y validación
 filter_ni_tv AS (
 	SELECT 	spid,
-			array_agg(distinct gridid) - array[ $<arg_gridids:raw> ] as cells
+			array_agg(distinct $<res_grid:raw>) - array[ $<arg_gridids:raw> ] as cells
 			--array_agg(distinct gridid) - array[ 573324, 581126, 507259 ] as cells
 			--icount(array_agg(distinct gridid)) as ni
 	FROM snib 

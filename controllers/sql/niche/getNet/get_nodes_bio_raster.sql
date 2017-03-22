@@ -3,7 +3,7 @@ with source AS (
 	SELECT  spid,
 			reinovalido, phylumdivisionvalido, clasevalida, ordenvalido, familiavalida, generovalido, especievalidabusqueda,
 			1 as grp,
-			cells 
+			$<res_celda:raw> AS cells 
 	FROM sp_snib 
 	--WHERE generovalido = 'Aedes'
 	$<where_config_source:raw>	 
@@ -18,7 +18,7 @@ target AS (
 			(label || ' ' || tag) 
 			end as especievalidabusqueda,
 			2 as grp,
-			cells 
+			$<res_celda:raw> AS cells 
 	FROM raster_bins
 	--where layer = 'bio01'
 	$<where_config_target_raster:raw>

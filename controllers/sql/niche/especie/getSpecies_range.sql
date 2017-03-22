@@ -1,5 +1,5 @@
 SELECT DISTINCT st_asgeojson(the_geom) as json_geom, 
-				gridid, 
+				$<res_celda:raw> as gridid, 
 				urlejemplar, 
 				fechacolecta
 FROM snib 
@@ -13,5 +13,5 @@ WHERE 	--spid = 33553 AND
 			cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)<= cast( $<lim_sup>  as integer)
 			or fechacolecta = ''
 		)
-		order by gridid desc
+		--order by $<res_celda:raw> desc
 		

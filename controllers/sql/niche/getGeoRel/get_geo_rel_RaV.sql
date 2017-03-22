@@ -1,6 +1,6 @@
 /*getGeoRel con proceso de validación*/
 WITH source AS (
-	SELECT spid, cells 
+	SELECT spid, $<res_celda:raw> as cells  
 	FROM sp_snib 
 	WHERE 
 		spid = $<spid>
@@ -20,7 +20,7 @@ target AS (
 			cast('' as text) clasevalida,
 			cast('' as text) ordenvalido,
 			cast('' as text) familiavalida,
-			cells 
+			$<res_celda:raw> as cells  
 	FROM raster_bins 
 	$<where_config_raster:raw>	 
 ),

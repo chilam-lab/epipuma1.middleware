@@ -1,6 +1,6 @@
 /*getGeoRel con proceso de validación*/
 WITH source AS (
-	SELECT spid, cells 
+	SELECT spid, $<res_celda:raw> as cells  
 	FROM sp_snib 
 	WHERE 
 		spid = $<spid>
@@ -16,7 +16,7 @@ target AS (
 			clasevalida,
 			ordenvalido,
 			familiavalida,
-			cells 
+			$<res_celda:raw> as cells  
 	FROM sp_snib
 	$<where_config:raw>
 	--WHERE clasevalida = 'Mammalia'
