@@ -1,6 +1,6 @@
 /*getFreqCelda sin filtros*/
 WITH source AS (
-	SELECT spid, cells 
+	SELECT spid, $<res_celda:raw> as cells 
 	FROM sp_snib 
 	WHERE 
 		spid = $<spid>
@@ -9,7 +9,7 @@ WITH source AS (
 ),
 target AS (
 	SELECT  bid as spid,
-			cells 
+			$<res_celda:raw> as cells 
 	FROM raster_bins 
 	$<where_config_raster:raw>	
 ),
@@ -51,8 +51,8 @@ filter_nj AS (
 		-- climaticas no tienen tiempo para ser descartadas
 		SELECT 	
 			spid, 
-			cells as ids_nj,
-			icount(cells) as nj
+			$<res_celda:raw> as ids_nj,
+			icount($<res_celda:raw>) as nj
 		FROM target
 ),
 filter_nij AS(
@@ -108,7 +108,7 @@ basic_score as (
 	order by tscore desc
 ),
 allgridis as(
-	select gridid from grid_20km_mx
+	select $<res_celda:raw> as gridid from grid_16km_aoi
 ),
 prenorm as (
 	select 	allgridis.gridid, 

@@ -1,10 +1,12 @@
 /*getGeoRel con tiempo*/
 WITH source AS (
-	SELECT spid, cells 
+	SELECT spid, 
+			$<res_celda:raw> as cells
+			--cells_16km as cells
 	FROM sp_snib 
 	WHERE 
 		spid = $<spid>
-		--spid = 33553
+		--spid = 31981
 		and especievalidabusqueda <> ''
 ),
 target AS (
@@ -16,7 +18,8 @@ target AS (
 			clasevalida,
 			ordenvalido,
 			familiavalida,
-			cells 
+			$<res_celda:raw> as cells
+			--cells_16km as cells  
 	FROM sp_snib
 	$<where_config:raw>
 	--WHERE clasevalida = 'Mammalia'
@@ -26,10 +29,12 @@ target AS (
 -- el arreglo contiene las celdas donde la especie objetivo debe ser descartada 
 filter_ni AS (
 	SELECT 	spid,
-			array_agg(distinct gridid) as ids_ni,
-			icount(array_agg(distinct gridid)) as ni
+			array_agg(distinct $<res_grid:raw>) as ids_ni,
+			--array_agg(distinct gridid_16km) as ids_ni,
+			icount(array_agg(distinct $<res_grid:raw>)) as ni
+			--icount(array_agg(distinct gridid_16km)) as ni
 	FROM snib 
-			where --snib.fechacolecta <> ''
+			where --snib.fechacolecta <> '' -- and snib.fechacolecta is not null
 			/*((
 			cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)>= cast( 2000  as integer)
 			and 
@@ -52,24 +57,21 @@ filter_ni AS (
 						)
 						or snib.fechacolecta = '')
 			end) = true
-			--and spid = 33553
+			--and spid = 31981
 			and spid = $<spid>
 			and especievalidabusqueda <> ''
 	group by spid
 ),
 filter_nj AS (
 		SELECT 	
-			snib.spid, 
-			array_agg(distinct gridid) as ids_nj,
-			icount(array_agg(distinct gridid)) as nj
-		FROM snib, target
-		where --snib.fechacolecta <> ''
-			/*((
-			cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)>= cast( 2000  as integer)
-			and 
-			cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)<= cast( 2020  as integer)
-			)
-			or snib.fechacolecta = '')*/
+			snib.spid,
+			array_agg(distinct $<res_grid:raw>) as ids_ni,
+			--array_agg(distinct gridid_16km) as ids_nj,
+			icount(array_agg(distinct $<res_grid:raw>)) as ni
+			--icount(array_agg(distinct gridid_16km)) as nj
+		FROM snib join target
+		on snib.spid = target.spid
+		where --snib.fechacolecta <> '' -- and snib.fechacolecta is not null
 			(case when $<caso> = 1 
 				  then 
 				  		fechacolecta <> '' 
@@ -86,7 +88,8 @@ filter_nj AS (
 						)
 						or snib.fechacolecta = '')
 			end) = true
-			and snib.spid = target.spid
+		-- TODO: este cruce esta demorando las queries, optimizar!!! 
+			--and 
 			and snib.especievalidabusqueda <> ''
 		group by snib.spid
 		--order by spid
@@ -117,13 +120,13 @@ counts AS (
 	FROM source, target, filter_ni, filter_nj, filter_nij
 	where 	
 			target.spid <> $<spid>
-			--target.spid <> 33553
+			--target.spid <> 33894
 			--and source.spid = filter_ni.spid
 			and target.spid = filter_nj.spid
 			and target.spid = filter_nij.spid
-			and filter_nj.nj > $<min_occ:raw>
+			--and filter_nj.nj > $<min_occ:raw>
 			--and filter_nj.nj > 0
-			--and filter_nj.nj < filter_nij.niyj
+			and filter_nj.nj < filter_nij.niyj
 			order by spid
 ) 
 SELECT 	--counts.source_spid,
@@ -146,8 +149,7 @@ SELECT 	--counts.source_spid,
 				cast(counts.nj as integer), 
 				cast(counts.niyj as integer), 
 				cast(counts.ni as integer), 
-				cast($<N> as integer)
-				--cast(14707 as integer)
+				cast(counts.n as integer)
 		)as numeric), 2)  as epsilon,
 		round( cast(  ln(   
 			get_score(
@@ -156,8 +158,7 @@ SELECT 	--counts.source_spid,
 				cast(counts.nj as integer), 
 				cast(counts.niyj as integer), 
 				cast(counts.ni as integer), 
-				cast($<N> as integer)
-				--cast(14707 as integer)
+				cast(counts.n as integer)
 			)
 		)as numeric), 2) as score
 FROM counts 

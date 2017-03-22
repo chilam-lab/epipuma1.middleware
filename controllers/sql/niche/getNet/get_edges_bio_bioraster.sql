@@ -1,7 +1,7 @@
 /*getGeoRel sin filtros*/
 with source AS (
 	SELECT  spid,
-			cells 
+			$<res_celda:raw> AS cells 
 	FROM sp_snib 
 	--WHERE generovalido = 'Aedes'
 	$<where_config_source:raw>	 
@@ -9,14 +9,14 @@ with source AS (
 ),
 target AS (
 	 SELECT  spid,
-			cells 
+			$<res_celda:raw> AS cells 
 	FROM sp_snib 
 	--WHERE generovalido = 'Lutzomyia'
 	$<where_config_target:raw>	 
 	and especievalidabusqueda <> ''
 	union
 	SELECT  bid as spid,
-			cells 
+			$<res_celda:raw> AS cells 
 	FROM raster_bins
 	--where layer = 'bio01'
 	$<where_config_target_raster:raw>	  

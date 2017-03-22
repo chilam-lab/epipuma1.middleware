@@ -12,6 +12,9 @@ var queries = require('./sql/queryProvider.js')
 
 var pool = pgp(config.db)
 
+// var N = 14707;
+var N = 94544; // MX y EU sin alaska y hawuaii 16km
+
 /**
  * Regresa el valor del parametro `name` cuando este presente o `defaultValue`.
  *
@@ -5325,7 +5328,9 @@ exports.getGeoRelNiche_VT = function (req, res, next) {
     var spid        = getParam(req, 'id');
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
-    var N           = 14707; // Verificar N, que se esta contemplando
+    // var N           = 14707; // Verificar N, que se esta contemplando
+    var res_celda = getParam(req, 'res_celda', "cells_16km");
+    var res_grid = getParam(req, 'res_grid', "gridid_16km");
 
     // Siempre incluidos en query, nj >= 0
     var min_occ       = getParam(req, 'min_occ', 0);
@@ -5365,7 +5370,9 @@ exports.getGeoRelNiche_VT = function (req, res, next) {
         arg_gridids: discardedids.toString(),
         lim_inf: fecha_incio.format("YYYY"),
         lim_sup: fecha_fin.format("YYYY"),
-        caso: caso
+        caso: caso,
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         res.json({'data': data})
@@ -5396,7 +5403,9 @@ exports.getGeoRelNiche_VT = function (req, res, next) {
           arg_gridids: discardedids.toString(),
           lim_inf: fecha_incio.format("YYYY"),
           lim_sup: fecha_fin.format("YYYY"),
-          caso: caso
+          caso: caso,
+          res_celda: res_celda,
+        res_grid: res_grid
         })
         .then(function (data) {
           // console.log(data.length);
@@ -5427,7 +5436,9 @@ exports.getGeoRelNiche_VT = function (req, res, next) {
         arg_gridids: discardedids.toString(),
         lim_inf: fecha_incio.format("YYYY"),
         lim_sup: fecha_fin.format("YYYY"),
-        caso: caso
+        caso: caso,
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         res.json({'data': data})
@@ -5467,7 +5478,8 @@ exports.getGeoRelNiche_V = function (req, res, next) {
     var spid        = getParam(req, 'id');
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
-    var N           = 14707; // Verificar N, que se esta contemplando
+    // var N           = 14707; // Verificar N, que se esta contemplando
+    var res_celda = getParam(req, 'res_celda', "cells_16km");
 
     // Siempre incluidos en query, nj >= 0
     var min_occ       = getParam(req, 'min_occ', 0);
@@ -5493,7 +5505,8 @@ exports.getGeoRelNiche_V = function (req, res, next) {
         min_occ: min_occ,
         where_config: whereVar,
         where_config_raster: whereVarRaster,
-        arg_gridids: discardedids.toString()
+        arg_gridids: discardedids.toString(),
+        res_celda: res_celda
       })
       .then(function (data) {
         res.json({'data': data})
@@ -5517,7 +5530,8 @@ exports.getGeoRelNiche_V = function (req, res, next) {
         alpha: alpha,
         min_occ: min_occ,
         where_config: whereVar,
-        arg_gridids: discardedids.toString()
+        arg_gridids: discardedids.toString(),
+        res_celda: res_celda
       })
       .then(function (data) {
         // console.log(data.length);
@@ -5541,7 +5555,8 @@ exports.getGeoRelNiche_V = function (req, res, next) {
         alpha: alpha,
         min_occ: min_occ,
         where_config_raster: whereVarRaster,
-        arg_gridids: discardedids.toString()
+        arg_gridids: discardedids.toString(),
+        res_celda: res_celda
       })
       .then(function (data) {
         res.json({'data': data})
@@ -5582,7 +5597,9 @@ exports.getGeoRelNiche_T = function (req, res, next) {
     var spid        = getParam(req, 'id');
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
-    var N           = 14707; // Verificar N, que se esta contemplando
+    // var N           = 14707; // Verificar N, que se esta contemplando
+    var res_celda = getParam(req, 'res_celda', "cells_16km");
+    var res_grid = getParam(req, 'res_grid', "gridid_16km");
 
     // Siempre incluidos en query, nj >= 0
     var min_occ       = getParam(req, 'min_occ', 0);
@@ -5622,7 +5639,9 @@ exports.getGeoRelNiche_T = function (req, res, next) {
         where_config_raster: whereVarRaster,
         lim_inf: fecha_incio.format("YYYY"),
         lim_sup: fecha_fin.format("YYYY"),
-        caso: caso
+        caso: caso,
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         // console.log(data);
@@ -5655,7 +5674,9 @@ exports.getGeoRelNiche_T = function (req, res, next) {
         where_config: whereVar,
         lim_inf: fecha_incio.format("YYYY"),
         lim_sup: fecha_fin.format("YYYY"),
-        caso: caso
+        caso: caso,
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         // console.log(data);
@@ -5687,7 +5708,9 @@ exports.getGeoRelNiche_T = function (req, res, next) {
         where_config_raster: whereVarRaster,
         lim_inf: fecha_incio.format("YYYY"),
         lim_sup: fecha_fin.format("YYYY"),
-        caso: caso
+        caso: caso,
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         // console.log(data);
@@ -5730,7 +5753,8 @@ exports.getGeoRelNiche = function (req, res, next) {
     var spid        = getParam(req, 'id');
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
-    var N           = 14707; // Verificar N, que se esta contemplando
+    // var N           = 14707; // Verificar N, que se esta contemplando
+    var res_celda = getParam(req, 'res_celda', "cells_16km");
 
     // Siempre incluidos en query, nj >= 0
     var min_occ       = getParam(req, 'min_occ', 0);
@@ -5758,7 +5782,8 @@ exports.getGeoRelNiche = function (req, res, next) {
         alpha: alpha,
         min_occ: min_occ,
         where_config: whereVar,
-        where_config_raster: whereVarRaster
+        where_config_raster: whereVarRaster,
+        res_celda: res_celda
       })
       .then(function (data) {
         res.json({'data': data})
@@ -5782,7 +5807,8 @@ exports.getGeoRelNiche = function (req, res, next) {
         N: N,
         alpha: alpha,
         min_occ: min_occ,
-        where_config: whereVar
+        where_config: whereVar,
+        res_celda: res_celda
       })
       .then(function (data) {
         // console.log(data);
@@ -5805,7 +5831,8 @@ exports.getGeoRelNiche = function (req, res, next) {
         N: N,
         alpha: alpha,
         min_occ: min_occ,
-        where_config_raster: whereVarRaster
+        where_config_raster: whereVarRaster,
+        res_celda: res_celda
       })
       .then(function (data) {
         res.json({'data': data})
@@ -5818,8 +5845,6 @@ exports.getGeoRelNiche = function (req, res, next) {
       
     } 
     else{
-
-      console.log("NESTTTT");
 
       next();
     }
@@ -5858,7 +5883,9 @@ exports.getFreqNiche_VT = function (req, res, next) {
     var spid        = getParam(req, 'id');
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
-    var N           = 14707; // Verificar N, que se esta contemplando
+    // var N           = 14707; // Verificar N, que se esta contemplando
+    var res_celda = getParam(req, 'res_celda', "cells_16km");
+    var res_grid = getParam(req, 'res_grid', "gridid_16km");
 
     // Siempre incluidos en query, nj >= 0
     var min_occ       = getParam(req, 'min_occ', 0);
@@ -5895,7 +5922,9 @@ exports.getFreqNiche_VT = function (req, res, next) {
         arg_gridids: discardedids.toString(),
         lim_inf: fecha_incio.format("YYYY"),
         lim_sup: fecha_fin.format("YYYY"),
-        caso: caso
+        caso: caso,
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         res.json({'data': data})
@@ -5926,7 +5955,9 @@ exports.getFreqNiche_VT = function (req, res, next) {
           arg_gridids: discardedids.toString(),
           lim_inf: fecha_incio.format("YYYY"),
           lim_sup: fecha_fin.format("YYYY"),
-          caso: caso
+          caso: caso,
+        res_celda: res_celda,
+        res_grid: res_grid
         })
         .then(function (data) {
           // console.log(data.length);
@@ -5957,7 +5988,9 @@ exports.getFreqNiche_VT = function (req, res, next) {
         arg_gridids: discardedids.toString(),
         lim_inf: fecha_incio.format("YYYY"),
         lim_sup: fecha_fin.format("YYYY"),
-        caso: caso
+        caso: caso,
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         res.json({'data': data})
@@ -5997,7 +6030,8 @@ exports.getFreqNiche_V = function (req, res, next) {
     var spid        = getParam(req, 'id');
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
-    var N           = 14707; // Verificar N, que se esta contemplando
+    // var N           = 14707; // Verificar N, que se esta contemplando
+    var res_celda = getParam(req, 'res_celda', "cells_16km");
 
     // Siempre incluidos en query, nj >= 0
     var min_occ       = getParam(req, 'min_occ', 0);
@@ -6023,7 +6057,8 @@ exports.getFreqNiche_V = function (req, res, next) {
         min_occ: min_occ,
         where_config: whereVar,
         where_config_raster: whereVarRaster,
-        arg_gridids: discardedids.toString()
+        arg_gridids: discardedids.toString(),
+        res_celda: res_celda
       })
       .then(function (data) {
         res.json({'data': data})
@@ -6047,7 +6082,8 @@ exports.getFreqNiche_V = function (req, res, next) {
         alpha: alpha,
         min_occ: min_occ,
         where_config: whereVar,
-        arg_gridids: discardedids.toString()
+        arg_gridids: discardedids.toString(),
+        res_celda: res_celda
       })
       .then(function (data) {
         // console.log(data.length);
@@ -6071,7 +6107,8 @@ exports.getFreqNiche_V = function (req, res, next) {
         alpha: alpha,
         min_occ: min_occ,
         where_config_raster: whereVarRaster,
-        arg_gridids: discardedids.toString()
+        arg_gridids: discardedids.toString(),
+        res_celda: res_celda
       })
       .then(function (data) {
         res.json({'data': data})
@@ -6114,7 +6151,9 @@ exports.getFreqNiche_T = function (req, res, next) {
     var spid        = getParam(req, 'id');
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
-    var N           = 14707; // Verificar N, que se esta contemplando
+    // var N           = 14707; // Verificar N, que se esta contemplando
+    var res_celda = getParam(req, 'res_celda', "cells_16km");
+    var res_grid = getParam(req, 'res_grid', "gridid_16km");
 
     // Siempre incluidos en query, nj >= 0
     var min_occ       = getParam(req, 'min_occ', 0);
@@ -6152,7 +6191,9 @@ exports.getFreqNiche_T = function (req, res, next) {
         where_config_raster: whereVarRaster,
         lim_inf: fecha_incio.format("YYYY"),
         lim_sup: fecha_fin.format("YYYY"),
-        caso: caso
+        caso: caso,
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         // console.log(data);
@@ -6185,7 +6226,9 @@ exports.getFreqNiche_T = function (req, res, next) {
         where_config: whereVar,
         lim_inf: fecha_incio.format("YYYY"),
         lim_sup: fecha_fin.format("YYYY"),
-        caso: caso
+        caso: caso,
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         // console.log(data);
@@ -6217,7 +6260,9 @@ exports.getFreqNiche_T = function (req, res, next) {
         where_config_raster: whereVarRaster,
         lim_inf: fecha_incio.format("YYYY"),
         lim_sup: fecha_fin.format("YYYY"),
-        caso: caso
+        caso: caso,
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         // console.log(data);
@@ -6259,7 +6304,8 @@ exports.getFreqNiche = function (req, res, next) {
     var spid        = getParam(req, 'id');
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
-    var N           = 14707; // Verificar N, que se esta contemplando
+    // var N           = 14707; // Verificar N, que se esta contemplando
+    var res_celda = getParam(req, 'res_celda', "cells_16km");
 
     // Siempre incluidos en query, nj >= 0
     var min_occ       = getParam(req, 'min_occ', 0);
@@ -6281,7 +6327,8 @@ exports.getFreqNiche = function (req, res, next) {
         alpha: alpha,
         min_occ: min_occ,
         where_config: whereVar,
-        where_config_raster: whereVarRaster
+        where_config_raster: whereVarRaster,
+        res_celda: res_celda
       })
       .then(function (data) {
         res.json({'data': data})
@@ -6303,7 +6350,8 @@ exports.getFreqNiche = function (req, res, next) {
         N: N,
         alpha: alpha,
         min_occ: min_occ,
-        where_config: whereVar
+        where_config: whereVar,
+        res_celda: res_celda
       })
       .then(function (data) {
         res.json({'data': data})
@@ -6326,7 +6374,8 @@ exports.getFreqNiche = function (req, res, next) {
         N: N,
         alpha: alpha,
         min_occ: min_occ,
-        where_config_raster: whereVarRaster
+        where_config_raster: whereVarRaster,
+        res_celda: res_celda
       })
       .then(function (data) {
         res.json({'data': data})
@@ -6371,8 +6420,9 @@ exports.getFreqMapNiche_M = function (req, res, next) {
     var spid        = getParam(req, 'id');
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
-    var N           = 14707;
+    // var N           = 14707;
     var maxscore    = 700;
+    var res_celda = getParam(req, 'res_celda', "cells_16km");
 
     // Siempre incluidos en query, nj >= 0
     var min_occ       = getParam(req, 'min_occ', 0);
@@ -6381,6 +6431,7 @@ exports.getFreqMapNiche_M = function (req, res, next) {
     var hasBios         = getParam(req, 'hasBios');
     var hasRaster       = getParam(req, 'hasRaster');
     var mapa_prob       = getParam(req, 'mapa_prob');
+
 
     
     if (hasBios === 'true' && hasRaster === 'true' && mapa_prob === 'mapa_prob' ){
@@ -6397,7 +6448,8 @@ exports.getFreqMapNiche_M = function (req, res, next) {
                 maxscore: maxscore,
                 min_occ: min_occ,
                 where_config: whereVar,
-                where_config_raster: whereVarRaster
+                where_config_raster: whereVarRaster,
+                res_celda: res_celda
             })
             .then(function (data) {
                 res.json({'data': data})
@@ -6420,7 +6472,8 @@ exports.getFreqMapNiche_M = function (req, res, next) {
           alpha: alpha,
           maxscore: maxscore,
           min_occ: min_occ,
-          where_config: whereVar
+          where_config: whereVar,
+          res_celda: res_celda
       })
       .then(function (data) {
         res.json({'data': data})
@@ -6444,7 +6497,8 @@ exports.getFreqMapNiche_M = function (req, res, next) {
               alpha: alpha,
               maxscore: maxscore,
               min_occ: min_occ,
-              where_config_raster: whereVarRaster
+              where_config_raster: whereVarRaster,
+                res_celda: res_celda
           })
           .then(function (data) {
               res.json({'data': data})
@@ -6484,7 +6538,9 @@ exports.getFreqMapNiche_A = function (req, res, next) {
     var spid        = getParam(req, 'id');
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
-    var N           = 14707;
+    // var N           = 14707;
+    var res_celda = getParam(req, 'res_celda', "cells_16km");
+    var res_grid = getParam(req, 'res_grid', "gridid_16km");
 
     // Siempre incluidos en query, nj >= 0
     var min_occ       = getParam(req, 'min_occ', 0);
@@ -6508,7 +6564,9 @@ exports.getFreqMapNiche_A = function (req, res, next) {
                 alpha: alpha,
                 min_occ: min_occ,
                 where_config: whereVar,
-                where_config_raster: whereVarRaster
+                where_config_raster: whereVarRaster,
+                res_celda: res_celda,
+                res_grid: res_grid
             })
             .then(function (data) {
                 res.json({'data': data})
@@ -6531,7 +6589,9 @@ exports.getFreqMapNiche_A = function (req, res, next) {
           N: N,
           alpha: alpha,
           min_occ: min_occ,
-          where_config: whereVar
+          where_config: whereVar,
+                res_celda: res_celda,
+                res_grid: res_grid
       })
       .then(function (data) {
         res.json({'data': data})
@@ -6554,7 +6614,9 @@ exports.getFreqMapNiche_A = function (req, res, next) {
               N: N,
               alpha: alpha,
               min_occ: min_occ,
-              where_config_raster: whereVarRaster
+              where_config_raster: whereVarRaster,
+                res_celda: res_celda,
+                res_grid: res_grid
           })
           .then(function (data) {
               res.json({'data': data})
@@ -6591,7 +6653,10 @@ exports.getFreqMapNiche_T = function (req, res, next) {
     var spid        = getParam(req, 'id');
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
-    var N           = 14707; // Verificar N, que se esta contemplando
+    // var N           = 14707; // Verificar N, que se esta contemplando
+    var res_celda = getParam(req, 'res_celda', "cells_16km");
+    var res_grid = getParam(req, 'res_grid', "gridid_16km");
+
 
     // Siempre incluidos en query, nj >= 0
     var min_occ       = getParam(req, 'min_occ', 0);
@@ -6629,7 +6694,9 @@ exports.getFreqMapNiche_T = function (req, res, next) {
         where_config_raster: whereVarRaster,
         lim_inf: fecha_incio.format("YYYY"),
         lim_sup: fecha_fin.format("YYYY"),
-        caso: caso
+        caso: caso,
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         // console.log(data);
@@ -6662,7 +6729,9 @@ exports.getFreqMapNiche_T = function (req, res, next) {
         where_config: whereVar,
         lim_inf: fecha_incio.format("YYYY"),
         lim_sup: fecha_fin.format("YYYY"),
-        caso: caso
+        caso: caso,
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         // console.log(data);
@@ -6692,7 +6761,9 @@ exports.getFreqMapNiche_T = function (req, res, next) {
         where_config_raster: whereVarRaster,
         lim_inf: fecha_incio.format("YYYY"),
         lim_sup: fecha_fin.format("YYYY"),
-        caso: caso
+        caso: caso,
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         // console.log(data);
@@ -6733,7 +6804,9 @@ exports.getFreqMapNiche = function (req, res, next) {
     var spid        = getParam(req, 'id');
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
-    var N           = 14707; // Verificar N, que se esta contemplando
+    var res_celda = getParam(req, 'res_celda', "cells_16km");
+    // var N           = 14707; // Verificar N, que se esta contemplando
+
 
     // Siempre incluidos en query, nj >= 0
     var min_occ       = getParam(req, 'min_occ', 0);
@@ -6755,7 +6828,8 @@ exports.getFreqMapNiche = function (req, res, next) {
         alpha: alpha,
         min_occ: min_occ,
         where_config: whereVar,
-        where_config_raster: whereVarRaster
+        where_config_raster: whereVarRaster,
+        res_celda: res_celda
       })
       .then(function (data) {
         res.json({'data': data})
@@ -6777,7 +6851,8 @@ exports.getFreqMapNiche = function (req, res, next) {
         N: N,
         alpha: alpha,
         min_occ: min_occ,
-        where_config: whereVar
+        where_config: whereVar,
+        res_celda: res_celda
       })
       .then(function (data) {
         res.json({'data': data})
@@ -6800,7 +6875,8 @@ exports.getFreqMapNiche = function (req, res, next) {
         N: N,
         alpha: alpha,
         min_occ: min_occ,
-        where_config_raster: whereVarRaster
+        where_config_raster: whereVarRaster,
+        res_celda: res_celda
       })
       .then(function (data) {
         res.json({'data': data})
@@ -6849,7 +6925,10 @@ exports.getFreqCeldaNiche_A = function (req, res, next) {
     var spid        = getParam(req, 'id');
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
-    var N           = 14707;
+    // var N           = 14707;
+    var res_celda = getParam(req, 'res_celda', "cells_16km");
+    var res_grid = getParam(req, 'res_grid', "gridid_16km");
+
 
     // Siempre incluidos en query, nj >= 0
     var min_occ       = getParam(req, 'min_occ', 0);
@@ -6873,7 +6952,9 @@ exports.getFreqCeldaNiche_A = function (req, res, next) {
                 alpha: alpha,
                 min_occ: min_occ,
                 where_config: whereVar,
-                where_config_raster: whereVarRaster
+                where_config_raster: whereVarRaster,
+                res_celda: res_celda,
+                res_grid: res_grid
             })
             .then(function (data) {
                 res.json({'data': data})
@@ -6896,7 +6977,9 @@ exports.getFreqCeldaNiche_A = function (req, res, next) {
           N: N,
           alpha: alpha,
           min_occ: min_occ,
-          where_config: whereVar
+          where_config: whereVar,
+                res_celda: res_celda,
+                res_grid: res_grid
       })
       .then(function (data) {
         res.json({'data': data})
@@ -6919,7 +7002,9 @@ exports.getFreqCeldaNiche_A = function (req, res, next) {
               N: N,
               alpha: alpha,
               min_occ: min_occ,
-              where_config_raster: whereVarRaster
+              where_config_raster: whereVarRaster,
+                res_celda: res_celda,
+                res_grid: res_grid
           })
           .then(function (data) {
               res.json({'data': data})
@@ -6959,7 +7044,9 @@ exports.getFreqCeldaNiche_V = function (req, res, next) {
     var spid        = getParam(req, 'id');
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
-    var N           = 14707; // Verificar N, que se esta contemplando
+    // var N           = 14707; // Verificar N, que se esta contemplando
+    var res_celda = getParam(req, 'res_celda', "cells_16km");
+    var res_grid = getParam(req, 'res_grid', "gridid_16km");
 
     // Siempre incluidos en query, nj >= 0
     var min_occ       = getParam(req, 'min_occ', 0);
@@ -6985,7 +7072,9 @@ exports.getFreqCeldaNiche_V = function (req, res, next) {
         min_occ: min_occ,
         where_config: whereVar,
         where_config_raster: whereVarRaster,
-        arg_gridids: discardedids.toString()
+        arg_gridids: discardedids.toString(),
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         res.json({'data': data})
@@ -7009,7 +7098,9 @@ exports.getFreqCeldaNiche_V = function (req, res, next) {
         alpha: alpha,
         min_occ: min_occ,
         where_config: whereVar,
-        arg_gridids: discardedids.toString()
+        arg_gridids: discardedids.toString(),
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         // console.log(data.length);
@@ -7033,7 +7124,9 @@ exports.getFreqCeldaNiche_V = function (req, res, next) {
         alpha: alpha,
         min_occ: min_occ,
         where_config_raster: whereVarRaster,
-        arg_gridids: discardedids.toString()
+        arg_gridids: discardedids.toString(),
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         res.json({'data': data})
@@ -7075,7 +7168,9 @@ exports.getFreqCeldaNiche_T = function (req, res, next) {
     var spid        = getParam(req, 'id');
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
-    var N           = 14707; // Verificar N, que se esta contemplando
+    // var N           = 14707; // Verificar N, que se esta contemplando
+    var res_celda = getParam(req, 'res_celda', "cells_16km");
+    var res_grid = getParam(req, 'res_grid', "gridid_16km");
 
     // Siempre incluidos en query, nj >= 0
     var min_occ       = getParam(req, 'min_occ', 0);
@@ -7113,7 +7208,9 @@ exports.getFreqCeldaNiche_T = function (req, res, next) {
         where_config_raster: whereVarRaster,
         lim_inf: fecha_incio.format("YYYY"),
         lim_sup: fecha_fin.format("YYYY"),
-        caso: caso
+        caso: caso,
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         // console.log(data);
@@ -7146,7 +7243,9 @@ exports.getFreqCeldaNiche_T = function (req, res, next) {
         where_config: whereVar,
         lim_inf: fecha_incio.format("YYYY"),
         lim_sup: fecha_fin.format("YYYY"),
-        caso: caso
+        caso: caso,
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         // console.log(data);
@@ -7178,7 +7277,9 @@ exports.getFreqCeldaNiche_T = function (req, res, next) {
         where_config_raster: whereVarRaster,
         lim_inf: fecha_incio.format("YYYY"),
         lim_sup: fecha_fin.format("YYYY"),
-        caso: caso
+        caso: caso,
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         // console.log(data);
@@ -7220,7 +7321,9 @@ exports.getFreqCeldaNiche = function (req, res, next) {
     var spid        = getParam(req, 'id');
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
-    var N           = 14707;
+    // var N           = 14707;
+    var res_celda = getParam(req, 'res_celda', "cells_16km");
+    var res_grid = getParam(req, 'res_grid', "gridid_16km");
 
     // Siempre incluidos en query, nj >= 0
     var min_occ       = getParam(req, 'min_occ', 0);
@@ -7242,7 +7345,9 @@ exports.getFreqCeldaNiche = function (req, res, next) {
         alpha: alpha,
         min_occ: min_occ,
         where_config: whereVar,
-        where_config_raster: whereVarRaster
+        where_config_raster: whereVarRaster,
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         res.json({'data': data})
@@ -7265,7 +7370,9 @@ exports.getFreqCeldaNiche = function (req, res, next) {
         N: N,
         alpha: alpha,
         min_occ: min_occ,
-        where_config: whereVar
+        where_config: whereVar,
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         res.json({'data': data})
@@ -7288,7 +7395,9 @@ exports.getFreqCeldaNiche = function (req, res, next) {
         N: N,
         alpha: alpha,
         min_occ: min_occ,
-        where_config_raster: whereVarRaster
+        where_config_raster: whereVarRaster,
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         res.json({'data': data})
@@ -7331,7 +7440,9 @@ exports.getScoreDecilNiche_V = function (req, res, next) {
     var spid        = getParam(req, 'id');
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
-    var N           = 14707; // Verificar N, que se esta contemplando
+    // var N           = 14707; // Verificar N, que se esta contemplando
+    var res_celda = getParam(req, 'res_celda', "cells_16km");
+    var res_grid = getParam(req, 'res_grid', "gridid_16km");
 
     // Siempre incluidos en query, nj >= 0
     var min_occ       = getParam(req, 'min_occ', 0);
@@ -7360,7 +7471,9 @@ exports.getScoreDecilNiche_V = function (req, res, next) {
         min_occ: min_occ,
         where_config: whereVar,
         where_config_raster: whereVarRaster,
-        arg_gridids: discardedids.toString()
+        arg_gridids: discardedids.toString(),
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         for(i = 0; i < data.length; i++){
@@ -7388,7 +7501,9 @@ exports.getScoreDecilNiche_V = function (req, res, next) {
         alpha: alpha,
         min_occ: min_occ,
         where_config: whereVar,
-        arg_gridids: discardedids.toString()
+        arg_gridids: discardedids.toString(),
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         for(i = 0; i < data.length; i++){
@@ -7416,7 +7531,9 @@ exports.getScoreDecilNiche_V = function (req, res, next) {
         alpha: alpha,
         min_occ: min_occ,
         where_config_raster: whereVarRaster,
-        arg_gridids: discardedids.toString()
+        arg_gridids: discardedids.toString(),
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         for(i = 0; i < data.length; i++){
@@ -7462,7 +7579,9 @@ exports.getScoreDecilNiche_T = function (req, res, next) {
     var spid        = getParam(req, 'id');
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
-    var N           = 14707; // Verificar N, que se esta contemplando
+    // var N           = 14707; // Verificar N, que se esta contemplando
+    var res_celda = getParam(req, 'res_celda', "cells_16km");
+    var res_grid = getParam(req, 'res_grid', "gridid_16km");
 
     // Siempre incluidos en query, nj >= 0
     var min_occ       = getParam(req, 'min_occ', 0);
@@ -7503,7 +7622,9 @@ exports.getScoreDecilNiche_T = function (req, res, next) {
         where_config_raster: whereVarRaster,
         lim_inf: fecha_incio.format("YYYY"),
         lim_sup: fecha_fin.format("YYYY"),
-        caso: caso
+        caso: caso,
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         for(i = 0; i < data.length; i++){
@@ -7539,7 +7660,9 @@ exports.getScoreDecilNiche_T = function (req, res, next) {
         where_config: whereVar,
         lim_inf: fecha_incio.format("YYYY"),
         lim_sup: fecha_fin.format("YYYY"),
-        caso: caso
+        caso: caso,
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         for(i = 0; i < data.length; i++){
@@ -7574,7 +7697,9 @@ exports.getScoreDecilNiche_T = function (req, res, next) {
         where_config_raster: whereVarRaster,
         lim_inf: fecha_incio.format("YYYY"),
         lim_sup: fecha_fin.format("YYYY"),
-        caso: caso
+        caso: caso,
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         for(i = 0; i < data.length; i++){
@@ -7619,7 +7744,9 @@ exports.getScoreDecilNiche = function (req, res, next) {
     var spid        = getParam(req, 'id');
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
-    var N           = 14707;
+    // var N           = 14707;
+    var res_celda = getParam(req, 'res_celda', "cells_16km");
+    var res_grid = getParam(req, 'res_grid', "gridid_16km");
 
     // Siempre incluidos en query, nj >= 0
     var min_occ       = getParam(req, 'min_occ', 0);
@@ -7644,7 +7771,9 @@ exports.getScoreDecilNiche = function (req, res, next) {
         alpha: alpha,
         min_occ: min_occ,
         where_config: whereVar,
-        where_config_raster: whereVarRaster
+        where_config_raster: whereVarRaster,
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
 
@@ -7673,7 +7802,9 @@ exports.getScoreDecilNiche = function (req, res, next) {
         N: N,
         alpha: alpha,
         min_occ: min_occ,
-        where_config: whereVar
+        where_config: whereVar,
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
 
@@ -7702,7 +7833,9 @@ exports.getScoreDecilNiche = function (req, res, next) {
         N: N,
         alpha: alpha,
         min_occ: min_occ,
-        where_config_raster: whereVarRaster
+        where_config_raster: whereVarRaster,
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
 
@@ -7752,8 +7885,10 @@ exports.getScoreDecilNiche = function (req, res, next) {
     var spid        = getParam(req, 'id');
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
-    var N           = 14707;
+    // var N           = 14707;
     var maxscore    = 700;
+    var res_celda = getParam(req, 'res_celda', "cells_16km");
+    var res_grid = getParam(req, 'res_grid', "gridid_16km");
 
     // Siempre incluidos en query, nj >= 0
     var min_occ       = getParam(req, 'min_occ', 0);
@@ -7785,7 +7920,9 @@ exports.getScoreDecilNiche = function (req, res, next) {
         long: long,
         lat: lat,
         categorias: categorias,
-        maxscore: maxscore
+        maxscore: maxscore,
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         res.json({'data': data})
@@ -7814,7 +7951,9 @@ exports.getScoreDecilNiche = function (req, res, next) {
         long: long,
         lat: lat,
         categorias: categorias,
-        maxscore: maxscore
+        maxscore: maxscore,
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         res.json({'data': data})
@@ -7841,7 +7980,9 @@ exports.getScoreDecilNiche = function (req, res, next) {
         long: long,
         lat: lat,
         categorias: categorias,
-        maxscore: maxscore
+        maxscore: maxscore,
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         res.json({'data': data})
@@ -7880,8 +8021,10 @@ exports.getScoreDecilNiche = function (req, res, next) {
     var spid        = getParam(req, 'id');
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
-    var N           = 14707;
+    // var N           = 14707;
     var maxscore    = 700;
+    var res_celda = getParam(req, 'res_celda', "cells_16km");
+    var res_grid = getParam(req, 'res_grid', "gridid_16km");
 
     // Siempre incluidos en query, nj >= 0
     var min_occ       = getParam(req, 'min_occ', 0);
@@ -7911,7 +8054,9 @@ exports.getScoreDecilNiche = function (req, res, next) {
         long: long,
         lat: lat,
         categorias: categorias,
-        maxscore: maxscore
+        maxscore: maxscore,
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         res.json({'data': data})
@@ -7939,7 +8084,9 @@ exports.getScoreDecilNiche = function (req, res, next) {
         long: long,
         lat: lat,
         categorias: categorias,
-        maxscore: maxscore
+        maxscore: maxscore,
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         res.json({'data': data})
@@ -7966,7 +8113,9 @@ exports.getScoreDecilNiche = function (req, res, next) {
         long: long,
         lat: lat,
         categorias: categorias,
-        maxscore: maxscore
+        maxscore: maxscore,
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         res.json({'data': data})
@@ -8006,8 +8155,10 @@ exports.getGridSpeciesNiche_T = function (req, res, next) {
     var spid        = getParam(req, 'id');
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
-    var N           = 14707; // Verificar N, que se esta contemplando
+    // var N           = 14707; // Verificar N, que se esta contemplando
     var maxscore    = 700;
+    var res_celda = getParam(req, 'res_celda', "cells_16km");
+    var res_grid = getParam(req, 'res_grid', "gridid_16km");
 
     // Siempre incluidos en query, nj >= 0
     var min_occ       = getParam(req, 'min_occ', 0);
@@ -8053,7 +8204,9 @@ exports.getGridSpeciesNiche_T = function (req, res, next) {
         long: long,
         lat: lat,
         categorias: categorias,
-        maxscore: maxscore
+        maxscore: maxscore,
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         // console.log(data);
@@ -8086,7 +8239,9 @@ exports.getGridSpeciesNiche_T = function (req, res, next) {
         long: long,
         lat: lat,
         categorias: categorias,
-        maxscore: maxscore
+        maxscore: maxscore,
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         // console.log(data);
@@ -8120,7 +8275,9 @@ exports.getGridSpeciesNiche_T = function (req, res, next) {
         long: long,
         lat: lat,
         categorias: categorias,
-        maxscore: maxscore
+        maxscore: maxscore,
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         // console.log(data);
@@ -8160,8 +8317,10 @@ exports.getGridSpeciesNiche_T = function (req, res, next) {
     var spid        = getParam(req, 'id');
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
-    var N           = 14707;
+    // var N           = 14707;
     var maxscore    = 700;
+    var res_celda = getParam(req, 'res_celda', "cells_16km");
+    var res_grid = getParam(req, 'res_grid', "gridid_16km");
 
     // Siempre incluidos en query, nj >= 0
     var min_occ       = getParam(req, 'min_occ', 0);
@@ -8185,7 +8344,7 @@ exports.getGridSpeciesNiche_T = function (req, res, next) {
       var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
       var categorias = verb_utils.getRasterCategories(tfilters);
 
-      console.log(categorias);
+      // console.log(categorias);
 
       pool.any(queries.getGridSpeciesNiche.getGridSpecies, {
         spid: spid,
@@ -8197,7 +8356,9 @@ exports.getGridSpeciesNiche_T = function (req, res, next) {
         long: long,
         lat: lat,
         categorias: categorias,
-        maxscore: maxscore
+        maxscore: maxscore,
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         res.json({'data': data})
@@ -8225,7 +8386,9 @@ exports.getGridSpeciesNiche_T = function (req, res, next) {
         long: long,
         lat: lat,
         categorias: categorias,
-        maxscore: maxscore
+        maxscore: maxscore,
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         res.json({'data': data})
@@ -8240,8 +8403,13 @@ exports.getGridSpeciesNiche_T = function (req, res, next) {
     else if (hasRaster === 'true'){
 
       console.log("Ra");
+
+      // console.log(tfilters);
+
+      
       var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
       var categorias = verb_utils.getRasterCategories(tfilters);
+      
       // console.log(whereVarRaster);
 
       pool.any(queries.getGridSpeciesNiche.getGridSpeciesRaster, {
@@ -8253,7 +8421,9 @@ exports.getGridSpeciesNiche_T = function (req, res, next) {
         long: long,
         lat: lat,
         categorias: categorias,
-        maxscore: maxscore
+        maxscore: maxscore,
+        res_celda: res_celda,
+        res_grid: res_grid
       })
       .then(function (data) {
         res.json({'data': data})
@@ -8293,23 +8463,24 @@ exports.getGridSpeciesNiche_T = function (req, res, next) {
 exports.getEdgesNiche = function (req, res, next) {
 
   
-      console.log("getEdgesNiche");
+    console.log("getEdgesNiche");
 
-      // var spids = getParam(req, 'spids');
-      var sfilters    = getParam(req, 's_tfilters');
-      var tfilters    = getParam(req, 't_tfilters');
-      var alpha       = 0.01;
-      var N           = 14707;
-      var min_occ       = getParam(req, 'min_occ', 0);
+    // var spids = getParam(req, 'spids');
+    var sfilters    = getParam(req, 's_tfilters');
+    var tfilters    = getParam(req, 't_tfilters');
+    var alpha       = 0.01;
+    // var N           = 14707;
+    var min_occ       = getParam(req, 'min_occ', 0);
+    var res_celda = getParam(req, 'res_celda', "cells_16km");
 
 
-      var min_ep = 0.0;
-      var max_edges = 1000;
+    var min_ep = 0.0;
+    var max_edges = 1000;
 
-      var hasBiosSource    = getParam(req, 'hasbiosource');
-      var hasRasterSource    = getParam(req, 'hasrastersource');
-      var hasBiosTarget    = getParam(req, 'hasbiotarget');
-      var hasRasterTarget    = getParam(req, 'hasrastertarget');
+    var hasBiosSource    = getParam(req, 'hasbiosource');
+    var hasRasterSource    = getParam(req, 'hasrastersource');
+    var hasBiosTarget    = getParam(req, 'hasbiotarget');
+    var hasRasterTarget    = getParam(req, 'hasrastertarget');
 
 
 
@@ -8329,7 +8500,8 @@ exports.getEdgesNiche = function (req, res, next) {
           where_config_source: whereVarSource,
           where_config_source_raster: whereVarSourceRaster,
           where_config_target: whereVarTarget,
-          where_config_target_raster: whereVarTargetRaster
+          where_config_target_raster: whereVarTargetRaster,
+          res_celda: res_celda
         })
         .then(function (data) {
           res.json({'data': data})
@@ -8357,7 +8529,8 @@ exports.getEdgesNiche = function (req, res, next) {
           min_occ: min_occ,
           where_config_source: whereVarSource,
           where_config_source_raster: whereVarSourceRaster,
-          where_config_target: whereVarTarget
+          where_config_target: whereVarTarget,
+          res_celda: res_celda
           // where_config_target_raster: whereVarTargetRaster
         })
         .then(function (data) {
@@ -8388,7 +8561,8 @@ exports.getEdgesNiche = function (req, res, next) {
           where_config_source: whereVarSource,
           where_config_source_raster: whereVarSourceRaster,
           // where_config_target: whereVarTarget,
-          where_config_target_raster: whereVarTargetRaster
+          where_config_target_raster: whereVarTargetRaster,
+          res_celda: res_celda
         })
         .then(function (data) {
           res.json({'data': data})
@@ -8418,7 +8592,8 @@ exports.getEdgesNiche = function (req, res, next) {
           where_config_source: whereVarSource,
           // where_config_source_raster: whereVarSourceRaster,
           where_config_target: whereVarTarget,
-          where_config_target_raster: whereVarTargetRaster
+          where_config_target_raster: whereVarTargetRaster,
+          res_celda: res_celda
         })
         .then(function (data) {
           res.json({'data': data})
@@ -8448,7 +8623,9 @@ exports.getEdgesNiche = function (req, res, next) {
           // where_config_source: whereVarSource,
           where_config_source_raster: whereVarSourceRaster,
           where_config_target: whereVarTarget,
-          where_config_target_raster: whereVarTargetRaster
+          where_config_target_raster: whereVarTargetRaster,
+          res_celda: res_celda,
+          res_celda: res_celda
         })
         .then(function (data) {
           res.json({'data': data})
@@ -8476,7 +8653,9 @@ exports.getEdgesNiche = function (req, res, next) {
           min_occ: min_occ,
           where_config_source: whereVarSource,
           // where_config_source_raster: whereVarSourceRaster,
-          where_config_target: whereVarTarget
+          where_config_target: whereVarTarget,
+          res_celda: res_celda,
+          res_celda: res_celda
           // where_config_target_raster: whereVarTargetRaster
         })
         .then(function (data) {
@@ -8506,7 +8685,8 @@ exports.getEdgesNiche = function (req, res, next) {
           where_config_source: whereVarSource,
           // where_config_source_raster: whereVarSourceRaster,
           // where_config_target: whereVarTarget,
-          where_config_target_raster: whereVarTargetRaster
+          where_config_target_raster: whereVarTargetRaster,
+          res_celda: res_celda
         })
         .then(function (data) {
           res.json({'data': data})
@@ -8533,7 +8713,8 @@ exports.getEdgesNiche = function (req, res, next) {
           min_occ: min_occ,
           // where_config_source: whereVarSource,
           where_config_source_raster: whereVarSourceRaster,
-          where_config_target: whereVarTarget
+          where_config_target: whereVarTarget,
+          res_celda: res_celda
           // where_config_target_raster: whereVarTargetRaster
         })
         .then(function (data) {
@@ -8563,7 +8744,8 @@ exports.getEdgesNiche = function (req, res, next) {
           // where_config_source: whereVarSource,
           where_config_source_raster: whereVarSourceRaster,
           // where_config_target: whereVarTarget,
-          where_config_target_raster: whereVarTargetRaster
+          where_config_target_raster: whereVarTargetRaster,
+          res_celda: res_celda
         })
         .then(function (data) {
           res.json({'data': data})
@@ -8601,37 +8783,38 @@ exports.getEdgesNiche = function (req, res, next) {
 exports.getNodesNiche = function (req, res, next) {
 
   
-      console.log("getNodesNiche");
+    console.log("getNodesNiche");
 
-      
-      var sfilters    = getParam(req, 's_tfilters');
-      // console.log(sfilters);
-      var tfilters    = getParam(req, 't_tfilters');
-      // console.log(tfilters);
-      var min_occ     = getParam(req, 'min_occ', 0);
-
-
-      var alpha       = 0.01;
-      var N           = 14707;
-      var min_ep      = 0.0;
-      var max_edges   = 1000;
+    
+    var sfilters    = getParam(req, 's_tfilters');
+    // console.log(sfilters);
+    var tfilters    = getParam(req, 't_tfilters');
+    // console.log(tfilters);
+    var min_occ     = getParam(req, 'min_occ', 0);
+    var res_celda = getParam(req, 'res_celda', "cells_16km");
 
 
-      var hasBiosSource    = getParam(req, 'hasbiosource');
-      var hasRasterSource    = getParam(req, 'hasrastersource');
-      var hasBiosTarget    = getParam(req, 'hasbiotarget');
-      var hasRasterTarget    = getParam(req, 'hasrastertarget');
+    var alpha       = 0.01;
+    // var N           = 14707;
+    var min_ep      = 0.0;
+    var max_edges   = 1000;
 
-      // console.log(hasBiosSource);
-      // console.log(hasRasterSource);
-      // console.log(hasBiosTarget);
-      // console.log(hasRasterTarget);
 
-      // console.log("validaciones");
-      // console.log(hasBiosSource === true);
-      // console.log(hasBiosTarget === true);
-      // console.log(hasRasterSource === true);
-      // console.log(hasRasterTarget === true);
+    var hasBiosSource    = getParam(req, 'hasbiosource');
+    var hasRasterSource    = getParam(req, 'hasrastersource');
+    var hasBiosTarget    = getParam(req, 'hasbiotarget');
+    var hasRasterTarget    = getParam(req, 'hasrastertarget');
+
+    // console.log(hasBiosSource);
+    // console.log(hasRasterSource);
+    // console.log(hasBiosTarget);
+    // console.log(hasRasterTarget);
+
+    // console.log("validaciones");
+    // console.log(hasBiosSource === true);
+    // console.log(hasBiosTarget === true);
+    // console.log(hasRasterSource === true);
+    // console.log(hasRasterTarget === true);
 
 
     if ( hasBiosSource === true && hasBiosTarget === true && hasRasterSource === true && hasRasterTarget === true ){
@@ -8651,7 +8834,8 @@ exports.getNodesNiche = function (req, res, next) {
           where_config_source: whereVarSource,
           where_config_source_raster: whereVarSourceRaster,
           where_config_target: whereVarTarget,
-          where_config_target_raster: whereVarTargetRaster
+          where_config_target_raster: whereVarTargetRaster,
+          res_celda: res_celda
         })
         .then(function (data) {
           res.json({'data': data})
@@ -8679,7 +8863,8 @@ exports.getNodesNiche = function (req, res, next) {
           min_occ: min_occ,
           where_config_source: whereVarSource,
           where_config_source_raster: whereVarSourceRaster,
-          where_config_target: whereVarTarget
+          where_config_target: whereVarTarget,
+          res_celda: res_celda
           // where_config_target_raster: whereVarTargetRaster
         })
         .then(function (data) {
@@ -8709,7 +8894,8 @@ exports.getNodesNiche = function (req, res, next) {
           where_config_source: whereVarSource,
           where_config_source_raster: whereVarSourceRaster,
           // where_config_target: whereVarTarget,
-          where_config_target_raster: whereVarTargetRaster
+          where_config_target_raster: whereVarTargetRaster,
+          res_celda: res_celda
         })
         .then(function (data) {
           res.json({'data': data})
@@ -8738,7 +8924,8 @@ exports.getNodesNiche = function (req, res, next) {
           where_config_source: whereVarSource,
           // where_config_source_raster: whereVarSourceRaster,
           where_config_target: whereVarTarget,
-          where_config_target_raster: whereVarTargetRaster
+          where_config_target_raster: whereVarTargetRaster,
+          res_celda: res_celda
         })
         .then(function (data) {
           res.json({'data': data})
@@ -8766,7 +8953,8 @@ exports.getNodesNiche = function (req, res, next) {
           // where_config_source: whereVarSource,
           where_config_source_raster: whereVarSourceRaster,
           where_config_target: whereVarTarget,
-          where_config_target_raster: whereVarTargetRaster
+          where_config_target_raster: whereVarTargetRaster,
+          res_celda: res_celda
         })
         .then(function (data) {
           res.json({'data': data})
@@ -8798,7 +8986,8 @@ exports.getNodesNiche = function (req, res, next) {
           min_occ: min_occ,
           where_config_source: whereVarSource,
           // where_config_source_raster: whereVarSourceRaster,
-          where_config_target: whereVarTarget
+          where_config_target: whereVarTarget,
+          res_celda: res_celda
           // where_config_target_raster: whereVarTargetRaster
         })
         .then(function (data) {
@@ -8826,7 +9015,8 @@ exports.getNodesNiche = function (req, res, next) {
           where_config_source: whereVarSource,
           // where_config_source_raster: whereVarSourceRaster,
           // where_config_target: whereVarTarget,
-          where_config_target_raster: whereVarTargetRaster
+          where_config_target_raster: whereVarTargetRaster,
+          res_celda: res_celda
         })
         .then(function (data) {
           res.json({'data': data})
@@ -8853,7 +9043,8 @@ exports.getNodesNiche = function (req, res, next) {
           min_occ: min_occ,
           // where_config_source: whereVarSource,
           where_config_source_raster: whereVarSourceRaster,
-          where_config_target: whereVarTarget
+          where_config_target: whereVarTarget,
+          res_celda: res_celda
           // where_config_target_raster: whereVarTargetRaster
         })
         .then(function (data) {
@@ -8882,7 +9073,8 @@ exports.getNodesNiche = function (req, res, next) {
           // where_config_source: whereVarSource,
           where_config_source_raster: whereVarSourceRaster,
           // where_config_target: whereVarTarget,
-          where_config_target_raster: whereVarTargetRaster
+          where_config_target_raster: whereVarTargetRaster,
+          res_celda: res_celda
         })
         .then(function (data) {
           res.json({'data': data})
@@ -8931,6 +9123,9 @@ exports.getCountGridid = function (req, res, next) {
 
       var spids = getParam(req, 'spids');
       var isNicho = getParam(req, 'nicho');
+      var res_celda = getParam(req, 'res_celda', "cells_16km");
+      var res_grid = getParam(req, 'res_grid', "gridid_16km");
+
 
       // Si la peticion es de nicho, se requieren los spids
       var coleccion = "";
@@ -8942,7 +9137,9 @@ exports.getCountGridid = function (req, res, next) {
 
       pool.any(queries.getCountGridid.getCount, {
         spids: spids.toString(),
-        coleccion: coleccion
+        coleccion: coleccion,
+          res_celda: res_celda,
+          res_grid: res_grid
       })
           .then(function (data) {
             // console.log(data);
@@ -8985,8 +9182,11 @@ exports.getGrididsNiche = function (req, res, next) {
 
       console.log(getParam(req, 'qtype'));
       console.log("getGrididsNiche");
+      var res_celda = getParam(req, 'res_celda', "gridid_16km");
 
-      pool.any(queries.getGrididsNiche.getGridids, {})
+      pool.any(queries.getGrididsNiche.getGridids, {
+          res_celda: res_celda
+      })
           .then(function (data) {
             // console.log(data);
             res.json({'data': data})
@@ -9029,6 +9229,7 @@ exports.getSpeciesNiche = function (req, res, next) {
       var sfecha            = getParam(req, 'sfecha', false);
       var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
       var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
+      var res_celda = getParam(req, 'res_celda', "gridid_16km");
 
       // console.log(spid);
       // console.log(sfecha);
@@ -9042,7 +9243,8 @@ exports.getSpeciesNiche = function (req, res, next) {
         pool.any(queries.getSpeciesNiche.getSpeciesSDR, {
                 spid: spid,
                 lim_inf: fecha_incio.format('YYYY'),
-                lim_sup: fecha_fin.format('YYYY')
+                lim_sup: fecha_fin.format('YYYY'),
+                res_celda: res_celda
           })
           .then(function (data) {
                 // console.log(data);
@@ -9056,7 +9258,8 @@ exports.getSpeciesNiche = function (req, res, next) {
       else if( parseInt(fecha_incio.format('YYYY')) == 1500 && parseInt(fecha_fin.format('YYYY')) == parseInt(moment().format('YYYY'))  && sfecha === "false"){
           console.log("solo sin fecha");
           pool.any(queries.getSpeciesNiche.getSpeciesSD, {
-                spid: spid
+                spid: spid,
+                res_celda: res_celda
           })
           .then(function (data) {
                 // console.log(data);
@@ -9072,7 +9275,8 @@ exports.getSpeciesNiche = function (req, res, next) {
           pool.any(queries.getSpeciesNiche.getSpeciesR, {
                 spid: spid,
                 lim_inf: fecha_incio.format('YYYY'),
-                lim_sup: fecha_fin.format('YYYY')
+                lim_sup: fecha_fin.format('YYYY'),
+                res_celda: res_celda
           })
           .then(function (data) {
                 // console.log(data);
@@ -9086,7 +9290,8 @@ exports.getSpeciesNiche = function (req, res, next) {
       else{
           console.log("sin filtros");
           pool.any(queries.getSpeciesNiche.getSpecies, {
-                spid: spid
+                spid: spid,
+                res_celda: res_celda
           })
           .then(function (data) {
                 // console.log(data);
@@ -9133,6 +9338,7 @@ exports.getEntListNiche = function (req, res, next) {
       var nivel  = getParam(req, 'nivel');
       var limit   = 15; // numero de resultados a desplegar
        var columnas = verb_utils.getColumns(source, nivel);
+       var res_celda = getParam(req, 'res_celda', "gridid_16km");
 
       console.log(nivel);
       console.log(str);
@@ -9141,7 +9347,8 @@ exports.getEntListNiche = function (req, res, next) {
       pool.any(queries.getEntListNiche.getEntList, {
             str: str,
             columnas: columnas,
-            nivel: nivel
+            nivel: nivel,
+            res_celda: res_celda
       })
           .then(function (data) {
             // console.log(data);
