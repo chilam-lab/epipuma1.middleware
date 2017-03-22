@@ -1,6 +1,6 @@
 /*getFreq con proceso de validación y tiempo*/
 WITH source AS (
-	SELECT spid, cells 
+	SELECT spid, $<res_celda:raw> as cells 
 	FROM sp_snib 
 	WHERE 
 		spid = $<spid>
@@ -9,7 +9,7 @@ WITH source AS (
 ),
 target AS (
 	SELECT  spid,
-			cells 
+			$<res_celda:raw> as cells 
 	FROM sp_snib
 	$<where_config:raw>
 	--WHERE clasevalida = 'Mammalia'
@@ -19,7 +19,7 @@ target AS (
 -- celdas de ni resultantes despues de filtro de tiempo y validación
 filter_ni_tv AS (
 	SELECT 	spid,
-			array_agg(distinct gridid) - array[$<arg_gridids:raw>] as cells
+			array_agg(distinct $<res_grid:raw>) - array[$<arg_gridids:raw>] as cells
 			--icount(array_agg(distinct gridid)) as ni
 	FROM 	snib 
 			where --snib.fechacolecta <> ''
@@ -54,7 +54,7 @@ filter_ni_tv AS (
 filter_nj_tv AS (
 	SELECT 	
 		snib.spid, 
-		array_agg(distinct gridid) - array[ $<arg_gridids:raw> ] as cells
+		array_agg(distinct $<res_grid:raw>) - array[ $<arg_gridids:raw> ] as cells
 		--icount(array_agg(distinct gridid)) as nj
 	FROM snib, target
 	where --snib.fechacolecta <> ''

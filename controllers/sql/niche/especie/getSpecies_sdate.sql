@@ -1,5 +1,5 @@
 SELECT DISTINCT st_asgeojson(the_geom) as json_geom, 
-				gridid, 
+				$<res_celda:raw> as gridid, 
 				urlejemplar, 
 				fechacolecta
 FROM snib 

@@ -1,6 +1,6 @@
 /*getMap sin filtros*/
 WITH source AS (
-	SELECT spid, cells 
+	SELECT spid, $<res_celda:raw> as cells 
 	FROM sp_snib 
 	WHERE 
 		spid = $<spid>
@@ -9,7 +9,7 @@ WITH source AS (
 ),
 target AS (
 	SELECT  spid,
-			cells 
+			$<res_celda:raw> as cells 
 	FROM sp_snib 
 	--WHERE clasevalida = 'Mammalia'
 	$<where_config:raw>	 

@@ -1,6 +1,6 @@
 /*getGridSpecies sin filtros*/
 WITH source AS (
-	SELECT spid, cells 
+	SELECT spid, $<res_celda:raw> as cells 
 	FROM sp_snib 
 	WHERE 
 		spid = $<spid>	
@@ -20,7 +20,7 @@ target AS (
 			cast('' as text) clasevalida,
 			cast('' as text) ordenvalido,
 			cast('' as text) familiavalida,
-			cells 
+			$<res_celda:raw> as cells 
 	FROM raster_bins 
 	$<where_config_raster:raw>
 	--where layer = 'bio01'	 
@@ -30,8 +30,8 @@ target AS (
 -- el arreglo contiene las celdas donde la especie objetivo debe ser descartada 
 filter_ni AS (
 	SELECT 	spid,
-			array_agg(distinct gridid) as ids_ni,
-			icount(array_agg(distinct gridid)) as ni
+			array_agg(distinct $<res_grid:raw>) as ids_ni,
+			icount(array_agg(distinct $<res_grid:raw>)) as ni
 	FROM snib 
 			where --snib.fechacolecta <> ''
 			(case when $<caso> = 1 
@@ -61,8 +61,8 @@ filter_nj AS (
 			spid,
 			generovalido,
 			especievalidabusqueda,
-			cells as ids_nj,
-			icount(cells) as nj
+			$<res_celda:raw> as ids_nj,
+			icount($<res_celda:raw>) as nj
 		FROM target
 ),
 filter_nij AS(
@@ -124,9 +124,9 @@ rawdata as (
 ),
 -- mismos resultados hasta aqui
 grid_spid as (
-	SELECT gridid,
+	SELECT $<res_grid:raw> as gridid,
 	unnest( $<categorias:raw> ) as spid
-	FROM grid_20km_mx 
+	FROM grid_16km_aoi 
 	where ST_Intersects( the_geom, ST_GeomFromText('POINT($<long:raw> $<lat:raw>)',4326))
 	--where ST_Intersects( the_geom, ST_GeomFromText('POINT(-96.3720703125 19.27718395845517)',4326))
 	--order by spid
