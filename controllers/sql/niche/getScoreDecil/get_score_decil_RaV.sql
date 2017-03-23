@@ -135,15 +135,40 @@ prenorm as (
 deciles as ( 
 	SELECT gridid, tscore, array_sp, ntile(10) over (order by tscore) AS decil 
 	FROM prenorm ORDER BY tscore 
-) 
+),
+names_col as (
+	select 
+		decil,
+		unnest(array_sp) as specie_data,
+		sum(1) as decil_occ
+	from deciles 
+	group by decil, specie_data 
+	order by decil desc
+),
+names_col_occ as (
+	select
+		decil,
+		( specie_data||'|'||decil_occ ) as specie_data
+	from names_col
+),
+gruop_decil_data as (
+	select 	decil,
+			array_agg( specie_data ) as arraynames
+	from names_col_occ
+	group by decil
+	order by decil
+)
 select 
 	cast(round( cast(max(tscore) as numeric),2) as float) as l_sup, 
 	cast(round( cast(min(tscore) as numeric),2) as float) as l_inf, 
 	cast(round( cast(sum(tscore) as numeric),2) as float) as sum, 
 	cast(round( cast(avg(tscore) as numeric),2) as float) as avg, 
-	decil, array_agg(gridid) as gridids, 
-	array_agg(array_to_string(array_sp,',')) as arraynames 
+	deciles.decil, 
+	array_agg(distinct gridid) as gridids,
+	gruop_decil_data.arraynames
+	--array_agg(array_to_string( array_sp,',')) as arraynames
 from deciles 
-group by decil 
-order by decil desc
-
+join gruop_decil_data
+on deciles.decil = gruop_decil_data.decil
+group by deciles.decil, arraynames
+order by deciles.decil desc
