@@ -75,7 +75,7 @@ rawdata as (
 			)as numeric), 2)  as epsilon,
 			round( cast(  ln(   
 				get_score(
-					--$<alpha>,
+					$<alpha>,
 					--0.01,
 					cast(counts.nj as integer), 
 					cast(counts.niyj as integer), 
