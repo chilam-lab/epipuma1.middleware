@@ -97,7 +97,7 @@ router.all('/', function(req, res) {
       // verbsCtrl.getScoreDecil_VT,
       // verbsCtrl.getScoreDecil_VA,
       // verbsCtrl.getScoreDecil_TA,
-      // verbsCtrl.getScoreDecil_A,
+      verbsCtrl.getScoreDecilNiche_A,
       verbsCtrl.getScoreDecilNiche_V,
       verbsCtrl.getScoreDecilNiche_T,
       verbsCtrl.getScoreDecilNiche   
@@ -107,7 +107,7 @@ router.all('/', function(req, res) {
       // verbsCtrl.getScoreDecil_VT,
       // verbsCtrl.getScoreDecil_VA,
       // verbsCtrl.getScoreDecil_TA,
-      // verbsCtrl.getScoreDecil_A,
+      verbsCtrl.getScoreDecilNiche_A,
       verbsCtrl.getScoreDecilNiche_V,
       verbsCtrl.getScoreDecilNiche_T,
       verbsCtrl.getScoreDecilNiche   
@@ -154,6 +154,7 @@ router.route('/getNodes')
 
   router.route('/especie')
     .get(
+      verbsCtrl.getRasterNiche,
       verbsCtrl.getCountGridid,  
       verbsCtrl.getGrididsNiche,  
       verbsCtrl.getSpeciesNiche,
@@ -161,6 +162,7 @@ router.route('/getNodes')
       
     )
     .post(
+      verbsCtrl.getRasterNiche,
       verbsCtrl.getCountGridid,  
       verbsCtrl.getGrididsNiche,  
       verbsCtrl.getSpeciesNiche,
