@@ -5,8 +5,8 @@ WITH source AS (
 		cells_16km as cells
 	FROM sp_snib 
 	WHERE 
-		--spid = $<spid>
-		spid = 	28923	
+		spid = $<spid>
+		--spid = 	28923	
 		and especievalidabusqueda <> ''
 ),
 target AS (
@@ -22,10 +22,10 @@ target AS (
 			cast('' as text) clasevalida,
 			cast('' as text) ordenvalido,
 			cast('' as text) familiavalida,
-			--$<res_celda:raw> as cells
-			cells_16km as cells 
+			$<res_celda:raw> as cells
+			--cells_16km as cells 
 	FROM raster_bins 
-	--$<where_config_raster:raw>
+	$<where_config_raster:raw>
 	--where type = 0	
 ),
 counts AS (
@@ -37,8 +37,8 @@ counts AS (
 			icount(source.cells & target.cells) AS niyj,
 			icount(target.cells) AS nj,
 			icount(source.cells) AS ni,
-			--$<N> as n,
-			94544 as n,
+			$<N> as n,
+			--94544 as n,
 			target.reinovalido,
 			target.phylumdivisionvalido,
 			target.clasevalida,
@@ -46,10 +46,10 @@ counts AS (
 			target.familiavalida
 	FROM source,target
 	where 
-	--target.spid <> $<spid>
-	target.spid <> 28923
-	--and icount(target.cells) > $<min_occ:raw>
-	and icount(target.cells) > 0
+	target.spid <> $<spid>
+	--target.spid <> 28923
+	and icount(target.cells) > $<min_occ:raw>
+	--and icount(target.cells) > 0
 ),
 rawdata as (
 	SELECT 	counts.spid,
@@ -66,8 +66,8 @@ rawdata as (
 			counts.familiavalida,
 			round( cast(  
 			get_epsilon(
-				--$<alpha>,
-				0.01,
+				$<alpha>,
+				--0.01,
 				cast(counts.nj as integer), 
 				cast(counts.niyj as integer), 
 				cast(counts.ni as integer), 
@@ -76,7 +76,7 @@ rawdata as (
 			round( cast(  ln(   
 				get_score(
 					--$<alpha>,
-					0.01,
+					--0.01,
 					cast(counts.nj as integer), 
 					cast(counts.niyj as integer), 
 					cast(counts.ni as integer), 
