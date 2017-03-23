@@ -100,8 +100,8 @@ prenorm as (
 			tscore
 	from basic_score
 	inner join grid_16km_aoi
-	--on basic_score.gridid = grid_16km_aoi.$<res_grid:raw>
-	on basic_score.gridid = grid_16km_aoi.gridid_16km
+	on basic_score.gridid = grid_16km_aoi.$<res_grid:raw>
+	--on basic_score.gridid = grid_16km_aoi.gridid_16km
 	order by tscore desc
 ),
 deciles as ( 
