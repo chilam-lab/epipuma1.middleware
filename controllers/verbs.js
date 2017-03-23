@@ -410,7 +410,7 @@ exports.getGeoRel_VT = function (req, res, next) {
 
     console.log("getGeoRel_VT");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     var N           = 6473;
@@ -562,7 +562,7 @@ exports.getGeoRel_V = function (req, res, next) {
 
     console.log("getGeoRel_V");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     var N           = 6473;
@@ -700,7 +700,7 @@ exports.getGeoRel_T = function (req, res, next) {
 
     console.log("getGeoRel_T");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     var N           = 6473;
@@ -828,7 +828,7 @@ exports.getGeoRel = function (req, res, next) {
 
     console.log("getGeoRel");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     var N           = 6473;
@@ -940,7 +940,7 @@ exports.getFreq_VT = function (req, res, next) {
 
     console.log("getFreq_VT");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     var N           = 6473;
@@ -1089,7 +1089,7 @@ exports.getFreq_V = function (req, res, next) {
 
     console.log("getFreq_V");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     var N           = 6473;
@@ -1200,7 +1200,7 @@ exports.getFreq_T = function (req, res, next) {
 
     console.log("getFreq_T");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     var N           = 6473;
@@ -1326,7 +1326,7 @@ exports.getFreq = function (req, res, next) {
 
     console.log("getFreq");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     var N           = 6473;
@@ -1427,7 +1427,7 @@ exports.getFreqCelda_VTA = function (req, res, next) {
 
     console.log("getFreqCelda_VTA");
     
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     var N           = 6473;
@@ -1567,7 +1567,7 @@ exports.getFreqCelda_VA = function (req, res, next) {
 
     console.log("getFreqCelda_VA");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     var N           = 6473;
@@ -1688,7 +1688,7 @@ exports.getFreqCelda_VT = function (req, res, next) {
 
     console.log("getFreqCelda_VT");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     var N           = 6473;
@@ -1831,7 +1831,7 @@ exports.getFreqCelda_TA = function (req, res, next) {
 
     console.log("getFreqCelda_TA");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     var N           = 6473;
@@ -1979,7 +1979,7 @@ exports.getFreqCelda_A = function (req, res, next) {
 
     console.log("getFreqCelda_A");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     var N           = 6473;
@@ -2105,7 +2105,7 @@ exports.getFreqCelda_V = function (req, res, next) {
 
     console.log("getFreqCelda_V");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     var N           = 6473;
@@ -2227,7 +2227,7 @@ exports.getFreqCelda_T = function (req, res, next) {
 
     console.log("getFreqCelda_T");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     var N           = 6473;
@@ -2372,7 +2372,7 @@ exports.getFreqCelda = function (req, res, next) {
 
     console.log("getFreqCelda");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     var N           = 6473;
@@ -2480,7 +2480,7 @@ exports.getFreqMap_TM = function (req, res, next) {
 
     console.log("getFreqMap_TM");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     var N           = 6473;
@@ -2630,7 +2630,7 @@ exports.getFreqMap_TA = function (req, res, next) {
 
     console.log("getFreqMap_TA");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     var N           = 6473;
@@ -2776,7 +2776,7 @@ exports.getFreqMap_M = function (req, res, next) {
 
     console.log("getFreqMap_M");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     var N           = 6473;
@@ -2906,7 +2906,7 @@ exports.getFreqMap_A = function (req, res, next) {
 
     console.log("getFreqMap_A");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     var N           = 6473;
@@ -3032,7 +3032,7 @@ exports.getFreqMap_T = function (req, res, next) {
 
     console.log("getFreqMap_T");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     var N           = 6473;
@@ -3169,7 +3169,7 @@ exports.getFreqMap = function (req, res, next) {
 
     console.log("getFreqMap");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     var N           = 6473;
@@ -3292,7 +3292,7 @@ exports.getScoreDecil_VTA = function (req, res, next) {
 
     console.log("getScoreDecil_VTA");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     var N           = 6473;
@@ -3470,7 +3470,7 @@ exports.getScoreDecil_VT = function (req, res, next) {
 
     console.log("getScoreDecil_VT");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     var N           = 6473;
@@ -3646,7 +3646,7 @@ exports.getScoreDecil_VA = function (req, res, next) {
 
     console.log("getScoreDecil_VA");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     var N           = 6473;
@@ -3794,7 +3794,7 @@ exports.getScoreDecil_TA = function (req, res, next) {
 
     console.log("getScoreDecil_TA");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     var N           = 6473;
@@ -3958,7 +3958,7 @@ exports.getScoreDecil_A = function (req, res, next) {
 
     console.log("getScoreDecil_A");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     var N           = 6473;
@@ -4102,7 +4102,7 @@ exports.getScoreDecil_V = function (req, res, next) {
 
     console.log("getScoreDecil_V");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     var N           = 6473;
@@ -4249,7 +4249,7 @@ exports.getScoreDecil_T = function (req, res, next) {
 
     console.log("getScoreDecil_T");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     var N           = 6473;
@@ -4410,7 +4410,7 @@ exports.getScoreDecil = function (req, res, next) {
     console.log("getScoreDecil");
 
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     var N           = 6473;
@@ -4541,7 +4541,7 @@ exports.getScoreDecil = function (req, res, next) {
 
     console.log("getGridSpecies_TM");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     var N           = 6473;
@@ -4683,7 +4683,7 @@ exports.getScoreDecil = function (req, res, next) {
 
     console.log("getGridSpecies_TA");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     var N           = 6473;
@@ -4827,7 +4827,7 @@ exports.getScoreDecil = function (req, res, next) {
 
     console.log("getGridSpecies_M");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     var N           = 6473;
@@ -4956,7 +4956,7 @@ exports.getScoreDecil = function (req, res, next) {
 
     console.log("getGridSpecies_A");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     var N           = 6473;
@@ -5084,7 +5084,7 @@ exports.getScoreDecil = function (req, res, next) {
     console.log("getGridSpecies_T");
 
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     var N           = 6473;
@@ -5184,7 +5184,7 @@ exports.getScoreDecil = function (req, res, next) {
     console.log("getGridSpecies");
 
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     var N           = 6473;
@@ -5325,7 +5325,7 @@ exports.getGeoRelNiche_VT = function (req, res, next) {
 
     console.log("getGeoRelNiche_VT");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     // var N           = 14707; // Verificar N, que se esta contemplando
@@ -5475,7 +5475,7 @@ exports.getGeoRelNiche_V = function (req, res, next) {
 
     console.log("getGeoRelNiche_V");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     // var N           = 14707; // Verificar N, que se esta contemplando
@@ -5594,7 +5594,7 @@ exports.getGeoRelNiche_T = function (req, res, next) {
 
     console.log("getGeoRelNiche_T");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     // var N           = 14707; // Verificar N, que se esta contemplando
@@ -5750,7 +5750,7 @@ exports.getGeoRelNiche = function (req, res, next) {
 
     console.log("getGeoRelNiche");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     // var N           = 14707; // Verificar N, que se esta contemplando
@@ -5880,7 +5880,7 @@ exports.getFreqNiche_VT = function (req, res, next) {
 
     console.log("getFreqNiche_VT");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     // var N           = 14707; // Verificar N, que se esta contemplando
@@ -6027,7 +6027,7 @@ exports.getFreqNiche_V = function (req, res, next) {
 
     console.log("getFreqNiche_V");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     // var N           = 14707; // Verificar N, que se esta contemplando
@@ -6148,7 +6148,7 @@ exports.getFreqNiche_T = function (req, res, next) {
 
     console.log("getFreqNiche_T");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     // var N           = 14707; // Verificar N, que se esta contemplando
@@ -6301,7 +6301,7 @@ exports.getFreqNiche = function (req, res, next) {
 
     console.log("getFreqNiche");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     // var N           = 14707; // Verificar N, que se esta contemplando
@@ -6417,7 +6417,7 @@ exports.getFreqMapNiche_M = function (req, res, next) {
 
     console.log("getFreqMapNiche_M");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     // var N           = 14707;
@@ -6533,7 +6533,7 @@ exports.getFreqMapNiche_A = function (req, res, next) {
 
     console.log("getFreqMapNiche_A");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     // var N           = 14707;
@@ -6648,7 +6648,7 @@ exports.getFreqMapNiche_T = function (req, res, next) {
 
     console.log("getFreqMapNiche_T");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     // var N           = 14707; // Verificar N, que se esta contemplando
@@ -6799,7 +6799,7 @@ exports.getFreqMapNiche = function (req, res, next) {
 
     console.log("getFreqMapNiche");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     var res_celda = getParam(req, 'res_celda', "cells_16km");
@@ -6965,7 +6965,7 @@ exports.getFreqCeldaNiche_A = function (req, res, next) {
 
     console.log("getFreqCeldaNiche_A");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     // var N           = 14707;
@@ -7084,7 +7084,7 @@ exports.getFreqCeldaNiche_V = function (req, res, next) {
 
     console.log("getFreqCeldaNiche_V");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     // var N           = 14707; // Verificar N, que se esta contemplando
@@ -7208,7 +7208,7 @@ exports.getFreqCeldaNiche_T = function (req, res, next) {
 
     console.log("getFreqCeldaNiche_T");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     // var N           = 14707; // Verificar N, que se esta contemplando
@@ -7361,7 +7361,7 @@ exports.getFreqCeldaNiche = function (req, res, next) {
 
     console.log("getFreqCeldaNiche");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     // var N           = 14707;
@@ -7483,7 +7483,7 @@ exports.getScoreDecilNiche_A = function (req, res, next) {
 
     console.log("getScoreDecilNiche_A");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     // var N           = 14707;
@@ -7617,7 +7617,7 @@ exports.getScoreDecilNiche_V = function (req, res, next) {
 
     console.log("getScoreDecilNiche_V");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     // var N           = 14707; // Verificar N, que se esta contemplando
@@ -7756,7 +7756,7 @@ exports.getScoreDecilNiche_T = function (req, res, next) {
 
     console.log("getScoreDecilNiche_T");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     // var N           = 14707; // Verificar N, que se esta contemplando
@@ -7921,7 +7921,7 @@ exports.getScoreDecilNiche = function (req, res, next) {
     console.log("getScoreDecilNiche");
 
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     // var N           = 14707;
@@ -8062,7 +8062,7 @@ exports.getScoreDecilNiche = function (req, res, next) {
 
     console.log("getGridSpeciesNiche_M");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     // var N           = 14707;
@@ -8198,7 +8198,7 @@ exports.getScoreDecilNiche = function (req, res, next) {
 
     console.log("getGridSpeciesNiche_A");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     // var N           = 14707;
@@ -8332,7 +8332,7 @@ exports.getGridSpeciesNiche_T = function (req, res, next) {
 
     console.log("getGridSpeciesNiche_T");
 
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     // var N           = 14707; // Verificar N, que se esta contemplando
@@ -8494,7 +8494,7 @@ exports.getGridSpeciesNiche_T = function (req, res, next) {
     console.log("getGridSpeciesNiche");
 
     
-    var spid        = getParam(req, 'id');
+    var spid        = parseInt(getParam(req, 'id'));
     var tfilters    = getParam(req, 'tfilters');
     var alpha       = 0.01;
     // var N           = 14707;
@@ -9479,7 +9479,7 @@ exports.getSpeciesNiche = function (req, res, next) {
       console.log(getParam(req, 'qtype'));
       console.log("getSpeciesNiche");
 
-      var spid              = getParam(req, 'id');
+      var spid              = parseInt(getParam(req, 'id'));
       var sfecha            = getParam(req, 'sfecha', false);
       var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
       var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
@@ -9645,7 +9645,7 @@ exports.getEntListNiche = function (req, res, next) {
 
 //     console.log("getFreqMap_V");
 
-//     var spid        = getParam(req, 'id');
+//     var spid        = parseInt(getParam(req, 'id'));
 //     var tfilters    = getParam(req, 'tfilters');
 //     var alpha       = 0.01;
 //     var N           = 6473;
