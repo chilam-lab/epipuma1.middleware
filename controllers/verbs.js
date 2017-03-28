@@ -2,7 +2,7 @@
 * Verbs module
 * @module controllers/verbs
 */
-var debug = require('debug')('verbs')
+var debug = require('debug')('verbs:old')
 var pgp = require('pg-promise')()
 var moment = require('moment')
 var verb_utils = require('./verb_utils')
