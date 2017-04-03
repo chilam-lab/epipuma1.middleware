@@ -31,8 +31,6 @@ router.all('/', function(req, res) {
   )
 })
 
-/*** VERBOS PARA NICHO ***/
-
 /**
  * Ruta que calcula el score entre las variables elegidas. 
  * @name get/getGeoRel
@@ -196,46 +194,4 @@ router.route('/getGridSpecies')
     verbsCtrl.getGridSpeciesNiche        
   )
 
-
-/************************************************************* VERBOS PARA REDES ******************************/
-
-
-router.route('/getEdges')
-  .get(
-    verbsCtrl.getEdgesNiche
-  )
-  .post(
-    verbsCtrl.getEdgesNiche
-  )
-
-router.route('/getNodes')
-  .get(
-    verbsCtrl.getNodesNiche
-  )
-  .post(
-    verbsCtrl.getNodesNiche
-  )
-
-
-
-/************************************************************* VERBOS ÚTILES ******************************/
-
-  router.route('/especie')
-    .get(
-      verbsCtrl.getRasterNiche,
-      verbsCtrl.getCountGridid,  
-      verbsCtrl.getGrididsNiche,  
-      verbsCtrl.getSpeciesNiche,
-      verbsCtrl.getEntListNiche
-      
-    )
-    .post(
-      verbsCtrl.getRasterNiche,
-      verbsCtrl.getCountGridid,  
-      verbsCtrl.getGrididsNiche,  
-      verbsCtrl.getSpeciesNiche,
-      verbsCtrl.getEntListNiche
-    )
-
-  
 module.exports = router

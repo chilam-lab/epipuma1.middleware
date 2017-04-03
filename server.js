@@ -26,11 +26,16 @@ var port = process.env.PORT || 8080        // set our port
 // Routes for our api
 var verbsRouter = require('./routes/router')
 var nicheRouter = require('./routes/nicherouter')
+var netRouter = require('./routes/networkrouter')
+var utilsRouter = require('./routes/utilsrouter')
 
 // Register our routes
 // all of our routes will be prefixed with /snib
 app.use('/snib', verbsRouter)
-app.use('/niche', nicheRouter)
+app.use('/niche', 
+        nicheRouter, 
+        netRouter,
+        utilsRouter)
 
 // Start the server
 var server = app.listen(port, function () {
