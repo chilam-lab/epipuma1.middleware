@@ -12,7 +12,7 @@ var queries = require('./sql/queryProvider.js')
 
 var pool = pgp(config.db)
 
-// var N = 14707;
+// var N = 14707
 var N = 94544; // MX y EU sin alaska y hawuaii 16km
 
 /**
@@ -353,7 +353,7 @@ exports.getTopoVars = function (req, res, next) {
  */
 exports.getStates = function (req, res, next) {
 
-  // console.log("getStates");
+  // debug("getStates")
 
   pool.any(queries.layers.getStatesMX)
     .then(function (data) {
@@ -376,9 +376,9 @@ exports.getStates = function (req, res, next) {
  */
 exports.getUserReg = function (req, res, next) {
 
-  // console.log("getUserReg");
+  // debug("getUserReg")
   
-  var user_email = getParam(req, 'email');
+  var user_email = getParam(req, 'email')
 
   pool.any(queries.users.getUser, {email: user_email})
     .then(function (data) {
@@ -387,8 +387,7 @@ exports.getUserReg = function (req, res, next) {
     .catch(function (error) {
       next(error)
     })
-};
-
+}
 
 /**************************************************************************************************************************/
 /**************************************************************************************************************************/
@@ -412,28 +411,28 @@ exports.getUserReg = function (req, res, next) {
 
 exports.getGeoRelNiche_VT = function (req, res, next) {
 
-    console.log("getGeoRelNiche_VT");
+    debug("getGeoRelNiche_VT")
 
-    var spid        = parseInt(getParam(req, 'id'));
-    var tfilters    = getParam(req, 'tfilters');
-    var alpha       = 0.01;
+    var spid        = parseInt(getParam(req, 'id'))
+    var tfilters    = getParam(req, 'tfilters')
+    var alpha       = 0.01
     // var N           = 14707; // Verificar N, que se esta contemplando
-    var res_celda = getParam(req, 'res_celda', "cells_16km");
-    var res_grid = getParam(req, 'res_grid', "gridid_16km");
+    var res_celda = getParam(req, 'res_celda', "cells_16km")
+    var res_grid = getParam(req, 'res_grid', "gridid_16km")
 
     // Siempre incluidos en query, nj >= 0
-    var min_occ       = getParam(req, 'min_occ', 0);
+    var min_occ       = getParam(req, 'min_occ', 0)
 
     // variables configurables
-    var hasBios         = getParam(req, 'hasBios');
-    var hasRaster       = getParam(req, 'hasRaster');
-    var discardedids    = getParam(req, 'discardedids', []);
+    var hasBios         = getParam(req, 'hasBios')
+    var hasRaster       = getParam(req, 'hasRaster')
+    var discardedids    = getParam(req, 'discardedids', [])
     // filtros por tiempo
-    var sfecha            = getParam(req, 'sfecha', false);
-    var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
-    var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
-    var discardedFilterids = getParam(req, 'discardedDateFilterids');
-    // console.log(discardedFilterids);
+    var sfecha            = getParam(req, 'sfecha', false)
+    var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+    var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+    var discardedFilterids = getParam(req, 'discardedDateFilterids')
+    // debug(discardedFilterids)
 
 
     
@@ -441,13 +440,13 @@ exports.getGeoRelNiche_VT = function (req, res, next) {
     
     if ( hasBios === 'true' && hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 && discardedFilterids === "true" ){
 
-      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha);
-      console.log(caso);
+      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+      debug(caso)
 
 
-      console.log("V");
-      var whereVar = verb_utils.processBioFilters(tfilters, spid);
-      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      debug("V")
+      var whereVar = verb_utils.processBioFilters(tfilters, spid)
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
 
       pool.any(queries.getGeoRelNiche.getGeoRelVT, {
         spid: spid,
@@ -467,7 +466,7 @@ exports.getGeoRelNiche_VT = function (req, res, next) {
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
 
@@ -475,13 +474,13 @@ exports.getGeoRelNiche_VT = function (req, res, next) {
     }
     else if (hasBios === 'true' && discardedids != undefined && discardedids.length > 0 && discardedFilterids === "true" ){
 
-        var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha);
-        console.log(caso);
+        var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+        debug(caso)
 
 
-        console.log("B");
-        var whereVar = verb_utils.processBioFilters(tfilters, spid);
-        // console.log(whereVar);
+        debug("B")
+        var whereVar = verb_utils.processBioFilters(tfilters, spid)
+        // debug(whereVar)
 
         pool.any(queries.getGeoRelNiche.getGeoRelBioVT, {
           spid: spid,
@@ -497,24 +496,24 @@ exports.getGeoRelNiche_VT = function (req, res, next) {
         res_grid: res_grid
         })
         .then(function (data) {
-          // console.log(data.length);
+          // debug(data.length)
           res.json({'data': data})
         })
         .catch(function (error) {
-          console.log(error);
+          debug(error)
           next(error)
         })
       
     } 
     else if (hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 && discardedFilterids === "true" ){
 
-      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha);
-      console.log(caso);
+      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+      debug(caso)
 
 
-      console.log("Ra");
-      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
-      // console.log(whereVarRaster);
+      debug("Ra")
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
+      // debug(whereVarRaster)
 
       pool.any(queries.getGeoRelNiche.getGeoRelRaVT, {
         spid: spid,
@@ -533,7 +532,7 @@ exports.getGeoRelNiche_VT = function (req, res, next) {
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
 
@@ -541,10 +540,10 @@ exports.getGeoRelNiche_VT = function (req, res, next) {
     } 
     else{
 
-      next();
+      next()
     }
 
-};
+}
 
 
 
@@ -562,30 +561,30 @@ exports.getGeoRelNiche_VT = function (req, res, next) {
 
 exports.getGeoRelNiche_V = function (req, res, next) {
 
-    console.log("getGeoRelNiche_V");
+    debug("getGeoRelNiche_V")
 
-    var spid        = parseInt(getParam(req, 'id'));
-    var tfilters    = getParam(req, 'tfilters');
-    var alpha       = 0.01;
+    var spid        = parseInt(getParam(req, 'id'))
+    var tfilters    = getParam(req, 'tfilters')
+    var alpha       = 0.01
     // var N           = 14707; // Verificar N, que se esta contemplando
-    var res_celda = getParam(req, 'res_celda', "cells_16km");
+    var res_celda = getParam(req, 'res_celda', "cells_16km")
 
     // Siempre incluidos en query, nj >= 0
-    var min_occ       = getParam(req, 'min_occ', 0);
+    var min_occ       = getParam(req, 'min_occ', 0)
 
     // variables configurables
-    var hasBios         = getParam(req, 'hasBios');
-    var hasRaster       = getParam(req, 'hasRaster');
-    var discardedids    = getParam(req, 'discardedids', []);
+    var hasBios         = getParam(req, 'hasBios')
+    var hasRaster       = getParam(req, 'hasRaster')
+    var discardedids    = getParam(req, 'discardedids', [])
 
-    // console.log(discardedids);
+    // debug(discardedids)
 
     
     if ( hasBios === 'true' && hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 ){
 
-      console.log("V");
-      var whereVar = verb_utils.processBioFilters(tfilters, spid);
-      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      debug("V")
+      var whereVar = verb_utils.processBioFilters(tfilters, spid)
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
 
       pool.any(queries.getGeoRelNiche.getGeoRelV, {
         spid: spid,
@@ -601,7 +600,7 @@ exports.getGeoRelNiche_V = function (req, res, next) {
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
 
@@ -609,9 +608,9 @@ exports.getGeoRelNiche_V = function (req, res, next) {
     }
     else if (hasBios === 'true' && discardedids != undefined && discardedids.length > 0 ){
 
-      console.log("B");
-      var whereVar = verb_utils.processBioFilters(tfilters, spid);
-      // console.log(whereVar);
+      debug("B")
+      var whereVar = verb_utils.processBioFilters(tfilters, spid)
+      // debug(whereVar)
 
       pool.any(queries.getGeoRelNiche.getGeoRelBioV, {
         spid: spid,
@@ -623,20 +622,20 @@ exports.getGeoRelNiche_V = function (req, res, next) {
         res_celda: res_celda
       })
       .then(function (data) {
-        // console.log(data.length);
+        // debug(data.length)
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
       
     } 
     else if (hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 ){
 
-      console.log("Ra");
-      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
-      // console.log(whereVarRaster);
+      debug("Ra")
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
+      // debug(whereVarRaster)
 
       pool.any(queries.getGeoRelNiche.getGeoRelRaV, {
         spid: spid,
@@ -651,7 +650,7 @@ exports.getGeoRelNiche_V = function (req, res, next) {
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
 
@@ -659,10 +658,10 @@ exports.getGeoRelNiche_V = function (req, res, next) {
     } 
     else{
 
-      next();
+      next()
     }
 
-};
+}
 
 
 
@@ -681,43 +680,43 @@ exports.getGeoRelNiche_V = function (req, res, next) {
 
 exports.getGeoRelNiche_T = function (req, res, next) {
 
-    console.log("getGeoRelNiche_T");
+    debug("getGeoRelNiche_T")
 
-    var spid        = parseInt(getParam(req, 'id'));
-    var tfilters    = getParam(req, 'tfilters');
-    var alpha       = 0.01;
+    var spid        = parseInt(getParam(req, 'id'))
+    var tfilters    = getParam(req, 'tfilters')
+    var alpha       = 0.01
     // var N           = 14707; // Verificar N, que se esta contemplando
-    var res_celda = getParam(req, 'res_celda', "cells_16km");
-    var res_grid = getParam(req, 'res_grid', "gridid_16km");
+    var res_celda = getParam(req, 'res_celda', "cells_16km")
+    var res_grid = getParam(req, 'res_grid', "gridid_16km")
 
     // Siempre incluidos en query, nj >= 0
-    var min_occ       = getParam(req, 'min_occ', 0);
+    var min_occ       = getParam(req, 'min_occ', 0)
 
     // variables configurables
-    var hasBios         = getParam(req, 'hasBios');
-    var hasRaster       = getParam(req, 'hasRaster');
+    var hasBios         = getParam(req, 'hasBios')
+    var hasRaster       = getParam(req, 'hasRaster')
     
     // filtros por tiempo
-    var sfecha            = getParam(req, 'sfecha', false);
-    var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
-    var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
-    var discardedFilterids = getParam(req, 'discardedDateFilterids');
+    var sfecha            = getParam(req, 'sfecha', false)
+    var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+    var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+    var discardedFilterids = getParam(req, 'discardedDateFilterids')
 
-    console.log(discardedFilterids);
+    debug(discardedFilterids)
 
     
     
 
     if (hasBios === "true" && hasRaster === "true" && discardedFilterids === "true"){
 
-      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha);
-      console.log(caso);
+      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+      debug(caso)
 
 
-      console.log("T");  
+      debug("T");  
 
-       whereVar = verb_utils.processBioFilters(tfilters, spid);
-       whereVarRaster = verb_utils.processRasterFilters(tfilters,spid);
+       whereVar = verb_utils.processBioFilters(tfilters, spid)
+       whereVarRaster = verb_utils.processRasterFilters(tfilters,spid)
       
       pool.any(queries.getGeoRelNiche.getGeoRelT, {
         spid: spid,
@@ -733,11 +732,11 @@ exports.getGeoRelNiche_T = function (req, res, next) {
         res_grid: res_grid
       })
       .then(function (data) {
-        // console.log(data);
+        // debug(data)
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
 
@@ -747,13 +746,13 @@ exports.getGeoRelNiche_T = function (req, res, next) {
     }
     else if (hasBios === 'true' && discardedFilterids === "true" ){
 
-      console.log("B");
+      debug("B")
 
-      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha);
-      console.log(caso);  
+      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+      debug(caso);  
 
-      whereVar = verb_utils.processBioFilters(tfilters, spid);
-      // console.log(whereVar);
+      whereVar = verb_utils.processBioFilters(tfilters, spid)
+      // debug(whereVar)
       
       pool.any(queries.getGeoRelNiche.getGeoRelBioT, {
         spid: spid,
@@ -768,11 +767,11 @@ exports.getGeoRelNiche_T = function (req, res, next) {
         res_grid: res_grid
       })
       .then(function (data) {
-        // console.log(data);
+        // debug(data)
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
       
@@ -781,13 +780,13 @@ exports.getGeoRelNiche_T = function (req, res, next) {
     } 
     else if (hasRaster === 'true' && discardedFilterids === "true" ){
 
-      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha);
-      console.log(caso);
+      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+      debug(caso)
 
 
-      console.log("Ra");
+      debug("Ra")
 
-      whereVarRaster = verb_utils.processRasterFilters(tfilters,spid);
+      whereVarRaster = verb_utils.processRasterFilters(tfilters,spid)
       
       pool.any(queries.getGeoRelNiche.getGeoRelRaT, {
         spid: spid,
@@ -802,23 +801,23 @@ exports.getGeoRelNiche_T = function (req, res, next) {
         res_grid: res_grid
       })
       .then(function (data) {
-        // console.log(data);
+        // debug(data)
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
       
     } 
     else{
 
-      next();
+      next()
     }
 
     
 
-};
+}
 
 
 
@@ -837,18 +836,19 @@ exports.getGeoRelNiche_T = function (req, res, next) {
 
 exports.getGeoRelNiche = function (req, res, next) {
 
-    console.log("getGeoRelNiche");
+    debug("getGeoRelNiche")
 
-    var spid        = parseInt(getParam(req, 'id'));
-    var tfilters    = getParam(req, 'tfilters');
-    var alpha       = 0.01;
+    var spid        = parseInt(getParam(req, 'id'))
+    var tfilters    = getParam(req, 'tfilters')
+    var alpha       = 0.01
     // var N           = 14707; // Verificar N, que se esta contemplando
-    var res_celda = getParam(req, 'res_celda', "cells_16km");
+    var res_celda = getParam(req, 'res_celda', "cells_16km")
 
     // Siempre incluidos en query, nj >= 0
-    var min_occ       = getParam(req, 'min_occ', 0);
+    var min_occ       = getParam(req, 'min_occ', 0)
 
     // variables configurables
+
     var hasBios         = getParam(req, 'hasBios');
     var hasRaster       = getParam(req, 'hasRaster');
 
@@ -862,13 +862,14 @@ exports.getGeoRelNiche = function (req, res, next) {
     // console.log(spid);
     // console.log(tfilters);
     // console.log(min_occ);
+
     
     
     if (hasBios === 'true' && hasRaster === 'true' ){
 
-      console.log("T");
-      var whereVar = verb_utils.processBioFilters(tfilters, spid);
-      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      debug("T")
+      var whereVar = verb_utils.processBioFilters(tfilters, spid)
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
 
       pool.any(queries.getGeoRelNiche.getGeoRel, {
         spid: spid,
@@ -884,7 +885,7 @@ exports.getGeoRelNiche = function (req, res, next) {
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
 
@@ -892,10 +893,10 @@ exports.getGeoRelNiche = function (req, res, next) {
     }
     else if (hasBios === 'true'){
 
-      console.log("B");
-      var whereVar = verb_utils.processBioFilters(tfilters, spid);
-      // console.log(whereVar);
-      // console.log(queries.getGeoRelNiche.getGeoRelBio);
+      debug("B")
+      var whereVar = verb_utils.processBioFilters(tfilters, spid)
+      // debug(whereVar)
+      // debug(queries.getGeoRelNiche.getGeoRelBio)
 
       pool.any(queries.getGeoRelNiche.getGeoRelBio, {
         spid: spid,
@@ -907,20 +908,20 @@ exports.getGeoRelNiche = function (req, res, next) {
         discardedDeleted: discardedDeleted.toString()
       })
       .then(function (data) {
-        // console.log(data);
+        // debug(data)
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
       
     } 
     else if (hasRaster === 'true'){
 
-      console.log("Ra");
-      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
-      // console.log(whereVarRaster);
+      debug("Ra")
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
+      // debug(whereVarRaster)
 
       pool.any(queries.getGeoRelNiche.getGeoRelRaster, {
         spid: spid,
@@ -935,7 +936,7 @@ exports.getGeoRelNiche = function (req, res, next) {
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
 
@@ -943,13 +944,13 @@ exports.getGeoRelNiche = function (req, res, next) {
     } 
     else{
 
-      next();
+      next()
     }
 
 
 
 
-};
+}
 
 
 
@@ -975,39 +976,39 @@ exports.getGeoRelNiche = function (req, res, next) {
 
 exports.getFreqNiche_VT = function (req, res, next) {
 
-    console.log("getFreqNiche_VT");
+    debug("getFreqNiche_VT")
 
-    var spid        = parseInt(getParam(req, 'id'));
-    var tfilters    = getParam(req, 'tfilters');
-    var alpha       = 0.01;
+    var spid        = parseInt(getParam(req, 'id'))
+    var tfilters    = getParam(req, 'tfilters')
+    var alpha       = 0.01
     // var N           = 14707; // Verificar N, que se esta contemplando
-    var res_celda = getParam(req, 'res_celda', "cells_16km");
-    var res_grid = getParam(req, 'res_grid', "gridid_16km");
+    var res_celda = getParam(req, 'res_celda', "cells_16km")
+    var res_grid = getParam(req, 'res_grid', "gridid_16km")
 
     // Siempre incluidos en query, nj >= 0
-    var min_occ       = getParam(req, 'min_occ', 0);
+    var min_occ       = getParam(req, 'min_occ', 0)
 
     // variables configurables
-    var hasBios         = getParam(req, 'hasBios');
-    var hasRaster       = getParam(req, 'hasRaster');
-    var discardedids    = getParam(req, 'discardedids', []);
+    var hasBios         = getParam(req, 'hasBios')
+    var hasRaster       = getParam(req, 'hasRaster')
+    var discardedids    = getParam(req, 'discardedids', [])
     // filtros por tiempo
-    var sfecha            = getParam(req, 'sfecha', false);
-    var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
-    var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
-    var discardedFilterids = getParam(req, 'discardedDateFilterids');
-    // console.log(discardedFilterids);
+    var sfecha            = getParam(req, 'sfecha', false)
+    var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+    var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+    var discardedFilterids = getParam(req, 'discardedDateFilterids')
+    // debug(discardedFilterids)
 
     
     if ( hasBios === 'true' && hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 && discardedFilterids === "true" ){
 
-      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha);
-      console.log(caso);
+      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+      debug(caso)
 
 
-      console.log("V");
-      var whereVar = verb_utils.processBioFilters(tfilters, spid);
-      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      debug("V")
+      var whereVar = verb_utils.processBioFilters(tfilters, spid)
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
 
       pool.any(queries.getFreqNiche.getFreqVT, {
         spid: spid,
@@ -1027,7 +1028,7 @@ exports.getFreqNiche_VT = function (req, res, next) {
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
 
@@ -1035,13 +1036,13 @@ exports.getFreqNiche_VT = function (req, res, next) {
     }
     else if (hasBios === 'true' && discardedids != undefined && discardedids.length > 0 && discardedFilterids === "true" ){
 
-        var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha);
-        console.log(caso);
+        var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+        debug(caso)
 
 
-        console.log("B");
-        var whereVar = verb_utils.processBioFilters(tfilters, spid);
-        // console.log(whereVar);
+        debug("B")
+        var whereVar = verb_utils.processBioFilters(tfilters, spid)
+        // debug(whereVar)
 
         pool.any(queries.getFreqNiche.getFreqBioVT, {
           spid: spid,
@@ -1057,24 +1058,24 @@ exports.getFreqNiche_VT = function (req, res, next) {
         res_grid: res_grid
         })
         .then(function (data) {
-          // console.log(data.length);
+          // debug(data.length)
           res.json({'data': data})
         })
         .catch(function (error) {
-          console.log(error);
+          debug(error)
           next(error)
         })
       
     } 
     else if (hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 && discardedFilterids === "true" ){
 
-      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha);
-      console.log(caso);
+      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+      debug(caso)
 
 
-      console.log("Ra");
-      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
-      // console.log(whereVarRaster);
+      debug("Ra")
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
+      // debug(whereVarRaster)
 
       pool.any(queries.getFreqNiche.getFreqRaVT, {
         spid: spid,
@@ -1093,7 +1094,7 @@ exports.getFreqNiche_VT = function (req, res, next) {
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
 
@@ -1101,10 +1102,10 @@ exports.getFreqNiche_VT = function (req, res, next) {
     } 
     else{
 
-      next();
+      next()
     }
 
-};
+}
 
 
 
@@ -1122,30 +1123,30 @@ exports.getFreqNiche_VT = function (req, res, next) {
 
 exports.getFreqNiche_V = function (req, res, next) {
 
-    console.log("getFreqNiche_V");
+    debug("getFreqNiche_V")
 
-    var spid        = parseInt(getParam(req, 'id'));
-    var tfilters    = getParam(req, 'tfilters');
-    var alpha       = 0.01;
+    var spid        = parseInt(getParam(req, 'id'))
+    var tfilters    = getParam(req, 'tfilters')
+    var alpha       = 0.01
     // var N           = 14707; // Verificar N, que se esta contemplando
-    var res_celda = getParam(req, 'res_celda', "cells_16km");
+    var res_celda = getParam(req, 'res_celda', "cells_16km")
 
     // Siempre incluidos en query, nj >= 0
-    var min_occ       = getParam(req, 'min_occ', 0);
+    var min_occ       = getParam(req, 'min_occ', 0)
 
     // variables configurables
-    var hasBios         = getParam(req, 'hasBios');
-    var hasRaster       = getParam(req, 'hasRaster');
-    var discardedids    = getParam(req, 'discardedids', []);
+    var hasBios         = getParam(req, 'hasBios')
+    var hasRaster       = getParam(req, 'hasRaster')
+    var discardedids    = getParam(req, 'discardedids', [])
 
-    // console.log(discardedids);
+    // debug(discardedids)
 
     
     if ( hasBios === 'true' && hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 ){
 
-      console.log("V");
-      var whereVar = verb_utils.processBioFilters(tfilters, spid);
-      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      debug("V")
+      var whereVar = verb_utils.processBioFilters(tfilters, spid)
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
 
       pool.any(queries.getFreqNiche.getFreqV, {
         spid: spid,
@@ -1161,7 +1162,7 @@ exports.getFreqNiche_V = function (req, res, next) {
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
 
@@ -1169,9 +1170,9 @@ exports.getFreqNiche_V = function (req, res, next) {
     }
     else if (hasBios === 'true' && discardedids != undefined && discardedids.length > 0 ){
 
-      console.log("B");
-      var whereVar = verb_utils.processBioFilters(tfilters, spid);
-      // console.log(whereVar);
+      debug("B")
+      var whereVar = verb_utils.processBioFilters(tfilters, spid)
+      // debug(whereVar)
 
       pool.any(queries.getFreqNiche.getFreqBioV, {
         spid: spid,
@@ -1183,20 +1184,20 @@ exports.getFreqNiche_V = function (req, res, next) {
         res_celda: res_celda
       })
       .then(function (data) {
-        // console.log(data.length);
+        // debug(data.length)
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
       
     } 
     else if (hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 ){
 
-      console.log("Ra");
-      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
-      // console.log(whereVarRaster);
+      debug("Ra")
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
+      // debug(whereVarRaster)
 
       pool.any(queries.getFreqNiche.getFreqRasterV, {
         spid: spid,
@@ -1211,7 +1212,7 @@ exports.getFreqNiche_V = function (req, res, next) {
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
 
@@ -1219,10 +1220,10 @@ exports.getFreqNiche_V = function (req, res, next) {
     } 
     else{
 
-      next();
+      next()
     }
 
-};
+}
 
 
 
@@ -1243,41 +1244,41 @@ exports.getFreqNiche_V = function (req, res, next) {
 
 exports.getFreqNiche_T = function (req, res, next) {
 
-    console.log("getFreqNiche_T");
+    debug("getFreqNiche_T")
 
-    var spid        = parseInt(getParam(req, 'id'));
-    var tfilters    = getParam(req, 'tfilters');
-    var alpha       = 0.01;
+    var spid        = parseInt(getParam(req, 'id'))
+    var tfilters    = getParam(req, 'tfilters')
+    var alpha       = 0.01
     // var N           = 14707; // Verificar N, que se esta contemplando
-    var res_celda = getParam(req, 'res_celda', "cells_16km");
-    var res_grid = getParam(req, 'res_grid', "gridid_16km");
+    var res_celda = getParam(req, 'res_celda', "cells_16km")
+    var res_grid = getParam(req, 'res_grid', "gridid_16km")
 
     // Siempre incluidos en query, nj >= 0
-    var min_occ       = getParam(req, 'min_occ', 0);
+    var min_occ       = getParam(req, 'min_occ', 0)
 
     // variables configurables
-    var hasBios         = getParam(req, 'hasBios');
-    var hasRaster       = getParam(req, 'hasRaster');
+    var hasBios         = getParam(req, 'hasBios')
+    var hasRaster       = getParam(req, 'hasRaster')
     
     // filtros por tiempo
-    var sfecha            = getParam(req, 'sfecha', false);
-    var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
-    var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
-    var discardedFilterids = getParam(req, 'discardedDateFilterids');
+    var sfecha            = getParam(req, 'sfecha', false)
+    var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+    var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+    var discardedFilterids = getParam(req, 'discardedDateFilterids')
 
-    console.log(discardedFilterids);
+    debug(discardedFilterids)
 
     
     if (hasBios === "true" && hasRaster === "true" && discardedFilterids === "true"){
 
-      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha);
-      console.log(caso);
+      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+      debug(caso)
 
 
-      console.log("T");  
+      debug("T");  
 
-       whereVar = verb_utils.processBioFilters(tfilters, spid);
-       whereVarRaster = verb_utils.processRasterFilters(tfilters,spid);
+       whereVar = verb_utils.processBioFilters(tfilters, spid)
+       whereVarRaster = verb_utils.processRasterFilters(tfilters,spid)
       
       pool.any(queries.getFreqNiche.getFreqT, {
         spid: spid,
@@ -1293,11 +1294,11 @@ exports.getFreqNiche_T = function (req, res, next) {
         res_grid: res_grid
       })
       .then(function (data) {
-        // console.log(data);
+        // debug(data)
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
 
@@ -1307,13 +1308,13 @@ exports.getFreqNiche_T = function (req, res, next) {
     }
     else if (hasBios === 'true' && discardedFilterids === "true" ){
 
-      console.log("B");
+      debug("B")
 
-      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha);
-      console.log(caso);  
+      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+      debug(caso);  
 
-      whereVar = verb_utils.processBioFilters(tfilters, spid);
-      // console.log(whereVar);
+      whereVar = verb_utils.processBioFilters(tfilters, spid)
+      // debug(whereVar)
       
       pool.any(queries.getFreqNiche.getFreqBioT, {
         spid: spid,
@@ -1328,11 +1329,11 @@ exports.getFreqNiche_T = function (req, res, next) {
         res_grid: res_grid
       })
       .then(function (data) {
-        // console.log(data);
+        // debug(data)
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
       
@@ -1341,13 +1342,13 @@ exports.getFreqNiche_T = function (req, res, next) {
     } 
     else if (hasRaster === 'true' && discardedFilterids === "true" ){
 
-      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha);
-      console.log(caso);
+      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+      debug(caso)
 
 
-      console.log("Ra");
+      debug("Ra")
 
-      whereVarRaster = verb_utils.processRasterFilters(tfilters,spid);
+      whereVarRaster = verb_utils.processRasterFilters(tfilters,spid)
       
       pool.any(queries.getFreqNiche.getFreqRasterT, {
         spid: spid,
@@ -1362,23 +1363,23 @@ exports.getFreqNiche_T = function (req, res, next) {
         res_grid: res_grid
       })
       .then(function (data) {
-        // console.log(data);
+        // debug(data)
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
       
     } 
     else{
 
-      next();
+      next()
     }
 
     
 
-};
+}
 
 
 
@@ -1396,29 +1397,29 @@ exports.getFreqNiche_T = function (req, res, next) {
 
 exports.getFreqNiche = function (req, res, next) {
 
-    console.log("getFreqNiche");
+    debug("getFreqNiche")
 
-    var spid        = parseInt(getParam(req, 'id'));
-    var tfilters    = getParam(req, 'tfilters');
-    var alpha       = 0.01;
+    var spid        = parseInt(getParam(req, 'id'))
+    var tfilters    = getParam(req, 'tfilters')
+    var alpha       = 0.01
     // var N           = 14707; // Verificar N, que se esta contemplando
-    var res_celda = getParam(req, 'res_celda', "cells_16km");
+    var res_celda = getParam(req, 'res_celda', "cells_16km")
 
     // Siempre incluidos en query, nj >= 0
-    var min_occ       = getParam(req, 'min_occ', 0);
+    var min_occ       = getParam(req, 'min_occ', 0)
 
     // variables configurables
-    var hasBios         = getParam(req, 'hasBios');
-    var hasRaster       = getParam(req, 'hasRaster');
+    var hasBios         = getParam(req, 'hasBios')
+    var hasRaster       = getParam(req, 'hasRaster')
 
     var discardedDeleted = getParam(req, 'discardedFilterids',[]);
 
     
     if (hasBios === 'true' && hasRaster === 'true' ){
 
-      console.log("T");
-      var whereVar = verb_utils.processBioFilters(tfilters, spid);
-      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      debug("T")
+      var whereVar = verb_utils.processBioFilters(tfilters, spid)
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
 
       pool.any(queries.getFreqNiche.getFreq, {
         spid: spid,
@@ -1434,7 +1435,7 @@ exports.getFreqNiche = function (req, res, next) {
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
 
@@ -1442,8 +1443,8 @@ exports.getFreqNiche = function (req, res, next) {
     }
     else if (hasBios === 'true'){
 
-      console.log("B");
-      var whereVar = verb_utils.processBioFilters(tfilters, spid);
+      debug("B")
+      var whereVar = verb_utils.processBioFilters(tfilters, spid)
 
       pool.any(queries.getFreqNiche.getFreqBio, {
         spid: spid,
@@ -1458,7 +1459,7 @@ exports.getFreqNiche = function (req, res, next) {
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
 
@@ -1466,9 +1467,9 @@ exports.getFreqNiche = function (req, res, next) {
     } 
     else if (hasRaster === 'true'){
 
-      console.log("Ra");
-      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
-      // console.log(whereVarRaster);
+      debug("Ra")
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
+      // debug(whereVarRaster)
 
       pool.any(queries.getFreqNiche.getFreqRaster, {
         spid: spid,
@@ -1483,17 +1484,17 @@ exports.getFreqNiche = function (req, res, next) {
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
       
     } 
     else{
 
-      next();
+      next()
     }
 
-};
+}
 
 
 
@@ -1517,29 +1518,29 @@ exports.getFreqNiche = function (req, res, next) {
 
 exports.getFreqMapNiche_M = function (req, res, next) {
 
-    console.log("getFreqMapNiche_M");
+    debug("getFreqMapNiche_M")
 
-    var spid        = parseInt(getParam(req, 'id'));
-    var tfilters    = getParam(req, 'tfilters');
-    var alpha       = 0.01;
-    // var N           = 14707;
-    var maxscore    = 700;
-    var res_celda = getParam(req, 'res_celda', "cells_16km");
+    var spid        = parseInt(getParam(req, 'id'))
+    var tfilters    = getParam(req, 'tfilters')
+    var alpha       = 0.01
+    // var N           = 14707
+    var maxscore    = 700
+    var res_celda = getParam(req, 'res_celda', "cells_16km")
 
     // Siempre incluidos en query, nj >= 0
-    var min_occ       = getParam(req, 'min_occ', 0);
+    var min_occ       = getParam(req, 'min_occ', 0)
 
     // variables configurables
-    var hasBios         = getParam(req, 'hasBios');
-    var hasRaster       = getParam(req, 'hasRaster');
-    var mapa_prob       = getParam(req, 'mapa_prob');
+    var hasBios         = getParam(req, 'hasBios')
+    var hasRaster       = getParam(req, 'hasRaster')
+    var mapa_prob       = getParam(req, 'mapa_prob')
     
     if (hasBios === 'true' && hasRaster === 'true' && mapa_prob === 'mapa_prob' ){
 
-        console.log("TM");
+        debug("TM")
 
-        var whereVar = verb_utils.processBioFilters(tfilters, spid);
-        var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+        var whereVar = verb_utils.processBioFilters(tfilters, spid)
+        var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
 
             pool.any(queries.getFreqMapNiche.getFreqMapM, {
                 spid: spid,
@@ -1555,7 +1556,7 @@ exports.getFreqMapNiche_M = function (req, res, next) {
                 res.json({'data': data})
             })
             .catch(function (error) {
-                console.log(error);
+                debug(error)
                 next(error)
         })
 
@@ -1563,8 +1564,8 @@ exports.getFreqMapNiche_M = function (req, res, next) {
     }
     else if (hasBios === 'true' && mapa_prob === 'mapa_prob' ){
 
-      console.log("BM");
-      var whereVar = verb_utils.processBioFilters(tfilters, spid);
+      debug("BM")
+      var whereVar = verb_utils.processBioFilters(tfilters, spid)
 
       pool.any(queries.getFreqMapNiche.getFreqMapBioM, {
           spid: spid,
@@ -1579,7 +1580,7 @@ exports.getFreqMapNiche_M = function (req, res, next) {
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
 
@@ -1587,9 +1588,9 @@ exports.getFreqMapNiche_M = function (req, res, next) {
     } 
     else if (hasRaster === 'true' && mapa_prob === 'mapa_prob' ){
 
-      console.log("RaM");
+      debug("RaM")
 
-      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
 
       console.log(queries.getFreqMapNiche.getFreqMapRaM);
 
@@ -1606,17 +1607,17 @@ exports.getFreqMapNiche_M = function (req, res, next) {
               res.json({'data': data})
           })
           .catch(function (error) {
-              console.log(error);
+              debug(error)
               next(error)
           })
       
     } 
     else{
 
-      next();
+      next()
     }
 
-};
+}
 
 
 
@@ -1635,30 +1636,30 @@ exports.getFreqMapNiche_M = function (req, res, next) {
 
 exports.getFreqMapNiche_A = function (req, res, next) {
 
-    console.log("getFreqMapNiche_A");
+    debug("getFreqMapNiche_A")
 
-    var spid        = parseInt(getParam(req, 'id'));
-    var tfilters    = getParam(req, 'tfilters');
-    var alpha       = 0.01;
-    // var N           = 14707;
-    var res_celda = getParam(req, 'res_celda', "cells_16km");
-    var res_grid = getParam(req, 'res_grid', "gridid_16km");
+    var spid        = parseInt(getParam(req, 'id'))
+    var tfilters    = getParam(req, 'tfilters')
+    var alpha       = 0.01
+    // var N           = 14707
+    var res_celda = getParam(req, 'res_celda', "cells_16km")
+    var res_grid = getParam(req, 'res_grid', "gridid_16km")
 
     // Siempre incluidos en query, nj >= 0
-    var min_occ       = getParam(req, 'min_occ', 0);
+    var min_occ       = getParam(req, 'min_occ', 0)
 
     // variables configurables
-    var hasBios         = getParam(req, 'hasBios');
-    var hasRaster       = getParam(req, 'hasRaster');
-    var apriori         = getParam(req, 'apriori');
+    var hasBios         = getParam(req, 'hasBios')
+    var hasRaster       = getParam(req, 'hasRaster')
+    var apriori         = getParam(req, 'apriori')
 
     
     if (hasBios === 'true' && hasRaster === 'true' && apriori === 'apriori' ){
 
-        console.log("TA");
+        debug("TA")
 
-        var whereVar = verb_utils.processBioFilters(tfilters, spid);
-        var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+        var whereVar = verb_utils.processBioFilters(tfilters, spid)
+        var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
 
             pool.any(queries.getFreqMapNiche.getFreqMapA, {
                 spid: spid,
@@ -1674,7 +1675,7 @@ exports.getFreqMapNiche_A = function (req, res, next) {
                 res.json({'data': data})
             })
             .catch(function (error) {
-                console.log(error);
+                debug(error)
                 next(error)
         })
 
@@ -1682,9 +1683,9 @@ exports.getFreqMapNiche_A = function (req, res, next) {
     }
     else if (hasBios === 'true' && apriori === 'apriori' ){
 
-      console.log("BA");
+      debug("BA")
 
-      var whereVar = verb_utils.processBioFilters(tfilters, spid);
+      var whereVar = verb_utils.processBioFilters(tfilters, spid)
 
       pool.any(queries.getFreqMapNiche.getFreqMapBioA, {
           spid: spid,
@@ -1699,7 +1700,7 @@ exports.getFreqMapNiche_A = function (req, res, next) {
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
 
@@ -1707,9 +1708,9 @@ exports.getFreqMapNiche_A = function (req, res, next) {
     } 
     else if (hasRaster === 'true' && apriori === 'apriori' ){
 
-      console.log("RaA");
+      debug("RaA")
 
-      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
 
           pool.any(queries.getFreqMapNiche.getFreqMapRaA, {
               spid: spid,
@@ -1724,17 +1725,17 @@ exports.getFreqMapNiche_A = function (req, res, next) {
               res.json({'data': data})
           })
           .catch(function (error) {
-              console.log(error);
+              debug(error)
               next(error)
           })
       
     } 
     else{
 
-      next();
+      next()
     }
 
-};
+}
 
 
 /**
@@ -1750,42 +1751,42 @@ exports.getFreqMapNiche_A = function (req, res, next) {
 
 exports.getFreqMapNiche_T = function (req, res, next) {
 
-    console.log("getFreqMapNiche_T");
+    debug("getFreqMapNiche_T")
 
-    var spid        = parseInt(getParam(req, 'id'));
-    var tfilters    = getParam(req, 'tfilters');
-    var alpha       = 0.01;
+    var spid        = parseInt(getParam(req, 'id'))
+    var tfilters    = getParam(req, 'tfilters')
+    var alpha       = 0.01
     // var N           = 14707; // Verificar N, que se esta contemplando
-    var res_celda = getParam(req, 'res_celda', "cells_16km");
-    var res_grid = getParam(req, 'res_grid', "gridid_16km");
+    var res_celda = getParam(req, 'res_celda', "cells_16km")
+    var res_grid = getParam(req, 'res_grid', "gridid_16km")
 
 
     // Siempre incluidos en query, nj >= 0
-    var min_occ       = getParam(req, 'min_occ', 0);
+    var min_occ       = getParam(req, 'min_occ', 0)
 
     // variables configurables
-    var hasBios         = getParam(req, 'hasBios');
-    var hasRaster       = getParam(req, 'hasRaster');
+    var hasBios         = getParam(req, 'hasBios')
+    var hasRaster       = getParam(req, 'hasRaster')
     
     // filtros por tiempo
-    var sfecha            = getParam(req, 'sfecha', false);
-    var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
-    var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
-    var discardedFilterids = getParam(req, 'discardedDateFilterids');
+    var sfecha            = getParam(req, 'sfecha', false)
+    var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+    var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+    var discardedFilterids = getParam(req, 'discardedDateFilterids')
 
-    // console.log(discardedFilterids);
+    // debug(discardedFilterids)
 
     
     if (hasBios === "true" && hasRaster === "true" && discardedFilterids === "true"){
 
-      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha);
-      // console.log(caso);
+      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+      // debug(caso)
 
 
-      console.log("T");  
+      debug("T");  
 
-       whereVar = verb_utils.processBioFilters(tfilters, spid);
-       whereVarRaster = verb_utils.processRasterFilters(tfilters,spid);
+       whereVar = verb_utils.processBioFilters(tfilters, spid)
+       whereVarRaster = verb_utils.processRasterFilters(tfilters,spid)
       
       pool.any(queries.getFreqMapNiche.getFreqMapT, {
         spid: spid,
@@ -1801,11 +1802,11 @@ exports.getFreqMapNiche_T = function (req, res, next) {
         res_grid: res_grid
       })
       .then(function (data) {
-        // console.log(data);
+        // debug(data)
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
 
@@ -1815,13 +1816,13 @@ exports.getFreqMapNiche_T = function (req, res, next) {
     }
     else if (hasBios === 'true' && discardedFilterids === "true" ){
 
-      console.log("B");
+      debug("B")
 
-      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha);
-      // console.log(caso);  
+      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+      // debug(caso);  
 
-      whereVar = verb_utils.processBioFilters(tfilters, spid);
-      // console.log(whereVar);
+      whereVar = verb_utils.processBioFilters(tfilters, spid)
+      // debug(whereVar)
       
       pool.any(queries.getFreqMapNiche.getFreqMapBioT, {
         spid: spid,
@@ -1836,24 +1837,24 @@ exports.getFreqMapNiche_T = function (req, res, next) {
         res_grid: res_grid
       })
       .then(function (data) {
-        // console.log(data);
+        // debug(data)
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
       
     } 
     else if (hasRaster === 'true' && discardedFilterids === "true" ){
 
-      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha);
-      // console.log(caso);
+      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+      // debug(caso)
 
 
-      console.log("Ra");
+      debug("Ra")
 
-      whereVarRaster = verb_utils.processRasterFilters(tfilters,spid);
+      whereVarRaster = verb_utils.processRasterFilters(tfilters,spid)
       
       pool.any(queries.getFreqMapNiche.getFreqMapRaT, {
         spid: spid,
@@ -1868,23 +1869,23 @@ exports.getFreqMapNiche_T = function (req, res, next) {
         res_grid: res_grid
       })
       .then(function (data) {
-        // console.log(data);
+        // debug(data)
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
       
     } 
     else{
 
-      next();
+      next()
     }
 
     
 
-};
+}
 
 
 
@@ -1901,33 +1902,33 @@ exports.getFreqMapNiche_T = function (req, res, next) {
 
 exports.getFreqMapNiche = function (req, res, next) {
 
-    console.log("getFreqMapNiche");
+    debug("getFreqMapNiche")
 
-    var spid        = parseInt(getParam(req, 'id'));
-    var tfilters    = getParam(req, 'tfilters');
-    var alpha       = 0.01;
-    var res_celda = getParam(req, 'res_celda', "cells_16km");
+    var spid        = parseInt(getParam(req, 'id'))
+    var tfilters    = getParam(req, 'tfilters')
+    var alpha       = 0.01
+    var res_celda = getParam(req, 'res_celda', "cells_16km")
     // var N           = 14707; // Verificar N, que se esta contemplando
 
 
     // Siempre incluidos en query, nj >= 0
-    var min_occ       = getParam(req, 'min_occ', 0);
+    var min_occ       = getParam(req, 'min_occ', 0)
 
     // variables configurables
-    var hasBios         = getParam(req, 'hasBios');
-    var hasRaster       = getParam(req, 'hasRaster');
+    var hasBios         = getParam(req, 'hasBios')
+    var hasRaster       = getParam(req, 'hasRaster')
 
     var discardedDeleted = getParam(req, 'discardedFilterids',[]);
-    console.log(discardedDeleted);
+    // console.log(discardedDeleted);
 
 
-    // var download       = getParam(req, 'download', false);
+    // var download       = getParam(req, 'download', false)
     // if(download){
 
-    //     console.log("download");  
+    //     debug("download");  
 
-    //     var mail    = getParam(req, 'mail');
-    //     var ftype   = getParam(req, 'ftype');
+    //     var mail    = getParam(req, 'mail')
+    //     var ftype   = getParam(req, 'ftype')
     //     var query = pool.as.format(queries.getFreqMapNiche.getFreqMapBio, {
     //         spid: spid,
     //         N: N,
@@ -1937,14 +1938,14 @@ exports.getFreqMapNiche = function (req, res, next) {
     //         res_celda: res_celda,
     //         addgeom: "geom, "
     //     })
-    //     console.log(query);
+    //     debug(query)
 
-    //     var json={};
-    //     json["query"] = query;
-    //     json["mail"] = mail;
-    //     json["ftype"] = ftype;
-    //     json["qtype"] = "setQuery";
-    //     json = JSON.stringify(json);
+    //     var json={}
+    //     json["query"] = query
+    //     json["mail"] = mail
+    //     json["ftype"] = ftype
+    //     json["qtype"] = "setQuery"
+    //     json = JSON.stringify(json)
       
     //     http.request({  
     //           host : "http://species.conabio.gob.mx/niche2?", // "localhost", 
@@ -1955,21 +1956,21 @@ exports.getFreqMapNiche = function (req, res, next) {
     //       function (response) {
     //           var body = ""; 
     //           response.on("data", function(chunk){
-    //                 body += chunk;
+    //                 body += chunk
     //               }
     //           ); 
     //           response.on("end",  res.json({'data': "success"})  ); 
     //       }
-    //     ).end(JSON.stringify(json));
+    //     ).end(JSON.stringify(json))
 
     // }
 
     
     if (hasBios === 'true' && hasRaster === 'true' ){
 
-      console.log("T");
-      var whereVar = verb_utils.processBioFilters(tfilters, spid);
-      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      debug("T")
+      var whereVar = verb_utils.processBioFilters(tfilters, spid)
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
 
       pool.any(queries.getFreqMapNiche.getFreqMap, {
         spid: spid,
@@ -1985,7 +1986,7 @@ exports.getFreqMapNiche = function (req, res, next) {
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
 
@@ -1993,8 +1994,8 @@ exports.getFreqMapNiche = function (req, res, next) {
     }
     else if (hasBios === 'true'){
 
-      console.log("B");
-      var whereVar = verb_utils.processBioFilters(tfilters, spid);
+      debug("B")
+      var whereVar = verb_utils.processBioFilters(tfilters, spid)
 
 
       pool.any(queries.getFreqMapNiche.getFreqMapBio, {
@@ -2010,7 +2011,7 @@ exports.getFreqMapNiche = function (req, res, next) {
           res.json({'data': data})  
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
 
@@ -2018,9 +2019,9 @@ exports.getFreqMapNiche = function (req, res, next) {
     } 
     else if (hasRaster === 'true'){
 
-      console.log("Ra");
-      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
-      // console.log(whereVarRaster);
+      debug("Ra")
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
+      // debug(whereVarRaster)
 
       pool.any(queries.getFreqMapNiche.getFreqMapRaster, {
         spid: spid,
@@ -2035,17 +2036,17 @@ exports.getFreqMapNiche = function (req, res, next) {
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
       
     } 
     else{
 
-      next();
+      next()
     }
 
-};
+}
 
 
 
@@ -2073,33 +2074,33 @@ exports.getFreqMapNiche = function (req, res, next) {
 
 exports.getFreqCeldaNiche_A = function (req, res, next) {
 
-    console.log("getFreqCeldaNiche_A");
+    debug("getFreqCeldaNiche_A")
 
-    var spid        = parseInt(getParam(req, 'id'));
-    var tfilters    = getParam(req, 'tfilters');
-    var alpha       = 0.01;
-    // var N           = 14707;
-    var res_celda = getParam(req, 'res_celda', "cells_16km");
-    var res_grid = getParam(req, 'res_grid', "gridid_16km");
+    var spid        = parseInt(getParam(req, 'id'))
+    var tfilters    = getParam(req, 'tfilters')
+    var alpha       = 0.01
+    // var N           = 14707
+    var res_celda = getParam(req, 'res_celda', "cells_16km")
+    var res_grid = getParam(req, 'res_grid', "gridid_16km")
 
     var discardedDeleted = getParam(req, 'discardedFilterids',[]);
 
 
     // Siempre incluidos en query, nj >= 0
-    var min_occ       = getParam(req, 'min_occ', 0);
+    var min_occ       = getParam(req, 'min_occ', 0)
 
     // variables configurables
-    var hasBios         = getParam(req, 'hasBios');
-    var hasRaster       = getParam(req, 'hasRaster');
-    var apriori         = getParam(req, 'apriori');
+    var hasBios         = getParam(req, 'hasBios')
+    var hasRaster       = getParam(req, 'hasRaster')
+    var apriori         = getParam(req, 'apriori')
 
     
     if (hasBios === 'true' && hasRaster === 'true' && apriori === 'apriori' ){
 
-        console.log("TA");
+        debug("TA")
 
-        var whereVar = verb_utils.processBioFilters(tfilters, spid);
-        var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+        var whereVar = verb_utils.processBioFilters(tfilters, spid)
+        var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
 
             pool.any(queries.getFreqCeldaNiche.getFreqCeldaA, {
                 spid: spid,
@@ -2116,7 +2117,7 @@ exports.getFreqCeldaNiche_A = function (req, res, next) {
                 res.json({'data': data})
             })
             .catch(function (error) {
-                console.log(error);
+                debug(error)
                 next(error)
         })
 
@@ -2124,9 +2125,9 @@ exports.getFreqCeldaNiche_A = function (req, res, next) {
     }
     else if (hasBios === 'true' && apriori === 'apriori' ){
 
-      console.log("BA");
+      debug("BA")
 
-      var whereVar = verb_utils.processBioFilters(tfilters, spid);
+      var whereVar = verb_utils.processBioFilters(tfilters, spid)
 
       pool.any(queries.getFreqCeldaNiche.getFreqCeldaBioA, {
           spid: spid,
@@ -2142,7 +2143,7 @@ exports.getFreqCeldaNiche_A = function (req, res, next) {
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
 
@@ -2150,9 +2151,9 @@ exports.getFreqCeldaNiche_A = function (req, res, next) {
     } 
     else if (hasRaster === 'true' && apriori === 'apriori' ){
 
-      console.log("RaA");
+      debug("RaA")
 
-      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
 
           pool.any(queries.getFreqCeldaNiche.getFreqCeldaRaA, {
               spid: spid,
@@ -2168,17 +2169,17 @@ exports.getFreqCeldaNiche_A = function (req, res, next) {
               res.json({'data': data})
           })
           .catch(function (error) {
-              console.log(error);
+              debug(error)
               next(error)
           })
       
     } 
     else{
 
-      next();
+      next()
     }
 
-};
+}
 
 
 
@@ -2197,31 +2198,31 @@ exports.getFreqCeldaNiche_A = function (req, res, next) {
 
 exports.getFreqCeldaNiche_V = function (req, res, next) {
 
-    console.log("getFreqCeldaNiche_V");
+    debug("getFreqCeldaNiche_V")
 
-    var spid        = parseInt(getParam(req, 'id'));
-    var tfilters    = getParam(req, 'tfilters');
-    var alpha       = 0.01;
+    var spid        = parseInt(getParam(req, 'id'))
+    var tfilters    = getParam(req, 'tfilters')
+    var alpha       = 0.01
     // var N           = 14707; // Verificar N, que se esta contemplando
-    var res_celda = getParam(req, 'res_celda', "cells_16km");
-    var res_grid = getParam(req, 'res_grid', "gridid_16km");
+    var res_celda = getParam(req, 'res_celda', "cells_16km")
+    var res_grid = getParam(req, 'res_grid', "gridid_16km")
 
     // Siempre incluidos en query, nj >= 0
-    var min_occ       = getParam(req, 'min_occ', 0);
+    var min_occ       = getParam(req, 'min_occ', 0)
 
     // variables configurables
-    var hasBios         = getParam(req, 'hasBios');
-    var hasRaster       = getParam(req, 'hasRaster');
-    var discardedids    = getParam(req, 'discardedids', []);
+    var hasBios         = getParam(req, 'hasBios')
+    var hasRaster       = getParam(req, 'hasRaster')
+    var discardedids    = getParam(req, 'discardedids', [])
 
-    // console.log(discardedids);
+    // debug(discardedids)
 
     
     if ( hasBios === 'true' && hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 ){
 
-      console.log("V");
-      var whereVar = verb_utils.processBioFilters(tfilters, spid);
-      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      debug("V")
+      var whereVar = verb_utils.processBioFilters(tfilters, spid)
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
 
       pool.any(queries.getFreqCeldaNiche.getFreqCeldaV, {
         spid: spid,
@@ -2238,7 +2239,7 @@ exports.getFreqCeldaNiche_V = function (req, res, next) {
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
 
@@ -2246,9 +2247,9 @@ exports.getFreqCeldaNiche_V = function (req, res, next) {
     }
     else if (hasBios === 'true' && discardedids != undefined && discardedids.length > 0 ){
 
-      console.log("B");
-      var whereVar = verb_utils.processBioFilters(tfilters, spid);
-      // console.log(whereVar);
+      debug("B")
+      var whereVar = verb_utils.processBioFilters(tfilters, spid)
+      // debug(whereVar)
 
       pool.any(queries.getFreqCeldaNiche.getFreqCeldaBioV, {
         spid: spid,
@@ -2261,20 +2262,20 @@ exports.getFreqCeldaNiche_V = function (req, res, next) {
         res_grid: res_grid
       })
       .then(function (data) {
-        // console.log(data.length);
+        // debug(data.length)
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
       
     } 
     else if (hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 ){
 
-      console.log("Ra");
-      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
-      // console.log(whereVarRaster);
+      debug("Ra")
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
+      // debug(whereVarRaster)
 
       pool.any(queries.getFreqCeldaNiche.getFreqCeldaRaV, {
         spid: spid,
@@ -2290,7 +2291,7 @@ exports.getFreqCeldaNiche_V = function (req, res, next) {
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
 
@@ -2298,10 +2299,10 @@ exports.getFreqCeldaNiche_V = function (req, res, next) {
     } 
     else{
 
-      next();
+      next()
     }
 
-};
+}
 
 
 
@@ -2321,41 +2322,41 @@ exports.getFreqCeldaNiche_V = function (req, res, next) {
 
 exports.getFreqCeldaNiche_T = function (req, res, next) {
 
-    console.log("getFreqCeldaNiche_T");
+    debug("getFreqCeldaNiche_T")
 
-    var spid        = parseInt(getParam(req, 'id'));
-    var tfilters    = getParam(req, 'tfilters');
-    var alpha       = 0.01;
+    var spid        = parseInt(getParam(req, 'id'))
+    var tfilters    = getParam(req, 'tfilters')
+    var alpha       = 0.01
     // var N           = 14707; // Verificar N, que se esta contemplando
-    var res_celda = getParam(req, 'res_celda', "cells_16km");
-    var res_grid = getParam(req, 'res_grid', "gridid_16km");
+    var res_celda = getParam(req, 'res_celda', "cells_16km")
+    var res_grid = getParam(req, 'res_grid', "gridid_16km")
 
     // Siempre incluidos en query, nj >= 0
-    var min_occ       = getParam(req, 'min_occ', 0);
+    var min_occ       = getParam(req, 'min_occ', 0)
 
     // variables configurables
-    var hasBios         = getParam(req, 'hasBios');
-    var hasRaster       = getParam(req, 'hasRaster');
+    var hasBios         = getParam(req, 'hasBios')
+    var hasRaster       = getParam(req, 'hasRaster')
     
     // filtros por tiempo
-    var sfecha            = getParam(req, 'sfecha', false);
-    var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
-    var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
-    var discardedFilterids = getParam(req, 'discardedDateFilterids');
+    var sfecha            = getParam(req, 'sfecha', false)
+    var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+    var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+    var discardedFilterids = getParam(req, 'discardedDateFilterids')
 
-    console.log(discardedFilterids);
+    debug(discardedFilterids)
 
     
     if (hasBios === "true" && hasRaster === "true" && discardedFilterids === "true"){
 
-      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha);
-      console.log(caso);
+      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+      debug(caso)
 
 
-      console.log("T");  
+      debug("T");  
 
-       whereVar = verb_utils.processBioFilters(tfilters, spid);
-       whereVarRaster = verb_utils.processRasterFilters(tfilters,spid);
+       whereVar = verb_utils.processBioFilters(tfilters, spid)
+       whereVarRaster = verb_utils.processRasterFilters(tfilters,spid)
       
       pool.any(queries.getFreqCeldaNiche.getFreqCeldaT, {
         spid: spid,
@@ -2371,11 +2372,11 @@ exports.getFreqCeldaNiche_T = function (req, res, next) {
         res_grid: res_grid
       })
       .then(function (data) {
-        // console.log(data);
+        // debug(data)
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
 
@@ -2385,13 +2386,13 @@ exports.getFreqCeldaNiche_T = function (req, res, next) {
     }
     else if (hasBios === 'true' && discardedFilterids === "true" ){
 
-      console.log("B");
+      debug("B")
 
-      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha);
-      console.log(caso);  
+      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+      debug(caso);  
 
-      whereVar = verb_utils.processBioFilters(tfilters, spid);
-      // console.log(whereVar);
+      whereVar = verb_utils.processBioFilters(tfilters, spid)
+      // debug(whereVar)
       
       pool.any(queries.getFreqCeldaNiche.getFreqCeldaBioT, {
         spid: spid,
@@ -2406,11 +2407,11 @@ exports.getFreqCeldaNiche_T = function (req, res, next) {
         res_grid: res_grid
       })
       .then(function (data) {
-        // console.log(data);
+        // debug(data)
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
       
@@ -2419,13 +2420,13 @@ exports.getFreqCeldaNiche_T = function (req, res, next) {
     } 
     else if (hasRaster === 'true' && discardedFilterids === "true" ){
 
-      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha);
-      console.log(caso);
+      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+      debug(caso)
 
 
-      console.log("Ra");
+      debug("Ra")
 
-      whereVarRaster = verb_utils.processRasterFilters(tfilters,spid);
+      whereVarRaster = verb_utils.processRasterFilters(tfilters,spid)
       
       pool.any(queries.getFreqCeldaNiche.getFreqCeldaRaT, {
         spid: spid,
@@ -2440,23 +2441,23 @@ exports.getFreqCeldaNiche_T = function (req, res, next) {
         res_grid: res_grid
       })
       .then(function (data) {
-        // console.log(data);
+        // debug(data)
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
       
     } 
     else{
 
-      next();
+      next()
     }
 
     
 
-};
+}
 
 
 
@@ -2474,30 +2475,30 @@ exports.getFreqCeldaNiche_T = function (req, res, next) {
 
 exports.getFreqCeldaNiche = function (req, res, next) {
 
-    console.log("getFreqCeldaNiche");
+    debug("getFreqCeldaNiche")
 
-    var spid        = parseInt(getParam(req, 'id'));
-    var tfilters    = getParam(req, 'tfilters');
-    var alpha       = 0.01;
-    // var N           = 14707;
-    var res_celda = getParam(req, 'res_celda', "cells_16km");
-    var res_grid = getParam(req, 'res_grid', "gridid_16km");
+    var spid        = parseInt(getParam(req, 'id'))
+    var tfilters    = getParam(req, 'tfilters')
+    var alpha       = 0.01
+    // var N           = 14707
+    var res_celda = getParam(req, 'res_celda', "cells_16km")
+    var res_grid = getParam(req, 'res_grid', "gridid_16km")
 
     var discardedDeleted = getParam(req, 'discardedFilterids',[]);
 
     // Siempre incluidos en query, nj >= 0
-    var min_occ       = getParam(req, 'min_occ', 0);
+    var min_occ       = getParam(req, 'min_occ', 0)
 
     // variables configurables
-    var hasBios         = getParam(req, 'hasBios');
-    var hasRaster       = getParam(req, 'hasRaster');
+    var hasBios         = getParam(req, 'hasBios')
+    var hasRaster       = getParam(req, 'hasRaster')
 
     
     if (hasBios === 'true' && hasRaster === 'true' ){
 
-      console.log("T");
-      var whereVar = verb_utils.processBioFilters(tfilters, spid);
-      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      debug("T")
+      var whereVar = verb_utils.processBioFilters(tfilters, spid)
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
 
       pool.any(queries.getFreqCeldaNiche.getFreqCelda, {
         spid: spid,
@@ -2514,7 +2515,7 @@ exports.getFreqCeldaNiche = function (req, res, next) {
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
 
@@ -2522,9 +2523,9 @@ exports.getFreqCeldaNiche = function (req, res, next) {
     }
     else if (hasBios === 'true'){
 
-      console.log("B");
-      var whereVar = verb_utils.processBioFilters(tfilters, spid);
-      // console.log(whereVar);
+      debug("B")
+      var whereVar = verb_utils.processBioFilters(tfilters, spid)
+      // debug(whereVar)
 
       pool.any(queries.getFreqCeldaNiche.getFreqCeldaBio, {
         spid: spid,
@@ -2540,7 +2541,7 @@ exports.getFreqCeldaNiche = function (req, res, next) {
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
 
@@ -2548,9 +2549,9 @@ exports.getFreqCeldaNiche = function (req, res, next) {
     } 
     else if (hasRaster === 'true'){
 
-      console.log("Ra");
-      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
-      // console.log(whereVarRaster);
+      debug("Ra")
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
+      // debug(whereVarRaster)
 
       pool.any(queries.getFreqCeldaNiche.getFreqCeldaRaster, {
         spid: spid,
@@ -2566,17 +2567,17 @@ exports.getFreqCeldaNiche = function (req, res, next) {
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
       
     } 
     else{
 
-      next();
+      next()
     }
 
-};
+}
 
 
 
@@ -2601,34 +2602,34 @@ exports.getFreqCeldaNiche = function (req, res, next) {
 
 exports.getScoreDecilNiche_A = function (req, res, next) {
 
-    console.log("getScoreDecilNiche_A");
+    debug("getScoreDecilNiche_A")
 
-    var spid        = parseInt(getParam(req, 'id'));
-    var tfilters    = getParam(req, 'tfilters');
-    var alpha       = 0.01;
-    // var N           = 14707;
-    var res_celda = getParam(req, 'res_celda', "cells_16km");
-    var res_grid = getParam(req, 'res_grid', "gridid_16km");
+    var spid        = parseInt(getParam(req, 'id'))
+    var tfilters    = getParam(req, 'tfilters')
+    var alpha       = 0.01
+    // var N           = 14707
+    var res_celda = getParam(req, 'res_celda', "cells_16km")
+    var res_grid = getParam(req, 'res_grid', "gridid_16km")
 
     // Siempre incluidos en query, nj >= 0
-    var min_occ       = getParam(req, 'min_occ', 0);
+    var min_occ       = getParam(req, 'min_occ', 0)
 
     // variables configurables
-    var hasBios         = getParam(req, 'hasBios');
-    var hasRaster       = getParam(req, 'hasRaster');
-    var apriori         = getParam(req, 'apriori');
+    var hasBios         = getParam(req, 'hasBios')
+    var hasRaster       = getParam(req, 'hasRaster')
+    var apriori         = getParam(req, 'apriori')
 
-    var groupid        = getParam(req, 'groupid');
+    var groupid        = getParam(req, 'groupid')
 
-    var title_valor = verb_utils.processTitleGroup(groupid, tfilters);
+    var title_valor = verb_utils.processTitleGroup(groupid, tfilters)
 
     
     if (hasBios === 'true' && hasRaster === 'true' && apriori === 'apriori' ){
 
-        console.log("TA");
+        debug("TA")
 
-        var whereVar = verb_utils.processBioFilters(tfilters, spid);
-        var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+        var whereVar = verb_utils.processBioFilters(tfilters, spid)
+        var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
 
             pool.any(queries.getScoreDecilNiche.getScoreDecilA, {
                 spid: spid,
@@ -2642,13 +2643,13 @@ exports.getScoreDecilNiche_A = function (req, res, next) {
             })
             .then(function (data) {
                 for(i = 0; i < data.length; i++){
-                  item = data[i];
-                  item["title"] = title_valor;
+                  item = data[i]
+                  item["title"] = title_valor
                 }
                 res.json({'data': data})
             })
             .catch(function (error) {
-                console.log(error);
+                debug(error)
                 next(error)
         })
 
@@ -2656,9 +2657,9 @@ exports.getScoreDecilNiche_A = function (req, res, next) {
     }
     else if (hasBios === 'true' && apriori === 'apriori' ){
 
-      console.log("BA");
+      debug("BA")
 
-      var whereVar = verb_utils.processBioFilters(tfilters, spid);
+      var whereVar = verb_utils.processBioFilters(tfilters, spid)
 
       pool.any(queries.getScoreDecilNiche.getScoreDecilBioA, {
           spid: spid,
@@ -2671,13 +2672,13 @@ exports.getScoreDecilNiche_A = function (req, res, next) {
       })
       .then(function (data) {
         for(i = 0; i < data.length; i++){
-          item = data[i];
-          item["title"] = title_valor;
+          item = data[i]
+          item["title"] = title_valor
         }
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
 
@@ -2685,9 +2686,9 @@ exports.getScoreDecilNiche_A = function (req, res, next) {
     } 
     else if (hasRaster === 'true' && apriori === 'apriori' ){
 
-      console.log("RaA");
+      debug("RaA")
 
-      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
 
           pool.any(queries.getScoreDecilNiche.getScoreDecilRaA, {
               spid: spid,
@@ -2700,23 +2701,23 @@ exports.getScoreDecilNiche_A = function (req, res, next) {
           })
           .then(function (data) {
               for(i = 0; i < data.length; i++){
-                  item = data[i];
-                  item["title"] = title_valor;
+                  item = data[i]
+                  item["title"] = title_valor
               }
               res.json({'data': data})
           })
           .catch(function (error) {
-              console.log(error);
+              debug(error)
               next(error)
           })
       
     } 
     else{
 
-      next();
+      next()
     }
 
-};
+}
 
 
 
@@ -2735,34 +2736,34 @@ exports.getScoreDecilNiche_A = function (req, res, next) {
 
 exports.getScoreDecilNiche_V = function (req, res, next) {
 
-    console.log("getScoreDecilNiche_V");
+    debug("getScoreDecilNiche_V")
 
-    var spid        = parseInt(getParam(req, 'id'));
-    var tfilters    = getParam(req, 'tfilters');
-    var alpha       = 0.01;
+    var spid        = parseInt(getParam(req, 'id'))
+    var tfilters    = getParam(req, 'tfilters')
+    var alpha       = 0.01
     // var N           = 14707; // Verificar N, que se esta contemplando
-    var res_celda = getParam(req, 'res_celda', "cells_16km");
-    var res_grid = getParam(req, 'res_grid', "gridid_16km");
+    var res_celda = getParam(req, 'res_celda', "cells_16km")
+    var res_grid = getParam(req, 'res_grid', "gridid_16km")
 
     // Siempre incluidos en query, nj >= 0
-    var min_occ       = getParam(req, 'min_occ', 0);
-    var groupid        = getParam(req, 'groupid');
+    var min_occ       = getParam(req, 'min_occ', 0)
+    var groupid        = getParam(req, 'groupid')
 
-    var title_valor = verb_utils.processTitleGroup(groupid, tfilters);
+    var title_valor = verb_utils.processTitleGroup(groupid, tfilters)
 
     // variables configurables
-    var hasBios         = getParam(req, 'hasBios');
-    var hasRaster       = getParam(req, 'hasRaster');
-    var discardedids    = getParam(req, 'discardedids', []);
+    var hasBios         = getParam(req, 'hasBios')
+    var hasRaster       = getParam(req, 'hasRaster')
+    var discardedids    = getParam(req, 'discardedids', [])
 
-    // console.log(discardedids);
+    // debug(discardedids)
 
     
     if ( hasBios === 'true' && hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 ){
 
-      console.log("V");
-      var whereVar = verb_utils.processBioFilters(tfilters, spid);
-      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      debug("V")
+      var whereVar = verb_utils.processBioFilters(tfilters, spid)
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
 
       pool.any(queries.getScoreDecilNiche.getScoreDecilV, {
         spid: spid,
@@ -2777,13 +2778,13 @@ exports.getScoreDecilNiche_V = function (req, res, next) {
       })
       .then(function (data) {
         for(i = 0; i < data.length; i++){
-          item = data[i];
-          item["title"] = title_valor;
+          item = data[i]
+          item["title"] = title_valor
         }
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
 
@@ -2791,9 +2792,9 @@ exports.getScoreDecilNiche_V = function (req, res, next) {
     }
     else if (hasBios === 'true' && discardedids != undefined && discardedids.length > 0 ){
 
-      console.log("B");
-      var whereVar = verb_utils.processBioFilters(tfilters, spid);
-      // console.log(whereVar);
+      debug("B")
+      var whereVar = verb_utils.processBioFilters(tfilters, spid)
+      // debug(whereVar)
 
       pool.any(queries.getScoreDecilNiche.getScoreDecilBioV, {
         spid: spid,
@@ -2807,24 +2808,23 @@ exports.getScoreDecilNiche_V = function (req, res, next) {
       })
       .then(function (data) {
         for(i = 0; i < data.length; i++){
-          item = data[i];
-          item["title"] = title_valor;
+          item = data[i]
+          item["title"] = title_valor
         }
-        console.log("ready");
 
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
       
     } 
     else if (hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 ){
 
-      console.log("Ra");
-      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
-      // console.log(whereVarRaster);
+      debug("Ra")
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
+      // debug(whereVarRaster)
 
       pool.any(queries.getScoreDecilNiche.getScoreDecilRaV, {
         spid: spid,
@@ -2838,13 +2838,13 @@ exports.getScoreDecilNiche_V = function (req, res, next) {
       })
       .then(function (data) {
         for(i = 0; i < data.length; i++){
-          item = data[i];
-          item["title"] = title_valor;
+          item = data[i]
+          item["title"] = title_valor
         }
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
 
@@ -2852,10 +2852,10 @@ exports.getScoreDecilNiche_V = function (req, res, next) {
     } 
     else{
 
-      next();
+      next()
     }
 
-};
+}
 
 
 
@@ -2875,44 +2875,44 @@ exports.getScoreDecilNiche_V = function (req, res, next) {
 
 exports.getScoreDecilNiche_T = function (req, res, next) {
 
-    console.log("getScoreDecilNiche_T");
+    debug("getScoreDecilNiche_T")
 
-    var spid        = parseInt(getParam(req, 'id'));
-    var tfilters    = getParam(req, 'tfilters');
-    var alpha       = 0.01;
+    var spid        = parseInt(getParam(req, 'id'))
+    var tfilters    = getParam(req, 'tfilters')
+    var alpha       = 0.01
     // var N           = 14707; // Verificar N, que se esta contemplando
-    var res_celda = getParam(req, 'res_celda', "cells_16km");
-    var res_grid = getParam(req, 'res_grid', "gridid_16km");
+    var res_celda = getParam(req, 'res_celda', "cells_16km")
+    var res_grid = getParam(req, 'res_grid', "gridid_16km")
 
     // Siempre incluidos en query, nj >= 0
-    var min_occ       = getParam(req, 'min_occ', 0);
+    var min_occ       = getParam(req, 'min_occ', 0)
 
     // variables configurables
-    var hasBios         = getParam(req, 'hasBios');
-    var hasRaster       = getParam(req, 'hasRaster');
-    var groupid        = getParam(req, 'groupid');
+    var hasBios         = getParam(req, 'hasBios')
+    var hasRaster       = getParam(req, 'hasRaster')
+    var groupid        = getParam(req, 'groupid')
 
-    var title_valor = verb_utils.processTitleGroup(groupid, tfilters);
+    var title_valor = verb_utils.processTitleGroup(groupid, tfilters)
     
     // filtros por tiempo
-    var sfecha            = getParam(req, 'sfecha', false);
-    var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
-    var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
-    var discardedFilterids = getParam(req, 'discardedDateFilterids');
+    var sfecha            = getParam(req, 'sfecha', false)
+    var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+    var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+    var discardedFilterids = getParam(req, 'discardedDateFilterids')
 
-    console.log(discardedFilterids);
+    debug(discardedFilterids)
 
     
     if (hasBios === "true" && hasRaster === "true" && discardedFilterids === "true"){
 
-      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha);
-      console.log(caso);
+      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+      debug(caso)
 
 
-      console.log("T");  
+      debug("T");  
 
-       whereVar = verb_utils.processBioFilters(tfilters, spid);
-       whereVarRaster = verb_utils.processRasterFilters(tfilters,spid);
+       whereVar = verb_utils.processBioFilters(tfilters, spid)
+       whereVarRaster = verb_utils.processRasterFilters(tfilters,spid)
       
       pool.any(queries.getScoreDecilNiche.getScoreDecilT, {
         spid: spid,
@@ -2929,13 +2929,13 @@ exports.getScoreDecilNiche_T = function (req, res, next) {
       })
       .then(function (data) {
         for(i = 0; i < data.length; i++){
-          item = data[i];
-          item["title"] = title_valor;
+          item = data[i]
+          item["title"] = title_valor
         }
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
 
@@ -2945,13 +2945,13 @@ exports.getScoreDecilNiche_T = function (req, res, next) {
     }
     else if (hasBios === 'true' && discardedFilterids === "true" ){
 
-      console.log("B");
+      debug("B")
 
-      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha);
-      console.log(caso);  
+      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+      debug(caso);  
 
-      whereVar = verb_utils.processBioFilters(tfilters, spid);
-      // console.log(whereVar);
+      whereVar = verb_utils.processBioFilters(tfilters, spid)
+      // debug(whereVar)
       
       pool.any(queries.getScoreDecilNiche.getScoreDecilBioT, {
         spid: spid,
@@ -2967,13 +2967,13 @@ exports.getScoreDecilNiche_T = function (req, res, next) {
       })
       .then(function (data) {
         for(i = 0; i < data.length; i++){
-          item = data[i];
-          item["title"] = title_valor;
+          item = data[i]
+          item["title"] = title_valor
         }
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
       
@@ -2982,13 +2982,13 @@ exports.getScoreDecilNiche_T = function (req, res, next) {
     } 
     else if (hasRaster === 'true' && discardedFilterids === "true" ){
 
-      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha);
-      console.log(caso);
+      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+      debug(caso)
 
 
-      console.log("Ra");
+      debug("Ra")
 
-      whereVarRaster = verb_utils.processRasterFilters(tfilters,spid);
+      whereVarRaster = verb_utils.processRasterFilters(tfilters,spid)
       
       pool.any(queries.getScoreDecilNiche.getScoreDecilRaT, {
         spid: spid,
@@ -3004,25 +3004,25 @@ exports.getScoreDecilNiche_T = function (req, res, next) {
       })
       .then(function (data) {
         for(i = 0; i < data.length; i++){
-          item = data[i];
-          item["title"] = title_valor;
+          item = data[i]
+          item["title"] = title_valor
         }
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
       
     } 
     else{
 
-      next();
+      next()
     }
 
     
 
-};
+}
 
 
 /**
@@ -3039,34 +3039,34 @@ exports.getScoreDecilNiche_T = function (req, res, next) {
 
 exports.getScoreDecilNiche = function (req, res, next) {
 
-    console.log("getScoreDecilNiche");
+    debug("getScoreDecilNiche")
 
 
-    var spid        = parseInt(getParam(req, 'id'));
-    var tfilters    = getParam(req, 'tfilters');
-    var alpha       = 0.01;
-    // var N           = 14707;
-    var res_celda = getParam(req, 'res_celda', "cells_16km");
-    var res_grid = getParam(req, 'res_grid', "gridid_16km");
+    var spid        = parseInt(getParam(req, 'id'))
+    var tfilters    = getParam(req, 'tfilters')
+    var alpha       = 0.01
+    // var N           = 14707
+    var res_celda = getParam(req, 'res_celda', "cells_16km")
+    var res_grid = getParam(req, 'res_grid', "gridid_16km")
 
     var discardedDeleted = getParam(req, 'discardedFilterids',[]);
 
     // Siempre incluidos en query, nj >= 0
-    var min_occ       = getParam(req, 'min_occ', 0);
+    var min_occ       = getParam(req, 'min_occ', 0)
 
     // variables configurables
-    var hasBios         = getParam(req, 'hasBios');
-    var hasRaster       = getParam(req, 'hasRaster');
-    var groupid        = getParam(req, 'groupid');
+    var hasBios         = getParam(req, 'hasBios')
+    var hasRaster       = getParam(req, 'hasRaster')
+    var groupid        = getParam(req, 'groupid')
 
-    var title_valor = verb_utils.processTitleGroup(groupid, tfilters);
+    var title_valor = verb_utils.processTitleGroup(groupid, tfilters)
 
     
     if (hasBios === 'true' && hasRaster === 'true' ){
 
-      console.log("T");
-      var whereVar = verb_utils.processBioFilters(tfilters, spid);
-      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+      debug("T")
+      var whereVar = verb_utils.processBioFilters(tfilters, spid)
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
 
       pool.any(queries.getScoreDecilNiche.getScoreDecil, {
         spid: spid,
@@ -3082,14 +3082,14 @@ exports.getScoreDecilNiche = function (req, res, next) {
       .then(function (data) {
 
         for(i = 0; i < data.length; i++){
-          item = data[i];
-          item["title"] = title_valor;
+          item = data[i]
+          item["title"] = title_valor
         }
 
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
 
@@ -3097,9 +3097,9 @@ exports.getScoreDecilNiche = function (req, res, next) {
     }
     else if (hasBios === 'true'){
 
-      console.log("B");
-      var whereVar = verb_utils.processBioFilters(tfilters, spid);
-      // console.log(whereVar);
+      debug("B")
+      var whereVar = verb_utils.processBioFilters(tfilters, spid)
+      // debug(whereVar)
 
       pool.any(queries.getScoreDecilNiche.getScoreDecilBio, {
         spid: spid,
@@ -3114,14 +3114,14 @@ exports.getScoreDecilNiche = function (req, res, next) {
       .then(function (data) {
 
         for(i = 0; i < data.length; i++){
-          item = data[i];
-          item["title"] = title_valor;
+          item = data[i]
+          item["title"] = title_valor
         }
 
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
 
@@ -3129,9 +3129,9 @@ exports.getScoreDecilNiche = function (req, res, next) {
     } 
     else if (hasRaster === 'true'){
 
-      console.log("Ra");
-      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
-      // console.log(whereVarRaster);
+      debug("Ra")
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
+      // debug(whereVarRaster)
 
       pool.any(queries.getScoreDecilNiche.getScoreDecilRaster, {
         spid: spid,
@@ -3146,24 +3146,24 @@ exports.getScoreDecilNiche = function (req, res, next) {
       .then(function (data) {
 
         for(i = 0; i < data.length; i++){
-          item = data[i];
-          item["title"] = title_valor;
+          item = data[i]
+          item["title"] = title_valor
         }
 
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
       
     } 
     else{
 
-      next();
+      next()
     }
 
-};
+}
 
 
 
@@ -3186,35 +3186,35 @@ exports.getScoreDecilNiche = function (req, res, next) {
 
  exports.getGridSpeciesNiche_M = function (req, res, next) {
 
-    console.log("getGridSpeciesNiche_M");
+    debug("getGridSpeciesNiche_M")
 
-    var spid        = parseInt(getParam(req, 'id'));
-    var tfilters    = getParam(req, 'tfilters');
-    var alpha       = 0.01;
-    // var N           = 14707;
-    var maxscore    = 700;
-    var res_celda = getParam(req, 'res_celda', "cells_16km");
-    var res_grid = getParam(req, 'res_grid', "gridid_16km");
+    var spid        = parseInt(getParam(req, 'id'))
+    var tfilters    = getParam(req, 'tfilters')
+    var alpha       = 0.01
+    // var N           = 14707
+    var maxscore    = 700
+    var res_celda = getParam(req, 'res_celda', "cells_16km")
+    var res_grid = getParam(req, 'res_grid', "gridid_16km")
 
     // Siempre incluidos en query, nj >= 0
-    var min_occ       = getParam(req, 'min_occ', 0);
+    var min_occ       = getParam(req, 'min_occ', 0)
 
     // variables configurables
-    var hasBios     = getParam(req, 'hasBios');
-    var hasRaster   = getParam(req, 'hasRaster');
-    var lat         = getParam(req, 'lat');
-    var long        = getParam(req, 'long');
+    var hasBios     = getParam(req, 'hasBios')
+    var hasRaster   = getParam(req, 'hasRaster')
+    var lat         = getParam(req, 'lat')
+    var long        = getParam(req, 'long')
 
-    var mapa_prob       = getParam(req, 'mapa_prob');
+    var mapa_prob       = getParam(req, 'mapa_prob')
 
     
     if (hasBios === 'true' && hasRaster === 'true' && mapa_prob === 'mapa_prob' ){
 
-      console.log("T");
+      debug("T")
 
-      var whereVar = verb_utils.processBioFilters(tfilters, spid);
-      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
-      var categorias = verb_utils.getRasterCategories(tfilters);
+      var whereVar = verb_utils.processBioFilters(tfilters, spid)
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
+      var categorias = verb_utils.getRasterCategories(tfilters)
       
       pool.any(queries.getGridSpeciesNiche.getGridSpeciesM, {
         spid: spid,
@@ -3234,7 +3234,7 @@ exports.getScoreDecilNiche = function (req, res, next) {
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
 
@@ -3242,10 +3242,10 @@ exports.getScoreDecilNiche = function (req, res, next) {
     }
     else if (hasBios === 'true' && mapa_prob === 'mapa_prob' ){
 
-      console.log("B");
+      debug("B")
 
-      var whereVar = verb_utils.processBioFilters(tfilters, spid);
-      var categorias = verb_utils.getRasterCategories(tfilters);
+      var whereVar = verb_utils.processBioFilters(tfilters, spid)
+      var categorias = verb_utils.getRasterCategories(tfilters)
 
       
       pool.any(queries.getGridSpeciesNiche.getGridSpeciesBioM, {
@@ -3265,7 +3265,7 @@ exports.getScoreDecilNiche = function (req, res, next) {
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
 
@@ -3273,9 +3273,9 @@ exports.getScoreDecilNiche = function (req, res, next) {
     } 
     else if (hasRaster === 'true' && mapa_prob === 'mapa_prob' ){
 
-      console.log("Ra");
-      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
-      var categorias = verb_utils.getRasterCategories(tfilters);
+      debug("Ra")
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
+      var categorias = verb_utils.getRasterCategories(tfilters)
 
       pool.any(queries.getGridSpeciesNiche.getGridSpeciesRaM, {
         spid: spid,
@@ -3294,17 +3294,17 @@ exports.getScoreDecilNiche = function (req, res, next) {
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
       
     } 
     else{
 
-      next();
+      next()
     }
 
-};
+}
 
 
 
@@ -3322,33 +3322,33 @@ exports.getScoreDecilNiche = function (req, res, next) {
 
  exports.getGridSpeciesNiche_A = function (req, res, next) {
 
-    console.log("getGridSpeciesNiche_A");
+    debug("getGridSpeciesNiche_A")
 
-    var spid        = parseInt(getParam(req, 'id'));
-    var tfilters    = getParam(req, 'tfilters');
-    var alpha       = 0.01;
-    // var N           = 14707;
-    var maxscore    = 700;
-    var res_celda = getParam(req, 'res_celda', "cells_16km");
-    var res_grid = getParam(req, 'res_grid', "gridid_16km");
+    var spid        = parseInt(getParam(req, 'id'))
+    var tfilters    = getParam(req, 'tfilters')
+    var alpha       = 0.01
+    // var N           = 14707
+    var maxscore    = 700
+    var res_celda = getParam(req, 'res_celda', "cells_16km")
+    var res_grid = getParam(req, 'res_grid', "gridid_16km")
 
     // Siempre incluidos en query, nj >= 0
-    var min_occ       = getParam(req, 'min_occ', 0);
+    var min_occ       = getParam(req, 'min_occ', 0)
 
     // variables configurables
-    var hasBios     = getParam(req, 'hasBios');
-    var hasRaster   = getParam(req, 'hasRaster');
-    var lat         = getParam(req, 'lat');
-    var long        = getParam(req, 'long');
-    var apriori     = getParam(req, 'apriori');
+    var hasBios     = getParam(req, 'hasBios')
+    var hasRaster   = getParam(req, 'hasRaster')
+    var lat         = getParam(req, 'lat')
+    var long        = getParam(req, 'long')
+    var apriori     = getParam(req, 'apriori')
 
     if (hasBios === 'true' && hasRaster === 'true' && apriori === 'apriori' ){
 
-      console.log("T");
+      debug("T")
 
-      var whereVar  = verb_utils.processBioFilters(tfilters, spid);
-      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
-      var categorias = verb_utils.getRasterCategories(tfilters);
+      var whereVar  = verb_utils.processBioFilters(tfilters, spid)
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
+      var categorias = verb_utils.getRasterCategories(tfilters)
       
       pool.any(queries.getGridSpeciesNiche.getGridSpeciesA, {
         spid: spid,
@@ -3368,7 +3368,7 @@ exports.getScoreDecilNiche = function (req, res, next) {
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
 
@@ -3376,10 +3376,10 @@ exports.getScoreDecilNiche = function (req, res, next) {
     }
     else if (hasBios === 'true' && apriori === 'apriori' ){
 
-      console.log("B");
+      debug("B")
 
-      var whereVar = verb_utils.processBioFilters(tfilters, spid);
-      var categorias = verb_utils.getRasterCategories(tfilters);
+      var whereVar = verb_utils.processBioFilters(tfilters, spid)
+      var categorias = verb_utils.getRasterCategories(tfilters)
 
       pool.any(queries.getGridSpeciesNiche.getGridSpeciesBioA, {
         spid: spid,
@@ -3398,7 +3398,7 @@ exports.getScoreDecilNiche = function (req, res, next) {
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
 
@@ -3406,9 +3406,9 @@ exports.getScoreDecilNiche = function (req, res, next) {
     } 
     else if (hasRaster === 'true' && apriori === 'apriori' ){
 
-      console.log("Ra");
-      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
-      var categorias = verb_utils.getRasterCategories(tfilters);
+      debug("Ra")
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
+      var categorias = verb_utils.getRasterCategories(tfilters)
 
       pool.any(queries.getGridSpeciesNiche.getGridSpeciesRaA, {
         spid: spid,
@@ -3427,17 +3427,17 @@ exports.getScoreDecilNiche = function (req, res, next) {
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
       
     } 
     else{
 
-      next();
+      next()
     }
 
-};
+}
 
 
 
@@ -3456,46 +3456,46 @@ exports.getScoreDecilNiche = function (req, res, next) {
 
 exports.getGridSpeciesNiche_T = function (req, res, next) {
 
-    console.log("getGridSpeciesNiche_T");
+    debug("getGridSpeciesNiche_T")
 
-    var spid        = parseInt(getParam(req, 'id'));
-    var tfilters    = getParam(req, 'tfilters');
-    var alpha       = 0.01;
+    var spid        = parseInt(getParam(req, 'id'))
+    var tfilters    = getParam(req, 'tfilters')
+    var alpha       = 0.01
     // var N           = 14707; // Verificar N, que se esta contemplando
-    var maxscore    = 700;
-    var res_celda = getParam(req, 'res_celda', "cells_16km");
-    var res_grid = getParam(req, 'res_grid', "gridid_16km");
+    var maxscore    = 700
+    var res_celda = getParam(req, 'res_celda', "cells_16km")
+    var res_grid = getParam(req, 'res_grid', "gridid_16km")
 
     // Siempre incluidos en query, nj >= 0
-    var min_occ       = getParam(req, 'min_occ', 0);
+    var min_occ       = getParam(req, 'min_occ', 0)
 
     // variables configurables
-    var hasBios         = getParam(req, 'hasBios');
-    var hasRaster       = getParam(req, 'hasRaster');
+    var hasBios         = getParam(req, 'hasBios')
+    var hasRaster       = getParam(req, 'hasRaster')
 
-    var lat      = getParam(req, 'lat');
-    var long      = getParam(req, 'long');
+    var lat      = getParam(req, 'lat')
+    var long      = getParam(req, 'long')
     
     // filtros por tiempo
-    var sfecha            = getParam(req, 'sfecha', false);
-    var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
-    var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
-    var discardedFilterids = getParam(req, 'discardedDateFilterids');
+    var sfecha            = getParam(req, 'sfecha', false)
+    var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+    var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+    var discardedFilterids = getParam(req, 'discardedDateFilterids')
 
-    // console.log(discardedFilterids);
+    // debug(discardedFilterids)
 
     
     if (hasBios === "true" && hasRaster === "true" && discardedFilterids === "true"){
 
-      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha);
-      // console.log(caso);
+      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+      // debug(caso)
 
 
-      console.log("T");  
+      debug("T");  
 
-       var whereVar = verb_utils.processBioFilters(tfilters, spid);
-       var whereVarRaster = verb_utils.processRasterFilters(tfilters,spid);
-       var categorias = verb_utils.getRasterCategories(tfilters);
+       var whereVar = verb_utils.processBioFilters(tfilters, spid)
+       var whereVarRaster = verb_utils.processRasterFilters(tfilters,spid)
+       var categorias = verb_utils.getRasterCategories(tfilters)
       
       pool.any(queries.getGridSpeciesNiche.getGridSpeciesT, {
         spid: spid,
@@ -3515,22 +3515,22 @@ exports.getGridSpeciesNiche_T = function (req, res, next) {
         res_grid: res_grid
       })
       .then(function (data) {
-        // console.log(data);
+        // debug(data)
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
 
     }
     else if (hasBios === 'true' && discardedFilterids === "true" ){
 
-      console.log("B");
+      debug("B")
 
-      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha);
-      var whereVar = verb_utils.processBioFilters(tfilters, spid);
-      var categorias = verb_utils.getRasterCategories(tfilters);
+      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+      var whereVar = verb_utils.processBioFilters(tfilters, spid)
+      var categorias = verb_utils.getRasterCategories(tfilters)
       
       
       pool.any(queries.getGridSpeciesNiche.getGridSpeciesBioT, {
@@ -3550,24 +3550,24 @@ exports.getGridSpeciesNiche_T = function (req, res, next) {
         res_grid: res_grid
       })
       .then(function (data) {
-        // console.log(data);
+        // debug(data)
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
       
     } 
     else if (hasRaster === 'true' && discardedFilterids === "true" ){
 
-      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha);
-      var categorias = verb_utils.getRasterCategories(tfilters);
+      var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+      var categorias = verb_utils.getRasterCategories(tfilters)
 
 
-      console.log("Ra");
+      debug("Ra")
 
-      whereVarRaster = verb_utils.processRasterFilters(tfilters,spid);
+      whereVarRaster = verb_utils.processRasterFilters(tfilters,spid)
       
       pool.any(queries.getGridSpeciesNiche.getGridSpeciesRaT, {
         spid: spid,
@@ -3586,23 +3586,23 @@ exports.getGridSpeciesNiche_T = function (req, res, next) {
         res_grid: res_grid
       })
       .then(function (data) {
-        // console.log(data);
+        // debug(data)
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
       
     } 
     else{
 
-      next();
+      next()
     }
 
     
 
-};
+}
 
 /**
  *
@@ -3617,42 +3617,42 @@ exports.getGridSpeciesNiche_T = function (req, res, next) {
 
  exports.getGridSpeciesNiche = function (req, res, next) {
 
-    console.log("getGridSpeciesNiche");
+    debug("getGridSpeciesNiche")
 
     
-    var spid        = parseInt(getParam(req, 'id'));
-    var tfilters    = getParam(req, 'tfilters');
-    var alpha       = 0.01;
-    // var N           = 14707;
-    var maxscore    = 700;
-    var res_celda = getParam(req, 'res_celda', "cells_16km");
-    var res_grid = getParam(req, 'res_grid', "gridid_16km");
+    var spid        = parseInt(getParam(req, 'id'))
+    var tfilters    = getParam(req, 'tfilters')
+    var alpha       = 0.01
+    // var N           = 14707
+    var maxscore    = 700
+    var res_celda = getParam(req, 'res_celda', "cells_16km")
+    var res_grid = getParam(req, 'res_grid', "gridid_16km")
 
     var discardedDeleted = getParam(req, 'discardedFilterids',[]);
 
     // Siempre incluidos en query, nj >= 0
-    var min_occ       = getParam(req, 'min_occ', 0);
+    var min_occ       = getParam(req, 'min_occ', 0)
 
     // variables configurables
-    var hasBios     = getParam(req, 'hasBios');
-    var hasRaster   = getParam(req, 'hasRaster');
+    var hasBios     = getParam(req, 'hasBios')
+    var hasRaster   = getParam(req, 'hasRaster')
 
-    var lat      = getParam(req, 'lat');
-    var long      = getParam(req, 'long');
+    var lat      = getParam(req, 'lat')
+    var long      = getParam(req, 'long')
 
-    // console.log(idGrid);
-    // var groupid        = getParam(req, 'groupid');
-    // var title_valor = verb_utils.processTitleGroup(groupid, tfilters);
+    // debug(idGrid)
+    // var groupid        = getParam(req, 'groupid')
+    // var title_valor = verb_utils.processTitleGroup(groupid, tfilters)
     
     if (hasBios === 'true' && hasRaster === 'true'){
 
-      console.log("T");
+      debug("T")
       
-      var whereVar = verb_utils.processBioFilters(tfilters, spid);
-      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
-      var categorias = verb_utils.getRasterCategories(tfilters);
+      var whereVar = verb_utils.processBioFilters(tfilters, spid)
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
+      var categorias = verb_utils.getRasterCategories(tfilters)
 
-      // console.log(categorias);
+      // debug(categorias)
 
       pool.any(queries.getGridSpeciesNiche.getGridSpecies, {
         spid: spid,
@@ -3673,7 +3673,7 @@ exports.getGridSpeciesNiche_T = function (req, res, next) {
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
 
@@ -3681,10 +3681,10 @@ exports.getGridSpeciesNiche_T = function (req, res, next) {
     }
     else if (hasBios === 'true'){
 
-      console.log("B");
+      debug("B")
 
-      var whereVar = verb_utils.processBioFilters(tfilters, spid);
-      var categorias = verb_utils.getRasterCategories(tfilters);
+      var whereVar = verb_utils.processBioFilters(tfilters, spid)
+      var categorias = verb_utils.getRasterCategories(tfilters)
       
       pool.any(queries.getGridSpeciesNiche.getGridSpeciesBio, {
         spid: spid,
@@ -3704,7 +3704,7 @@ exports.getGridSpeciesNiche_T = function (req, res, next) {
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
 
@@ -3712,15 +3712,15 @@ exports.getGridSpeciesNiche_T = function (req, res, next) {
     } 
     else if (hasRaster === 'true'){
 
-      console.log("Ra");
+      debug("Ra")
 
-      // console.log(tfilters);
+      // debug(tfilters)
 
       
-      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
-      var categorias = verb_utils.getRasterCategories(tfilters);
+      var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
+      var categorias = verb_utils.getRasterCategories(tfilters)
       
-      // console.log(whereVarRaster);
+      // debug(whereVarRaster)
 
       pool.any(queries.getGridSpeciesNiche.getGridSpeciesRaster, {
         spid: spid,
@@ -3740,17 +3740,17 @@ exports.getGridSpeciesNiche_T = function (req, res, next) {
         res.json({'data': data})
       })
       .catch(function (error) {
-        console.log(error);
+        debug(error)
         next(error)
       })
       
     } 
     else{
 
-      next();
+      next()
     }
 
-};
+}
 
 
 
@@ -3774,35 +3774,35 @@ exports.getGridSpeciesNiche_T = function (req, res, next) {
 exports.getEdgesNiche = function (req, res, next) {
 
   
-    console.log("getEdgesNiche");
+    debug("getEdgesNiche")
 
-    // var spids = getParam(req, 'spids');
-    var sfilters    = getParam(req, 's_tfilters');
-    var tfilters    = getParam(req, 't_tfilters');
-    var alpha       = 0.01;
-    // var N           = 14707;
-    var min_occ       = getParam(req, 'min_occ', 0);
-    var res_celda = getParam(req, 'res_celda', "cells_16km");
+    // var spids = getParam(req, 'spids')
+    var sfilters    = getParam(req, 's_tfilters')
+    var tfilters    = getParam(req, 't_tfilters')
+    var alpha       = 0.01
+    // var N           = 14707
+    var min_occ       = getParam(req, 'min_occ', 0)
+    var res_celda = getParam(req, 'res_celda', "cells_16km")
 
 
-    var min_ep = 0.0;
-    var max_edges = 1000;
+    var min_ep = 0.0
+    var max_edges = 1000
 
-    var hasBiosSource    = getParam(req, 'hasbiosource');
-    var hasRasterSource    = getParam(req, 'hasrastersource');
-    var hasBiosTarget    = getParam(req, 'hasbiotarget');
-    var hasRasterTarget    = getParam(req, 'hasrastertarget');
+    var hasBiosSource    = getParam(req, 'hasbiosource')
+    var hasRasterSource    = getParam(req, 'hasrastersource')
+    var hasBiosTarget    = getParam(req, 'hasbiotarget')
+    var hasRasterTarget    = getParam(req, 'hasrastertarget')
 
 
 
     if ( hasBiosSource === true && hasBiosTarget === true && hasRasterSource === true && hasRasterTarget === true ){
 
-        console.log("T");
-        var whereVarSource = verb_utils.processBioFilters(sfilters);
-        var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters);
+        debug("T")
+        var whereVarSource = verb_utils.processBioFilters(sfilters)
+        var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters)
 
-        var whereVarTarget = verb_utils.processBioFilters(tfilters);
-        var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters);
+        var whereVarTarget = verb_utils.processBioFilters(tfilters)
+        var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters)
 
         pool.any(queries.getEdgesNiche.getEdgesNicheBioRaster_BioRaster, {
           N: N,
@@ -3818,7 +3818,7 @@ exports.getEdgesNiche = function (req, res, next) {
           res.json({'data': data})
         })
         .catch(function (error) {
-          console.log(error);
+          debug(error)
           next(error)
         })
 
@@ -3826,12 +3826,12 @@ exports.getEdgesNiche = function (req, res, next) {
     }
     else if ( hasBiosSource === true && hasRasterSource === true && hasBiosTarget === true ){
 
-        console.log("T");
-        var whereVarSource = verb_utils.processBioFilters(sfilters);
-        var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters);
+        debug("T")
+        var whereVarSource = verb_utils.processBioFilters(sfilters)
+        var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters)
 
-        var whereVarTarget = verb_utils.processBioFilters(tfilters);
-        // var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters);
+        var whereVarTarget = verb_utils.processBioFilters(tfilters)
+        // var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters)
 
 
         pool.any(queries.getEdgesNiche.getEdgesNicheBioRaster_Bio, {
@@ -3848,7 +3848,7 @@ exports.getEdgesNiche = function (req, res, next) {
           res.json({'data': data})
         })
         .catch(function (error) {
-          console.log(error);
+          debug(error)
           next(error)
         })
 
@@ -3856,12 +3856,12 @@ exports.getEdgesNiche = function (req, res, next) {
     }
     else if ( hasBiosSource === true && hasRasterSource === true && hasRasterTarget === true ){
 
-        console.log("T");
-        var whereVarSource = verb_utils.processBioFilters(sfilters);
-        var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters);
+        debug("T")
+        var whereVarSource = verb_utils.processBioFilters(sfilters)
+        var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters)
 
-        // var whereVarTarget = verb_utils.processBioFilters(tfilters);
-        var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters);
+        // var whereVarTarget = verb_utils.processBioFilters(tfilters)
+        var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters)
 
 
         
@@ -3879,7 +3879,7 @@ exports.getEdgesNiche = function (req, res, next) {
           res.json({'data': data})
         })
         .catch(function (error) {
-          console.log(error);
+          debug(error)
           next(error)
         })
 
@@ -3887,12 +3887,12 @@ exports.getEdgesNiche = function (req, res, next) {
     }
     else if ( hasBiosSource === true && hasBiosTarget === true && hasRasterTarget === true ){
 
-        console.log("T");
-        var whereVarSource = verb_utils.processBioFilters(sfilters);
-        // var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters);
+        debug("T")
+        var whereVarSource = verb_utils.processBioFilters(sfilters)
+        // var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters)
 
-        var whereVarTarget = verb_utils.processBioFilters(tfilters);
-        var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters);
+        var whereVarTarget = verb_utils.processBioFilters(tfilters)
+        var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters)
 
 
 
@@ -3910,7 +3910,7 @@ exports.getEdgesNiche = function (req, res, next) {
           res.json({'data': data})
         })
         .catch(function (error) {
-          console.log(error);
+          debug(error)
           next(error)
         })
 
@@ -3918,12 +3918,12 @@ exports.getEdgesNiche = function (req, res, next) {
     }
     else if ( hasRasterSource === true && hasBiosTarget === true && hasRasterTarget === true ){
 
-        console.log("T");
-        // var whereVarSource = verb_utils.processBioFilters(sfilters);
-        var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters);
+        debug("T")
+        // var whereVarSource = verb_utils.processBioFilters(sfilters)
+        var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters)
 
-        var whereVarTarget = verb_utils.processBioFilters(tfilters);
-        var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters);
+        var whereVarTarget = verb_utils.processBioFilters(tfilters)
+        var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters)
 
 
 
@@ -3942,7 +3942,7 @@ exports.getEdgesNiche = function (req, res, next) {
           res.json({'data': data})
         })
         .catch(function (error) {
-          console.log(error);
+          debug(error)
           next(error)
         })
 
@@ -3950,12 +3950,12 @@ exports.getEdgesNiche = function (req, res, next) {
     }
     else if ( hasBiosSource === true && hasBiosTarget === true ){
 
-        console.log("T");
-        var whereVarSource = verb_utils.processBioFilters(sfilters);
-        // var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters);
+        debug("T")
+        var whereVarSource = verb_utils.processBioFilters(sfilters)
+        // var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters)
 
-        var whereVarTarget = verb_utils.processBioFilters(tfilters);
-        // var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters);
+        var whereVarTarget = verb_utils.processBioFilters(tfilters)
+        // var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters)
 
 
         pool.any(queries.getEdgesNiche.getEdgesNicheBio_Bio, {
@@ -3973,7 +3973,7 @@ exports.getEdgesNiche = function (req, res, next) {
           res.json({'data': data})
         })
         .catch(function (error) {
-          console.log(error);
+          debug(error)
           next(error)
         })
 
@@ -3981,11 +3981,11 @@ exports.getEdgesNiche = function (req, res, next) {
     }
     else if ( hasBiosSource === true && hasRasterTarget === true ){
 
-        console.log("T");
-        var whereVarSource = verb_utils.processBioFilters(sfilters);
-        // var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters);
-        // var whereVarTarget = verb_utils.processBioFilters(tfilters);
-        var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters);
+        debug("T")
+        var whereVarSource = verb_utils.processBioFilters(sfilters)
+        // var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters)
+        // var whereVarTarget = verb_utils.processBioFilters(tfilters)
+        var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters)
 
 
         
@@ -4003,7 +4003,7 @@ exports.getEdgesNiche = function (req, res, next) {
           res.json({'data': data})
         })
         .catch(function (error) {
-          console.log(error);
+          debug(error)
           next(error)
         })
 
@@ -4011,12 +4011,12 @@ exports.getEdgesNiche = function (req, res, next) {
     }
     else if ( hasRasterSource === true && hasBiosTarget === true ){
 
-        console.log("T");
-        // var whereVarSource = verb_utils.processBioFilters(sfilters);
-        var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters);
+        debug("T")
+        // var whereVarSource = verb_utils.processBioFilters(sfilters)
+        var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters)
 
-        var whereVarTarget = verb_utils.processBioFilters(tfilters);
-        // var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters);
+        var whereVarTarget = verb_utils.processBioFilters(tfilters)
+        // var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters)
 
         pool.any(queries.getEdgesNiche.getEdgesNicheRaster_Bio, {
           N: N,
@@ -4032,7 +4032,7 @@ exports.getEdgesNiche = function (req, res, next) {
           res.json({'data': data})
         })
         .catch(function (error) {
-          console.log(error);
+          debug(error)
           next(error)
         })
 
@@ -4040,12 +4040,12 @@ exports.getEdgesNiche = function (req, res, next) {
     }
     else if ( hasRasterSource === true && hasRasterTarget === true ){
 
-        console.log("T");
-        // var whereVarSource = verb_utils.processBioFilters(sfilters);
-        var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters);
+        debug("T")
+        // var whereVarSource = verb_utils.processBioFilters(sfilters)
+        var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters)
 
-        // var whereVarTarget = verb_utils.processBioFilters(tfilters);
-        var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters);
+        // var whereVarTarget = verb_utils.processBioFilters(tfilters)
+        var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters)
 
 
         pool.any(queries.getEdgesNiche.getEdgesNicheRaster_Raster, {
@@ -4062,7 +4062,7 @@ exports.getEdgesNiche = function (req, res, next) {
           res.json({'data': data})
         })
         .catch(function (error) {
-          console.log(error);
+          debug(error)
           next(error)
         })
 
@@ -4071,11 +4071,11 @@ exports.getEdgesNiche = function (req, res, next) {
 
     else{
 
-      next();
+      next()
     }
 
 
-};
+}
 
 
 
@@ -4094,48 +4094,48 @@ exports.getEdgesNiche = function (req, res, next) {
 exports.getNodesNiche = function (req, res, next) {
 
   
-    console.log("getNodesNiche");
+    debug("getNodesNiche")
 
     
-    var sfilters    = getParam(req, 's_tfilters');
-    // console.log(sfilters);
-    var tfilters    = getParam(req, 't_tfilters');
-    // console.log(tfilters);
-    var min_occ     = getParam(req, 'min_occ', 0);
-    var res_celda = getParam(req, 'res_celda', "cells_16km");
+    var sfilters    = getParam(req, 's_tfilters')
+    // debug(sfilters)
+    var tfilters    = getParam(req, 't_tfilters')
+    // debug(tfilters)
+    var min_occ     = getParam(req, 'min_occ', 0)
+    var res_celda = getParam(req, 'res_celda', "cells_16km")
 
 
-    var alpha       = 0.01;
-    // var N           = 14707;
-    var min_ep      = 0.0;
-    var max_edges   = 1000;
+    var alpha       = 0.01
+    // var N           = 14707
+    var min_ep      = 0.0
+    var max_edges   = 1000
 
 
-    var hasBiosSource    = getParam(req, 'hasbiosource');
-    var hasRasterSource    = getParam(req, 'hasrastersource');
-    var hasBiosTarget    = getParam(req, 'hasbiotarget');
-    var hasRasterTarget    = getParam(req, 'hasrastertarget');
+    var hasBiosSource    = getParam(req, 'hasbiosource')
+    var hasRasterSource    = getParam(req, 'hasrastersource')
+    var hasBiosTarget    = getParam(req, 'hasbiotarget')
+    var hasRasterTarget    = getParam(req, 'hasrastertarget')
 
-    // console.log(hasBiosSource);
-    // console.log(hasRasterSource);
-    // console.log(hasBiosTarget);
-    // console.log(hasRasterTarget);
+    // debug(hasBiosSource)
+    // debug(hasRasterSource)
+    // debug(hasBiosTarget)
+    // debug(hasRasterTarget)
 
-    // console.log("validaciones");
-    // console.log(hasBiosSource === true);
-    // console.log(hasBiosTarget === true);
-    // console.log(hasRasterSource === true);
-    // console.log(hasRasterTarget === true);
+    // debug("validaciones")
+    // debug(hasBiosSource === true)
+    // debug(hasBiosTarget === true)
+    // debug(hasRasterSource === true)
+    // debug(hasRasterTarget === true)
 
 
     if ( hasBiosSource === true && hasBiosTarget === true && hasRasterSource === true && hasRasterTarget === true ){
 
-        console.log("hasBiosSource - hasBiosTarget - hasRasterSource - hasRasterTarget");
-        var whereVarSource = verb_utils.processBioFilters(sfilters);
-        var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters);
+        debug("hasBiosSource - hasBiosTarget - hasRasterSource - hasRasterTarget")
+        var whereVarSource = verb_utils.processBioFilters(sfilters)
+        var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters)
 
-        var whereVarTarget = verb_utils.processBioFilters(tfilters);
-        var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters);
+        var whereVarTarget = verb_utils.processBioFilters(tfilters)
+        var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters)
 
 
         pool.any(queries.getNodesNiche.getNodesNicheBioRaster_BioRaster, {
@@ -4152,7 +4152,7 @@ exports.getNodesNiche = function (req, res, next) {
           res.json({'data': data})
         })
         .catch(function (error) {
-          console.log(error);
+          debug(error)
           next(error)
         })
 
@@ -4160,12 +4160,12 @@ exports.getNodesNiche = function (req, res, next) {
     }
     else if ( hasBiosSource === true && hasRasterSource === true && hasBiosTarget === true ){
 
-        console.log("T");
-        var whereVarSource = verb_utils.processBioFilters(sfilters);
-        var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters);
+        debug("T")
+        var whereVarSource = verb_utils.processBioFilters(sfilters)
+        var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters)
 
-        var whereVarTarget = verb_utils.processBioFilters(tfilters);
-        // var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters);
+        var whereVarTarget = verb_utils.processBioFilters(tfilters)
+        // var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters)
 
 
         pool.any(queries.getNodesNiche.getNodesNicheBioRaster_Bio, {
@@ -4182,7 +4182,7 @@ exports.getNodesNiche = function (req, res, next) {
           res.json({'data': data})
         })
         .catch(function (error) {
-          console.log(error);
+          debug(error)
           next(error)
         })
 
@@ -4190,12 +4190,12 @@ exports.getNodesNiche = function (req, res, next) {
     }
     else if ( hasBiosSource === true && hasRasterSource === true && hasRasterTarget === true ){
 
-        console.log("T");
-        var whereVarSource = verb_utils.processBioFilters(sfilters);
-        var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters);
+        debug("T")
+        var whereVarSource = verb_utils.processBioFilters(sfilters)
+        var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters)
 
-        // var whereVarTarget = verb_utils.processBioFilters(tfilters);
-        var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters);
+        // var whereVarTarget = verb_utils.processBioFilters(tfilters)
+        var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters)
 
 
         pool.any(queries.getNodesNiche.getNodesNicheBioRaster_Raster, {
@@ -4212,7 +4212,7 @@ exports.getNodesNiche = function (req, res, next) {
           res.json({'data': data})
         })
         .catch(function (error) {
-          console.log(error);
+          debug(error)
           next(error)
         })
 
@@ -4220,12 +4220,12 @@ exports.getNodesNiche = function (req, res, next) {
     }
     else if ( hasBiosSource === true && hasBiosTarget === true && hasRasterTarget === true ){
 
-        console.log("T");
-        var whereVarSource = verb_utils.processBioFilters(sfilters);
-        // var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters);
+        debug("T")
+        var whereVarSource = verb_utils.processBioFilters(sfilters)
+        // var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters)
 
-        var whereVarTarget = verb_utils.processBioFilters(tfilters);
-        var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters);
+        var whereVarTarget = verb_utils.processBioFilters(tfilters)
+        var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters)
 
 
         pool.any(queries.getNodesNiche.getNodesNicheBio_BioRaster, {
@@ -4242,7 +4242,7 @@ exports.getNodesNiche = function (req, res, next) {
           res.json({'data': data})
         })
         .catch(function (error) {
-          console.log(error);
+          debug(error)
           next(error)
         })
 
@@ -4250,12 +4250,12 @@ exports.getNodesNiche = function (req, res, next) {
     }
     else if ( hasRasterSource === true && hasBiosTarget === true && hasRasterTarget === true ){
 
-        console.log("T");
-        // var whereVarSource = verb_utils.processBioFilters(sfilters);
-        var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters);
+        debug("T")
+        // var whereVarSource = verb_utils.processBioFilters(sfilters)
+        var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters)
 
-        var whereVarTarget = verb_utils.processBioFilters(tfilters);
-        var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters);
+        var whereVarTarget = verb_utils.processBioFilters(tfilters)
+        var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters)
 
         pool.any(queries.getNodesNiche.getNodesNicheRaster_BioRaster, {
           N: N,
@@ -4271,7 +4271,7 @@ exports.getNodesNiche = function (req, res, next) {
           res.json({'data': data})
         })
         .catch(function (error) {
-          console.log(error);
+          debug(error)
           next(error)
         })
 
@@ -4279,16 +4279,16 @@ exports.getNodesNiche = function (req, res, next) {
     }
     else if ( hasBiosSource === true && hasBiosTarget === true ){
 
-        console.log("hasBiosSource - hasBiosTarget");
-        var whereVarSource = verb_utils.processBioFilters(sfilters);
-        // var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters);
+        debug("hasBiosSource - hasBiosTarget")
+        var whereVarSource = verb_utils.processBioFilters(sfilters)
+        // var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters)
 
-        var whereVarTarget = verb_utils.processBioFilters(tfilters);
-        // var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters);
+        var whereVarTarget = verb_utils.processBioFilters(tfilters)
+        // var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters)
 
 
-        console.log(whereVarSource);
-        console.log(whereVarTarget);
+        debug(whereVarSource)
+        debug(whereVarTarget)
 
 
         pool.any(queries.getNodesNiche.getNodesNicheBio_Bio, {
@@ -4305,7 +4305,7 @@ exports.getNodesNiche = function (req, res, next) {
           res.json({'data': data})
         })
         .catch(function (error) {
-          console.log(error);
+          debug(error)
           next(error)
         })
 
@@ -4313,11 +4313,11 @@ exports.getNodesNiche = function (req, res, next) {
     }
     else if ( hasBiosSource === true && hasRasterTarget === true ){
 
-        console.log("T");
-        var whereVarSource = verb_utils.processBioFilters(sfilters);
-        // var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters);
-        // var whereVarTarget = verb_utils.processBioFilters(tfilters);
-        var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters);
+        debug("T")
+        var whereVarSource = verb_utils.processBioFilters(sfilters)
+        // var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters)
+        // var whereVarTarget = verb_utils.processBioFilters(tfilters)
+        var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters)
 
         pool.any(queries.getNodesNiche.getNodesNicheBio_Raster, {
           N: N,
@@ -4333,7 +4333,7 @@ exports.getNodesNiche = function (req, res, next) {
           res.json({'data': data})
         })
         .catch(function (error) {
-          console.log(error);
+          debug(error)
           next(error)
         })
 
@@ -4341,12 +4341,12 @@ exports.getNodesNiche = function (req, res, next) {
     }
     else if ( hasRasterSource === true && hasBiosTarget === true ){
 
-        console.log("T");
-        // var whereVarSource = verb_utils.processBioFilters(sfilters);
-        var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters);
+        debug("T")
+        // var whereVarSource = verb_utils.processBioFilters(sfilters)
+        var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters)
 
-        var whereVarTarget = verb_utils.processBioFilters(tfilters);
-        // var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters);
+        var whereVarTarget = verb_utils.processBioFilters(tfilters)
+        // var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters)
 
         pool.any(queries.getNodesNiche.getNodesNicheRaster_Bio, {
           N: N,
@@ -4362,7 +4362,7 @@ exports.getNodesNiche = function (req, res, next) {
           res.json({'data': data})
         })
         .catch(function (error) {
-          console.log(error);
+          debug(error)
           next(error)
         })
 
@@ -4370,12 +4370,12 @@ exports.getNodesNiche = function (req, res, next) {
     }
     else if ( hasRasterSource === true && hasRasterTarget === true ){
 
-        console.log("T");
-        // var whereVarSource = verb_utils.processBioFilters(sfilters);
-        var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters);
+        debug("T")
+        // var whereVarSource = verb_utils.processBioFilters(sfilters)
+        var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters)
 
-        // var whereVarTarget = verb_utils.processBioFilters(tfilters);
-        var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters);
+        // var whereVarTarget = verb_utils.processBioFilters(tfilters)
+        var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters)
 
         pool.any(queries.getNodesNiche.getNodesNicheRaster_Raster, {
           N: N,
@@ -4391,7 +4391,7 @@ exports.getNodesNiche = function (req, res, next) {
           res.json({'data': data})
         })
         .catch(function (error) {
-          console.log(error);
+          debug(error)
           next(error)
         })
 
@@ -4400,13 +4400,13 @@ exports.getNodesNiche = function (req, res, next) {
 
     else{
 
-      next();
+      next()
     }
 
 
 
 
-};
+}
 
 
 
@@ -4430,27 +4430,27 @@ exports.getRasterNiche = function (req, res, next) {
 
   if(getParam(req, 'qtype') === "getRasterVariables"){
 
-      console.log(getParam(req, 'qtype'));
-      console.log("getRasterNiche");
+      debug(getParam(req, 'qtype'))
+      debug("getRasterNiche")
 
       
-      var field = getParam(req, 'field');
-      var level = parseInt(getParam(req, 'level', 0));
-      var type = parseInt(getParam(req, 'type'));
+      var field = getParam(req, 'field')
+      var level = parseInt(getParam(req, 'level', 0))
+      var type = parseInt(getParam(req, 'type'))
 
-      console.log(level);
+      debug(level)
 
       // Si la peticion es de nicho, se requieren los spids
-      var coleccion = "";
+      var coleccion = ""
       if(level == 0){
 
           pool.any(queries.getRasterNiche.getRasterBios, {})
           .then(function (data) {
-                // console.log(data);
+                // debug(data)
                 res.json({'data': data})
           })
           .catch(function (error) {
-                console.log(error);
+                debug(error)
                 next(error)
           })
       
@@ -4462,11 +4462,11 @@ exports.getRasterNiche = function (req, res, next) {
             typename: type
           })
           .then(function (data) {
-                // console.log(data);
+                // debug(data)
                 res.json({'data': data})
           })
           .catch(function (error) {
-                console.log(error);
+                debug(error)
                 next(error)
           })
       
@@ -4478,12 +4478,12 @@ exports.getRasterNiche = function (req, res, next) {
 
   }
   else{
-      next();
+      next()
   }
 
   
 
-};
+}
 
 
 
@@ -4503,23 +4503,25 @@ exports.getCountGridid = function (req, res, next) {
 
   if(getParam(req, 'qtype') === "getCountGridid"){
 
-      console.log(getParam(req, 'qtype'));
-      console.log("getCountGridid");
+      debug(getParam(req, 'qtype'))
+      debug("getCountGridid")
 
-      var spids = getParam(req, 'spids');
-      var isNicho = getParam(req, 'nicho');
-      var res_celda = getParam(req, 'res_celda', "cells_16km");
-      var res_grid = getParam(req, 'res_grid', "gridid_16km");
+      var spids = getParam(req, 'spids')
+      var isNicho = getParam(req, 'nicho')
+      var res_celda = getParam(req, 'res_celda', "cells_16km")
+      var res_grid = getParam(req, 'res_grid', "gridid_16km")
 
 
       // Si la peticion es de nicho, se requieren los spids
-      var coleccion = "";
+      var coleccion = ""
       if(isNicho === 'true'){
+
          coleccion = "(animalia || plantae || fungi || protoctista || prokaryotae || bio01 || bio02 || bio03 || bio04 || bio05 || bio06 || bio07 || bio08 ||bio09 || bio10 || bio11 || bio12 || bio13 || bio14 || bio15 || bio16 ||bio17 || bio18 || bio19 ) as spids,";
          // || elevacion || pendiente || topidx
+
       }
 
-      // console.log(spids);
+      // debug(spids)
 
       pool.any(queries.getCountGridid.getCount, {
         spids: spids.toString(),
@@ -4528,21 +4530,22 @@ exports.getCountGridid = function (req, res, next) {
           res_grid: res_grid
       })
           .then(function (data) {
+
             res.json({'data': data})
       })
           .catch(function (error) {
-            console.log(error);
+            debug(error)
             next(error)
       })
 
   }
   else{
-      next();
+      next()
   }
 
   
 
-};
+}
 
 
 
@@ -4565,30 +4568,30 @@ exports.getGrididsNiche = function (req, res, next) {
 
   if(getParam(req, 'qtype') === "getGridids"){
 
-      console.log(getParam(req, 'qtype'));
-      console.log("getGrididsNiche");
-      var res_celda = getParam(req, 'res_celda', "gridid_16km");
+      debug(getParam(req, 'qtype'))
+      debug("getGrididsNiche")
+      var res_celda = getParam(req, 'res_celda', "gridid_16km")
 
       pool.any(queries.getGrididsNiche.getGridids, {
           res_celda: res_celda
       })
           .then(function (data) {
-            // console.log(data);
+            // debug(data)
             res.json({'data': data})
       })
           .catch(function (error) {
-            console.log(error);
+            debug(error)
             next(error)
       })
 
   }
   else{
-      next();
+      next()
   }
 
   
 
-};
+}
 
 
 /**
@@ -4607,24 +4610,24 @@ exports.getSpeciesNiche = function (req, res, next) {
 
   if(getParam(req, 'qtype') === "getSpecies"){
 
-      console.log(getParam(req, 'qtype'));
-      console.log("getSpeciesNiche");
+      debug(getParam(req, 'qtype'))
+      debug("getSpeciesNiche")
 
-      var spid              = parseInt(getParam(req, 'id'));
-      var sfecha            = getParam(req, 'sfecha', false);
-      var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
-      var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es');
-      var res_celda = getParam(req, 'res_celda', "gridid_16km");
+      var spid              = parseInt(getParam(req, 'id'))
+      var sfecha            = getParam(req, 'sfecha', false)
+      var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+      var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+      var res_celda = getParam(req, 'res_celda', "gridid_16km")
 
-      // console.log(spid);
-      // console.log(sfecha);
-      // console.log(fecha_incio.format('YYYY'));
-      // console.log(fecha_fin.format('YYYY'));
-      // console.log(moment().format('YYYY-MM-DD'));
+      // debug(spid)
+      // debug(sfecha)
+      // debug(fecha_incio.format('YYYY'))
+      // debug(fecha_fin.format('YYYY'))
+      // debug(moment().format('YYYY-MM-DD'))
 
 
       if( (parseInt(fecha_incio.format('YYYY')) != 1500 || parseInt(fecha_fin.format('YYYY')) != parseInt(moment().format('YYYY')) ) && sfecha === "false"){
-        console.log("rango y sin fecha");
+        debug("rango y sin fecha")
         pool.any(queries.getSpeciesNiche.getSpeciesSDR, {
                 spid: spid,
                 lim_inf: fecha_incio.format('YYYY'),
@@ -4632,31 +4635,31 @@ exports.getSpeciesNiche = function (req, res, next) {
                 res_celda: res_celda
           })
           .then(function (data) {
-                // console.log(data);
+                // debug(data)
                 res.json({'data': data})
           })
           .catch(function (error) {
-                console.log(error);
+                debug(error)
                 next(error)
           })
       }
       else if( parseInt(fecha_incio.format('YYYY')) == 1500 && parseInt(fecha_fin.format('YYYY')) == parseInt(moment().format('YYYY'))  && sfecha === "false"){
-          console.log("solo sin fecha");
+          debug("solo sin fecha")
           pool.any(queries.getSpeciesNiche.getSpeciesSD, {
                 spid: spid,
                 res_celda: res_celda
           })
           .then(function (data) {
-                // console.log(data);
+                // debug(data)
                 res.json({'data': data})
           })
           .catch(function (error) {
-                console.log(error);
+                debug(error)
                 next(error)
           })
       }
       else if( parseInt(fecha_incio.format('YYYY')) != 1500 || parseInt(fecha_fin.format('YYYY')) != parseInt(moment().format('YYYY')) ){
-          console.log("solo rango");
+          debug("solo rango")
           pool.any(queries.getSpeciesNiche.getSpeciesR, {
                 spid: spid,
                 lim_inf: fecha_incio.format('YYYY'),
@@ -4664,26 +4667,26 @@ exports.getSpeciesNiche = function (req, res, next) {
                 res_celda: res_celda
           })
           .then(function (data) {
-                // console.log(data);
+                // debug(data)
                 res.json({'data': data})
           })
           .catch(function (error) {
-                console.log(error);
+                debug(error)
                 next(error)
           })
       }
       else{
-          console.log("sin filtros");
+          debug("sin filtros")
           pool.any(queries.getSpeciesNiche.getSpecies, {
                 spid: spid,
                 res_celda: res_celda
           })
           .then(function (data) {
-                // console.log(data);
+                // debug(data)
                 res.json({'data': data})
           })
           .catch(function (error) {
-                console.log(error);
+                debug(error)
                 next(error)
           })
       }
@@ -4692,11 +4695,11 @@ exports.getSpeciesNiche = function (req, res, next) {
   }
   else{
 
-    next();
+    next()
 
   }
       
-};
+}
 
 
 
@@ -4715,19 +4718,19 @@ exports.getEntListNiche = function (req, res, next) {
   
   if(getParam(req, 'qtype') === "getEntList"){
 
-      console.log(getParam(req, 'qtype'));
-      console.log("getEntListNiche");
+      debug(getParam(req, 'qtype'))
+      debug("getEntListNiche")
 
-      var str     = getParam(req, 'searchStr');
-      var source  = parseInt(getParam(req, 'source'));
-      var nivel  = getParam(req, 'nivel');
+      var str     = getParam(req, 'searchStr')
+      var source  = parseInt(getParam(req, 'source'))
+      var nivel  = getParam(req, 'nivel')
       var limit   = 15; // numero de resultados a desplegar
-       var columnas = verb_utils.getColumns(source, nivel);
-       var res_celda = getParam(req, 'res_celda', "gridid_16km");
+       var columnas = verb_utils.getColumns(source, nivel)
+       var res_celda = getParam(req, 'res_celda', "gridid_16km")
 
-      console.log(nivel);
-      console.log(str);
-      console.log(columnas);
+      debug(nivel)
+      debug(str)
+      debug(columnas)
 
       pool.any(queries.getEntListNiche.getEntList, {
             str: str,
@@ -4736,20 +4739,20 @@ exports.getEntListNiche = function (req, res, next) {
             res_celda: res_celda
       })
           .then(function (data) {
-            // console.log(data);
+            // debug(data)
             res.json({'data': data})
       })
           .catch(function (error) {
-            console.log(error);
+            debug(error)
             next(error)
       })
 
   }
   else{
-      next();
+      next()
   }
 
-};
+}
 
 
 
@@ -4774,33 +4777,33 @@ exports.getEntListNiche = function (req, res, next) {
 *
 * exports.getFreqMap_V = function (req, res, next) {
 
-//     console.log("getFreqMap_V");
+//     debug("getFreqMap_V")
 
-//     var spid        = parseInt(getParam(req, 'id'));
-//     var tfilters    = getParam(req, 'tfilters');
-//     var alpha       = 0.01;
-//     var N           = 6473;
+//     var spid        = parseInt(getParam(req, 'id'))
+//     var tfilters    = getParam(req, 'tfilters')
+//     var alpha       = 0.01
+//     var N           = 6473
 
 //     // Siempre incluidos en query, nj >= 0
-//     var min_occ       = getParam(req, 'min_occ', 0);
+//     var min_occ       = getParam(req, 'min_occ', 0)
 
 //     // variables configurables
-//     var hasBios         = getParam(req, 'hasBios');
-//     var hasRaster       = getParam(req, 'hasRaster');
-//     var discardedids    = getParam(req, 'discardedids', []);
+//     var hasBios         = getParam(req, 'hasBios')
+//     var hasRaster       = getParam(req, 'hasRaster')
+//     var discardedids    = getParam(req, 'discardedids', [])
     
 //     if ( hasBios === 'true' && hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 ){
 
-//       console.log("TV");
-//       var whereVar = "";
+//       debug("TV")
+//       var whereVar = ""
 //       if(tfilters.length>0){
-//           whereVar = verb_utils.processBioFilters(tfilters, spid);
-//           whereVar = whereVar + " and epitetovalido <> '' ";
+//           whereVar = verb_utils.processBioFilters(tfilters, spid)
+//           whereVar = whereVar + " and epitetovalido <> '' "
 //       }
 //       else{
-//           whereVar = " epitetovalido <> '' ";
+//           whereVar = " epitetovalido <> '' "
 //       }
-//       var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+//       var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
 
 //       // pool.any(queries.getFreqCelda.getFreqCeldaV, {
 //       //     spid: spid,
@@ -4815,7 +4818,7 @@ exports.getEntListNiche = function (req, res, next) {
 //       //     res.json({'data': data})
 //       // })
 //       // .catch(function (error) {
-//       //     console.log(error);
+//       //     debug(error)
 //       //     next(error)
 //       // })
 
@@ -4823,15 +4826,15 @@ exports.getEntListNiche = function (req, res, next) {
 //     }
 //     else if (hasBios === 'true' && discardedids != undefined && discardedids.length > 0 ){
 
-//       console.log("BV");
+//       debug("BV")
 
-//       var whereVar = "";
+//       var whereVar = ""
 //       if(tfilters.length > 0){
-//           whereVar = verb_utils.processBioFilters(tfilters, spid);
-//           whereVar = whereVar + " and epitetovalido <> '' ";
+//           whereVar = verb_utils.processBioFilters(tfilters, spid)
+//           whereVar = whereVar + " and epitetovalido <> '' "
 //       }
 //       else{
-//           whereVar = " epitetovalido <> '' ";
+//           whereVar = " epitetovalido <> '' "
 //       }
 
 //       pool.any(queries.getFreqMap.getFreqMapBioV, {
@@ -4846,7 +4849,7 @@ exports.getEntListNiche = function (req, res, next) {
 //         res.json({'data': data})
 //       })
 //       .catch(function (error) {
-//         console.log(error);
+//         debug(error)
 //         next(error)
 //       })
 
@@ -4854,8 +4857,8 @@ exports.getEntListNiche = function (req, res, next) {
 //     } 
 //     else if (hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 ){
 
-//       console.log("RaV");
-//       var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid);
+//       debug("RaV")
+//       var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
 
 //       // pool.any(queries.getFreqCelda.getFreqCeldaRaV, {
 //       //     spid: spid,
@@ -4869,14 +4872,14 @@ exports.getEntListNiche = function (req, res, next) {
 //       //     res.json({'data': data})
 //       // })
 //       // .catch(function (error) {
-//       //     console.log(error);
+//       //     debug(error)
 //       //     next(error)
 //       // })
       
 //     } 
 //     else{
 
-//       next();
+//       next()
 //     }
 
 // };*/
