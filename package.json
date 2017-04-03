@@ -4,8 +4,8 @@
   "description": "Middleware para consumir los datos del SNIB",
   "main": "server.js",
   "scripts": {
-    "start": "DEBUG=express:router,verbs,snib-middleware:* nodemon server.js",
-    "test": "DEBUG=verbs,snib-middleware:* mocha -R spec tests/",
+    "start": "DEBUG=express:router,verbs:*,snib-middleware:* nodemon server.js",
+    "test": "DEBUG=verbs:*,snib-middleware:* mocha -R spec tests/",
     "api-docs": "swagger-markdown -i api/swagger/swagger.yaml -o docs/api-docs.md",
     "lint": "eslint ."
   },
@@ -28,6 +28,7 @@
   "devDependencies": {
     "dox": "~0.9.0",
     "eslint": "^3.9.1",
+    "jsdoc": "^3.4.3",
     "mocha": "~3.1.0",
     "nodemon": "^1.11.0",
     "pg-monitor": "^0.5.11",
