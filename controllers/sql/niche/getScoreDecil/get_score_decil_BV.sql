@@ -1,10 +1,14 @@
 /*getFreqDecil sin filtros*/
 WITH source AS (
-	SELECT spid, $<res_celda:raw> as cells 
+	SELECT spid,
+		--$<res_celda:raw> as cells 
+		--(cells_16km - array[573324, 581126, 507259])  as cells
+		($<res_celda:raw> - array[$<arg_gridids:raw>])  as cells
+		--cells_16km as cells
 	FROM sp_snib 
 	WHERE 
 		spid = $<spid>
-		--spid = 33553		
+		--spid = 28923		
 		and especievalidabusqueda <> ''
 ),
 target AS (
@@ -16,7 +20,10 @@ target AS (
 			clasevalida,
 			ordenvalido,
 			familiavalida,
-			$<res_celda:raw> as cells 
+			--(cells_16km - array[573324, 581126, 507259])  as cells
+			($<res_celda:raw> - array[$<arg_gridids:raw>])  as cells
+			--$<res_celda:raw> as cells 
+			--cells_16km as cells
 	FROM sp_snib 
 	--WHERE clasevalida = 'Mammalia'
 	--WHERE ordenvalido = 'Carnivora'
@@ -24,13 +31,15 @@ target AS (
 	and especievalidabusqueda <> ''
 ),
 filter_ni AS (
-		SELECT 	spid, 
-				icount( cells - array[$<arg_gridids:raw>] ) as ni,
+		SELECT 	spid,
+				cells,
+				--cells - array[$<arg_gridids:raw> ]  as cells
+				icount( cells ) as ni
+				--icount( cells - array[$<arg_gridids:raw>] ) as ni,
 				--icount( cells - array[573324, 581126, 507259] ) as ni,
-				cells - array[$<arg_gridids:raw> ]  as cells
 				--cells - array[573324, 581126, 507259 ]  as cells
 		FROM source 
-), 
+),
 filter_nj AS(
 		select 	generovalido,
 				especievalidabusqueda,
@@ -40,18 +49,14 @@ filter_nj AS(
 				clasevalida,
 				ordenvalido,
 				familiavalida,
-				icount(cells - array[$<arg_gridids:raw>]) AS nj,
+				cells,
+				icount(cells) AS nj
+				--icount(cells - array[$<arg_gridids:raw>]) AS nj,
 				--icount(cells - array[573324, 581126, 507259]) AS nj,
-				cells - array[ $<arg_gridids:raw> ]  AS cells
+				--cells - array[ $<arg_gridids:raw> ]  AS cells
 				--cells - array[573324, 581126, 507259 ]  AS cells
 		FROM target 
 ),
-/*filter_nij AS(
-		select 	filter_nj.spid, 
-				icount(filter_ni.cells & filter_nj.cells) AS niyj
-				--icount(source.cells & target.cells & array[573324, 581126, 507259 ]) AS d_niyj
-		FROM filter_ni, filter_nj
-),*/
 counts AS (
 	SELECT 	--source.spid as source_spid,
 			filter_nj.spid,
@@ -71,7 +76,7 @@ counts AS (
 	FROM filter_ni, filter_nj
 	where 
 	filter_nj.spid <> $<spid>
-	--filter_nj.spid <> 33553
+	--filter_nj.spid <> 28923
 	and icount(filter_nj.cells) > $<min_occ:raw>
 	--and icount(filter_nj.cells) > 0
 ),
@@ -89,14 +94,14 @@ rawdata as (
 			counts.ordenvalido,
 			counts.familiavalida,
 			round( cast(  
-			get_epsilon(
-				$<alpha>,
-				--0.01,
-				cast(counts.nj as integer), 
-				cast(counts.niyj as integer), 
-				cast(counts.ni as integer), 
-				cast(counts.n as integer)
-			)as numeric), 2)  as epsilon,
+				get_epsilon(
+					$<alpha>,
+					--0.01,
+					cast(counts.nj as integer), 
+					cast(counts.niyj as integer), 
+					cast(counts.ni as integer), 
+					cast(counts.n as integer)
+				)as numeric), 2)  as epsilon,
 			round( cast(  ln(   
 				get_score(
 					$<alpha>,
@@ -106,7 +111,7 @@ rawdata as (
 					cast(counts.ni as integer), 
 					cast(counts.n as integer)
 				)
-			)as numeric), 2) as score
+			) as numeric), 2) as score
 	FROM counts 
 	ORDER BY epsilon desc
 ),
@@ -119,7 +124,10 @@ basic_score as (
 	order by tscore desc
 ),
 allgridis as(
-	select $<res_grid:raw> as gridid from grid_16km_aoi
+	select 
+		$<res_grid:raw> as gridid
+		--gridid_16km as gridid 
+	from grid_16km_aoi
 ),
 prenorm as (
 	select 	allgridis.gridid,
@@ -155,18 +163,20 @@ gruop_decil_data as (
 	from names_col_occ
 	group by decil
 	order by decil
+),
+valor_deciles as (
+	select 
+		cast(round( cast(max(tscore) as numeric),2) as float) as l_sup, 
+		cast(round( cast(min(tscore) as numeric),2) as float) as l_inf, 
+		cast(round( cast(sum(tscore) as numeric),2) as float) as sum, 
+		cast(round( cast(avg(tscore) as numeric),2) as float) as avg, 
+		deciles.decil, 
+		array_agg(distinct gridid) as gridids
+	from deciles 
+	group by deciles.decil --, arraynames
 )
-select 
-	cast(round( cast(max(tscore) as numeric),2) as float) as l_sup, 
-	cast(round( cast(min(tscore) as numeric),2) as float) as l_inf, 
-	cast(round( cast(sum(tscore) as numeric),2) as float) as sum, 
-	cast(round( cast(avg(tscore) as numeric),2) as float) as avg, 
-	deciles.decil, 
-	array_agg(distinct gridid) as gridids,
-	gruop_decil_data.arraynames
-	--array_agg(array_to_string( array_sp,',')) as arraynames
-from deciles 
+select l_sup, l_inf, sum, avg, valor_deciles.decil, gridids, arraynames
+from valor_deciles
 join gruop_decil_data
-on deciles.decil = gruop_decil_data.decil
-group by deciles.decil, arraynames
-order by deciles.decil desc
+on valor_deciles.decil = gruop_decil_data.decil
+order by valor_deciles.decil desc
