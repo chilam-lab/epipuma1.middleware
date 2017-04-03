@@ -4,7 +4,7 @@ WITH source AS (
 	FROM sp_snib 
 	WHERE 
 		spid = $<spid>
-		--spid = 33553		
+		--spid = 28923		
 		and especievalidabusqueda <> ''
 ),
 target AS (
@@ -12,6 +12,7 @@ target AS (
 			$<res_celda:raw> as cells 
 	FROM raster_bins 
 	$<where_config_raster:raw>
+	--where layer = 'bio01'
 ),
 counts AS (
 	SELECT 	target.spid,
@@ -19,7 +20,8 @@ counts AS (
 			icount(source.cells & target.cells) AS niyj,
 			icount(target.cells) AS nj,
 			icount(source.cells) AS ni,
-			$<N> as n,
+			--14707 as n
+			$<N> as n
 	FROM source,target
 	where 
 	target.spid <> $<spid>
