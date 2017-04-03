@@ -1,10 +1,12 @@
 /*getFreqDecil sin filtros*/
 WITH source AS (
-	SELECT spid, $<res_celda:raw> as cells 
+	SELECT 	spid, 
+			--$<res_celda:raw> as cells
+			($<res_celda:raw> - array[$<discardedDeleted:raw>]::int[])  as cells 
 	FROM sp_snib 
 	WHERE 
 		spid = $<spid>
-		--spid = 33553		
+		--spid = 28923		
 		and especievalidabusqueda <> ''
 ),
 target AS (
@@ -16,14 +18,13 @@ target AS (
 			clasevalida,
 			ordenvalido,
 			familiavalida,
-			$<res_celda:raw> as cells 
+			$<res_celda:raw> as cells
+			--cells_16km as cells
 	FROM sp_snib 
 	--WHERE clasevalida = 'Mammalia'
 	$<where_config:raw>	 
 	and especievalidabusqueda <> ''
-	
 	union
-	
 	SELECT  cast('' as text) generovalido,
 			case when type = 1 then
 			layer
@@ -37,6 +38,7 @@ target AS (
 			cast('' as text) ordenvalido,
 			cast('' as text) familiavalida,
 			$<res_celda:raw> as cells 
+			--cells_16km as cells
 	FROM raster_bins 
 	$<where_config_raster:raw>	 
 ),
@@ -49,6 +51,8 @@ counts AS (
 			icount(source.cells & target.cells) AS niyj,
 			icount(target.cells) AS nj,
 			icount(source.cells) AS ni,
+			$<N> as n,
+			--14707 as n,
 			target.reinovalido,
 			target.phylumdivisionvalido,
 			target.clasevalida,
@@ -57,7 +61,7 @@ counts AS (
 	FROM source,target
 	where 
 	target.spid <> $<spid>
-	--target.spid <> 33553
+	--target.spid <> 28923
 	and icount(target.cells) > $<min_occ:raw>
 	--and icount(target.cells) > 0
 ),
@@ -68,8 +72,7 @@ rawdata as (
 			counts.niyj as nij,
 			counts.nj,
 			counts.ni,
-			$<N> as n,
-			--14707 as n,
+			counts.n,
 			counts.reinovalido,
 			counts.phylumdivisionvalido,
 			counts.clasevalida,
@@ -82,8 +85,7 @@ rawdata as (
 				cast(counts.nj as integer), 
 				cast(counts.niyj as integer), 
 				cast(counts.ni as integer), 
-				cast($<N> as integer)
-				--cast(14707 as integer)
+				cast(counts.n as integer)
 			)as numeric), 2)  as epsilon,
 			round( cast(  ln(   
 				get_score(
@@ -92,8 +94,7 @@ rawdata as (
 					cast(counts.nj as integer), 
 					cast(counts.niyj as integer), 
 					cast(counts.ni as integer), 
-					cast($<N> as integer)
-					--cast(14707 as integer)
+					cast(counts.n as integer)
 				)
 			)as numeric), 2) as score
 	FROM counts 

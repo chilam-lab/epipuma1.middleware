@@ -1,6 +1,8 @@
 /*getFreqDecil sin filtros*/
 WITH source AS (
-	SELECT spid, $<res_celda:raw> as cells 
+	SELECT spid, 
+		--$<res_celda:raw> as cells
+		($<res_celda:raw> - array[$<arg_gridids:raw>])  as cells 
 	FROM sp_snib 
 	WHERE 
 		spid = $<spid>
@@ -16,7 +18,8 @@ target AS (
 			clasevalida,
 			ordenvalido,
 			familiavalida,
-			$<res_celda:raw> as cells 
+			--$<res_celda:raw> as cells
+			($<res_celda:raw> - array[$<arg_gridids:raw>])  as cells 
 	FROM sp_snib 
 	--WHERE clasevalida = 'Mammalia'
 	$<where_config:raw>	 
@@ -34,16 +37,19 @@ target AS (
 			cast('' as text) clasevalida,
 			cast('' as text) ordenvalido,
 			cast('' as text) familiavalida,
-			$<res_celda:raw> as cells 
+			--$<res_celda:raw> as cells
+			($<res_celda:raw> - array[$<arg_gridids:raw>])  as cells 
 	FROM raster_bins
 	--where layer = 'bio01'
 	$<where_config_raster:raw>	
 ),
 filter_ni AS (
-		SELECT 	spid, 
-				icount( cells - array[$<arg_gridids:raw>] ) as ni,
+		SELECT 	spid,
+				cells,
+				icount( cells ) as ni
+				--icount( cells - array[$<arg_gridids:raw>] ) as ni,
 				--icount( cells - array[573324, 581126, 507259] ) as ni,
-				cells - array[$<arg_gridids:raw> ]  as cells
+				--cells - array[$<arg_gridids:raw> ]  as cells
 				--cells - array[573324, 581126, 507259 ]  as cells
 		FROM source 
 ), 
@@ -56,9 +62,11 @@ filter_nj AS(
 				clasevalida,
 				ordenvalido,
 				familiavalida,
-				icount(cells - array[$<arg_gridids:raw>]) AS nj,
+				cells,
+				icount( cells ) as nj
+				--icount(cells - array[$<arg_gridids:raw>]) AS nj,
 				--icount(cells - array[573324, 581126, 507259]) AS nj,
-				cells - array[ $<arg_gridids:raw> ]  AS cells
+				--cells - array[ $<arg_gridids:raw> ]  AS cells
 				--cells - array[573324, 581126, 507259 ]  AS cells
 		FROM target 
 ),
@@ -77,6 +85,7 @@ counts AS (
 			icount(filter_ni.cells & filter_nj.cells) AS niyj,
 			filter_nj.nj,
 			filter_ni.ni,
+			$<N> as n,
 			filter_nj.reinovalido,
 			filter_nj.phylumdivisionvalido,
 			filter_nj.clasevalida,
@@ -96,8 +105,7 @@ rawdata as (
 			counts.niyj as nij,
 			counts.nj,
 			counts.ni,
-			$<N> as n,
-			--14707 as n,
+			counts.n,
 			counts.reinovalido,
 			counts.phylumdivisionvalido,
 			counts.clasevalida,
@@ -110,8 +118,7 @@ rawdata as (
 				cast(counts.nj as integer), 
 				cast(counts.niyj as integer), 
 				cast(counts.ni as integer), 
-				cast($<N> as integer)
-				--cast(14707 as integer)
+				cast(counts.n as integer)
 			)as numeric), 2)  as epsilon,
 			round( cast(  ln(   
 				get_score(
@@ -120,8 +127,7 @@ rawdata as (
 					cast(counts.nj as integer), 
 					cast(counts.niyj as integer), 
 					cast(counts.ni as integer), 
-					cast($<N> as integer)
-					--cast(14707 as integer)
+					cast(counts.n as integer)
 				)
 			)as numeric), 2) as score
 	FROM counts 
@@ -173,17 +179,19 @@ gruop_decil_data as (
 	group by decil
 	order by decil
 )
-select 
-	cast(round( cast(max(tscore) as numeric),2) as float) as l_sup, 
-	cast(round( cast(min(tscore) as numeric),2) as float) as l_inf, 
-	cast(round( cast(sum(tscore) as numeric),2) as float) as sum, 
-	cast(round( cast(avg(tscore) as numeric),2) as float) as avg, 
-	deciles.decil, 
-	array_agg(distinct gridid) as gridids,
-	gruop_decil_data.arraynames
-	--array_agg(array_to_string( array_sp,',')) as arraynames
-from deciles 
+valor_deciles as (
+	select 
+		cast(round( cast(max(tscore) as numeric),2) as float) as l_sup, 
+		cast(round( cast(min(tscore) as numeric),2) as float) as l_inf, 
+		cast(round( cast(sum(tscore) as numeric),2) as float) as sum, 
+		cast(round( cast(avg(tscore) as numeric),2) as float) as avg, 
+		deciles.decil, 
+		array_agg(distinct gridid) as gridids
+	from deciles 
+	group by deciles.decil --, arraynames
+)
+select l_sup, l_inf, sum, avg, valor_deciles.decil, gridids, arraynames
+from valor_deciles
 join gruop_decil_data
-on deciles.decil = gruop_decil_data.decil
-group by deciles.decil, arraynames
-order by deciles.decil desc
+on valor_deciles.decil = gruop_decil_data.decil
+order by valor_deciles.decil desc
