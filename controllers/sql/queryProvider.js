@@ -234,6 +234,14 @@ var queryProvider = {
 
 /************************************************************* VERBOS ÚTILES ******************************/
 
+  getVariablesNiche: {
+
+        getVariablesReino: sqlPath('niche/especie/get_variables_reino.sql'),
+        getVariables: sqlPath('niche/especie/get_variables.sql')
+        
+    
+  },
+
   getRasterNiche: {
 
         getRasterBios: sqlPath('niche/raster/raster_bios.sql'),
