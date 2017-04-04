@@ -24,6 +24,8 @@ var verbsCtrl = require('../controllers/verbsniche')
  */
 router.route('/especie')
   .get(
+    verbsCtrl.getGridGeoJsonNiche,
+    verbsCtrl.getVariablesNiche,
     verbsCtrl.getRasterNiche,
     verbsCtrl.getCountGridid,  
     verbsCtrl.getGrididsNiche,  
@@ -31,6 +33,8 @@ router.route('/especie')
     verbsCtrl.getEntListNiche
   )
   .post(
+    verbsCtrl.getGridGeoJsonNiche,
+    verbsCtrl.getVariablesNiche,
     verbsCtrl.getRasterNiche,
     verbsCtrl.getCountGridid,  
     verbsCtrl.getGrididsNiche,  
