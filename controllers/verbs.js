@@ -13,7 +13,7 @@ var queries = require('./sql/queryProvider.js')
 var pool = pgp(config.db)
 
 // var N = 14707
-var N = 94544; // MX y EU sin alaska y hawuaii 16km
+var N = 94544; // MX y EU sin alaska y hawaii 16km
 
 /**
  * Regresa el valor del parametro `name` cuando este presente o `defaultValue`.
