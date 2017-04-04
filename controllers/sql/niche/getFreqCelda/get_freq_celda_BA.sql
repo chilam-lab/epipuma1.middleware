@@ -1,6 +1,8 @@
 /*getFreqCelda con apriori*/
 WITH source AS (
-	SELECT spid, $<res_celda:raw> as cells 
+	SELECT spid, 
+			--$<res_celda:raw> as cells
+			($<res_celda:raw> - array[$<discardedDeleted:raw>]::int[])  as cells 
 	FROM sp_snib 
 	WHERE 
 		spid = $<spid>
