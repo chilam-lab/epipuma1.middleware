@@ -1,6 +1,8 @@
 /*getFreqCelda validacion*/
 WITH source AS (
-	SELECT spid, $<res_celda:raw> as cells 
+	SELECT spid, 
+			--$<res_celda:raw> as cells
+			($<res_celda:raw> - (array[$<arg_gridids:raw>] + array[$<discardedDeleted:raw>]::int[]) )  as cells 
 	FROM sp_snib 
 	WHERE 
 		spid = $<spid>
@@ -9,21 +11,26 @@ WITH source AS (
 ),
 target AS (
 	SELECT  bid as spid,
-			$<res_celda:raw> as cells 
+			--$<res_celda:raw> as cells
+			($<res_celda:raw> - array[$<arg_gridids:raw>])  as cells 
 	FROM raster_bins 
 	$<where_config_raster:raw>	 
 ),
 filter_ni AS (
-		SELECT 	spid, 
-				icount( cells - array[$<arg_gridids:raw>] ) as ni,
-				cells - array[$<arg_gridids:raw>] as cells
+		SELECT 	spid,
+				cells,
+				icount( cells ) as ni
+				--icount( cells - array[$<arg_gridids:raw>] ) as ni,
+				--cells - array[$<arg_gridids:raw>] as cells
 				--icount( cells & array[ 573324, 581126, 507259 ] ) as d_ni
 		FROM source 
 ), 
 filter_nj AS(
-		select 	spid, 
-				icount(cells - array[$<arg_gridids:raw>]) as nj,
-				cells - array[$<arg_gridids:raw>] as cells
+		select 	spid,
+				cells,
+				icount( cells ) as nj
+				--icount(cells - array[$<arg_gridids:raw>]) as nj,
+				--cells - array[$<arg_gridids:raw>] as cells
 				--icount(cells & array[ 573324, 581126, 507259 ] ) AS d_nj
 		FROM target 
 ),
