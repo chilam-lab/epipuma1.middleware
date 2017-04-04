@@ -2,7 +2,7 @@
 WITH source AS (
 	SELECT spid, 
 		--$<res_celda:raw> as cells
-		($<res_celda:raw> - array[$<arg_gridids:raw>])  as cells 
+		($<res_celda:raw> - (array[$<arg_gridids:raw>] + array[$<discardedDeleted:raw>]::int[]))  as cells 
 	FROM sp_snib 
 	WHERE 
 		spid = $<spid>
@@ -178,7 +178,7 @@ gruop_decil_data as (
 	from names_col_occ
 	group by decil
 	order by decil
-)
+),
 valor_deciles as (
 	select 
 		cast(round( cast(max(tscore) as numeric),2) as float) as l_sup, 

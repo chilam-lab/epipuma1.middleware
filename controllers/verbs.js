@@ -434,6 +434,9 @@ exports.getGeoRelNiche_VT = function (req, res, next) {
     var discardedFilterids = getParam(req, 'discardedDateFilterids')
     // debug(discardedFilterids)
 
+    var discardedDeleted = getParam(req, 'discardedFilterids',[]);
+    // debug(discardedFilterids)
+
 
     
 
@@ -455,12 +458,13 @@ exports.getGeoRelNiche_VT = function (req, res, next) {
         min_occ: min_occ,
         where_config: whereVar,
         where_config_raster: whereVarRaster,
-        arg_gridids: discardedids.toString(),
+        arg_gridids: discardedids,
         lim_inf: fecha_incio.format("YYYY"),
         lim_sup: fecha_fin.format("YYYY"),
         caso: caso,
         res_celda: res_celda,
-        res_grid: res_grid
+        res_grid: res_grid,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         res.json({'data': data})
@@ -488,12 +492,13 @@ exports.getGeoRelNiche_VT = function (req, res, next) {
           alpha: alpha,
           min_occ: min_occ,
           where_config: whereVar,
-          arg_gridids: discardedids.toString(),
+          arg_gridids: discardedids,
           lim_inf: fecha_incio.format("YYYY"),
           lim_sup: fecha_fin.format("YYYY"),
           caso: caso,
           res_celda: res_celda,
-        res_grid: res_grid
+        res_grid: res_grid,
+        discardedDeleted: discardedDeleted
         })
         .then(function (data) {
           // debug(data.length)
@@ -521,12 +526,13 @@ exports.getGeoRelNiche_VT = function (req, res, next) {
         alpha: alpha,
         min_occ: min_occ,
         where_config_raster: whereVarRaster,
-        arg_gridids: discardedids.toString(),
+        arg_gridids: discardedids,
         lim_inf: fecha_incio.format("YYYY"),
         lim_sup: fecha_fin.format("YYYY"),
         caso: caso,
         res_celda: res_celda,
-        res_grid: res_grid
+        res_grid: res_grid,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         res.json({'data': data})
@@ -577,6 +583,9 @@ exports.getGeoRelNiche_V = function (req, res, next) {
     var hasRaster       = getParam(req, 'hasRaster')
     var discardedids    = getParam(req, 'discardedids', [])
 
+    var discardedDeleted = getParam(req, 'discardedFilterids',[]);
+    // debug(discardedFilterids)
+
     // debug(discardedids)
 
     
@@ -593,8 +602,9 @@ exports.getGeoRelNiche_V = function (req, res, next) {
         min_occ: min_occ,
         where_config: whereVar,
         where_config_raster: whereVarRaster,
-        arg_gridids: discardedids.toString(),
-        res_celda: res_celda
+        arg_gridids: discardedids,
+        res_celda: res_celda,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         res.json({'data': data})
@@ -618,8 +628,9 @@ exports.getGeoRelNiche_V = function (req, res, next) {
         alpha: alpha,
         min_occ: min_occ,
         where_config: whereVar,
-        arg_gridids: discardedids.toString(),
-        res_celda: res_celda
+        arg_gridids: discardedids,
+        res_celda: res_celda,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         // debug(data.length)
@@ -643,8 +654,9 @@ exports.getGeoRelNiche_V = function (req, res, next) {
         alpha: alpha,
         min_occ: min_occ,
         where_config_raster: whereVarRaster,
-        arg_gridids: discardedids.toString(),
-        res_celda: res_celda
+        arg_gridids: discardedids,
+        res_celda: res_celda,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         res.json({'data': data})
@@ -662,6 +674,7 @@ exports.getGeoRelNiche_V = function (req, res, next) {
     }
 
 }
+
 
 
 
@@ -700,11 +713,11 @@ exports.getGeoRelNiche_T = function (req, res, next) {
     var sfecha            = getParam(req, 'sfecha', false)
     var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
     var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+    
     var discardedFilterids = getParam(req, 'discardedDateFilterids')
 
-    debug(discardedFilterids)
-
-    
+    var discardedDeleted = getParam(req, 'discardedFilterids',[]);
+    // debug(discardedFilterids)
     
 
     if (hasBios === "true" && hasRaster === "true" && discardedFilterids === "true"){
@@ -729,7 +742,8 @@ exports.getGeoRelNiche_T = function (req, res, next) {
         lim_sup: fecha_fin.format("YYYY"),
         caso: caso,
         res_celda: res_celda,
-        res_grid: res_grid
+        res_grid: res_grid,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         // debug(data)
@@ -764,7 +778,8 @@ exports.getGeoRelNiche_T = function (req, res, next) {
         lim_sup: fecha_fin.format("YYYY"),
         caso: caso,
         res_celda: res_celda,
-        res_grid: res_grid
+        res_grid: res_grid,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         // debug(data)
@@ -798,7 +813,8 @@ exports.getGeoRelNiche_T = function (req, res, next) {
         lim_sup: fecha_fin.format("YYYY"),
         caso: caso,
         res_celda: res_celda,
-        res_grid: res_grid
+        res_grid: res_grid,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         // debug(data)
@@ -827,7 +843,7 @@ exports.getGeoRelNiche_T = function (req, res, next) {
  *
  * Servidor Niche: getGeoRelNiche de SNIB DB, sin filtros
  *
- * Obtiene epsilon y score de la relación de especie objetivo y conjunto de variables bioticas y raster.
+ * Obtiene epsilon y score de la elación de especie objetivo y conjunto de variables bioticas y raster.
  *
  * @param {express.Request} req
  * @param {express.Response} res
@@ -879,7 +895,7 @@ exports.getGeoRelNiche = function (req, res, next) {
         where_config: whereVar,
         where_config_raster: whereVarRaster,
         res_celda: res_celda,
-        discardedDeleted: discardedDeleted.toString()
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         res.json({'data': data})
@@ -905,7 +921,7 @@ exports.getGeoRelNiche = function (req, res, next) {
         min_occ: min_occ,
         where_config: whereVar,
         res_celda: res_celda,
-        discardedDeleted: discardedDeleted.toString()
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         // debug(data)
@@ -930,7 +946,7 @@ exports.getGeoRelNiche = function (req, res, next) {
         min_occ: min_occ,
         where_config_raster: whereVarRaster,
         res_celda: res_celda,
-        discardedDeleted: discardedDeleted.toString()
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         res.json({'data': data})
@@ -992,6 +1008,9 @@ exports.getFreqNiche_VT = function (req, res, next) {
     var hasBios         = getParam(req, 'hasBios')
     var hasRaster       = getParam(req, 'hasRaster')
     var discardedids    = getParam(req, 'discardedids', [])
+
+    var discardedDeleted = getParam(req, 'discardedFilterids',[]);
+
     // filtros por tiempo
     var sfecha            = getParam(req, 'sfecha', false)
     var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
@@ -1017,12 +1036,13 @@ exports.getFreqNiche_VT = function (req, res, next) {
         min_occ: min_occ,
         where_config: whereVar,
         where_config_raster: whereVarRaster,
-        arg_gridids: discardedids.toString(),
+        arg_gridids: discardedids,
         lim_inf: fecha_incio.format("YYYY"),
         lim_sup: fecha_fin.format("YYYY"),
         caso: caso,
         res_celda: res_celda,
-        res_grid: res_grid
+        res_grid: res_grid,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         res.json({'data': data})
@@ -1050,12 +1070,13 @@ exports.getFreqNiche_VT = function (req, res, next) {
           alpha: alpha,
           min_occ: min_occ,
           where_config: whereVar,
-          arg_gridids: discardedids.toString(),
+          arg_gridids: discardedids,
           lim_inf: fecha_incio.format("YYYY"),
           lim_sup: fecha_fin.format("YYYY"),
           caso: caso,
-        res_celda: res_celda,
-        res_grid: res_grid
+          res_celda: res_celda,
+          res_grid: res_grid,
+          discardedDeleted: discardedDeleted
         })
         .then(function (data) {
           // debug(data.length)
@@ -1083,12 +1104,13 @@ exports.getFreqNiche_VT = function (req, res, next) {
         alpha: alpha,
         min_occ: min_occ,
         where_config_raster: whereVarRaster,
-        arg_gridids: discardedids.toString(),
+        arg_gridids: discardedids,
         lim_inf: fecha_incio.format("YYYY"),
         lim_sup: fecha_fin.format("YYYY"),
         caso: caso,
         res_celda: res_celda,
-        res_grid: res_grid
+        res_grid: res_grid,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         res.json({'data': data})
@@ -1139,6 +1161,8 @@ exports.getFreqNiche_V = function (req, res, next) {
     var hasRaster       = getParam(req, 'hasRaster')
     var discardedids    = getParam(req, 'discardedids', [])
 
+    var discardedDeleted = getParam(req, 'discardedFilterids',[]);
+
     // debug(discardedids)
 
     
@@ -1155,8 +1179,9 @@ exports.getFreqNiche_V = function (req, res, next) {
         min_occ: min_occ,
         where_config: whereVar,
         where_config_raster: whereVarRaster,
-        arg_gridids: discardedids.toString(),
-        res_celda: res_celda
+        arg_gridids: discardedids,
+        res_celda: res_celda,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         res.json({'data': data})
@@ -1180,8 +1205,9 @@ exports.getFreqNiche_V = function (req, res, next) {
         alpha: alpha,
         min_occ: min_occ,
         where_config: whereVar,
-        arg_gridids: discardedids.toString(),
-        res_celda: res_celda
+        arg_gridids: discardedids,
+        res_celda: res_celda,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         // debug(data.length)
@@ -1205,8 +1231,9 @@ exports.getFreqNiche_V = function (req, res, next) {
         alpha: alpha,
         min_occ: min_occ,
         where_config_raster: whereVarRaster,
-        arg_gridids: discardedids.toString(),
-        res_celda: res_celda
+        arg_gridids: discardedids,
+        res_celda: res_celda,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         res.json({'data': data})
@@ -1266,7 +1293,9 @@ exports.getFreqNiche_T = function (req, res, next) {
     var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
     var discardedFilterids = getParam(req, 'discardedDateFilterids')
 
-    debug(discardedFilterids)
+    var discardedDeleted = getParam(req, 'discardedFilterids',[]);
+
+    // debug(discardedFilterids)
 
     
     if (hasBios === "true" && hasRaster === "true" && discardedFilterids === "true"){
@@ -1291,7 +1320,8 @@ exports.getFreqNiche_T = function (req, res, next) {
         lim_sup: fecha_fin.format("YYYY"),
         caso: caso,
         res_celda: res_celda,
-        res_grid: res_grid
+        res_grid: res_grid,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         // debug(data)
@@ -1326,7 +1356,8 @@ exports.getFreqNiche_T = function (req, res, next) {
         lim_sup: fecha_fin.format("YYYY"),
         caso: caso,
         res_celda: res_celda,
-        res_grid: res_grid
+        res_grid: res_grid,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         // debug(data)
@@ -1360,7 +1391,8 @@ exports.getFreqNiche_T = function (req, res, next) {
         lim_sup: fecha_fin.format("YYYY"),
         caso: caso,
         res_celda: res_celda,
-        res_grid: res_grid
+        res_grid: res_grid,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         // debug(data)
@@ -1429,7 +1461,7 @@ exports.getFreqNiche = function (req, res, next) {
         where_config: whereVar,
         where_config_raster: whereVarRaster,
         res_celda: res_celda,
-        discardedDeleted: discardedDeleted.toString()
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         res.json({'data': data})
@@ -1453,7 +1485,7 @@ exports.getFreqNiche = function (req, res, next) {
         min_occ: min_occ,
         where_config: whereVar,
         res_celda: res_celda,
-        discardedDeleted: discardedDeleted.toString()
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         res.json({'data': data})
@@ -1478,7 +1510,7 @@ exports.getFreqNiche = function (req, res, next) {
         min_occ: min_occ,
         where_config_raster: whereVarRaster,
         res_celda: res_celda,
-        discardedDeleted: discardedDeleted.toString()
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         res.json({'data': data})
@@ -1534,6 +1566,8 @@ exports.getFreqMapNiche_M = function (req, res, next) {
     var hasBios         = getParam(req, 'hasBios')
     var hasRaster       = getParam(req, 'hasRaster')
     var mapa_prob       = getParam(req, 'mapa_prob')
+
+    var discardedDeleted = getParam(req, 'discardedFilterids',[]);
     
     if (hasBios === 'true' && hasRaster === 'true' && mapa_prob === 'mapa_prob' ){
 
@@ -1550,7 +1584,8 @@ exports.getFreqMapNiche_M = function (req, res, next) {
                 min_occ: min_occ,
                 where_config: whereVar,
                 where_config_raster: whereVarRaster,
-                res_celda: res_celda
+                res_celda: res_celda,
+                discardedDeleted: discardedDeleted
             })
             .then(function (data) {
                 res.json({'data': data})
@@ -1574,7 +1609,8 @@ exports.getFreqMapNiche_M = function (req, res, next) {
           maxscore: maxscore,
           min_occ: min_occ,
           where_config: whereVar,
-          res_celda: res_celda
+          res_celda: res_celda,
+                discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         res.json({'data': data})
@@ -1601,7 +1637,8 @@ exports.getFreqMapNiche_M = function (req, res, next) {
               maxscore: maxscore,
               min_occ: min_occ,
               where_config_raster: whereVarRaster,
-                res_celda: res_celda
+                res_celda: res_celda,
+                discardedDeleted: discardedDeleted
           })
           .then(function (data) {
               res.json({'data': data})
@@ -1653,6 +1690,8 @@ exports.getFreqMapNiche_A = function (req, res, next) {
     var hasRaster       = getParam(req, 'hasRaster')
     var apriori         = getParam(req, 'apriori')
 
+    var discardedDeleted = getParam(req, 'discardedFilterids',[]);
+
     
     if (hasBios === 'true' && hasRaster === 'true' && apriori === 'apriori' ){
 
@@ -1669,7 +1708,8 @@ exports.getFreqMapNiche_A = function (req, res, next) {
                 where_config: whereVar,
                 where_config_raster: whereVarRaster,
                 res_celda: res_celda,
-                res_grid: res_grid
+                res_grid: res_grid,
+                discardedDeleted: discardedDeleted
             })
             .then(function (data) {
                 res.json({'data': data})
@@ -1694,7 +1734,8 @@ exports.getFreqMapNiche_A = function (req, res, next) {
           min_occ: min_occ,
           where_config: whereVar,
                 res_celda: res_celda,
-                res_grid: res_grid
+                res_grid: res_grid,
+                discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         res.json({'data': data})
@@ -1719,7 +1760,8 @@ exports.getFreqMapNiche_A = function (req, res, next) {
               min_occ: min_occ,
               where_config_raster: whereVarRaster,
                 res_celda: res_celda,
-                res_grid: res_grid
+                res_grid: res_grid,
+                discardedDeleted: discardedDeleted
           })
           .then(function (data) {
               res.json({'data': data})
@@ -1774,6 +1816,8 @@ exports.getFreqMapNiche_T = function (req, res, next) {
     var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
     var discardedFilterids = getParam(req, 'discardedDateFilterids')
 
+    var discardedDeleted = getParam(req, 'discardedFilterids',[]);
+
     // debug(discardedFilterids)
 
     
@@ -1799,7 +1843,8 @@ exports.getFreqMapNiche_T = function (req, res, next) {
         lim_sup: fecha_fin.format("YYYY"),
         caso: caso,
         res_celda: res_celda,
-        res_grid: res_grid
+        res_grid: res_grid,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         // debug(data)
@@ -1834,7 +1879,8 @@ exports.getFreqMapNiche_T = function (req, res, next) {
         lim_sup: fecha_fin.format("YYYY"),
         caso: caso,
         res_celda: res_celda,
-        res_grid: res_grid
+        res_grid: res_grid,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         // debug(data)
@@ -1866,7 +1912,8 @@ exports.getFreqMapNiche_T = function (req, res, next) {
         lim_sup: fecha_fin.format("YYYY"),
         caso: caso,
         res_celda: res_celda,
-        res_grid: res_grid
+        res_grid: res_grid,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         // debug(data)
@@ -1980,7 +2027,7 @@ exports.getFreqMapNiche = function (req, res, next) {
         where_config: whereVar,
         where_config_raster: whereVarRaster,
         res_celda: res_celda,
-        discardedDeleted: discardedDeleted.toString()
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         res.json({'data': data})
@@ -2005,7 +2052,7 @@ exports.getFreqMapNiche = function (req, res, next) {
         min_occ: min_occ,
         where_config: whereVar,
         res_celda: res_celda,
-        discardedDeleted: discardedDeleted.toString()
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) { 
           res.json({'data': data})  
@@ -2030,7 +2077,7 @@ exports.getFreqMapNiche = function (req, res, next) {
         min_occ: min_occ,
         where_config_raster: whereVarRaster,
         res_celda: res_celda,
-        discardedDeleted: discardedDeleted.toString()
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         res.json({'data': data})
@@ -2215,6 +2262,8 @@ exports.getFreqCeldaNiche_V = function (req, res, next) {
     var hasRaster       = getParam(req, 'hasRaster')
     var discardedids    = getParam(req, 'discardedids', [])
 
+    var discardedDeleted = getParam(req, 'discardedFilterids',[]);
+
     // debug(discardedids)
 
     
@@ -2231,9 +2280,10 @@ exports.getFreqCeldaNiche_V = function (req, res, next) {
         min_occ: min_occ,
         where_config: whereVar,
         where_config_raster: whereVarRaster,
-        arg_gridids: discardedids.toString(),
+        arg_gridids: discardedids,
         res_celda: res_celda,
-        res_grid: res_grid
+        res_grid: res_grid,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         res.json({'data': data})
@@ -2257,9 +2307,10 @@ exports.getFreqCeldaNiche_V = function (req, res, next) {
         alpha: alpha,
         min_occ: min_occ,
         where_config: whereVar,
-        arg_gridids: discardedids.toString(),
+        arg_gridids: discardedids,
         res_celda: res_celda,
-        res_grid: res_grid
+        res_grid: res_grid,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         // debug(data.length)
@@ -2283,9 +2334,10 @@ exports.getFreqCeldaNiche_V = function (req, res, next) {
         alpha: alpha,
         min_occ: min_occ,
         where_config_raster: whereVarRaster,
-        arg_gridids: discardedids.toString(),
+        arg_gridids: discardedids,
         res_celda: res_celda,
-        res_grid: res_grid
+        res_grid: res_grid,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         res.json({'data': data})
@@ -2344,7 +2396,9 @@ exports.getFreqCeldaNiche_T = function (req, res, next) {
     var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
     var discardedFilterids = getParam(req, 'discardedDateFilterids')
 
-    debug(discardedFilterids)
+    var discardedDeleted = getParam(req, 'discardedFilterids',[]);
+
+    // debug(discardedFilterids)
 
     
     if (hasBios === "true" && hasRaster === "true" && discardedFilterids === "true"){
@@ -2369,7 +2423,8 @@ exports.getFreqCeldaNiche_T = function (req, res, next) {
         lim_sup: fecha_fin.format("YYYY"),
         caso: caso,
         res_celda: res_celda,
-        res_grid: res_grid
+        res_grid: res_grid,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         // debug(data)
@@ -2404,7 +2459,8 @@ exports.getFreqCeldaNiche_T = function (req, res, next) {
         lim_sup: fecha_fin.format("YYYY"),
         caso: caso,
         res_celda: res_celda,
-        res_grid: res_grid
+        res_grid: res_grid,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         // debug(data)
@@ -2438,7 +2494,8 @@ exports.getFreqCeldaNiche_T = function (req, res, next) {
         lim_sup: fecha_fin.format("YYYY"),
         caso: caso,
         res_celda: res_celda,
-        res_grid: res_grid
+        res_grid: res_grid,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         // debug(data)
@@ -2509,7 +2566,7 @@ exports.getFreqCeldaNiche = function (req, res, next) {
         where_config_raster: whereVarRaster,
         res_celda: res_celda,
         res_grid: res_grid,
-        discardedDeleted: discardedDeleted.toString()
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         res.json({'data': data})
@@ -2535,7 +2592,7 @@ exports.getFreqCeldaNiche = function (req, res, next) {
         where_config: whereVar,
         res_celda: res_celda,
         res_grid: res_grid,
-        discardedDeleted: discardedDeleted.toString()
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         res.json({'data': data})
@@ -2561,7 +2618,7 @@ exports.getFreqCeldaNiche = function (req, res, next) {
         where_config_raster: whereVarRaster,
         res_celda: res_celda,
         res_grid: res_grid,
-        discardedDeleted: discardedDeleted.toString()
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         res.json({'data': data})
@@ -2583,9 +2640,6 @@ exports.getFreqCeldaNiche = function (req, res, next) {
 
 
 /******************************************************************** getScoreDecilNiche */
-
-
-
 
 
 
@@ -2623,6 +2677,8 @@ exports.getScoreDecilNiche_A = function (req, res, next) {
 
     var title_valor = verb_utils.processTitleGroup(groupid, tfilters)
 
+    var discardedDeleted = getParam(req, 'discardedFilterids',[]);
+
     
     if (hasBios === 'true' && hasRaster === 'true' && apriori === 'apriori' ){
 
@@ -2639,7 +2695,8 @@ exports.getScoreDecilNiche_A = function (req, res, next) {
                 where_config: whereVar,
                 where_config_raster: whereVarRaster,
                 res_celda: res_celda,
-                res_grid: res_grid
+                res_grid: res_grid,
+                discardedDeleted: discardedDeleted
             })
             .then(function (data) {
                 for(i = 0; i < data.length; i++){
@@ -2668,7 +2725,8 @@ exports.getScoreDecilNiche_A = function (req, res, next) {
           min_occ: min_occ,
           where_config: whereVar,
           res_celda: res_celda,
-          res_grid: res_grid
+          res_grid: res_grid,
+                discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         for(i = 0; i < data.length; i++){
@@ -2697,7 +2755,8 @@ exports.getScoreDecilNiche_A = function (req, res, next) {
               min_occ: min_occ,
               where_config_raster: whereVarRaster,
                 res_celda: res_celda,
-                res_grid: res_grid
+                res_grid: res_grid,
+                discardedDeleted: discardedDeleted
           })
           .then(function (data) {
               for(i = 0; i < data.length; i++){
@@ -2756,6 +2815,8 @@ exports.getScoreDecilNiche_V = function (req, res, next) {
     var hasRaster       = getParam(req, 'hasRaster')
     var discardedids    = getParam(req, 'discardedids', [])
 
+    var discardedDeleted = getParam(req, 'discardedFilterids',[]);
+
     // debug(discardedids)
 
     
@@ -2774,7 +2835,8 @@ exports.getScoreDecilNiche_V = function (req, res, next) {
         where_config_raster: whereVarRaster,
         arg_gridids: discardedids.toString(),
         res_celda: res_celda,
-        res_grid: res_grid
+        res_grid: res_grid,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         for(i = 0; i < data.length; i++){
@@ -2804,7 +2866,8 @@ exports.getScoreDecilNiche_V = function (req, res, next) {
         where_config: whereVar,
         arg_gridids: discardedids.toString(),
         res_celda: res_celda,
-        res_grid: res_grid
+        res_grid: res_grid,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         for(i = 0; i < data.length; i++){
@@ -2834,7 +2897,8 @@ exports.getScoreDecilNiche_V = function (req, res, next) {
         where_config_raster: whereVarRaster,
         arg_gridids: discardedids.toString(),
         res_celda: res_celda,
-        res_grid: res_grid
+        res_grid: res_grid,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         for(i = 0; i < data.length; i++){
@@ -2899,8 +2963,9 @@ exports.getScoreDecilNiche_T = function (req, res, next) {
     var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
     var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
     var discardedFilterids = getParam(req, 'discardedDateFilterids')
+    // debug(discardedFilterids)
 
-    debug(discardedFilterids)
+    var discardedDeleted = getParam(req, 'discardedFilterids',[]);
 
     
     if (hasBios === "true" && hasRaster === "true" && discardedFilterids === "true"){
@@ -2925,7 +2990,8 @@ exports.getScoreDecilNiche_T = function (req, res, next) {
         lim_sup: fecha_fin.format("YYYY"),
         caso: caso,
         res_celda: res_celda,
-        res_grid: res_grid
+        res_grid: res_grid,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         for(i = 0; i < data.length; i++){
@@ -2963,7 +3029,8 @@ exports.getScoreDecilNiche_T = function (req, res, next) {
         lim_sup: fecha_fin.format("YYYY"),
         caso: caso,
         res_celda: res_celda,
-        res_grid: res_grid
+        res_grid: res_grid,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         for(i = 0; i < data.length; i++){
@@ -3000,7 +3067,8 @@ exports.getScoreDecilNiche_T = function (req, res, next) {
         lim_sup: fecha_fin.format("YYYY"),
         caso: caso,
         res_celda: res_celda,
-        res_grid: res_grid
+        res_grid: res_grid,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         for(i = 0; i < data.length; i++){
@@ -3077,7 +3145,7 @@ exports.getScoreDecilNiche = function (req, res, next) {
         where_config_raster: whereVarRaster,
         res_celda: res_celda,
         res_grid: res_grid,
-        discardedDeleted: discardedDeleted.toString()
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
 
@@ -3109,7 +3177,7 @@ exports.getScoreDecilNiche = function (req, res, next) {
         where_config: whereVar,
         res_celda: res_celda,
         res_grid: res_grid,
-        discardedDeleted: discardedDeleted.toString()
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
 
@@ -3141,7 +3209,7 @@ exports.getScoreDecilNiche = function (req, res, next) {
         where_config_raster: whereVarRaster,
         res_celda: res_celda,
         res_grid: res_grid,
-        discardedDeleted: discardedDeleted.toString()
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
 
@@ -3207,6 +3275,8 @@ exports.getScoreDecilNiche = function (req, res, next) {
 
     var mapa_prob       = getParam(req, 'mapa_prob')
 
+    var discardedDeleted = getParam(req, 'discardedFilterids',[]);
+
     
     if (hasBios === 'true' && hasRaster === 'true' && mapa_prob === 'mapa_prob' ){
 
@@ -3228,7 +3298,8 @@ exports.getScoreDecilNiche = function (req, res, next) {
         categorias: categorias,
         maxscore: maxscore,
         res_celda: res_celda,
-        res_grid: res_grid
+        res_grid: res_grid,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         res.json({'data': data})
@@ -3259,7 +3330,8 @@ exports.getScoreDecilNiche = function (req, res, next) {
         categorias: categorias,
         maxscore: maxscore,
         res_celda: res_celda,
-        res_grid: res_grid
+        res_grid: res_grid,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         res.json({'data': data})
@@ -3288,7 +3360,8 @@ exports.getScoreDecilNiche = function (req, res, next) {
         categorias: categorias,
         maxscore: maxscore,
         res_celda: res_celda,
-        res_grid: res_grid
+        res_grid: res_grid,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         res.json({'data': data})
@@ -3342,6 +3415,8 @@ exports.getScoreDecilNiche = function (req, res, next) {
     var long        = getParam(req, 'long')
     var apriori     = getParam(req, 'apriori')
 
+    var discardedDeleted = getParam(req, 'discardedFilterids',[]);
+
     if (hasBios === 'true' && hasRaster === 'true' && apriori === 'apriori' ){
 
       debug("T")
@@ -3362,7 +3437,8 @@ exports.getScoreDecilNiche = function (req, res, next) {
         categorias: categorias,
         maxscore: maxscore,
         res_celda: res_celda,
-        res_grid: res_grid
+        res_grid: res_grid,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         res.json({'data': data})
@@ -3392,7 +3468,8 @@ exports.getScoreDecilNiche = function (req, res, next) {
         categorias: categorias,
         maxscore: maxscore,
         res_celda: res_celda,
-        res_grid: res_grid
+        res_grid: res_grid,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         res.json({'data': data})
@@ -3421,7 +3498,8 @@ exports.getScoreDecilNiche = function (req, res, next) {
         categorias: categorias,
         maxscore: maxscore,
         res_celda: res_celda,
-        res_grid: res_grid
+        res_grid: res_grid,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         res.json({'data': data})
@@ -3482,6 +3560,8 @@ exports.getGridSpeciesNiche_T = function (req, res, next) {
     var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
     var discardedFilterids = getParam(req, 'discardedDateFilterids')
 
+    var discardedDeleted = getParam(req, 'discardedFilterids',[]);
+
     // debug(discardedFilterids)
 
     
@@ -3512,7 +3592,8 @@ exports.getGridSpeciesNiche_T = function (req, res, next) {
         categorias: categorias,
         maxscore: maxscore,
         res_celda: res_celda,
-        res_grid: res_grid
+        res_grid: res_grid,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         // debug(data)
@@ -3547,7 +3628,8 @@ exports.getGridSpeciesNiche_T = function (req, res, next) {
         categorias: categorias,
         maxscore: maxscore,
         res_celda: res_celda,
-        res_grid: res_grid
+        res_grid: res_grid,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         // debug(data)
@@ -3583,7 +3665,8 @@ exports.getGridSpeciesNiche_T = function (req, res, next) {
         categorias: categorias,
         maxscore: maxscore,
         res_celda: res_celda,
-        res_grid: res_grid
+        res_grid: res_grid,
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         // debug(data)
@@ -3667,7 +3750,7 @@ exports.getGridSpeciesNiche_T = function (req, res, next) {
         maxscore: maxscore,
         res_celda: res_celda,
         res_grid: res_grid,
-        discardedDeleted: discardedDeleted.toString()
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         res.json({'data': data})
@@ -3698,7 +3781,7 @@ exports.getGridSpeciesNiche_T = function (req, res, next) {
         maxscore: maxscore,
         res_celda: res_celda,
         res_grid: res_grid,
-        discardedDeleted: discardedDeleted.toString()
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         res.json({'data': data})
@@ -3734,7 +3817,7 @@ exports.getGridSpeciesNiche_T = function (req, res, next) {
         maxscore: maxscore,
         res_celda: res_celda,
         res_grid: res_grid,
-        discardedDeleted: discardedDeleted.toString()
+        discardedDeleted: discardedDeleted
       })
       .then(function (data) {
         res.json({'data': data})
@@ -4812,7 +4895,7 @@ exports.getEntListNiche = function (req, res, next) {
 //       //     min_occ: min_occ,
 //       //     where_config: whereVar,
 //       //     where_config_raster: whereVarRaster,
-//       //     arg_gridids: discardedids.toString()
+//       //     arg_gridids: discardedids
 //       // })
 //       // .then(function (data) {
 //       //     res.json({'data': data})
@@ -4843,7 +4926,7 @@ exports.getEntListNiche = function (req, res, next) {
 //           alpha: alpha,
 //           min_occ: min_occ,
 //           where_config: whereVar,
-//           arg_gridids: discardedids.toString()
+//           arg_gridids: discardedids
 //       })
 //       .then(function (data) {
 //         res.json({'data': data})
@@ -4866,7 +4949,7 @@ exports.getEntListNiche = function (req, res, next) {
 //       //     alpha: alpha,
 //       //     min_occ: min_occ,
 //       //     where_config_raster: whereVarRaster,
-//       //     arg_gridids: discardedids.toString()
+//       //     arg_gridids: discardedids
 //       // })
 //       // .then(function (data) {
 //       //     res.json({'data': data})
