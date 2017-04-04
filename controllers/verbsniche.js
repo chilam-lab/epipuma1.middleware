@@ -3311,7 +3311,7 @@ exports.getGridSpeciesNiche_T = function (req, res, next) {
         maxscore: maxscore,
         res_celda: res_celda,
         res_grid: res_grid,
-        discardedDeleted = discardedDeleted.toString()
+        discardedDeleted: discardedDeleted.toString()
       })
       .then(function (data) {
         res.json({'data': data})
@@ -3342,7 +3342,7 @@ exports.getGridSpeciesNiche_T = function (req, res, next) {
         maxscore: maxscore,
         res_celda: res_celda,
         res_grid: res_grid,
-        discardedDeleted = discardedDeleted.toString()
+        discardedDeleted: discardedDeleted.toString()
       })
       .then(function (data) {
         res.json({'data': data})
@@ -3378,7 +3378,7 @@ exports.getGridSpeciesNiche_T = function (req, res, next) {
         maxscore: maxscore,
         res_celda: res_celda,
         res_grid: res_grid,
-        discardedDeleted = discardedDeleted.toString()
+        discardedDeleted: discardedDeleted.toString()
       })
       .then(function (data) {
         res.json({'data': data})

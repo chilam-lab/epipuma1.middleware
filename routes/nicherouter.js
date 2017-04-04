@@ -11,7 +11,7 @@
  * @namespace nicheRouter
  */
 var router = require('express').Router()
-var verbsCtrl = require('../controllers/verbsniche')
+var verbsCtrl = require('../controllers/verbs')
 
 
 /**
