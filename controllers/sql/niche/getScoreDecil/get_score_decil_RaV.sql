@@ -2,7 +2,7 @@
 WITH source AS (
 	SELECT spid, 
 		--$<res_celda:raw> as cells
-		($<res_celda:raw> - array[$<arg_gridids:raw>])  as cells 
+		($<res_celda:raw> - (array[$<arg_gridids:raw>] + array[$<discardedDeleted:raw>]::int[]))  as cells 
 	FROM sp_snib 
 	WHERE 
 		spid = $<spid>

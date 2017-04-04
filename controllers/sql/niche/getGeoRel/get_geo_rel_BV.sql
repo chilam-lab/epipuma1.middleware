@@ -1,6 +1,8 @@
 /*getGeoRel con proceso de validación*/
 WITH source AS (
-	SELECT spid, $<res_celda:raw> as cells  
+	SELECT spid, 
+			--$<res_celda:raw> as cells
+			($<res_celda:raw> - (array[$<arg_gridids:raw>] + array[$<discardedDeleted:raw>]::int[]) )  as cells  
 	FROM sp_snib 
 	WHERE 
 		spid = $<spid>
@@ -16,7 +18,8 @@ target AS (
 			clasevalida,
 			ordenvalido,
 			familiavalida,
-			$<res_celda:raw> as cells  
+			--$<res_celda:raw> as cells
+			($<res_celda:raw> - array[$<arg_gridids:raw>])  as cells  
 	FROM sp_snib
 	$<where_config:raw>
 	--WHERE clasevalida = 'Mammalia'
@@ -24,15 +27,19 @@ target AS (
 	and especievalidabusqueda <> ''
 ),
 filter_ni AS (
-		SELECT 	spid, 
-				icount( cells - array[$<arg_gridids:raw>] ) as ni,
-				cells - array[$<arg_gridids:raw> ]  as cells
+		SELECT 	spid,
+				cells,
+				icount( cells ) as ni
+				--icount( cells - array[$<arg_gridids:raw>] ) as ni,
+				--cells - array[$<arg_gridids:raw> ]  as cells
 		FROM source 
 ), 
 filter_nj AS(
-		select 	spid, 
-				icount(cells - array[$<arg_gridids:raw>]) AS nj,
-				cells - array[ $<arg_gridids:raw> ]  AS cells
+		select 	spid,
+				cells,
+				icount( cells ) as nj
+				--icount(cells - array[$<arg_gridids:raw>]) AS nj,
+				--cells - array[ $<arg_gridids:raw> ]  AS cells
 		FROM target 
 ),
 filter_nij AS(
