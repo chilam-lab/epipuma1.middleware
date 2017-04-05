@@ -3,6 +3,32 @@ var moment = require('moment')
 
 var verbs_utils = {} 
 
+/**
+ * Regresa el valor del parametro `name` cuando este presente o `defaultValue`.
+ *
+ *  - Checks body params, ex: id=12, {"id":12}
+ *  - Checks query string params, ex: ?id=12
+ *
+ * To utilize request bodies, `req.body`
+ * should be an object. This can be done by using
+ * the `bodyParser()` middleware.
+ *
+ * @param {express.Request} req
+ * @param {string} name
+ * @param {Mixed} [defaultValue]
+ * @return {string}
+ *
+ */
+verbs_utils.getParam = function (req, name, defaultValue) {
+  var body = req.body || {}
+  var query = req.query || {}
+
+  if (body[name] != null) return body[name]
+  if (query[name] != null) return query[name]
+
+  return defaultValue
+}
+
 verbs_utils.processBioFilters = function(tfilters_total, spid){
   var whereVar = ''
   var first_bio = true

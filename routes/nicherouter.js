@@ -12,7 +12,7 @@
  */
 var router = require('express').Router()
 var verbsCtrl = require('../controllers/verbsniche')
-
+var getGeoRel = require('../controllers/getGeoRelNiche')
 
 /**
  * Ruta que muestra un mensaje de bienvenida 
@@ -40,20 +40,22 @@ router.all('/', function(req, res) {
  * @param {string} path - Express path
  * @param {callback} middleware - Express middleware.
  */
+// router.route('/getGeoRel')
+//   .get(
+//     verbsCtrl.getGeoRelNiche_VT,
+//     verbsCtrl.getGeoRelNiche_V,
+//     verbsCtrl.getGeoRelNiche_T,
+//     verbsCtrl.getGeoRelNiche    
+//   )
+//   .post(
+//     verbsCtrl.getGeoRelNiche_VT,
+//     verbsCtrl.getGeoRelNiche_V,
+//     verbsCtrl.getGeoRelNiche_T,
+//     verbsCtrl.getGeoRelNiche
+//   )
 router.route('/getGeoRel')
-  .get(
-    verbsCtrl.getGeoRelNiche_VT,
-    verbsCtrl.getGeoRelNiche_V,
-    verbsCtrl.getGeoRelNiche_T,
-    verbsCtrl.getGeoRelNiche    
-  )
-  .post(
-    verbsCtrl.getGeoRelNiche_VT,
-    verbsCtrl.getGeoRelNiche_V,
-    verbsCtrl.getGeoRelNiche_T,
-    verbsCtrl.getGeoRelNiche
-  )
-
+  .get(getGeoRel.pipe)
+  .post(getGeoRel.pipe)
 
 /**
  * Ruta que obtiene las frecuencia de epsilon y score por especie.
