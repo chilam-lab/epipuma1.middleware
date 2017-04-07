@@ -1,12 +1,11 @@
 /**
-* getGeoRelNiche module
+* getGridSpeciesNiche module
 *
-* Este verbo es responsable de obtener los valores de epsilon y score entre una
-* especie objetivo y un conjunto de variables bióoticas y raster.
+* Este verbo obtiene el score por celda agrupado por decil 
 *
-* @module controllers/getGeoRelNiche
+* @module controllers/getGridSpeciesNiche
 */
-var debug = require('debug')('verbs:getGeoRelNiche')
+var debug = require('debug')('verbs:getGridSpeciesNiche')
 var pgp = require('pg-promise')()
 var moment = require('moment')
 var verb_utils = require('./verb_utils')
@@ -17,69 +16,66 @@ var queries = require('./sql/queryProvider')
 var pool= pgp(config.db)
 var N = verb_utils.N 
 
+/******************************************************************** getGridSpeciesNiche */
+
+
+
 /**
  *
- * Servidor Niche: getGeoRelNiche_VT de SNIB DB, con validación y tiempo
+ * getGridSpeciesNiche_M de SNIB DB, con mapa prob
  *
- * Obtiene epsilon y score de la relación de especie objetivo y conjunto de variables bioticas y raster.
+ * Obtiene el score por celda agrupado por decil
  *
  * @param {express.Request} req
  * @param {express.Response} res
  *
  */
 
-function getGeoRelNiche_VT(req, res, next) {
-  debug('getGeoRelNiche_VT')
+function getGridSpeciesNiche_M(req, res, next) {
 
-  var spid = parseInt(verb_utils.getParam(req, 'id'))
-  var tfilters = verb_utils.getParam(req, 'tfilters')
-  var alpha = 0.01
-  // var N = 14707; // Verificar N, que se esta contemplando
+  debug('getGridSpeciesNiche_M')
+
+  var spid        = parseInt(verb_utils.getParam(req, 'id'))
+  var tfilters    = verb_utils.getParam(req, 'tfilters')
+  var alpha       = 0.01
+    // var N           = 14707
+  var maxscore    = 700
   var res_celda = verb_utils.getParam(req, 'res_celda', 'cells_16km')
   var res_grid = verb_utils.getParam(req, 'res_grid', 'gridid_16km')
 
-  // Siempre incluidos en query, nj >= 0
+    // Siempre incluidos en query, nj >= 0
   var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
 
-  // variables configurables
-  var hasBios         = verb_utils.getParam(req, 'hasBios')
-  var hasRaster       = verb_utils.getParam(req, 'hasRaster')
-  var discardedids    = verb_utils.getParam(req, 'discardedids', [])
-  // filtros por tiempo
-  var sfecha            = verb_utils.getParam(req, 'sfecha', false)
-  var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
-  var fecha_fin         = moment(verb_utils.getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
-  var discardedFilterids = verb_utils.getParam(req, 'discardedDateFilterids')
-  // debug(discardedFilterids)
+    // variables configurables
+  var hasBios     = verb_utils.getParam(req, 'hasBios')
+  var hasRaster   = verb_utils.getParam(req, 'hasRaster')
+  var lat         = verb_utils.getParam(req, 'lat')
+  var long        = verb_utils.getParam(req, 'long')
+
+  var mapa_prob       = verb_utils.getParam(req, 'mapa_prob')
 
   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
-  // debug(discardedFilterids)
-
 
     
+  if (hasBios === 'true' && hasRaster === 'true' && mapa_prob === 'mapa_prob' ){
 
-    
-  if ( hasBios === 'true' && hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 && discardedFilterids === 'true' ){
+    debug('T')
 
-    var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
-    debug(caso)
-
-
-    debug('V')
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
-
-    pool.any(queries.getGeoRelNiche.getGeoRelVT, {
+    var categorias = verb_utils.getRasterCategories(tfilters)
+      
+    pool.any(queries.getGridSpeciesNiche.getGridSpeciesM, {
       spid: spid,
       N: N,
       alpha: alpha,
       min_occ: min_occ,
       where_config: whereVar,
       where_config_raster: whereVarRaster,
-      arg_gridids: discardedids,
-      lim_inf: fecha_incio.format('YYYY'),
-      lim_sup: fecha_fin.format('YYYY'),
-      caso: caso,
+      long: long,
+      lat: lat,
+      categorias: categorias,
+      maxscore: maxscore,
       res_celda: res_celda,
       res_grid: res_grid,
       discardedDeleted: discardedDeleted
@@ -94,60 +90,24 @@ function getGeoRelNiche_VT(req, res, next) {
 
       
   }
-  else if (hasBios === 'true' && discardedids != undefined && discardedids.length > 0 && discardedFilterids === 'true' ){
-
-    var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
-    debug(caso)
-
+  else if (hasBios === 'true' && mapa_prob === 'mapa_prob' ){
 
     debug('B')
-    var whereVar = verb_utils.processBioFilters(tfilters, spid)
-        // debug(whereVar)
 
-    pool.any(queries.getGeoRelNiche.getGeoRelBioVT, {
+    var whereVar = verb_utils.processBioFilters(tfilters, spid)
+    var categorias = verb_utils.getRasterCategories(tfilters)
+
+      
+    pool.any(queries.getGridSpeciesNiche.getGridSpeciesBioM, {
       spid: spid,
       N: N,
       alpha: alpha,
       min_occ: min_occ,
       where_config: whereVar,
-      arg_gridids: discardedids,
-      lim_inf: fecha_incio.format('YYYY'),
-      lim_sup: fecha_fin.format('YYYY'),
-      caso: caso,
-      res_celda: res_celda,
-      res_grid: res_grid,
-      discardedDeleted: discardedDeleted
-    })
-        .then(function (data) {
-          // debug(data.length)
-          res.json({'data': data})
-        })
-        .catch(function (error) {
-          debug(error)
-          next(error)
-        })
-      
-  } 
-  else if (hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 && discardedFilterids === 'true' ){
-
-    var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
-    debug(caso)
-
-
-    debug('Ra')
-    var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
-      // debug(whereVarRaster)
-
-    pool.any(queries.getGeoRelNiche.getGeoRelRaVT, {
-      spid: spid,
-      N: N,
-      alpha: alpha,
-      min_occ: min_occ,
-      where_config_raster: whereVarRaster,
-      arg_gridids: discardedids,
-      lim_inf: fecha_incio.format('YYYY'),
-      lim_sup: fecha_fin.format('YYYY'),
-      caso: caso,
+      long: long,
+      lat: lat,
+      categorias: categorias,
+      maxscore: maxscore,
       res_celda: res_celda,
       res_grid: res_grid,
       discardedDeleted: discardedDeleted
@@ -160,6 +120,35 @@ function getGeoRelNiche_VT(req, res, next) {
         next(error)
       })
 
+      
+  } 
+  else if (hasRaster === 'true' && mapa_prob === 'mapa_prob' ){
+
+    debug('Ra')
+    var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
+    var categorias = verb_utils.getRasterCategories(tfilters)
+
+    pool.any(queries.getGridSpeciesNiche.getGridSpeciesRaM, {
+      spid: spid,
+      N: N,
+      alpha: alpha,
+      min_occ: min_occ,
+      where_config_raster: whereVarRaster,
+      long: long,
+      lat: lat,
+      categorias: categorias,
+      maxscore: maxscore,
+      res_celda: res_celda,
+      res_grid: res_grid,
+      discardedDeleted: discardedDeleted
+    })
+      .then(function (data) {
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        debug(error)
+        next(error)
+      })
       
   } 
   else{
@@ -174,54 +163,60 @@ function getGeoRelNiche_VT(req, res, next) {
 
 /**
  *
- * Servidor Niche: getGeoRelNiche_V de SNIB DB, con validación
+ * getGridSpeciesNiche_A de SNIB DB, apriori
  *
- * Obtiene epsilon y score de la relación de especie objetivo y conjunto de variables bioticas y raster.
+ * Obtiene el score por celda agrupado por decil
  *
  * @param {express.Request} req
  * @param {express.Response} res
  *
  */
 
-function getGeoRelNiche_V(req, res, next) {
+function getGridSpeciesNiche_A(req, res, next) {
 
-  debug('getGeoRelNiche_V')
+  debug('getGridSpeciesNiche_A')
 
   var spid        = parseInt(verb_utils.getParam(req, 'id'))
   var tfilters    = verb_utils.getParam(req, 'tfilters')
   var alpha       = 0.01
-    // var N           = 14707; // Verificar N, que se esta contemplando
+    // var N           = 14707
+  var maxscore    = 700
   var res_celda = verb_utils.getParam(req, 'res_celda', 'cells_16km')
+  var res_grid = verb_utils.getParam(req, 'res_grid', 'gridid_16km')
 
     // Siempre incluidos en query, nj >= 0
   var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
 
     // variables configurables
-  var hasBios         = verb_utils.getParam(req, 'hasBios')
-  var hasRaster       = verb_utils.getParam(req, 'hasRaster')
-  var discardedids    = verb_utils.getParam(req, 'discardedids', [])
+  var hasBios     = verb_utils.getParam(req, 'hasBios')
+  var hasRaster   = verb_utils.getParam(req, 'hasRaster')
+  var lat         = verb_utils.getParam(req, 'lat')
+  var long        = verb_utils.getParam(req, 'long')
+  var apriori     = verb_utils.getParam(req, 'apriori')
 
   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
-    // debug(discardedFilterids)
 
-    // debug(discardedids)
+  if (hasBios === 'true' && hasRaster === 'true' && apriori === 'apriori' ){
 
-    
-  if ( hasBios === 'true' && hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 ){
+    debug('T')
 
-    debug('V')
-    var whereVar = verb_utils.processBioFilters(tfilters, spid)
+    var whereVar  = verb_utils.processBioFilters(tfilters, spid)
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
-
-    pool.any(queries.getGeoRelNiche.getGeoRelV, {
+    var categorias = verb_utils.getRasterCategories(tfilters)
+      
+    pool.any(queries.getGridSpeciesNiche.getGridSpeciesA, {
       spid: spid,
       N: N,
       alpha: alpha,
       min_occ: min_occ,
       where_config: whereVar,
       where_config_raster: whereVarRaster,
-      arg_gridids: discardedids,
+      long: long,
+      lat: lat,
+      categorias: categorias,
+      maxscore: maxscore,
       res_celda: res_celda,
+      res_grid: res_grid,
       discardedDeleted: discardedDeleted
     })
       .then(function (data) {
@@ -234,46 +229,55 @@ function getGeoRelNiche_V(req, res, next) {
 
       
   }
-  else if (hasBios === 'true' && discardedids != undefined && discardedids.length > 0 ){
+  else if (hasBios === 'true' && apriori === 'apriori' ){
 
     debug('B')
-    var whereVar = verb_utils.processBioFilters(tfilters, spid)
-      // debug(whereVar)
 
-    pool.any(queries.getGeoRelNiche.getGeoRelBioV, {
+    var whereVar = verb_utils.processBioFilters(tfilters, spid)
+    var categorias = verb_utils.getRasterCategories(tfilters)
+
+    pool.any(queries.getGridSpeciesNiche.getGridSpeciesBioA, {
       spid: spid,
       N: N,
       alpha: alpha,
       min_occ: min_occ,
       where_config: whereVar,
-      arg_gridids: discardedids,
+      long: long,
+      lat: lat,
+      categorias: categorias,
+      maxscore: maxscore,
       res_celda: res_celda,
+      res_grid: res_grid,
       discardedDeleted: discardedDeleted
     })
       .then(function (data) {
-        // debug(data.length)
         res.json({'data': data})
       })
       .catch(function (error) {
         debug(error)
         next(error)
       })
+
       
   } 
-  else if (hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 ){
+  else if (hasRaster === 'true' && apriori === 'apriori' ){
 
     debug('Ra')
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
-      // debug(whereVarRaster)
+    var categorias = verb_utils.getRasterCategories(tfilters)
 
-    pool.any(queries.getGeoRelNiche.getGeoRelRaV, {
+    pool.any(queries.getGridSpeciesNiche.getGridSpeciesRaA, {
       spid: spid,
       N: N,
       alpha: alpha,
       min_occ: min_occ,
       where_config_raster: whereVarRaster,
-      arg_gridids: discardedids,
+      long: long,
+      lat: lat,
+      categorias: categorias,
+      maxscore: maxscore,
       res_celda: res_celda,
+      res_grid: res_grid,
       discardedDeleted: discardedDeleted
     })
       .then(function (data) {
@@ -283,7 +287,6 @@ function getGeoRelNiche_V(req, res, next) {
         debug(error)
         next(error)
       })
-
       
   } 
   else{
@@ -297,26 +300,26 @@ function getGeoRelNiche_V(req, res, next) {
 
 
 
-
 /**
  *
- * Servidor Niche: getGeoRelNiche_T de SNIB DB, con tiempo
+ * getGridSpeciesNiche_T de SNIB DB
  *
- * Obtiene epsilon y score de la relación de especie objetivo y conjunto de variables bioticas y raster.
+ * Obtiene el score por celda agrupado por decil
  *
  * @param {express.Request} req
  * @param {express.Response} res
  *
  */
 
-function getGeoRelNiche_T(req, res, next) {
+function getGridSpeciesNiche_T(req, res, next) {
 
-  debug('getGeoRelNiche_T')
+  debug('getGridSpeciesNiche_T')
 
   var spid        = parseInt(verb_utils.getParam(req, 'id'))
   var tfilters    = verb_utils.getParam(req, 'tfilters')
   var alpha       = 0.01
     // var N           = 14707; // Verificar N, que se esta contemplando
+  var maxscore    = 700
   var res_celda = verb_utils.getParam(req, 'res_celda', 'cells_16km')
   var res_grid = verb_utils.getParam(req, 'res_grid', 'gridid_16km')
 
@@ -326,30 +329,34 @@ function getGeoRelNiche_T(req, res, next) {
     // variables configurables
   var hasBios         = verb_utils.getParam(req, 'hasBios')
   var hasRaster       = verb_utils.getParam(req, 'hasRaster')
+
+  var lat      = verb_utils.getParam(req, 'lat')
+  var long      = verb_utils.getParam(req, 'long')
     
     // filtros por tiempo
   var sfecha            = verb_utils.getParam(req, 'sfecha', false)
   var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
   var fecha_fin         = moment(verb_utils.getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
-    
   var discardedFilterids = verb_utils.getParam(req, 'discardedDateFilterids')
 
   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
-    // debug(discardedFilterids)
-    
 
+    // debug(discardedFilterids)
+
+    
   if (hasBios === 'true' && hasRaster === 'true' && discardedFilterids === 'true'){
 
     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
-    debug(caso)
+      // debug(caso)
 
 
     debug('T')  
 
-    whereVar = verb_utils.processBioFilters(tfilters, spid)
-    whereVarRaster = verb_utils.processRasterFilters(tfilters,spid)
+    var whereVar = verb_utils.processBioFilters(tfilters, spid)
+    var whereVarRaster = verb_utils.processRasterFilters(tfilters,spid)
+    var categorias = verb_utils.getRasterCategories(tfilters)
       
-    pool.any(queries.getGeoRelNiche.getGeoRelT, {
+    pool.any(queries.getGridSpeciesNiche.getGridSpeciesT, {
       spid: spid,
       N: N,
       alpha: alpha,
@@ -359,6 +366,10 @@ function getGeoRelNiche_T(req, res, next) {
       lim_inf: fecha_incio.format('YYYY'),
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
+      long: long,
+      lat: lat,
+      categorias: categorias,
+      maxscore: maxscore,
       res_celda: res_celda,
       res_grid: res_grid,
       discardedDeleted: discardedDeleted
@@ -371,9 +382,6 @@ function getGeoRelNiche_T(req, res, next) {
         debug(error)
         next(error)
       })
-
-     
-      
 
   }
   else if (hasBios === 'true' && discardedFilterids === 'true' ){
@@ -381,12 +389,11 @@ function getGeoRelNiche_T(req, res, next) {
     debug('B')
 
     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
-    debug(caso)  
-
-    whereVar = verb_utils.processBioFilters(tfilters, spid)
-      // debug(whereVar)
+    var whereVar = verb_utils.processBioFilters(tfilters, spid)
+    var categorias = verb_utils.getRasterCategories(tfilters)
       
-    pool.any(queries.getGeoRelNiche.getGeoRelBioT, {
+      
+    pool.any(queries.getGridSpeciesNiche.getGridSpeciesBioT, {
       spid: spid,
       N: N,
       alpha: alpha,
@@ -395,6 +402,10 @@ function getGeoRelNiche_T(req, res, next) {
       lim_inf: fecha_incio.format('YYYY'),
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
+      long: long,
+      lat: lat,
+      categorias: categorias,
+      maxscore: maxscore,
       res_celda: res_celda,
       res_grid: res_grid,
       discardedDeleted: discardedDeleted
@@ -408,20 +419,18 @@ function getGeoRelNiche_T(req, res, next) {
         next(error)
       })
       
-
-      
   } 
   else if (hasRaster === 'true' && discardedFilterids === 'true' ){
 
     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
-    debug(caso)
+    var categorias = verb_utils.getRasterCategories(tfilters)
 
 
     debug('Ra')
 
     whereVarRaster = verb_utils.processRasterFilters(tfilters,spid)
       
-    pool.any(queries.getGeoRelNiche.getGeoRelRaT, {
+    pool.any(queries.getGridSpeciesNiche.getGridSpeciesRaT, {
       spid: spid,
       N: N,
       alpha: alpha,
@@ -430,6 +439,10 @@ function getGeoRelNiche_T(req, res, next) {
       lim_inf: fecha_incio.format('YYYY'),
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
+      long: long,
+      lat: lat,
+      categorias: categorias,
+      maxscore: maxscore,
       res_celda: res_celda,
       res_grid: res_grid,
       discardedDeleted: discardedDeleted
@@ -453,66 +466,69 @@ function getGeoRelNiche_T(req, res, next) {
 
 }
 
-
-
-
-
 /**
  *
- * Servidor Niche: getGeoRelNiche de SNIB DB, sin filtros
+ * getGridSpeciesNiche de SNIB DB
  *
- * Obtiene epsilon y score de la elación de especie objetivo y conjunto de variables bioticas y raster.
+ * Obtiene el score por celda agrupado por decil
  *
  * @param {express.Request} req
  * @param {express.Response} res
  *
  */
 
-function getGeoRelNiche(req, res, next) {
+function getGridSpeciesNiche(req, res, next) {
 
-  debug('getGeoRelNiche')
+  debug('getGridSpeciesNiche')
 
+    
   var spid        = parseInt(verb_utils.getParam(req, 'id'))
   var tfilters    = verb_utils.getParam(req, 'tfilters')
   var alpha       = 0.01
-    // var N           = 14707; // Verificar N, que se esta contemplando
+    // var N           = 14707
+  var maxscore    = 700
   var res_celda = verb_utils.getParam(req, 'res_celda', 'cells_16km')
+  var res_grid = verb_utils.getParam(req, 'res_grid', 'gridid_16km')
+
+  var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
 
     // Siempre incluidos en query, nj >= 0
   var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
 
     // variables configurables
+  var hasBios     = verb_utils.getParam(req, 'hasBios')
+  var hasRaster   = verb_utils.getParam(req, 'hasRaster')
 
-  var hasBios         = verb_utils.getParam(req, 'hasBios')
-  var hasRaster       = verb_utils.getParam(req, 'hasRaster')
+  var lat      = verb_utils.getParam(req, 'lat')
+  var long      = verb_utils.getParam(req, 'long')
 
-  var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
-    // console.log(discardedDeleted);
-
+    // debug(idGrid)
+    // var groupid        = verb_utils.getParam(req, 'groupid')
+    // var title_valor = verb_utils.processTitleGroup(groupid, tfilters)
     
-
-    // console.log(hasBios);
-    // console.log(hasRaster);
-    // console.log(spid);
-    // console.log(tfilters);
-    // console.log(min_occ);
-
-    
-    
-  if (hasBios === 'true' && hasRaster === 'true' ){
+  if (hasBios === 'true' && hasRaster === 'true'){
 
     debug('T')
+      
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
+    var categorias = verb_utils.getRasterCategories(tfilters)
 
-    pool.any(queries.getGeoRelNiche.getGeoRel, {
+      // debug(categorias)
+
+    pool.any(queries.getGridSpeciesNiche.getGridSpecies, {
       spid: spid,
       N: N,
       alpha: alpha,
       min_occ: min_occ,
       where_config: whereVar,
       where_config_raster: whereVarRaster,
+      long: long,
+      lat: lat,
+      categorias: categorias,
+      maxscore: maxscore,
       res_celda: res_celda,
+      res_grid: res_grid,
       discardedDeleted: discardedDeleted
     })
       .then(function (data) {
@@ -528,42 +544,58 @@ function getGeoRelNiche(req, res, next) {
   else if (hasBios === 'true'){
 
     debug('B')
-    var whereVar = verb_utils.processBioFilters(tfilters, spid)
-      // debug(whereVar)
-      // debug(queries.getGeoRelNiche.getGeoRelBio)
 
-    pool.any(queries.getGeoRelNiche.getGeoRelBio, {
+    var whereVar = verb_utils.processBioFilters(tfilters, spid)
+    var categorias = verb_utils.getRasterCategories(tfilters)
+      
+    pool.any(queries.getGridSpeciesNiche.getGridSpeciesBio, {
       spid: spid,
       N: N,
       alpha: alpha,
       min_occ: min_occ,
       where_config: whereVar,
+      long: long,
+      lat: lat,
+      categorias: categorias,
+      maxscore: maxscore,
       res_celda: res_celda,
+      res_grid: res_grid,
       discardedDeleted: discardedDeleted
     })
       .then(function (data) {
-        // debug(data)
         res.json({'data': data})
       })
       .catch(function (error) {
         debug(error)
         next(error)
       })
+
       
   } 
   else if (hasRaster === 'true'){
 
     debug('Ra')
+
+      // debug(tfilters)
+
+      
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
+    var categorias = verb_utils.getRasterCategories(tfilters)
+      
       // debug(whereVarRaster)
 
-    pool.any(queries.getGeoRelNiche.getGeoRelRaster, {
+    pool.any(queries.getGridSpeciesNiche.getGridSpeciesRaster, {
       spid: spid,
       N: N,
       alpha: alpha,
       min_occ: min_occ,
       where_config_raster: whereVarRaster,
+      long: long,
+      lat: lat,
+      categorias: categorias,
+      maxscore: maxscore,
       res_celda: res_celda,
+      res_grid: res_grid,
       discardedDeleted: discardedDeleted
     })
       .then(function (data) {
@@ -573,7 +605,6 @@ function getGeoRelNiche(req, res, next) {
         debug(error)
         next(error)
       })
-
       
   } 
   else{
@@ -581,15 +612,11 @@ function getGeoRelNiche(req, res, next) {
     next()
   }
 
-
-
-
 }
 
-
 exports.pipe = [
-  getGeoRelNiche_VT,
-  getGeoRelNiche_V,
-  getGeoRelNiche_T,
-  getGeoRelNiche
-] 
+  getGridSpeciesNiche_M,
+  getGridSpeciesNiche_A,
+  getGridSpeciesNiche_T,
+  getGridSpeciesNiche        
+]

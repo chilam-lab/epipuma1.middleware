@@ -1,12 +1,12 @@
 /**
-* getGeoRelNiche module
+* getFreqMapNiche module
 *
-* Este verbo es responsable de obtener los valores de epsilon y score entre una
-* especie objetivo y un conjunto de variables bióoticas y raster.
+* Este verbo regresa la frecuencia del score por celda para poder desplegar el
+* mapa de probabilidad
 *
-* @module controllers/getGeoRelNiche
+* @module controllers/getFreqMapNiche
 */
-var debug = require('debug')('verbs:getGeoRelNiche')
+var debug = require('debug')('verbs:getFreqMapNiche')
 var pgp = require('pg-promise')()
 var moment = require('moment')
 var verb_utils = require('./verb_utils')
@@ -17,180 +17,27 @@ var queries = require('./sql/queryProvider')
 var pool= pgp(config.db)
 var N = verb_utils.N 
 
+
 /**
  *
- * Servidor Niche: getGeoRelNiche_VT de SNIB DB, con validación y tiempo
+ * getFreqMapNiche_M de SNIB DB, mapa de probabilidad
  *
- * Obtiene epsilon y score de la relación de especie objetivo y conjunto de variables bioticas y raster.
+ * Obtiene la suma de socre por celda para desplegar en el mapa
  *
  * @param {express.Request} req
  * @param {express.Response} res
  *
  */
 
-function getGeoRelNiche_VT(req, res, next) {
-  debug('getGeoRelNiche_VT')
+function getFreqMapNiche_M(req, res, next) {
 
-  var spid = parseInt(verb_utils.getParam(req, 'id'))
-  var tfilters = verb_utils.getParam(req, 'tfilters')
-  var alpha = 0.01
-  // var N = 14707; // Verificar N, que se esta contemplando
-  var res_celda = verb_utils.getParam(req, 'res_celda', 'cells_16km')
-  var res_grid = verb_utils.getParam(req, 'res_grid', 'gridid_16km')
-
-  // Siempre incluidos en query, nj >= 0
-  var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
-
-  // variables configurables
-  var hasBios         = verb_utils.getParam(req, 'hasBios')
-  var hasRaster       = verb_utils.getParam(req, 'hasRaster')
-  var discardedids    = verb_utils.getParam(req, 'discardedids', [])
-  // filtros por tiempo
-  var sfecha            = verb_utils.getParam(req, 'sfecha', false)
-  var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
-  var fecha_fin         = moment(verb_utils.getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
-  var discardedFilterids = verb_utils.getParam(req, 'discardedDateFilterids')
-  // debug(discardedFilterids)
-
-  var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
-  // debug(discardedFilterids)
-
-
-    
-
-    
-  if ( hasBios === 'true' && hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 && discardedFilterids === 'true' ){
-
-    var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
-    debug(caso)
-
-
-    debug('V')
-    var whereVar = verb_utils.processBioFilters(tfilters, spid)
-    var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
-
-    pool.any(queries.getGeoRelNiche.getGeoRelVT, {
-      spid: spid,
-      N: N,
-      alpha: alpha,
-      min_occ: min_occ,
-      where_config: whereVar,
-      where_config_raster: whereVarRaster,
-      arg_gridids: discardedids,
-      lim_inf: fecha_incio.format('YYYY'),
-      lim_sup: fecha_fin.format('YYYY'),
-      caso: caso,
-      res_celda: res_celda,
-      res_grid: res_grid,
-      discardedDeleted: discardedDeleted
-    })
-      .then(function (data) {
-        res.json({'data': data})
-      })
-      .catch(function (error) {
-        debug(error)
-        next(error)
-      })
-
-      
-  }
-  else if (hasBios === 'true' && discardedids != undefined && discardedids.length > 0 && discardedFilterids === 'true' ){
-
-    var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
-    debug(caso)
-
-
-    debug('B')
-    var whereVar = verb_utils.processBioFilters(tfilters, spid)
-        // debug(whereVar)
-
-    pool.any(queries.getGeoRelNiche.getGeoRelBioVT, {
-      spid: spid,
-      N: N,
-      alpha: alpha,
-      min_occ: min_occ,
-      where_config: whereVar,
-      arg_gridids: discardedids,
-      lim_inf: fecha_incio.format('YYYY'),
-      lim_sup: fecha_fin.format('YYYY'),
-      caso: caso,
-      res_celda: res_celda,
-      res_grid: res_grid,
-      discardedDeleted: discardedDeleted
-    })
-        .then(function (data) {
-          // debug(data.length)
-          res.json({'data': data})
-        })
-        .catch(function (error) {
-          debug(error)
-          next(error)
-        })
-      
-  } 
-  else if (hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 && discardedFilterids === 'true' ){
-
-    var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
-    debug(caso)
-
-
-    debug('Ra')
-    var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
-      // debug(whereVarRaster)
-
-    pool.any(queries.getGeoRelNiche.getGeoRelRaVT, {
-      spid: spid,
-      N: N,
-      alpha: alpha,
-      min_occ: min_occ,
-      where_config_raster: whereVarRaster,
-      arg_gridids: discardedids,
-      lim_inf: fecha_incio.format('YYYY'),
-      lim_sup: fecha_fin.format('YYYY'),
-      caso: caso,
-      res_celda: res_celda,
-      res_grid: res_grid,
-      discardedDeleted: discardedDeleted
-    })
-      .then(function (data) {
-        res.json({'data': data})
-      })
-      .catch(function (error) {
-        debug(error)
-        next(error)
-      })
-
-      
-  } 
-  else{
-
-    next()
-  }
-
-}
-
-
-
-
-/**
- *
- * Servidor Niche: getGeoRelNiche_V de SNIB DB, con validación
- *
- * Obtiene epsilon y score de la relación de especie objetivo y conjunto de variables bioticas y raster.
- *
- * @param {express.Request} req
- * @param {express.Response} res
- *
- */
-
-function getGeoRelNiche_V(req, res, next) {
-
-  debug('getGeoRelNiche_V')
+  debug('getFreqMapNiche_M')
 
   var spid        = parseInt(verb_utils.getParam(req, 'id'))
   var tfilters    = verb_utils.getParam(req, 'tfilters')
   var alpha       = 0.01
-    // var N           = 14707; // Verificar N, que se esta contemplando
+    // var N           = 14707
+  var maxscore    = 700
   var res_celda = verb_utils.getParam(req, 'res_celda', 'cells_16km')
 
     // Siempre incluidos en query, nj >= 0
@@ -199,91 +46,88 @@ function getGeoRelNiche_V(req, res, next) {
     // variables configurables
   var hasBios         = verb_utils.getParam(req, 'hasBios')
   var hasRaster       = verb_utils.getParam(req, 'hasRaster')
-  var discardedids    = verb_utils.getParam(req, 'discardedids', [])
+  var mapa_prob       = verb_utils.getParam(req, 'mapa_prob')
 
   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
-    // debug(discardedFilterids)
-
-    // debug(discardedids)
-
     
-  if ( hasBios === 'true' && hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 ){
+  if (hasBios === 'true' && hasRaster === 'true' && mapa_prob === 'mapa_prob' ){
 
-    debug('V')
+    debug('TM')
+
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
 
-    pool.any(queries.getGeoRelNiche.getGeoRelV, {
+    pool.any(queries.getFreqMapNiche.getFreqMapM, {
       spid: spid,
       N: N,
       alpha: alpha,
+      maxscore: maxscore,
       min_occ: min_occ,
       where_config: whereVar,
       where_config_raster: whereVarRaster,
-      arg_gridids: discardedids,
       res_celda: res_celda,
       discardedDeleted: discardedDeleted
     })
-      .then(function (data) {
-        res.json({'data': data})
-      })
-      .catch(function (error) {
-        debug(error)
-        next(error)
-      })
+            .then(function (data) {
+              res.json({'data': data})
+            })
+            .catch(function (error) {
+              debug(error)
+              next(error)
+            })
 
       
   }
-  else if (hasBios === 'true' && discardedids != undefined && discardedids.length > 0 ){
+  else if (hasBios === 'true' && mapa_prob === 'mapa_prob' ){
 
-    debug('B')
+    debug('BM')
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
-      // debug(whereVar)
 
-    pool.any(queries.getGeoRelNiche.getGeoRelBioV, {
+    pool.any(queries.getFreqMapNiche.getFreqMapBioM, {
       spid: spid,
       N: N,
       alpha: alpha,
+      maxscore: maxscore,
       min_occ: min_occ,
       where_config: whereVar,
-      arg_gridids: discardedids,
       res_celda: res_celda,
       discardedDeleted: discardedDeleted
     })
       .then(function (data) {
-        // debug(data.length)
         res.json({'data': data})
       })
       .catch(function (error) {
         debug(error)
         next(error)
       })
+
       
   } 
-  else if (hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 ){
+  else if (hasRaster === 'true' && mapa_prob === 'mapa_prob' ){
 
-    debug('Ra')
+    debug('RaM')
+
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
-      // debug(whereVarRaster)
 
-    pool.any(queries.getGeoRelNiche.getGeoRelRaV, {
+    console.log(queries.getFreqMapNiche.getFreqMapRaM)
+
+    pool.any(queries.getFreqMapNiche.getFreqMapRaM, {
       spid: spid,
       N: N,
       alpha: alpha,
+      maxscore: maxscore,
       min_occ: min_occ,
       where_config_raster: whereVarRaster,
-      arg_gridids: discardedids,
       res_celda: res_celda,
       discardedDeleted: discardedDeleted
     })
-      .then(function (data) {
-        res.json({'data': data})
-      })
-      .catch(function (error) {
-        debug(error)
-        next(error)
-      })
-
+          .then(function (data) {
+            res.json({'data': data})
+          })
+          .catch(function (error) {
+            debug(error)
+            next(error)
+          })
       
   } 
   else{
@@ -296,22 +140,141 @@ function getGeoRelNiche_V(req, res, next) {
 
 
 
-
-
 /**
  *
- * Servidor Niche: getGeoRelNiche_T de SNIB DB, con tiempo
+ * getFreqMapNiche_A de SNIB DB, apriori
  *
- * Obtiene epsilon y score de la relación de especie objetivo y conjunto de variables bioticas y raster.
+ * Obtiene la suma de socre por celda para desplegar en el mapa
  *
  * @param {express.Request} req
  * @param {express.Response} res
  *
  */
 
-function getGeoRelNiche_T(req, res, next) {
 
-  debug('getGeoRelNiche_T')
+function getFreqMapNiche_A(req, res, next) {
+
+  debug('getFreqMapNiche_A')
+
+  var spid        = parseInt(verb_utils.getParam(req, 'id'))
+  var tfilters    = verb_utils.getParam(req, 'tfilters')
+  var alpha       = 0.01
+    // var N           = 14707
+  var res_celda = verb_utils.getParam(req, 'res_celda', 'cells_16km')
+  var res_grid = verb_utils.getParam(req, 'res_grid', 'gridid_16km')
+
+    // Siempre incluidos en query, nj >= 0
+  var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
+
+    // variables configurables
+  var hasBios         = verb_utils.getParam(req, 'hasBios')
+  var hasRaster       = verb_utils.getParam(req, 'hasRaster')
+  var apriori         = verb_utils.getParam(req, 'apriori')
+
+  var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
+
+    
+  if (hasBios === 'true' && hasRaster === 'true' && apriori === 'apriori' ){
+
+    debug('TA')
+
+    var whereVar = verb_utils.processBioFilters(tfilters, spid)
+    var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
+
+    pool.any(queries.getFreqMapNiche.getFreqMapA, {
+      spid: spid,
+      N: N,
+      alpha: alpha,
+      min_occ: min_occ,
+      where_config: whereVar,
+      where_config_raster: whereVarRaster,
+      res_celda: res_celda,
+      res_grid: res_grid,
+      discardedDeleted: discardedDeleted
+    })
+            .then(function (data) {
+              res.json({'data': data})
+            })
+            .catch(function (error) {
+              debug(error)
+              next(error)
+            })
+
+      
+  }
+  else if (hasBios === 'true' && apriori === 'apriori' ){
+
+    debug('BA')
+
+    var whereVar = verb_utils.processBioFilters(tfilters, spid)
+
+    pool.any(queries.getFreqMapNiche.getFreqMapBioA, {
+      spid: spid,
+      N: N,
+      alpha: alpha,
+      min_occ: min_occ,
+      where_config: whereVar,
+      res_celda: res_celda,
+      res_grid: res_grid,
+      discardedDeleted: discardedDeleted
+    })
+      .then(function (data) {
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        debug(error)
+        next(error)
+      })
+
+      
+  } 
+  else if (hasRaster === 'true' && apriori === 'apriori' ){
+
+    debug('RaA')
+
+    var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
+
+    pool.any(queries.getFreqMapNiche.getFreqMapRaA, {
+      spid: spid,
+      N: N,
+      alpha: alpha,
+      min_occ: min_occ,
+      where_config_raster: whereVarRaster,
+      res_celda: res_celda,
+      res_grid: res_grid,
+      discardedDeleted: discardedDeleted
+    })
+          .then(function (data) {
+            res.json({'data': data})
+          })
+          .catch(function (error) {
+            debug(error)
+            next(error)
+          })
+      
+  } 
+  else{
+
+    next()
+  }
+
+}
+
+
+/**
+ *
+ * getFreqMapNiche_T de SNIB DB, sin filtros
+ *
+ * Obtiene frecuencia score por celda para desplegar el mapa de probabilidad
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ *
+ */
+
+function getFreqMapNiche_T(req, res, next) {
+
+  debug('getFreqMapNiche_T')
 
   var spid        = parseInt(verb_utils.getParam(req, 'id'))
   var tfilters    = verb_utils.getParam(req, 'tfilters')
@@ -319,6 +282,7 @@ function getGeoRelNiche_T(req, res, next) {
     // var N           = 14707; // Verificar N, que se esta contemplando
   var res_celda = verb_utils.getParam(req, 'res_celda', 'cells_16km')
   var res_grid = verb_utils.getParam(req, 'res_grid', 'gridid_16km')
+
 
     // Siempre incluidos en query, nj >= 0
   var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
@@ -331,17 +295,17 @@ function getGeoRelNiche_T(req, res, next) {
   var sfecha            = verb_utils.getParam(req, 'sfecha', false)
   var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
   var fecha_fin         = moment(verb_utils.getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
-    
   var discardedFilterids = verb_utils.getParam(req, 'discardedDateFilterids')
 
   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
-    // debug(discardedFilterids)
-    
 
+    // debug(discardedFilterids)
+
+    
   if (hasBios === 'true' && hasRaster === 'true' && discardedFilterids === 'true'){
 
     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
-    debug(caso)
+      // debug(caso)
 
 
     debug('T')  
@@ -349,7 +313,7 @@ function getGeoRelNiche_T(req, res, next) {
     whereVar = verb_utils.processBioFilters(tfilters, spid)
     whereVarRaster = verb_utils.processRasterFilters(tfilters,spid)
       
-    pool.any(queries.getGeoRelNiche.getGeoRelT, {
+    pool.any(queries.getFreqMapNiche.getFreqMapT, {
       spid: spid,
       N: N,
       alpha: alpha,
@@ -381,12 +345,12 @@ function getGeoRelNiche_T(req, res, next) {
     debug('B')
 
     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
-    debug(caso)  
+      // debug(caso);  
 
     whereVar = verb_utils.processBioFilters(tfilters, spid)
       // debug(whereVar)
       
-    pool.any(queries.getGeoRelNiche.getGeoRelBioT, {
+    pool.any(queries.getFreqMapNiche.getFreqMapBioT, {
       spid: spid,
       N: N,
       alpha: alpha,
@@ -408,20 +372,18 @@ function getGeoRelNiche_T(req, res, next) {
         next(error)
       })
       
-
-      
   } 
   else if (hasRaster === 'true' && discardedFilterids === 'true' ){
 
     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
-    debug(caso)
+      // debug(caso)
 
 
     debug('Ra')
 
     whereVarRaster = verb_utils.processRasterFilters(tfilters,spid)
       
-    pool.any(queries.getGeoRelNiche.getGeoRelRaT, {
+    pool.any(queries.getFreqMapNiche.getFreqMapRaT, {
       spid: spid,
       N: N,
       alpha: alpha,
@@ -455,49 +417,82 @@ function getGeoRelNiche_T(req, res, next) {
 
 
 
-
-
 /**
  *
- * Servidor Niche: getGeoRelNiche de SNIB DB, sin filtros
+ * getFreqMapNiche de SNIB DB, sin filtros
  *
- * Obtiene epsilon y score de la elación de especie objetivo y conjunto de variables bioticas y raster.
+ * Obtiene frecuencia score por celda para desplegar el mapa de probabilidad
  *
  * @param {express.Request} req
  * @param {express.Response} res
  *
  */
 
-function getGeoRelNiche(req, res, next) {
+function getFreqMapNiche(req, res, next) {
 
-  debug('getGeoRelNiche')
+  debug('getFreqMapNiche')
 
   var spid        = parseInt(verb_utils.getParam(req, 'id'))
   var tfilters    = verb_utils.getParam(req, 'tfilters')
   var alpha       = 0.01
-    // var N           = 14707; // Verificar N, que se esta contemplando
   var res_celda = verb_utils.getParam(req, 'res_celda', 'cells_16km')
+    // var N           = 14707; // Verificar N, que se esta contemplando
+
 
     // Siempre incluidos en query, nj >= 0
   var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
 
     // variables configurables
-
   var hasBios         = verb_utils.getParam(req, 'hasBios')
   var hasRaster       = verb_utils.getParam(req, 'hasRaster')
 
   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
     // console.log(discardedDeleted);
 
-    
 
-    // console.log(hasBios);
-    // console.log(hasRaster);
-    // console.log(spid);
-    // console.log(tfilters);
-    // console.log(min_occ);
+    // var download       = verb_utils.getParam(req, 'download', false)
+    // if(download){
 
-    
+    //     debug("download");  
+
+    //     var mail    = verb_utils.getParam(req, 'mail')
+    //     var ftype   = verb_utils.getParam(req, 'ftype')
+    //     var query = pool.as.format(queries.getFreqMapNiche.getFreqMapBio, {
+    //         spid: spid,
+    //         N: N,
+    //         alpha: alpha,
+    //         min_occ: min_occ,
+    //         where_config: whereVar,
+    //         res_celda: res_celda,
+    //         addgeom: "geom, "
+    //     })
+    //     debug(query)
+
+    //     var json={}
+    //     json["query"] = query
+    //     json["mail"] = mail
+    //     json["ftype"] = ftype
+    //     json["qtype"] = "setQuery"
+    //     json = JSON.stringify(json)
+      
+    //     http.request({  
+    //           host : "http://species.conabio.gob.mx/niche2?", // "localhost", 
+    //           port : 9011, 
+    //           path : "/",
+    //           method : "POST"
+    //       }, 
+    //       function (response) {
+    //           var body = ""; 
+    //           response.on("data", function(chunk){
+    //                 body += chunk
+    //               }
+    //           ); 
+    //           response.on("end",  res.json({'data': "success"})  ); 
+    //       }
+    //     ).end(JSON.stringify(json))
+
+    // }
+
     
   if (hasBios === 'true' && hasRaster === 'true' ){
 
@@ -505,7 +500,7 @@ function getGeoRelNiche(req, res, next) {
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
 
-    pool.any(queries.getGeoRelNiche.getGeoRel, {
+    pool.any(queries.getFreqMapNiche.getFreqMap, {
       spid: spid,
       N: N,
       alpha: alpha,
@@ -529,10 +524,9 @@ function getGeoRelNiche(req, res, next) {
 
     debug('B')
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
-      // debug(whereVar)
-      // debug(queries.getGeoRelNiche.getGeoRelBio)
 
-    pool.any(queries.getGeoRelNiche.getGeoRelBio, {
+
+    pool.any(queries.getFreqMapNiche.getFreqMapBio, {
       spid: spid,
       N: N,
       alpha: alpha,
@@ -541,14 +535,14 @@ function getGeoRelNiche(req, res, next) {
       res_celda: res_celda,
       discardedDeleted: discardedDeleted
     })
-      .then(function (data) {
-        // debug(data)
-        res.json({'data': data})
+      .then(function (data) { 
+        res.json({'data': data})  
       })
       .catch(function (error) {
         debug(error)
         next(error)
       })
+
       
   } 
   else if (hasRaster === 'true'){
@@ -557,7 +551,7 @@ function getGeoRelNiche(req, res, next) {
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
       // debug(whereVarRaster)
 
-    pool.any(queries.getGeoRelNiche.getGeoRelRaster, {
+    pool.any(queries.getFreqMapNiche.getFreqMapRaster, {
       spid: spid,
       N: N,
       alpha: alpha,
@@ -573,7 +567,6 @@ function getGeoRelNiche(req, res, next) {
         debug(error)
         next(error)
       })
-
       
   } 
   else{
@@ -581,15 +574,13 @@ function getGeoRelNiche(req, res, next) {
     next()
   }
 
-
-
-
 }
 
-
 exports.pipe = [
-  getGeoRelNiche_VT,
-  getGeoRelNiche_V,
-  getGeoRelNiche_T,
-  getGeoRelNiche
-] 
+  // getFreqMap_TM,
+  // getFreqMap_TA,
+  getFreqMapNiche_M,
+  getFreqMapNiche_A,
+  getFreqMapNiche_T,
+  getFreqMapNiche    
+]
