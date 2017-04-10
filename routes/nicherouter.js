@@ -11,7 +11,12 @@
  * @namespace nicheRouter
  */
 var router = require('express').Router()
-var verbsCtrl = require('../controllers/verbsniche')
+var getGeoRel = require('../controllers/getGeoRelNiche')
+var getFreqNiche = require('../controllers/getFreqNiche')
+var getFreqMapNiche = require('../controllers/getFreqMapNiche') 
+var getFreqCeldaNiche = require('../controllers/getFreqCeldaNiche') 
+var getScoreDecilNiche = require('../controllers/getScoreDecilNiche') 
+var getGridSpeciesNiche = require('../controllers/getGridSpeciesNiche') 
 
 
 /**
@@ -31,6 +36,7 @@ router.all('/', function(req, res) {
   )
 })
 
+
 /**
  * Ruta que calcula el score entre las variables elegidas. 
  * @name get/getGeoRel
@@ -41,18 +47,8 @@ router.all('/', function(req, res) {
  * @param {callback} middleware - Express middleware.
  */
 router.route('/getGeoRel')
-  .get(
-    verbsCtrl.getGeoRelNiche_VT,
-    verbsCtrl.getGeoRelNiche_V,
-    verbsCtrl.getGeoRelNiche_T,
-    verbsCtrl.getGeoRelNiche    
-  )
-  .post(
-    verbsCtrl.getGeoRelNiche_VT,
-    verbsCtrl.getGeoRelNiche_V,
-    verbsCtrl.getGeoRelNiche_T,
-    verbsCtrl.getGeoRelNiche
-  )
+  .get(getGeoRel.pipe)
+  .post(getGeoRel.pipe)
 
 
 /**
@@ -65,18 +61,8 @@ router.route('/getGeoRel')
  * @param {callback} middleware - Express middleware.
  */
 router.route('/getFreq')
-  .get(
-    verbsCtrl.getFreqNiche_VT,
-    verbsCtrl.getFreqNiche_V,
-    verbsCtrl.getFreqNiche_T,
-    verbsCtrl.getFreqNiche    
-  )
-  .post(
-    verbsCtrl.getFreqNiche_VT,
-    verbsCtrl.getFreqNiche_V,
-    verbsCtrl.getFreqNiche_T,
-    verbsCtrl.getFreqNiche 
-  )
+  .get(getFreqNiche.pipe)
+  .post(getFreqNiche.pipe)
 
 
 /**
@@ -89,22 +75,8 @@ router.route('/getFreq')
  * @param {callback} middleware - Express middleware.
  */
 router.route('/getFreqMap')
-  .get(
-    // verbsCtrl.getFreqMap_TM,
-    // verbsCtrl.getFreqMap_TA,
-    verbsCtrl.getFreqMapNiche_M,
-    verbsCtrl.getFreqMapNiche_A,
-    verbsCtrl.getFreqMapNiche_T,
-    verbsCtrl.getFreqMapNiche    
-  )
-  .post(
-    // verbsCtrl.getFreqMap_TM,
-    // verbsCtrl.getFreqMap_TA,
-    verbsCtrl.getFreqMapNiche_M,
-    verbsCtrl.getFreqMapNiche_A,
-    verbsCtrl.getFreqMapNiche_T,
-    verbsCtrl.getFreqMapNiche 
-  )
+  .get(getFreqMapNiche.pipe)
+  .post(getFreqMapNiche.pipe)
 
 
 /**
@@ -117,26 +89,8 @@ router.route('/getFreqMap')
  * @param {callback} middleware - Express middleware.
  */
 router.route('/getFreqCelda')
-  .get(
-    // verbsCtrl.getFreqCelda_VTA,
-    // verbsCtrl.getFreqCelda_VA,
-    // verbsCtrl.getFreqCelda_VT,
-    // verbsCtrl.getFreqCelda_TA,
-    verbsCtrl.getFreqCeldaNiche_A,
-    verbsCtrl.getFreqCeldaNiche_V,
-    verbsCtrl.getFreqCeldaNiche_T,
-    verbsCtrl.getFreqCeldaNiche    
-  )
-  .post(
-    // verbsCtrl.getFreqCelda_VTA,
-    // verbsCtrl.getFreqCelda_VA,
-    // verbsCtrl.getFreqCelda_VT,
-    // verbsCtrl.getFreqCelda_TA,
-    verbsCtrl.getFreqCeldaNiche_A,
-    verbsCtrl.getFreqCeldaNiche_V,
-    verbsCtrl.getFreqCeldaNiche_T,
-    verbsCtrl.getFreqCeldaNiche 
-  )
+  .get(getFreqCeldaNiche.pipe)
+  .post(getFreqCeldaNiche.pipe)
 
 
 /**
@@ -149,26 +103,8 @@ router.route('/getFreqCelda')
  * @param {callback} middleware - Express middleware.
  */
 router.route('/getScoreDecil')
-  .get(
-    // verbsCtrl.getScoreDecil_VTA,
-    // verbsCtrl.getScoreDecil_VT,
-    // verbsCtrl.getScoreDecil_VA,
-    // verbsCtrl.getScoreDecil_TA,
-    verbsCtrl.getScoreDecilNiche_A,
-    verbsCtrl.getScoreDecilNiche_V,
-    verbsCtrl.getScoreDecilNiche_T,
-    verbsCtrl.getScoreDecilNiche   
-  )
-  .post(
-    // verbsCtrl.getScoreDecil_VTA,
-    // verbsCtrl.getScoreDecil_VT,
-    // verbsCtrl.getScoreDecil_VA,
-    // verbsCtrl.getScoreDecil_TA,
-    verbsCtrl.getScoreDecilNiche_A,
-    verbsCtrl.getScoreDecilNiche_V,
-    verbsCtrl.getScoreDecilNiche_T,
-    verbsCtrl.getScoreDecilNiche   
-  )
+  .get(getScoreDecilNiche.pipe)
+  .post(getScoreDecilNiche.pipe)
 
 
 /**
@@ -181,17 +117,8 @@ router.route('/getScoreDecil')
  * @param {callback} middleware - Express middleware.
  */
 router.route('/getGridSpecies')
-  .get(
-    verbsCtrl.getGridSpeciesNiche_M,
-    verbsCtrl.getGridSpeciesNiche_A,
-    verbsCtrl.getGridSpeciesNiche_T,
-    verbsCtrl.getGridSpeciesNiche        
-  )
-  .post(
-    verbsCtrl.getGridSpeciesNiche_M,
-    verbsCtrl.getGridSpeciesNiche_A,
-    verbsCtrl.getGridSpeciesNiche_T,
-    verbsCtrl.getGridSpeciesNiche        
-  )
+  .get(getGridSpeciesNiche.pipe)
+  .post(getGridSpeciesNiche.pipe)
+
 
 module.exports = router

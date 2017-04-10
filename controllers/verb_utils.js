@@ -1,9 +1,42 @@
 var debug = require('debug')('verbs:verbsUtils')
 var moment = require('moment')
 
-var verbs_utils = {} 
+var verb_utils = {} 
 
-verbs_utils.processBioFilters = function(tfilters_total, spid){
+/**
+ * Definición del número de celdas en la malla
+ */
+
+verb_utils.N = 94544 // MX y US sin Alaska y Hawaii a 16km
+
+
+/**
+ * Regresa el valor del parametro `name` cuando este presente o `defaultValue`.
+ *
+ *  - Checks body params, ex: id=12, {"id":12}
+ *  - Checks query string params, ex: ?id=12
+ *
+ * To utilize request bodies, `req.body`
+ * should be an object. This can be done by using
+ * the `bodyParser()` middleware.
+ *
+ * @param {express.Request} req
+ * @param {string} name
+ * @param {Mixed} [defaultValue]
+ * @return {string}
+ *
+ */
+verb_utils.getParam = function (req, name, defaultValue) {
+  var body = req.body || {}
+  var query = req.query || {}
+
+  if (body[name] != null) return body[name]
+  if (query[name] != null) return query[name]
+
+  return defaultValue
+}
+
+verb_utils.processBioFilters = function(tfilters_total, spid){
   var whereVar = ''
   var first_bio = true
   var tfilters = []
@@ -41,7 +74,7 @@ verbs_utils.processBioFilters = function(tfilters_total, spid){
   return whereVar
 }
 
-verbs_utils.processRasterFilters = function(tfilters_total, spid){
+verb_utils.processRasterFilters = function(tfilters_total, spid){
   var whereVar = ''
   var first_other = true
   var tfilters = []
@@ -89,7 +122,7 @@ verbs_utils.processRasterFilters = function(tfilters_total, spid){
   return whereVar
 }
 
-verbs_utils.processDateRecords = function(lim_inf, lim_sup, sfecha){
+verb_utils.processDateRecords = function(lim_inf, lim_sup, sfecha){
   var filterDates = ''
   // debug(lim_inf);
   // debug(lim_sup);
@@ -120,7 +153,7 @@ verbs_utils.processDateRecords = function(lim_inf, lim_sup, sfecha){
   return filterDates
 }
 
-verbs_utils.processTitleGroup = function(groupid, tfilters){
+verb_utils.processTitleGroup = function(groupid, tfilters){
   var title_valor = ''
 
   if(groupid != undefined) {
@@ -149,7 +182,7 @@ verbs_utils.processTitleGroup = function(groupid, tfilters){
   return JSON.parse(title_valor)
 }
 
-verbs_utils.getColumns = function(issource, nivel) {
+verb_utils.getColumns = function(issource, nivel) {
   if(issource == 1) {
     return 'spid, reinovalido, phylumdivisionvalido, clasevalida, ordenvalido, familiavalida, generovalido, especievalidabusqueda'
   } else {
@@ -157,7 +190,7 @@ verbs_utils.getColumns = function(issource, nivel) {
   }
 }
 
-verbs_utils.getTimeCase = function(fecha_incio, fecha_fin, sfecha){
+verb_utils.getTimeCase = function(fecha_incio, fecha_fin, sfecha){
   // debug(fecha_incio.format('YYYY'));
   // debug(fecha_fin.format('YYYY'));
   // debug(sfecha);
@@ -180,7 +213,7 @@ verbs_utils.getTimeCase = function(fecha_incio, fecha_fin, sfecha){
 
 }
 
-verbs_utils.getRasterCategories = function(tfilters_total) {
+verb_utils.getRasterCategories = function(tfilters_total) {
   var categorias = ''
   var abio = false, topo = false, suelo = false, bio = false
 
@@ -212,4 +245,4 @@ verbs_utils.getRasterCategories = function(tfilters_total) {
   return categorias
 }
 
-module.exports = verbs_utils
+module.exports = verb_utils
