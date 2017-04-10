@@ -11,7 +11,8 @@
  * @namespace netRouter
  */
 var router = require('express').Router()
-var verbsCtrl = require('../controllers/verbsniche')
+var getEdgesNiche = require('../controllers/getEdgesNiche')
+var getNodesNiche = require('../controllers/getNodesNiche')
 
 
 /**
@@ -24,12 +25,8 @@ var verbsCtrl = require('../controllers/verbsniche')
  * @param {callback} middleware - Express middleware.
  */
 router.route('/getEdges')
-  .get(
-    verbsCtrl.getEdgesNiche
-  )
-  .post(
-    verbsCtrl.getEdgesNiche
-  )
+  .get(getEdgesNiche.pipe)
+  .post(getEdgesNiche.pipe)
 
 
 /**
@@ -42,11 +39,8 @@ router.route('/getEdges')
  * @param {callback} middleware - Express middleware.
  */
 router.route('/getNodes')
-  .get(
-    verbsCtrl.getNodesNiche
-  )
-  .post(
-    verbsCtrl.getNodesNiche
-  )
+  .get(getNodesNiche.pipe)
+  .post(getNodesNiche.pipe)
+
 
 module.exports = router
