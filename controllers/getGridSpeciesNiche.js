@@ -1,23 +1,24 @@
 /**
-* getGridSpeciesNiche module
-*
 * Este verbo obtiene el score por celda agrupado por decil 
 *
 * @module controllers/getGridSpeciesNiche
+* @requires debug
+* @requires pg-promise
+* @requires moment
+* @requires config
+* @requires module:controllers/verb_utils
+* @requires module:controllers/sql/queryProvider
 */
 var debug = require('debug')('verbs:getGridSpeciesNiche')
 var pgp = require('pg-promise')()
 var moment = require('moment')
-var verb_utils = require('./verb_utils')
 
 var config = require('../config')
+var verb_utils = require('./verb_utils')
 var queries = require('./sql/queryProvider')
 
 var pool= pgp(config.db)
 var N = verb_utils.N 
-
-/******************************************************************** getGridSpeciesNiche */
-
 
 
 /**
