@@ -1,28 +1,31 @@
+/**
+* En este módulo se implementan utilidades comunes para todos los verbos
+*
+* @exports controllers/verb_utils
+* @requires debug
+* @requires moment
+*/
+var verb_utils = {} 
+
 var debug = require('debug')('verbs:verbsUtils')
 var moment = require('moment')
 
-var verb_utils = {} 
 
 /**
  * Definición del número de celdas en la malla
  */
-
 verb_utils.N = 94544 // MX y US sin Alaska y Hawaii a 16km
 
 
 /**
- * Regresa el valor del parametro `name` cuando este presente o `defaultValue`.
+ * Regresa el valor del parametro `name` cuando este presente o
+ * `defaultValue`. Verifica los valores en el cuerpo de la petición, {"id":12}, 
+ * y en el query, ej. ?id=12. Se utiliza `BodyParser`.
  *
- *  - Checks body params, ex: id=12, {"id":12}
- *  - Checks query string params, ex: ?id=12
- *
- * To utilize request bodies, `req.body`
- * should be an object. This can be done by using
- * the `bodyParser()` middleware.
- *
- * @param {express.Request} req
- * @param {string} name
- * @param {Mixed} [defaultValue]
+ * @param {express.Request} req - Express request object
+ * @param {string} name - Parameter name
+ * @param {Mixed} [defaultValue] - Returned default value if paramters is not 
+ * defined
  * @return {string}
  *
  */
@@ -36,6 +39,15 @@ verb_utils.getParam = function (req, name, defaultValue) {
   return defaultValue
 }
 
+
+/**
+ * Procesa los valores de `tfilters_total` para crear el filtro de estos. Solo
+ * se consideran los filtros bióticos.
+ *
+ * @param {array} tfilters_total - Express request object
+ * @param {integer} [spid] - Specie identifier 
+ * @returns {string} Raw SQL statement to filter
+ */
 verb_utils.processBioFilters = function(tfilters_total, spid){
   var whereVar = ''
   var first_bio = true
@@ -74,7 +86,15 @@ verb_utils.processBioFilters = function(tfilters_total, spid){
   return whereVar
 }
 
-verb_utils.processRasterFilters = function(tfilters_total, spid){
+
+/**
+ * Procesa los valores de `tfilters_total` para crear el filtro de estos. Solo
+ * se consideran los filtros abióticos.
+ *
+ * @param {array} tfilters_total - Express request object
+ * @returns {string} Raw SQL statement to filter
+ */
+verb_utils.processRasterFilters = function(tfilters_total){
   var whereVar = ''
   var first_other = true
   var tfilters = []
@@ -122,6 +142,16 @@ verb_utils.processRasterFilters = function(tfilters_total, spid){
   return whereVar
 }
 
+
+/**
+ * Se genera el filtro necesario para hacer consultas temporales 
+ *
+ * @param {string} lim_inf - Date string in format YYYY-MM-DD
+ * @param {string} lim_sup - Date string in format YYYY-MM-DD
+ * @param {boolean} sfecha - Indicates if the registers without dates are 
+ * considered
+ * @returns {string} Raw SQL statement to filter
+ */
 verb_utils.processDateRecords = function(lim_inf, lim_sup, sfecha){
   var filterDates = ''
   // debug(lim_inf);
@@ -153,6 +183,15 @@ verb_utils.processDateRecords = function(lim_inf, lim_sup, sfecha){
   return filterDates
 }
 
+
+/**
+ * Se genera el filtro necesario para hacer consultas temporales 
+ *
+ * @param {integer} groupid - Code for Biotic, Abiotic, Topographic 
+ * variables 
+ * @param {integer} tfilters - 
+ * @returns {Object} 
+ */
 verb_utils.processTitleGroup = function(groupid, tfilters){
   var title_valor = ''
 
@@ -182,6 +221,14 @@ verb_utils.processTitleGroup = function(groupid, tfilters){
   return JSON.parse(title_valor)
 }
 
+
+/**
+ * Se genera el filtro necesario para hacer consultas temporales 
+ *
+ * @param {boolean} issource - True if it is specie
+ * @param {string} nivel - Taxonomic level 
+ * @returns {string} Raw SQL column names 
+ */
 verb_utils.getColumns = function(issource, nivel) {
   if(issource == 1) {
     return 'spid, reinovalido, phylumdivisionvalido, clasevalida, ordenvalido, familiavalida, generovalido, especievalidabusqueda'
@@ -190,6 +237,15 @@ verb_utils.getColumns = function(issource, nivel) {
   }
 }
 
+
+/**
+ * Se genera el filtro necesario para hacer consultas temporales 
+ *
+ * @param {string} fecha_incio - 
+ * @param {string} fecha_fin - 
+ * @param {boolean} sfecha - True if the registries without date are consider  
+ * @returns {integer} Temporal filter code 
+ */
 verb_utils.getTimeCase = function(fecha_incio, fecha_fin, sfecha){
   // debug(fecha_incio.format('YYYY'));
   // debug(fecha_fin.format('YYYY'));
@@ -213,6 +269,13 @@ verb_utils.getTimeCase = function(fecha_incio, fecha_fin, sfecha){
 
 }
 
+
+/**
+ * Se genera el filtro necesario para hacer consultas temporales 
+ *
+ * @param {array} tfilters_total - Array with filters 
+ * @returns {string} Raw SQL columns names 
+ */
 verb_utils.getRasterCategories = function(tfilters_total) {
   var categorias = ''
   var abio = false, topo = false, suelo = false, bio = false
