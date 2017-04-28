@@ -16,7 +16,7 @@ var moment = require('moment')
  */
 
 // verb_utils.N = 94544 // MX y US sin Alaska y Hawaii a 16km
-verb_utils.N = 26944 // MX y US sin Alaska y Hawaii a 16km
+verb_utils.N = 19968 // MX y US sin Alaska y Hawaii a 16km
 
 
 /**
