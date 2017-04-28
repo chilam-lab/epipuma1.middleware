@@ -1,7 +1,10 @@
 /*getFreqDecil sin filtros*/
+-- 4698 rows - 6446ms
+-- 4698 rows - 6363ms
 WITH source AS (
 	SELECT spid,
-		--(cells_16km - array[573324, 581126, 507259])  as cells
+		--(cells_16km - intset(573324, 581126, 507259) )  as cells
+		--(cells_16km)  as cells
 		($<res_celda:raw> - (array[$<arg_gridids:raw>] + array[$<discardedDeleted:raw>]::int[]))  as cells
 	FROM sp_snib 
 	WHERE 
@@ -19,6 +22,7 @@ target AS (
 			ordenvalido,
 			familiavalida,
 			--(cells_16km - array[573324, 581126, 507259])  as cells
+			--(cells_16km)  as cells
 			($<res_celda:raw> - array[$<arg_gridids:raw>])  as cells
 	FROM sp_snib 
 	--WHERE clasevalida = 'Mammalia'
@@ -51,9 +55,15 @@ counts AS (
 			filter_nj.cells,
 			filter_nj.generovalido,
 			filter_nj.especievalidabusqueda,
-			icount(filter_ni.cells & filter_nj.cells) AS niyj,
-			filter_nj.nj,
+			icount(filter_ni.cells & filter_nj.cells) as niyj,
 			filter_ni.ni,
+			filter_nj.nj,
+			--icount( (source.cells & target.cells) - (array[573324, 581126, 507259] + array[573354, 581129])   ) AS niyj,
+			--icount( (source.cells & target.cells) - (array[$<arg_gridids:raw>] + array[$<discardedDeleted:raw>]::int[]) ) AS niyj,
+			--icount(target.cells - array[573324, 581126, 507259]) as nj,
+			--icount(target.cells - array[$<arg_gridids:raw>] ) as nj,
+			--icount(source.cells - (array[573324, 581126, 507259] + array[573354, 581129]) ) as ni,
+			--icount(source.cells - array[$<arg_gridids:raw>] ) as ni,
 			$<N> as n,
 			--14707 as n,
 			filter_nj.reinovalido,
