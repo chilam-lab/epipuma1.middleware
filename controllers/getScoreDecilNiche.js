@@ -232,18 +232,24 @@ function getScoreDecilNiche_V(req, res, next) {
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
       // debug(whereVar)
 
+      // debug(discardedDeleted)
+      // debug(discardedids)
+
     pool.any(queries.getScoreDecilNiche.getScoreDecilBioV, {
       spid: spid,
       N: N,
       alpha: alpha,
       min_occ: min_occ,
       where_config: whereVar,
-      arg_gridids: discardedids.toString(),
+      arg_gridids: discardedids,
       res_celda: res_celda,
       res_grid: res_grid,
       discardedDeleted: discardedDeleted
     })
       .then(function (data) {
+
+        // debug(data)
+        
         for(var i = 0; i < data.length; i++){
           item = data[i]
           item['title'] = title_valor
@@ -542,6 +548,8 @@ function getScoreDecilNiche(req, res, next) {
     debug('B')
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
       // debug(whereVar)
+
+
 
     pool.any(queries.getScoreDecilNiche.getScoreDecilBio, {
       spid: spid,
