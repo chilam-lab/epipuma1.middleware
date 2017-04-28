@@ -1,12 +1,12 @@
 /*getGeoRel con tiempo*/
 WITH source AS (
 	SELECT spid, 
-			$<res_celda:raw> as cells
-			--cells_16km as cells
+			--$<res_celda:raw> as cells
+			cells_16km as cells
 	FROM sp_snib 
 	WHERE 
-		spid = $<spid>
-		--spid = 28923
+		--spid = $<spid>
+		spid = 27332
 		and especievalidabusqueda <> ''
 ),
 target AS (
@@ -18,30 +18,30 @@ target AS (
 			clasevalida,
 			ordenvalido,
 			familiavalida,
-			$<res_celda:raw> as cells
-			--cells_16km as cells  
+			--$<res_celda:raw> as cells
+			cells_16km as cells  
 	FROM sp_snib
-	$<where_config:raw>
-	--WHERE clasevalida = 'Mammalia'
+	--$<where_config:raw>
+	WHERE clasevalida = 'Mammalia'
 	--WHERE ordenvalido = 'Carnivora'
 	and especievalidabusqueda <> ''
-),
+)
 -- el arreglo contiene las celdas donde la especie objetivo debe ser descartada 
-filter_ni AS (
+--filter_ni AS (
 	SELECT 	spid,
-			array_agg(distinct $<res_grid:raw>) as ids_ni,
-			--array_agg(distinct gridid_16km) as ids_ni,
-			icount(array_agg(distinct $<res_grid:raw>)) as ni
-			--icount(array_agg(distinct gridid_16km)) as ni
+			--array_agg(distinct $<res_grid:raw>) as ids_ni,
+			array_agg(distinct gridid_16km) as ids_ni,
+			--icount(array_agg(distinct $<res_grid:raw>)) as ni
+			icount(array_agg(distinct gridid_16km)) as ni
 	FROM snib 
 			where --snib.fechacolecta <> '' -- and snib.fechacolecta is not null
-			/*((
+			((
 			cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)>= cast( 2000  as integer)
 			and 
 			cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)<= cast( 2020  as integer)
 			)
-			or snib.fechacolecta = '')*/
-			(case when $<caso> = 1 
+			or snib.fechacolecta = '')
+			/*(case when $<caso> = 1 
 				  then 
 				  		fechacolecta <> '' 
 				  when $<caso> = 2 
@@ -56,9 +56,9 @@ filter_ni AS (
 						cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)<= cast( $<lim_sup>  as integer)
 						)
 						or snib.fechacolecta = '')
-			end) = true
-			--and spid = 28923
-			and spid = $<spid>
+			end) = true*/
+			and spid = 27332
+			--and spid = $<spid>
 			and especievalidabusqueda <> ''
 	group by spid
 ),
@@ -71,8 +71,8 @@ filter_nj AS (
 			icount(array_agg(distinct gridid_16km)) as nj
 		FROM snib join target
 		on snib.spid = target.spid
-		where --snib.fechacolecta <> '' -- and snib.fechacolecta is not null
-			(case when $<caso> = 1 
+		where snib.fechacolecta <> '' -- and snib.fechacolecta is not null
+			/*(case when $<caso> = 1 
 				  then 
 				  		fechacolecta <> '' 
 				  when $<caso> = 2 
@@ -87,7 +87,7 @@ filter_nj AS (
 						cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)<= cast( $<lim_sup>  as integer)
 						)
 						or snib.fechacolecta = '')
-			end) = true
+			end) = true*/
 		-- TODO: este cruce esta demorando las queries, optimizar!!! 
 			--and 
 			and snib.especievalidabusqueda <> ''
@@ -110,8 +110,8 @@ counts AS (
 			filter_nj.nj,
 			filter_ni.ni,
 			filter_nij.niyj,
-			$<N> as n,
-			--94544 as n,
+			--$<N> as n,
+			94544 as n,
 			target.reinovalido,
 			target.phylumdivisionvalido,
 			target.clasevalida,
@@ -161,3 +161,4 @@ SELECT 	--counts.source_spid,
 		)as numeric), 2) as score
 FROM counts 
 ORDER BY epsilon desc;
+*/

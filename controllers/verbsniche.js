@@ -16,7 +16,8 @@ var fs = require("fs")
 var pool = pgp(config.db)
 
 // var N = 14707
-var N = 94544; // MX y EU sin alaska y hawuaii 16km
+// var N = 94544; // MX y EU sin alaska y hawuaii 16km
+var N = 26944
 
 /**
  * Regresa el valor del parametro `name` cuando este presente o `defaultValue`.
@@ -4518,7 +4519,7 @@ exports.getGridGeoJsonNiche = function (req, res, next) {
       debug("getGridGeoJson")
 
       try {
-          var filePath = path.join(__dirname, "../geofiles/niche/gridQGIS_nueva.json");
+          var filePath = path.join(__dirname, "../geofiles/niche/MX_cells.json");
           debug(filePath);
 
           var stat = fs.statSync(filePath);
