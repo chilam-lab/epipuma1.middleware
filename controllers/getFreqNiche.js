@@ -1,17 +1,21 @@
 /**
-* getFreqNiche module
-*
-* Este verbo es obtiene y devuelve la frecuencia de epsilon y el score por
+* Este verbo obtiene y devuelve la frecuencia de epsilon y el score por
 * especie
 *
 * @module controllers/getFreqNiche  
+* @requires debug
+* @requires pg-promise
+* @requires moment
+* @requires config
+* @requires module:controllers/verb_utils
+* @requires module:controllers/sql/queryProvider
 */
 var debug = require('debug')('verbs:getFreqNiche')
 var pgp = require('pg-promise')()
 var moment = require('moment')
 
-var verb_utils = require('./verb_utils')
 var config = require('../config')
+var verb_utils = require('./verb_utils')
 var queries = require('./sql/queryProvider')
 
 var pool= pgp(config.db)
@@ -19,50 +23,45 @@ var N = verb_utils.N
 
 
 /**
+ * Obtiene frecuencia de epsilon y score por especie con validación y tiempo.
  *
- * Servidor Niche: getFreqNiche_VT de SNIB DB, con validación y tiempo
- *
- * Obtiene frecuencia de epsilon y score por especie
- *
- * @param {express.Request} req
- * @param {express.Response} res
- *
+ * @function
+ * @param {express.Request} req - Express request object
+ * @param {express.Response} res - Express response object 
+ * @param {function} next - Express next middleware function
  */
-
 function getFreqNiche_VT(req, res, next) {
-
   debug('getFreqNiche_VT')
-
   var spid        = parseInt(verb_utils.getParam(req, 'id'))
   var tfilters    = verb_utils.getParam(req, 'tfilters')
   var alpha       = 0.01
-    // var N           = 14707; // Verificar N, que se esta contemplando
   var res_celda = verb_utils.getParam(req, 'res_celda', 'cells_16km')
   var res_grid = verb_utils.getParam(req, 'res_grid', 'gridid_16km')
 
-    // Siempre incluidos en query, nj >= 0
+  // Siempre incluidos en query, nj >= 0
   var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
 
-    // variables configurables
+  // variables configurables
   var hasBios         = verb_utils.getParam(req, 'hasBios')
   var hasRaster       = verb_utils.getParam(req, 'hasRaster')
   var discardedids    = verb_utils.getParam(req, 'discardedids', [])
 
   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
 
-    // filtros por tiempo
+  // filtros por tiempo
   var sfecha            = verb_utils.getParam(req, 'sfecha', false)
-  var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
-  var fecha_fin         = moment(verb_utils.getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+  var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'), 
+                                 ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+  var fecha_fin         = moment(verb_utils.getParam(req, 'lim_sup',
+                                                     moment().format('YYYY-MM-DD')),
+                                 ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
   var discardedFilterids = verb_utils.getParam(req, 'discardedDateFilterids')
-    // debug(discardedFilterids)
+  // debug(discardedFilterids)
 
-    
-  if ( hasBios === 'true' && hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 && discardedFilterids === 'true' ){
+  if ( hasBios === 'true' && hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 && discardedFilterids === 'true' ) {
 
     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
     debug(caso)
-
 
     debug('V')
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
@@ -90,18 +89,15 @@ function getFreqNiche_VT(req, res, next) {
         debug(error)
         next(error)
       })
-
-      
   }
-  else if (hasBios === 'true' && discardedids != undefined && discardedids.length > 0 && discardedFilterids === 'true' ){
+  else if (hasBios === 'true' && discardedids != undefined && discardedids.length > 0 && discardedFilterids === 'true' ) {
 
     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
     debug(caso)
 
-
     debug('B')
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
-        // debug(whereVar)
+    // debug(whereVar)
 
     pool.any(queries.getFreqNiche.getFreqBioVT, {
       spid: spid,
@@ -117,25 +113,23 @@ function getFreqNiche_VT(req, res, next) {
       res_grid: res_grid,
       discardedDeleted: discardedDeleted
     })
-        .then(function (data) {
-          // debug(data.length)
-          res.json({'data': data})
-        })
-        .catch(function (error) {
-          debug(error)
-          next(error)
-        })
-      
+      .then(function (data) {
+        // debug(data.length)
+        res.json({'data': data})
+      })
+      .catch(function (error) {
+        debug(error)
+        next(error)
+      })
   } 
-  else if (hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 && discardedFilterids === 'true' ){
+  else if (hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 && discardedFilterids === 'true' ) {
 
     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
     debug(caso)
 
-
     debug('Ra')
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
-      // debug(whereVarRaster)
+    // debug(whereVarRaster)
 
     pool.any(queries.getFreqNiche.getFreqRaVT, {
       spid: spid,
@@ -158,30 +152,21 @@ function getFreqNiche_VT(req, res, next) {
         debug(error)
         next(error)
       })
-
-      
   } 
   else{
-
     next()
   }
-
 }
 
 
-
-
 /**
+ * Obtiene frecuencia de epsilon y score por especie con validación.
  *
- * Servidor Niche: getFreqNiche_V de SNIB DB, con validación
- *
- * Obtiene frecuencia de epsilon y score por especie
- *
- * @param {express.Request} req
- * @param {express.Response} res
- *
+ * @function
+ * @param {express.Request} req - Express request object
+ * @param {express.Response} res - Express response object 
+ * @param {function} next - Express next middleware function
  */
-
 function getFreqNiche_V(req, res, next) {
 
   debug('getFreqNiche_V')
@@ -189,24 +174,21 @@ function getFreqNiche_V(req, res, next) {
   var spid        = parseInt(verb_utils.getParam(req, 'id'))
   var tfilters    = verb_utils.getParam(req, 'tfilters')
   var alpha       = 0.01
-    // var N           = 14707; // Verificar N, que se esta contemplando
+  // var N           = 14707; // Verificar N, que se esta contemplando
   var res_celda = verb_utils.getParam(req, 'res_celda', 'cells_16km')
 
-    // Siempre incluidos en query, nj >= 0
+  // Siempre incluidos en query, nj >= 0
   var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
 
-    // variables configurables
+  // variables configurables
   var hasBios         = verb_utils.getParam(req, 'hasBios')
   var hasRaster       = verb_utils.getParam(req, 'hasRaster')
   var discardedids    = verb_utils.getParam(req, 'discardedids', [])
 
   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
-
-    // debug(discardedids)
-
+  // debug(discardedids)
     
-  if ( hasBios === 'true' && hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 ){
-
+  if ( hasBios === 'true' && hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 ) {
     debug('V')
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
@@ -229,14 +211,11 @@ function getFreqNiche_V(req, res, next) {
         debug(error)
         next(error)
       })
-
-      
   }
-  else if (hasBios === 'true' && discardedids != undefined && discardedids.length > 0 ){
-
+  else if (hasBios === 'true' && discardedids != undefined && discardedids.length > 0 ) {
     debug('B')
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
-      // debug(whereVar)
+    // debug(whereVar)
 
     pool.any(queries.getFreqNiche.getFreqBioV, {
       spid: spid,
@@ -256,13 +235,11 @@ function getFreqNiche_V(req, res, next) {
         debug(error)
         next(error)
       })
-      
   } 
-  else if (hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 ){
-
+  else if (hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 ) {
     debug('Ra')
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
-      // debug(whereVarRaster)
+    // debug(whereVarRaster)
 
     pool.any(queries.getFreqNiche.getFreqRasterV, {
       spid: spid,
@@ -281,72 +258,56 @@ function getFreqNiche_V(req, res, next) {
         debug(error)
         next(error)
       })
-
-      
   } 
   else{
-
     next()
   }
-
 }
 
 
-
-
-
-
-
 /**
+ * Obtiene frecuencia de epsilon y score por especie con filtro temporal
  *
- * Servidor Niche: getFreqNiche_T de SNIB DB, con tiempo
- *
- * Obtiene frecuencia de epsilon y score por especie
- *
- * @param {express.Request} req
- * @param {express.Response} res
- *
+ * @function
+ * @param {express.Request} req - Express request object
+ * @param {express.Response} res - Express response object 
+ * @param {function} next - Express next middleware function
  */
-
 function getFreqNiche_T(req, res, next) {
-
   debug('getFreqNiche_T')
-
   var spid        = parseInt(verb_utils.getParam(req, 'id'))
   var tfilters    = verb_utils.getParam(req, 'tfilters')
   var alpha       = 0.01
-    // var N           = 14707; // Verificar N, que se esta contemplando
+  // var N           = 14707; // Verificar N, que se esta contemplando
   var res_celda = verb_utils.getParam(req, 'res_celda', 'cells_16km')
   var res_grid = verb_utils.getParam(req, 'res_grid', 'gridid_16km')
 
-    // Siempre incluidos en query, nj >= 0
+  // Siempre incluidos en query, nj >= 0
   var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
 
-    // variables configurables
+  // variables configurables
   var hasBios         = verb_utils.getParam(req, 'hasBios')
   var hasRaster       = verb_utils.getParam(req, 'hasRaster')
     
-    // filtros por tiempo
+  // filtros por tiempo
   var sfecha            = verb_utils.getParam(req, 'sfecha', false)
-  var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
-  var fecha_fin         = moment(verb_utils.getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+  var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'),
+                                 ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+  var fecha_fin         = moment(verb_utils.getParam(req, 'lim_sup', 
+                                                     moment().format('YYYY-MM-DD')),
+                                 ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
   var discardedFilterids = verb_utils.getParam(req, 'discardedDateFilterids')
 
   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
-
-    // debug(discardedFilterids)
-
+  // debug(discardedFilterids)
     
-  if (hasBios === 'true' && hasRaster === 'true' && discardedFilterids === 'true'){
-
+  if (hasBios === 'true' && hasRaster === 'true' && discardedFilterids === 'true') {
     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
     debug(caso)
 
-
     debug('T')  
-
-    whereVar = verb_utils.processBioFilters(tfilters, spid)
-    whereVarRaster = verb_utils.processRasterFilters(tfilters,spid)
+    var whereVar = verb_utils.processBioFilters(tfilters, spid)
+    var whereVarRaster = verb_utils.processRasterFilters(tfilters,spid)
       
     pool.any(queries.getFreqNiche.getFreqT, {
       spid: spid,
@@ -370,20 +331,15 @@ function getFreqNiche_T(req, res, next) {
         debug(error)
         next(error)
       })
-
-     
-      
-
   }
   else if (hasBios === 'true' && discardedFilterids === 'true' ){
-
     debug('B')
 
     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
     debug(caso)  
 
     whereVar = verb_utils.processBioFilters(tfilters, spid)
-      // debug(whereVar)
+    // debug(whereVar)
       
     pool.any(queries.getFreqNiche.getFreqBioT, {
       spid: spid,
@@ -411,13 +367,10 @@ function getFreqNiche_T(req, res, next) {
       
   } 
   else if (hasRaster === 'true' && discardedFilterids === 'true' ){
-
     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
     debug(caso)
 
-
     debug('Ra')
-
     whereVarRaster = verb_utils.processRasterFilters(tfilters,spid)
       
     pool.any(queries.getFreqNiche.getFreqRasterT, {
@@ -441,53 +394,39 @@ function getFreqNiche_T(req, res, next) {
         debug(error)
         next(error)
       })
-      
   } 
   else{
-
     next()
   }
-
-    
-
 }
 
 
-
-
 /**
+ * Obtiene frecuencia de epsilon y score por especie sin ningún filtro
  *
- * getFreqNiche de SNIB DB, sin filtros
- *
- * Obtiene frecuencia de epsilon y score por especie
- *
- * @param {express.Request} req
- * @param {express.Response} res
- *
+ * @function
+ * @param {express.Request} req - Express request object
+ * @param {express.Response} res - Express response object 
+ * @param {function} next - Express next middleware function
  */
-
 function getFreqNiche(req, res, next) {
-
   debug('getFreqNiche')
-
   var spid        = parseInt(verb_utils.getParam(req, 'id'))
   var tfilters    = verb_utils.getParam(req, 'tfilters')
   var alpha       = 0.01
-    // var N           = 14707; // Verificar N, que se esta contemplando
+  // var N           = 14707; // Verificar N, que se esta contemplando
   var res_celda = verb_utils.getParam(req, 'res_celda', 'cells_16km')
 
-    // Siempre incluidos en query, nj >= 0
+  // Siempre incluidos en query, nj >= 0
   var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
 
-    // variables configurables
+  // variables configurables
   var hasBios         = verb_utils.getParam(req, 'hasBios')
   var hasRaster       = verb_utils.getParam(req, 'hasRaster')
 
   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
 
-    
-  if (hasBios === 'true' && hasRaster === 'true' ){
-
+  if (hasBios === 'true' && hasRaster === 'true' ) {
     debug('T')
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
@@ -509,11 +448,8 @@ function getFreqNiche(req, res, next) {
         debug(error)
         next(error)
       })
-
-      
   }
   else if (hasBios === 'true'){
-
     debug('B')
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
 
@@ -533,14 +469,11 @@ function getFreqNiche(req, res, next) {
         debug(error)
         next(error)
       })
-
-      
   } 
   else if (hasRaster === 'true'){
-
     debug('Ra')
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
-      // debug(whereVarRaster)
+    // debug(whereVarRaster)
 
     pool.any(queries.getFreqNiche.getFreqRaster, {
       spid: spid,
@@ -558,15 +491,23 @@ function getFreqNiche(req, res, next) {
         debug(error)
         next(error)
       })
-      
   } 
   else{
-
     next()
   }
-
 }
 
+
+/**
+ * Está variable es un arreglo donde se define el flujo que debe de tener una 
+ * petición al verbo getFreqNiche. Actualmente el flujo es getFreqNiche_VT,
+ * getFreqNiche_V, getFreqNiche_T y getFreqNiche.
+ *
+ * @see controllers/getFreqNiche~getFreqNiche_VT
+ * @see controllers/getFreqNiche~getFreqNiche_V
+ * @see controllers/getFreqNiche~getFreqNiche_T
+ * @see controllers/getFreqNiche~getFreqNiche
+ */
 exports.pipe = [
   getFreqNiche_VT,
   getFreqNiche_V,
