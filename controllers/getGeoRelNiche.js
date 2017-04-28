@@ -335,13 +335,17 @@ function getGeoRelNiche_T(req, res, next) {
   var discardedFilterids = verb_utils.getParam(req, 'discardedDateFilterids')
 
   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
-    // debug(discardedFilterids)
+    
+    debug(discardedFilterids)
+    debug(sfecha)
+    debug(fecha_incio)
+    debug(fecha_fin)
     
 
   if (hasBios === 'true' && hasRaster === 'true' && discardedFilterids === 'true'){
 
     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
-    debug(caso)
+    debug("caso: " + caso)
 
 
     debug('T')  
@@ -381,10 +385,10 @@ function getGeoRelNiche_T(req, res, next) {
     debug('B')
 
     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
-    debug(caso)  
+    debug("caso: " + caso)
 
     whereVar = verb_utils.processBioFilters(tfilters, spid)
-      // debug(whereVar)
+      debug(whereVar)
       
     pool.any(queries.getGeoRelNiche.getGeoRelBioT, {
       spid: spid,
@@ -487,7 +491,7 @@ function getGeoRelNiche(req, res, next) {
   var hasRaster       = verb_utils.getParam(req, 'hasRaster')
 
   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
-    // console.log(discardedDeleted);
+    console.log(discardedDeleted);
 
     
 
@@ -516,6 +520,8 @@ function getGeoRelNiche(req, res, next) {
       discardedDeleted: discardedDeleted
     })
       .then(function (data) {
+
+        // debug(data)
         res.json({'data': data})
       })
       .catch(function (error) {
