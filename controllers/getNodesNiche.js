@@ -191,8 +191,8 @@ function getNodesNiche(req, res, next) {
     var whereVarTarget = verb_utils.processBioFilters(tfilters)
     // var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters)
 
-    debug(whereVarSource)
-    debug(whereVarTarget)
+    // debug(whereVarSource)
+    // debug(whereVarTarget)
 
     pool.any(queries.getNodesNiche.getNodesNicheBio_Bio, {
       N: N,
@@ -268,6 +268,9 @@ function getNodesNiche(req, res, next) {
     // var whereVarTarget = verb_utils.processBioFilters(tfilters)
     var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters)
 
+    // debug(whereVarSourceRaster)
+    // debug(whereVarTargetRaster)
+
     pool.any(queries.getNodesNiche.getNodesNicheRaster_Raster, {
       N: N,
       alpha: alpha,
@@ -279,6 +282,7 @@ function getNodesNiche(req, res, next) {
       res_celda: res_celda
     })
       .then(function (data) {
+        // debug(data)
         res.json({'data': data})
       })
       .catch(function (error) {

@@ -266,11 +266,18 @@ function getEdgesNiche(req, res, next) {
   else if ( hasRasterSource === true && hasBiosTarget === true ){
 
     debug('T')
+
+    debug(sfilters)
+    debug(tfilters)
         // var whereVarSource = verb_utils.processBioFilters(sfilters)
     var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters)
 
     var whereVarTarget = verb_utils.processBioFilters(tfilters)
         // var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters)
+
+        
+        debug(whereVarSourceRaster)
+        debug(whereVarTarget)
 
     pool.any(queries.getEdgesNiche.getEdgesNicheRaster_Bio, {
       N: N,
@@ -283,6 +290,8 @@ function getEdgesNiche(req, res, next) {
           // where_config_target_raster: whereVarTargetRaster
     })
         .then(function (data) {
+          // debug(data)
+
           res.json({'data': data})
         })
         .catch(function (error) {
@@ -301,6 +310,9 @@ function getEdgesNiche(req, res, next) {
         // var whereVarTarget = verb_utils.processBioFilters(tfilters)
     var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters)
 
+    // debug(whereVarTargetRaster)
+    // debug(whereVarSourceRaster)
+
 
     pool.any(queries.getEdgesNiche.getEdgesNicheRaster_Raster, {
       N: N,
@@ -313,6 +325,9 @@ function getEdgesNiche(req, res, next) {
       res_celda: res_celda
     })
         .then(function (data) {
+
+          // debug(data)
+
           res.json({'data': data})
         })
         .catch(function (error) {

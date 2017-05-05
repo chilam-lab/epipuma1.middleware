@@ -1,4 +1,3 @@
-/*getGeoRel sin filtros*/
 with source AS (
 	SELECT  spid,
 			reinovalido, phylumdivisionvalido, clasevalida, ordenvalido, familiavalida, generovalido, especievalidabusqueda,
@@ -30,7 +29,7 @@ target AS (
 			$<res_celda:raw> AS cells 
 	FROM raster_bins
 	--where layer = 'bio01'
-	$<where_config_target_raster:raw>	
+	$<where_config_target_raster:raw>
 )
 select 	spid,
 	 	reinovalido, phylumdivisionvalido, clasevalida, ordenvalido, familiavalida, generovalido, 
@@ -45,3 +44,4 @@ select 	spid,
 	 	grp,
 	 	icount(cells) as occ
 from target
+where icount(cells) >= $<min_occ:raw>

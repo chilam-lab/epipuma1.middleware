@@ -8,9 +8,11 @@ with source AS (
 			(label || ' ' || tag) 
 			end as especievalidabusqueda,
 			1 as grp,
-			$<res_celda:raw> AS cells 
+			$<res_celda:raw> AS cells
+			--raster_bins.cells_16km AS cells
 	FROM raster_bins
 	--where layer = 'bio01'
+	--where bid = 300012
 	$<where_config_source_raster:raw>	 
 ),
 target AS (
@@ -22,8 +24,10 @@ target AS (
 			(label || ' ' || tag) 
 			end as especievalidabusqueda,
 			2 as grp,
-			$<res_celda:raw> AS cells 
+			$<res_celda:raw> AS cells
+			--raster_bins.cells_16km AS cells 
 	FROM raster_bins
+	--where bid = 300012
 	--where layer = 'bio01'
 	$<where_config_target_raster:raw>
 )
@@ -40,3 +44,4 @@ select 	spid,
 	 	grp,
 	 	icount(cells) as occ
 from target
+where icount(cells) >= $<min_occ:raw>

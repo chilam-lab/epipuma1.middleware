@@ -10,15 +10,17 @@ with source AS (
 			1 as grp,
 			$<res_celda:raw> AS cells 
 	FROM raster_bins
+	--where bid = '300012'
 	--where layer = 'bio01'
 	$<where_config_source_raster:raw>	 
 ),
 target AS (
-	 SELECT spid,
+	SELECT spid,
 	 		reinovalido, phylumdivisionvalido, clasevalida, ordenvalido, familiavalida, generovalido, especievalidabusqueda,
 	 		2 as grp,
 			$<res_celda:raw> AS cells 
-	FROM sp_snib 
+	FROM sp_snib
+	--WHERE clasevalida = 'Mammalia'
 	--WHERE generovalido = 'Lutzomyia'
 	$<where_config_target:raw>	 
 	and especievalidabusqueda <> ''
@@ -36,3 +38,4 @@ select 	spid,
 	 	grp,
 	 	icount(cells) as occ
 from target
+where icount(cells) >= $<min_occ:raw>
