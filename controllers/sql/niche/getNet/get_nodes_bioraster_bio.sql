@@ -45,3 +45,4 @@ select 	spid,
 	 	grp,
 	 	icount(cells) as occ
 from target
+where icount(cells) >= $<min_occ:raw>

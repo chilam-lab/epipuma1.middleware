@@ -1,15 +1,20 @@
 /*getGeoRel sin filtros*/
 with source AS (
 	SELECT  bid as spid,
-			$<res_celda:raw> AS cells 
+			$<res_celda:raw> AS cells
+			--raster_bins.cells_16km AS cells 
 	FROM raster_bins
+	--where cells_16km is null
+	--where bid = '300012'
 	--where layer = 'bio01'
 	$<where_config_source_raster:raw>	 	 
 ),
 target AS (
 	SELECT  spid,
-			$<res_celda:raw> AS cells 
-	FROM sp_snib 
+			$<res_celda:raw> AS cells
+			--sp_snib.cells_16km as cells 
+	FROM sp_snib
+	--where clasevalida = 'Mammalia'
 	--WHERE generovalido = 'Lutzomyia'
 	$<where_config_target:raw>	 
 	and especievalidabusqueda <> ''
@@ -21,10 +26,10 @@ counts AS (
 			icount(target.cells) AS nj,
 			icount(source.cells) AS ni,
 			$<N> as n
-			--14707 as n
+			--19968 as n
 	FROM source,target
-	--where icount(source.cells & target.cells) > 0
-	where icount(source.cells & target.cells) > $<min_occ:raw>
+	--where icount(target.cells) > 0
+	where icount(target.cells) >= $<min_occ:raw>
 ) 
 SELECT 	counts.source,
 		counts.target,

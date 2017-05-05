@@ -1,4 +1,3 @@
-/*getGeoRel sin filtros*/
 with source AS (
 	SELECT  spid,
 			reinovalido, phylumdivisionvalido, clasevalida, ordenvalido, familiavalida, generovalido, especievalidabusqueda,
@@ -32,3 +31,4 @@ select 	spid,
 	 	grp,
 	 	icount(cells) as occ
 from target
+where icount(cells) >= $<min_occ:raw>

@@ -8,7 +8,7 @@ with source AS (
 	and especievalidabusqueda <> ''
 	union
 	SELECT  bid as spid,
-			cells 
+			$<res_celda:raw> as cells 
 	FROM raster_bins
 	--where layer = 'bio01'
 	$<where_config_source_raster:raw>	 	 
@@ -30,7 +30,7 @@ counts AS (
 			--14707 as n
 	FROM source,target
 	--where icount(source.cells & target.cells) > 0
-	where icount(source.cells & target.cells) > $<min_occ:raw>
+	where icount(target.cells) >= $<min_occ:raw>
 ) 
 SELECT 	counts.source,
 		counts.target,
