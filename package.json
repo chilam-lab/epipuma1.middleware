@@ -4,28 +4,36 @@
   "description": "Middleware para consumir los datos del SNIB",
   "main": "server.js",
   "scripts": {
-    "start": "DEBUG=express:router,verbs,snib-middleware:* nodemon server.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "DEBUG=express:router,verbs:*,snib-middleware:* nodemon server.js",
+    "test": "DEBUG=verbs:*,snib-middleware:* mocha -R spec tests/",
     "api-docs": "swagger-markdown -i api/swagger/swagger.yaml -o docs/api-docs.md",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "docs": "jsdoc -c jsdoc.conf"
   },
   "keywords": [
     "express",
     "conabio",
     "snib"
   ],
-  "author": "",
-  "license": "MIT",
+  "engine": "node >= 6.9.1",
+  "author": "Ecoinformática, CONABIO-C3",
+  "license": "GPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "https://bitbucket.org/conabio_c3/snib-middleware.git"
+
+  },
   "dependencies": {
     "body-parser": "~1.15.2",
+    "connect-timeout": "^1.8.0",
     "cors": "^2.8.1",
     "express": "~4.14.0",
     "moment": "^2.15.1",
     "pg-promise": "^5.3.5"
   },
   "devDependencies": {
-    "dox": "~0.9.0",
     "eslint": "^3.9.1",
+    "jsdoc": "^3.4.3",
     "mocha": "~3.1.0",
     "nodemon": "^1.11.0",
     "pg-monitor": "^0.5.11",
