@@ -1,6 +1,7 @@
 with source AS (
 	SELECT  spid,
-			$<res_celda:raw> AS cells 
+			$<res_celda:raw> AS cells
+			--cells_16km AS cells
 	FROM sp_snib 
 	--WHERE generovalido = 'Aedes'
 	$<where_config_source:raw>	 
@@ -8,8 +9,10 @@ with source AS (
 ),
 target AS (
 	 SELECT  spid,
-			$<res_celda:raw> AS cells 
+			$<res_celda:raw> AS cells
+			--cells_16km AS cells 
 	FROM sp_snib 
+	--WHERE clasevalida = 'Mammalia'
 	--WHERE generovalido = 'Lutzomyia'
 	$<where_config_target:raw>	 
 	and especievalidabusqueda <> ''	  
@@ -21,10 +24,10 @@ counts AS (
 			icount(target.cells) AS nj,
 			icount(source.cells) AS ni,
 			$<N> as n
-			--14707 as n
+			--19968 as n
 	FROM source,target
-	--where icount(source.cells & target.cells) > 0
-	where icount(target.cells) >= $<min_occ:raw>
+	--where icount(target.cells) > 0
+	where icount(target.cells) > $<min_occ:raw>
 ) 
 SELECT 	counts.source,
 		counts.target,
