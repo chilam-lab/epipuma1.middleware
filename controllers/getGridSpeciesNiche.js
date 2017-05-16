@@ -467,6 +467,7 @@ function getGridSpeciesNiche(req, res, next) {
       discardedDeleted: discardedDeleted
     })
       .then(function (data) {
+        // debug(data)
         res.json({'data': data})
       })
       .catch(function (error) {
@@ -494,6 +495,7 @@ function getGridSpeciesNiche(req, res, next) {
       discardedDeleted: discardedDeleted
     })
       .then(function (data) {
+        // debug(data)
         res.json({'data': data})
       })
       .catch(function (error) {
