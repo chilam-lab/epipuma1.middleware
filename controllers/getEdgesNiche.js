@@ -205,13 +205,15 @@ function getEdgesNiche(req, res, next) {
   }
   else if ( hasBiosSource === true && hasBiosTarget === true ){
 
-    debug('T')
+    debug('hasBiosSource & hasBiosTarget')
     var whereVarSource = verb_utils.processBioFilters(sfilters)
         // var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters)
 
     var whereVarTarget = verb_utils.processBioFilters(tfilters)
         // var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters)
 
+    debug(whereVarSource)
+    debug(whereVarTarget)
 
     pool.any(queries.getEdgesNiche.getEdgesNicheBio_Bio, {
       N: N,
