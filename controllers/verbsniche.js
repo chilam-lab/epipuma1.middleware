@@ -4519,8 +4519,8 @@ exports.getGridGeoJsonNiche = function (req, res, next) {
       debug("getGridGeoJson")
 
       try {
-          // var filePath = path.join(__dirname, "../geofiles/niche/MX_cells.json");
-          var filePath = path.join(__dirname, "../geofiles/niche/gridQGIS_nueva.json");
+          var filePath = path.join(__dirname, "../geofiles/niche/MX_cells.json");
+          // var filePath = path.join(__dirname, "../geofiles/niche/gridQGIS_nueva.json");
           debug(filePath);
 
           var stat = fs.statSync(filePath);
