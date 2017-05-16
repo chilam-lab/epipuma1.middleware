@@ -22,7 +22,7 @@ target AS (
 			case when type = 1 then
 			layer
 			else
-			(label || ' ' || tag) 
+			(label || ' ' || round(cast(split_part(split_part(tag,':',1),'.',1) as numeric)/10,2)  ||' ºC - ' || round(cast(split_part(split_part(tag,':',2),'.',1) as numeric)/10,2) || ' ºC') 
 			end as especievalidabusqueda,
 			bid as spid,
 			$<res_celda:raw> as cells,
