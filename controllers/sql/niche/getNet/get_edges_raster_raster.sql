@@ -23,7 +23,7 @@ counts AS (
 			--14707 as n
 	FROM source,target
 	--where icount(source.cells & target.cells) > 0
-	where icount(target.cells) >= $<min_occ:raw>
+	where icount(target.cells) > $<min_occ:raw>
 ) 
 SELECT 	counts.source,
 		counts.target,
