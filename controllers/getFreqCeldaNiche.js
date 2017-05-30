@@ -1,6 +1,6 @@
 /**
 * Este verbo es responsable de obtener los valores de epsilon y score entre una
-* especie objetivo y un conjunto de variables biÃ³oticas y raster.
+* especie objetivo y un conjunto de variables bióticas y raster.
 *
 * @module controllers/getFreqCeldaNiche
 * @requires debug
@@ -126,7 +126,7 @@ function getFreqCeldaNiche_A(req, res, next) {
 
 /**
  * Obtiene la frecuencia del score por celda obtenido de las especies con 
- * validaciÃ³n
+ * validación
  *
  * @function
  * @param {express.Request} req - Express request object
@@ -154,7 +154,8 @@ function getFreqCeldaNiche_V(req, res, next) {
   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
   // debug(discardedids)
     
-  if ( hasBios === 'true' && hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 ) {
+  if ( hasBios === 'true' && hasRaster === 'true' && 
+       discardedids != undefined && discardedids.length > 0 ) {
     debug('V')
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
@@ -178,8 +179,8 @@ function getFreqCeldaNiche_V(req, res, next) {
         debug(error)
         next(error)
       })
-  }
-  else if (hasBios === 'true' && discardedids != undefined && discardedids.length > 0 ) {
+  } else if (hasBios === 'true' && discardedids != undefined && 
+	     discardedids.length > 0 ) {
     debug('B')
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
     // debug(whereVar)
@@ -203,8 +204,8 @@ function getFreqCeldaNiche_V(req, res, next) {
         debug(error)
         next(error)
       })
-  } 
-  else if (hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 ){
+  } else if (hasRaster === 'true' && discardedids != undefined && 
+	     discardedids.length > 0 ){
     debug('Ra')
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
     // debug(whereVarRaster)
@@ -261,14 +262,19 @@ function getFreqCeldaNiche_T(req, res, next) {
     
   // filtros por tiempo
   var sfecha            = verb_utils.getParam(req, 'sfecha', false)
-  var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
-  var fecha_fin         = moment(verb_utils.getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+  var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'), 
+				 ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+  var fecha_fin         = moment(verb_utils.getParam(req, 'lim_sup', 
+						     moment().
+						     format('YYYY-MM-DD') ), 
+				 ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
   var discardedFilterids = verb_utils.getParam(req, 'discardedDateFilterids')
 
   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
   // debug(discardedFilterids)
 
-  if (hasBios === 'true' && hasRaster === 'true' && discardedFilterids === 'true') {
+  if (hasBios === 'true' && hasRaster === 'true' && 
+      discardedFilterids === 'true') {
     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
     debug(caso)
 
@@ -366,7 +372,8 @@ function getFreqCeldaNiche_T(req, res, next) {
 
 
 /**
- * Obtiene la frecuencia del score por celda obtenido de las especies, sin utilzar filtros
+ * Obtiene la frecuencia del score por celda obtenido de las especies, sin 
+ * utilzar filtros
  *
  * @function
  * @param {express.Request} req - Express request object
@@ -469,8 +476,9 @@ function getFreqCeldaNiche(req, res, next) {
 
 
 /**
- * EstÃ¡ variable es un arreglo donde se define el flujo que debe de tener una 
- * peticiÃ³n al verbo getFreqCeldaNiche. Actualmente el flujo es getFreqCeldaNiche_A,
+ * Esta variable es un arreglo donde se define el flujo que debe de tener una 
+ * petición al verbo getFreqCeldaNiche. Actualmente el flujo es 
+ * getFreqCeldaNiche_A,
  * getFreqCeldaNiche_V, getFreqCeldaNiche_T y getFreqCeldaNiche.
  *
  * @see controllers/getFreqCeldaNiche~getFreqCeldaNiche_A
