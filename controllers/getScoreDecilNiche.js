@@ -1,6 +1,6 @@
 /**
 * Este verbo es responsable de obtener los valores de epsilon y score entre una
-* especie objetivo y un conjunto de variables bióticas y raster.
+* especie objetivo y un conjunto de variables biÃ³ticas y raster.
 *
 * @module controllers/getScoreDecilNiche
 * @requires debug
@@ -529,8 +529,8 @@ function getScoreDecilNiche(req, res, next) {
 
 
 /**
- * Está variable es un arreglo donde se define el flujo que debe de tener una 
- * petición al verbo getScoreDecilNiche. Actualmente el flujo es 
+ * EstÃ¡ variable es un arreglo donde se define el flujo que debe de tener una 
+ * peticiÃ³n al verbo getScoreDecilNiche. Actualmente el flujo es 
  * getScoreDecilNiche_A, getScoreDecilNiche_V, getScoreDecilNiche_T y 
  * getScoreDecilNiche.
  *

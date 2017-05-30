@@ -1,6 +1,6 @@
 /**
 * Este verbo es responsable de obtener los valores de epsilon y score entre una
-* especie objetivo y un conjunto de variables bióoticas y raster.
+* especie objetivo y un conjunto de variables biÃ³oticas y raster.
 *
 * @module controllers/getGeoRelNiche
 * @requires debug
@@ -23,8 +23,8 @@ var N = verb_utils.N
 
 
 /**
- * Obtiene epsilon y score de la relación de especie objetivo y conjunto de 
- * variables bioticas y raster, con validación y tiempo.
+ * Obtiene epsilon y score de la relaciÃ³n de especie objetivo y conjunto de 
+ * variables bioticas y raster, con validaciÃ³n y tiempo.
  *
  * @function
  * @param {express.Request} req - Express request object
@@ -157,8 +157,8 @@ function getGeoRelNiche_VT(req, res, next) {
 
 
 /**
- * Obtiene epsilon y score de la relación de especie objetivo y conjunto de 
- * variables bioticas y raster, con validación
+ * Obtiene epsilon y score de la relaciÃ³n de especie objetivo y conjunto de 
+ * variables bioticas y raster, con validaciÃ³n
  *
  * @function
  * @param {express.Request} req - Express request object
@@ -263,7 +263,7 @@ function getGeoRelNiche_V(req, res, next) {
 
 
 /**
- * Obtiene epsilon y score de la relación de especie objetivo y conjunto de 
+ * Obtiene epsilon y score de la relaciÃ³n de especie objetivo y conjunto de 
  * variables bioticas y raster, con filtro temporal
  *
  * @function
@@ -403,7 +403,7 @@ function getGeoRelNiche_T(req, res, next) {
 
 
 /**
- * Obtiene epsilon y score de la elación de especie objetivo y conjunto de 
+ * Obtiene epsilon y score de la elaciÃ³n de especie objetivo y conjunto de 
  * variables bioticas y raster, sin filtros
  *
  * @function
@@ -521,8 +521,8 @@ function getGeoRelNiche(req, res, next) {
 
 
 /**
- * Está variable es un arreglo donde se define el flujo que debe de tener una 
- * petición al verbo getGeoRelNiche. Actualmente el flujo es getGeoRelNiche_VT,
+ * EstÃ¡ variable es un arreglo donde se define el flujo que debe de tener una 
+ * peticiÃ³n al verbo getGeoRelNiche. Actualmente el flujo es getGeoRelNiche_VT,
  * getGeoRelNiche_V, getGeoRelNiche_T y getGeoRelNiche.
  *
  * @see controllers/getGeoRelNiche~getGeoRelNiche_VT

@@ -23,7 +23,7 @@ var N = verb_utils.N
 
 
 /**
- * Obtiene frecuencia de epsilon y score por especie con validación y tiempo.
+ * Obtiene frecuencia de epsilon y score por especie con validaciÃ³n y tiempo.
  *
  * @function
  * @param {express.Request} req - Express request object
@@ -160,7 +160,7 @@ function getFreqNiche_VT(req, res, next) {
 
 
 /**
- * Obtiene frecuencia de epsilon y score por especie con validación.
+ * Obtiene frecuencia de epsilon y score por especie con validaciÃ³n.
  *
  * @function
  * @param {express.Request} req - Express request object
@@ -402,7 +402,7 @@ function getFreqNiche_T(req, res, next) {
 
 
 /**
- * Obtiene frecuencia de epsilon y score por especie sin ningún filtro
+ * Obtiene frecuencia de epsilon y score por especie sin ningÃºn filtro
  *
  * @function
  * @param {express.Request} req - Express request object
@@ -499,8 +499,8 @@ function getFreqNiche(req, res, next) {
 
 
 /**
- * Está variable es un arreglo donde se define el flujo que debe de tener una 
- * petición al verbo getFreqNiche. Actualmente el flujo es getFreqNiche_VT,
+ * EstÃ¡ variable es un arreglo donde se define el flujo que debe de tener una 
+ * peticiÃ³n al verbo getFreqNiche. Actualmente el flujo es getFreqNiche_VT,
  * getFreqNiche_V, getFreqNiche_T y getFreqNiche.
  *
  * @see controllers/getFreqNiche~getFreqNiche_VT

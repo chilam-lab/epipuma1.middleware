@@ -542,8 +542,8 @@ function getGridSpeciesNiche(req, res, next) {
 
 
 /**
- * Está variable es un arreglo donde se define el flujo que debe de tener una 
- * petición al verbo getGridSpeciesNiche. Actualmente el flujo es 
+ * EstÃ¡ variable es un arreglo donde se define el flujo que debe de tener una 
+ * peticiÃ³n al verbo getGridSpeciesNiche. Actualmente el flujo es 
  * getGridSpeciesNiche_M, getGridSpeciesNiche_A, getGridSpeciesNiche_T y
  * getGridSpeciesNiche.
  *
