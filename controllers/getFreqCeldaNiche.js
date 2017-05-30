@@ -1,6 +1,6 @@
 /**
 * Este verbo es responsable de obtener los valores de epsilon y score entre una
-* especie objetivo y un conjunto de variables bióoticas y raster.
+* especie objetivo y un conjunto de variables biÃ³oticas y raster.
 *
 * @module controllers/getFreqCeldaNiche
 * @requires debug
@@ -126,7 +126,7 @@ function getFreqCeldaNiche_A(req, res, next) {
 
 /**
  * Obtiene la frecuencia del score por celda obtenido de las especies con 
- * validación
+ * validaciÃ³n
  *
  * @function
  * @param {express.Request} req - Express request object
@@ -469,8 +469,8 @@ function getFreqCeldaNiche(req, res, next) {
 
 
 /**
- * Está variable es un arreglo donde se define el flujo que debe de tener una 
- * petición al verbo getFreqCeldaNiche. Actualmente el flujo es getFreqCeldaNiche_A,
+ * EstÃ¡ variable es un arreglo donde se define el flujo que debe de tener una 
+ * peticiÃ³n al verbo getFreqCeldaNiche. Actualmente el flujo es getFreqCeldaNiche_A,
  * getFreqCeldaNiche_V, getFreqCeldaNiche_T y getFreqCeldaNiche.
  *
  * @see controllers/getFreqCeldaNiche~getFreqCeldaNiche_A

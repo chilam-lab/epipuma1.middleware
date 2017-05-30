@@ -296,8 +296,8 @@ function getNodesNiche(req, res, next) {
 
 
 /**
- * Está variable es un arreglo donde se define el flujo que debe de tomar una
- * petición al verbo getNodesNiche. Actualmente solo consta de un elemento, 
+ * EstÃ¡ variable es un arreglo donde se define el flujo que debe de tomar una
+ * peticiÃ³n al verbo getNodesNiche. Actualmente solo consta de un elemento, 
  * getNodeNiche.
  *
  * @see controllers/getNodesNiche~GetNodeNiche

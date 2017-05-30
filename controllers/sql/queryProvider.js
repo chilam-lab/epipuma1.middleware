@@ -210,123 +210,123 @@ var queryProvider = {
 
 /************************************************************* VERBOS ÚTILES ******************************/
   getVariablesNiche: {
-    getVariablesReino: sqlPath('niche/especie/get_variables_reino.sql'),
-    getVariables: sqlPath('niche/especie/get_variables.sql')
+    getVariablesReino: sqlPath('especie/get_variables_reino.sql'),
+    getVariables: sqlPath('especie/get_variables.sql')
   },
   getRasterNiche: {
-    getRasterBios: sqlPath('niche/raster/raster_bios.sql'),
-    getRasterIds: sqlPath('niche/raster/raster_ids.sql')
+    getRasterBios: sqlPath('raster/raster_bios.sql'),
+    getRasterIds: sqlPath('raster/raster_ids.sql')
   },
   getSpeciesNiche: {
-    getSpecies: sqlPath('niche/especie/getSpecies.sql'),
-    getSpeciesSD: sqlPath('niche/especie/getSpecies_sdate.sql'),
-    getSpeciesR: sqlPath('niche/especie/getSpecies_range.sql'),
-    getSpeciesSDR: sqlPath('niche/especie/getSpecies_sdr.sql')
+    getSpecies: sqlPath('especie/getSpecies.sql'),
+    getSpeciesSD: sqlPath('especie/getSpecies_sdate.sql'),
+    getSpeciesR: sqlPath('especie/getSpecies_range.sql'),
+    getSpeciesSDR: sqlPath('especie/getSpecies_sdr.sql')
   },
   getEntListNiche: {
-    getEntList: sqlPath('niche/especie/getEntList.sql')
+    getEntList: sqlPath('especie/getEntList.sql')
   },
   getGrididsNiche: {
-    getGridids: sqlPath('niche/especie/getGridids.sql')
+    getGridids: sqlPath('especie/getGridids.sql')
   },
   getCountGridid: {
-    getCount: sqlPath('niche/especie/getCountGridid.sql')
+    getCount: sqlPath('especie/getCountGridid.sql')
   },
 
   /************************************************************* VERBOS PARA NICHO ******************************/
   getGridSpeciesNiche: {
-    getGridSpeciesBio: sqlPath('niche/getGridSpecies/get_grid_species_bio.sql'),
-    getGridSpeciesRaster: sqlPath('niche/getGridSpecies/get_grid_species_raster.sql'),
-    getGridSpecies: sqlPath('niche/getGridSpecies/get_grid_species.sql'),
+    getGridSpeciesBio: sqlPath('getGridSpecies/get_grid_species_bio.sql'),
+    getGridSpeciesRaster: sqlPath('getGridSpecies/get_grid_species_raster.sql'),
+    getGridSpecies: sqlPath('getGridSpecies/get_grid_species.sql'),
 
-    getGridSpeciesBioT: sqlPath('niche/getGridSpecies/get_grid_species_BT.sql'),
-    getGridSpeciesRaT: sqlPath('niche/getGridSpecies/get_grid_species_RaT.sql'),
-    getGridSpeciesT: sqlPath('niche/getGridSpecies/get_grid_species_T.sql'),
+    getGridSpeciesBioT: sqlPath('getGridSpecies/get_grid_species_BT.sql'),
+    getGridSpeciesRaT: sqlPath('getGridSpecies/get_grid_species_RaT.sql'),
+    getGridSpeciesT: sqlPath('getGridSpecies/get_grid_species_T.sql'),
 
-    getGridSpeciesBioA: sqlPath('niche/getGridSpecies/get_grid_species_BA.sql'),
-    getGridSpeciesRaA: sqlPath('niche/getGridSpecies/get_grid_species_RaA.sql'),
-    getGridSpeciesA: sqlPath('niche/getGridSpecies/get_grid_species_A.sql'),
+    getGridSpeciesBioA: sqlPath('getGridSpecies/get_grid_species_BA.sql'),
+    getGridSpeciesRaA: sqlPath('getGridSpecies/get_grid_species_RaA.sql'),
+    getGridSpeciesA: sqlPath('getGridSpecies/get_grid_species_A.sql'),
 
-    getGridSpeciesBioM: sqlPath('niche/getGridSpecies/get_grid_species_BM.sql'),
-    getGridSpeciesRaM: sqlPath('niche/getGridSpecies/get_grid_species_RaM.sql'),
-    getGridSpeciesM: sqlPath('niche/getGridSpecies/get_grid_species_M.sql')
+    getGridSpeciesBioM: sqlPath('getGridSpecies/get_grid_species_BM.sql'),
+    getGridSpeciesRaM: sqlPath('getGridSpecies/get_grid_species_RaM.sql'),
+    getGridSpeciesM: sqlPath('getGridSpecies/get_grid_species_M.sql')
   },
   getGeoRelNiche: {
-    getGeoRel: sqlPath('niche/getGeoRel/get_geo_rel.sql'),
-    getGeoRelBio: sqlPath('niche/getGeoRel/get_geo_rel_bio.sql'),
-    getGeoRelRaster: sqlPath('niche/getGeoRel/get_geo_rel_raster.sql'),
+    getGeoRel: sqlPath('getGeoRel/get_geo_rel.sql'),
+    getGeoRelBio: sqlPath('getGeoRel/get_geo_rel_bio.sql'),
+    getGeoRelRaster: sqlPath('getGeoRel/get_geo_rel_raster.sql'),
     
-    getGeoRelBioV: sqlPath('niche/getGeoRel/get_geo_rel_BV.sql'),
-    getGeoRelRaV: sqlPath('niche/getGeoRel/get_geo_rel_RaV.sql'),
-    getGeoRelV: sqlPath('niche/getGeoRel/get_geo_rel_V.sql'),
+    getGeoRelBioV: sqlPath('getGeoRel/get_geo_rel_BV.sql'),
+    getGeoRelRaV: sqlPath('getGeoRel/get_geo_rel_RaV.sql'),
+    getGeoRelV: sqlPath('getGeoRel/get_geo_rel_V.sql'),
 
-    getGeoRelBioT: sqlPath('niche/getGeoRel/get_geo_rel_BT.sql'),
-    getGeoRelRaT: sqlPath('niche/getGeoRel/get_geo_rel_RaT.sql'),
-    getGeoRelT: sqlPath('niche/getGeoRel/get_geo_rel_T.sql'),
+    getGeoRelBioT: sqlPath('getGeoRel/get_geo_rel_BT.sql'),
+    getGeoRelRaT: sqlPath('getGeoRel/get_geo_rel_RaT.sql'),
+    getGeoRelT: sqlPath('getGeoRel/get_geo_rel_T.sql'),
 
-    getGeoRelBioVT: sqlPath('niche/getGeoRel/get_geo_rel_BVT.sql'),
-    getGeoRelVT: sqlPath('niche/getGeoRel/get_geo_rel_VT.sql'),
-    getGeoRelRaVT: sqlPath('niche/getGeoRel/get_geo_rel_RaVT.sql')
+    getGeoRelBioVT: sqlPath('getGeoRel/get_geo_rel_BVT.sql'),
+    getGeoRelVT: sqlPath('getGeoRel/get_geo_rel_VT.sql'),
+    getGeoRelRaVT: sqlPath('getGeoRel/get_geo_rel_RaVT.sql')
   },
   getFreqNiche: {
-    getFreqBio: sqlPath('niche/getFreq/get_freq_bio.sql'),
-    getFreqRaster: sqlPath('niche/getFreq/get_freq_raster.sql'),
-    getFreq: sqlPath('niche/getFreq/get_freq.sql'),
+    getFreqBio: sqlPath('getFreq/get_freq_bio.sql'),
+    getFreqRaster: sqlPath('getFreq/get_freq_raster.sql'),
+    getFreq: sqlPath('getFreq/get_freq.sql'),
 
-    getFreqBioV: sqlPath('niche/getFreq/get_freq_BV.sql'),
-    getFreqRasterV: sqlPath('niche/getFreq/get_freq_RaV.sql'),
-    getFreqV: sqlPath('niche/getFreq/get_freq_V.sql'),
+    getFreqBioV: sqlPath('getFreq/get_freq_BV.sql'),
+    getFreqRasterV: sqlPath('getFreq/get_freq_RaV.sql'),
+    getFreqV: sqlPath('getFreq/get_freq_V.sql'),
 
-    getFreqBioT: sqlPath('niche/getFreq/get_freq_BT.sql'),
-    getFreqRasterT: sqlPath('niche/getFreq/get_freq_RaT.sql'),
-    getFreqT: sqlPath('niche/getFreq/get_freq_T.sql'),
+    getFreqBioT: sqlPath('getFreq/get_freq_BT.sql'),
+    getFreqRasterT: sqlPath('getFreq/get_freq_RaT.sql'),
+    getFreqT: sqlPath('getFreq/get_freq_T.sql'),
 
-    getFreqBioVT: sqlPath('niche/getFreq/get_freq_BVT.sql'),
-    getFreqRaVT: sqlPath('niche/getFreq/get_freq_RaVT.sql'),
-    getFreqVT: sqlPath('niche/getFreq/get_freq_VT.sql')
+    getFreqBioVT: sqlPath('getFreq/get_freq_BVT.sql'),
+    getFreqRaVT: sqlPath('getFreq/get_freq_RaVT.sql'),
+    getFreqVT: sqlPath('getFreq/get_freq_VT.sql')
   },
 
   getFreqMapNiche: {
-    getFreqMapBio: sqlPath('niche/getFreqMap/get_freq_map_bio.sql'),
-    getFreqMapRaster: sqlPath('niche/getFreqMap/get_freq_map_raster.sql'),
-    getFreqMap: sqlPath('niche/getFreqMap/get_freq_map.sql'),
+    getFreqMapBio: sqlPath('getFreqMap/get_freq_map_bio.sql'),
+    getFreqMapRaster: sqlPath('getFreqMap/get_freq_map_raster.sql'),
+    getFreqMap: sqlPath('getFreqMap/get_freq_map.sql'),
 
-    getFreqMapBioT: sqlPath('niche/getFreqMap/get_freq_map_BT.sql'),
-    getFreqMapRaT: sqlPath('niche/getFreqMap/get_freq_map_RaT.sql'),
-    getFreqMapT: sqlPath('niche/getFreqMap/get_freq_map_T.sql'),
+    getFreqMapBioT: sqlPath('getFreqMap/get_freq_map_BT.sql'),
+    getFreqMapRaT: sqlPath('getFreqMap/get_freq_map_RaT.sql'),
+    getFreqMapT: sqlPath('getFreqMap/get_freq_map_T.sql'),
 
-    getFreqMapBioA: sqlPath('niche/getFreqMap/get_freq_map_BA.sql'),
-    getFreqMapRaA: sqlPath('niche/getFreqMap/get_freq_map_RaA.sql'),
-    getFreqMapA: sqlPath('niche/getFreqMap/get_freq_map_A.sql'),
+    getFreqMapBioA: sqlPath('getFreqMap/get_freq_map_BA.sql'),
+    getFreqMapRaA: sqlPath('getFreqMap/get_freq_map_RaA.sql'),
+    getFreqMapA: sqlPath('getFreqMap/get_freq_map_A.sql'),
 
-    getFreqMapBioM: sqlPath('niche/getFreqMap/get_freq_map_BM.sql'),
-    getFreqMapRaM: sqlPath('niche/getFreqMap/get_freq_map_RaM.sql'),
-    getFreqMapM: sqlPath('niche/getFreqMap/get_freq_map_M.sql')
+    getFreqMapBioM: sqlPath('getFreqMap/get_freq_map_BM.sql'),
+    getFreqMapRaM: sqlPath('getFreqMap/get_freq_map_RaM.sql'),
+    getFreqMapM: sqlPath('getFreqMap/get_freq_map_M.sql')
 
-    // getFreqMapBioTA: sqlPath('niche/getFreqMap/get_freq_map_BTA.sql'),
-    // getFreqMapRaTA: sqlPath('niche/getFreqMap/get_freq_map_RaTA.sql'),
-    // getFreqMapTA: sqlPath('niche/getFreqMap/get_freq_map_TA.sql'),
+    // getFreqMapBioTA: sqlPath('getFreqMap/get_freq_map_BTA.sql'),
+    // getFreqMapRaTA: sqlPath('getFreqMap/get_freq_map_RaTA.sql'),
+    // getFreqMapTA: sqlPath('getFreqMap/get_freq_map_TA.sql'),
 
-    // getFreqMapBioTM: sqlPath('niche/getFreqMap/get_freq_map_BTM.sql'),
-    // getFreqMapRaTM: sqlPath('niche/getFreqMap/get_freq_map_RaTM.sql'),
-    // getFreqMapTM: sqlPath('niche/getFreqMap/get_freq_map_TM.sql')
+    // getFreqMapBioTM: sqlPath('getFreqMap/get_freq_map_BTM.sql'),
+    // getFreqMapRaTM: sqlPath('getFreqMap/get_freq_map_RaTM.sql'),
+    // getFreqMapTM: sqlPath('getFreqMap/get_freq_map_TM.sql')
   },
   getFreqCeldaNiche: {
-    getFreqCeldaBio: sqlPath('niche/getFreqCelda/get_freq_celda_bio.sql'),
-    getFreqCeldaRaster: sqlPath('niche/getFreqCelda/get_freq_celda_raster.sql'),
-    getFreqCelda: sqlPath('niche/getFreqCelda/get_freq_celda.sql'),
+    getFreqCeldaBio: sqlPath('getFreqCelda/get_freq_celda_bio.sql'),
+    getFreqCeldaRaster: sqlPath('getFreqCelda/get_freq_celda_raster.sql'),
+    getFreqCelda: sqlPath('getFreqCelda/get_freq_celda.sql'),
 
-    getFreqCeldaBioT: sqlPath('niche/getFreqCelda/get_freq_celda_BT.sql'),
-    getFreqCeldaRaT: sqlPath('niche/getFreqCelda/get_freq_celda_RaT.sql'),
-    getFreqCeldaT: sqlPath('niche/getFreqCelda/get_freq_celda_T.sql'),
+    getFreqCeldaBioT: sqlPath('getFreqCelda/get_freq_celda_BT.sql'),
+    getFreqCeldaRaT: sqlPath('getFreqCelda/get_freq_celda_RaT.sql'),
+    getFreqCeldaT: sqlPath('getFreqCelda/get_freq_celda_T.sql'),
 
-    getFreqCeldaBioV: sqlPath('niche/getFreqCelda/get_freq_celda_BV.sql'),
-    getFreqCeldaRaV: sqlPath('niche/getFreqCelda/get_freq_celda_RaV.sql'),
-    getFreqCeldaV: sqlPath('niche/getFreqCelda/get_freq_celda_V.sql'),
+    getFreqCeldaBioV: sqlPath('getFreqCelda/get_freq_celda_BV.sql'),
+    getFreqCeldaRaV: sqlPath('getFreqCelda/get_freq_celda_RaV.sql'),
+    getFreqCeldaV: sqlPath('getFreqCelda/get_freq_celda_V.sql'),
 
-    getFreqCeldaBioA: sqlPath('niche/getFreqCelda/get_freq_celda_BA.sql'),
-    getFreqCeldaRaA: sqlPath('niche/getFreqCelda/get_freq_celda_RaA.sql'),
-    getFreqCeldaA: sqlPath('niche/getFreqCelda/get_freq_celda_A.sql')
+    getFreqCeldaBioA: sqlPath('getFreqCelda/get_freq_celda_BA.sql'),
+    getFreqCeldaRaA: sqlPath('getFreqCelda/get_freq_celda_RaA.sql'),
+    getFreqCeldaA: sqlPath('getFreqCelda/get_freq_celda_A.sql')
 
     // getFreqCeldaBioTA: sqlPath('getFreqCelda/get_freq_celda_BTA.sql'),
     // getFreqCeldaRaTA: sqlPath('getFreqCelda/get_freq_celda_RaTA.sql'),
@@ -346,21 +346,21 @@ var queryProvider = {
     // getFreqCeldaVTA: sqlPath('getFreqCelda/get_freq_celda_VTA.sql')
   },
   getScoreDecilNiche: {
-    getScoreDecilBio: sqlPath('niche/getScoreDecil/get_score_decil_bio.sql'),
-    getScoreDecilRaster: sqlPath('niche/getScoreDecil/get_score_decil_raster.sql'),
-    getScoreDecil: sqlPath('niche/getScoreDecil/get_score_decil.sql'),
+    getScoreDecilBio: sqlPath('getScoreDecil/get_score_decil_bio.sql'),
+    getScoreDecilRaster: sqlPath('getScoreDecil/get_score_decil_raster.sql'),
+    getScoreDecil: sqlPath('getScoreDecil/get_score_decil.sql'),
 
-    getScoreDecilBioT: sqlPath('niche/getScoreDecil/get_score_decil_BT.sql'),
-    getScoreDecilRaT: sqlPath('niche/getScoreDecil/get_score_decil_RaT.sql'),
-    getScoreDecilT: sqlPath('niche/getScoreDecil/get_score_decil_T.sql'),
+    getScoreDecilBioT: sqlPath('getScoreDecil/get_score_decil_BT.sql'),
+    getScoreDecilRaT: sqlPath('getScoreDecil/get_score_decil_RaT.sql'),
+    getScoreDecilT: sqlPath('getScoreDecil/get_score_decil_T.sql'),
 
-    getScoreDecilBioV: sqlPath('niche/getScoreDecil/get_score_decil_BV.sql'),
-    getScoreDecilRaV: sqlPath('niche/getScoreDecil/get_score_decil_RaV.sql'),
-    getScoreDecilV: sqlPath('niche/getScoreDecil/get_score_decil_V.sql'),
+    getScoreDecilBioV: sqlPath('getScoreDecil/get_score_decil_BV.sql'),
+    getScoreDecilRaV: sqlPath('getScoreDecil/get_score_decil_RaV.sql'),
+    getScoreDecilV: sqlPath('getScoreDecil/get_score_decil_V.sql'),
 
-    getScoreDecilBioA: sqlPath('niche/getScoreDecil/get_score_decil_BA.sql'),
-    getScoreDecilRaA: sqlPath('niche/getScoreDecil/get_score_decil_RaA.sql'),
-    getScoreDecilA: sqlPath('niche/getScoreDecil/get_score_decil_A.sql')
+    getScoreDecilBioA: sqlPath('getScoreDecil/get_score_decil_BA.sql'),
+    getScoreDecilRaA: sqlPath('getScoreDecil/get_score_decil_RaA.sql'),
+    getScoreDecilA: sqlPath('getScoreDecil/get_score_decil_A.sql')
 
     // getScoreDecilBioTA: sqlPath('getScoreDecil/get_score_decil_BTA.sql'),
     // getScoreDecilRaTA: sqlPath('getScoreDecil/get_score_decil_RaTA.sql'),
@@ -382,36 +382,36 @@ var queryProvider = {
 /************************************************************* VERBOS PARA REDES ******************************/
 
   getEdgesNiche: {
-    // getEdgesNicheBio: sqlPath('niche/getNet/get_edges_bio.sql'),
-    // getEdgesNicheRaster: sqlPath('niche/getNet/get_edges_raster.sql'),
-    // getEdgesNiche: sqlPath('niche/getNet/get_edges.sql')
+    // getEdgesNicheBio: sqlPath('getNet/get_edges_bio.sql'),
+    // getEdgesNicheRaster: sqlPath('getNet/get_edges_raster.sql'),
+    // getEdgesNiche: sqlPath('getNet/get_edges.sql')
 
-    getEdgesNicheBioRaster_BioRaster: sqlPath('niche/getNet/get_edges.sql'),
+    getEdgesNicheBioRaster_BioRaster: sqlPath('getNet/get_edges.sql'),
     
-    getEdgesNicheBioRaster_Bio: sqlPath('niche/getNet/get_edges_bioraster_bio.sql'),
-    getEdgesNicheBioRaster_Raster: sqlPath('niche/getNet/get_edges_bioraster_raster.sql'),
+    getEdgesNicheBioRaster_Bio: sqlPath('getNet/get_edges_bioraster_bio.sql'),
+    getEdgesNicheBioRaster_Raster: sqlPath('getNet/get_edges_bioraster_raster.sql'),
 
-    getEdgesNicheBio_BioRaster: sqlPath('niche/getNet/get_edges_bio_bioraster.sql'),
-    getEdgesNicheRaster_BioRaster: sqlPath('niche/getNet/get_edges_raster_bioraster.sql'),
+    getEdgesNicheBio_BioRaster: sqlPath('getNet/get_edges_bio_bioraster.sql'),
+    getEdgesNicheRaster_BioRaster: sqlPath('getNet/get_edges_raster_bioraster.sql'),
 
-    getEdgesNicheBio_Bio: sqlPath('niche/getNet/get_edges_bio_bio.sql'),
-    getEdgesNicheBio_Raster: sqlPath('niche/getNet/get_edges_bio_raster.sql'),
-    getEdgesNicheRaster_Bio: sqlPath('niche/getNet/get_edges_raster_bio.sql'),
-    getEdgesNicheRaster_Raster: sqlPath('niche/getNet/get_edges_raster_raster.sql')
+    getEdgesNicheBio_Bio: sqlPath('getNet/get_edges_bio_bio.sql'),
+    getEdgesNicheBio_Raster: sqlPath('getNet/get_edges_bio_raster.sql'),
+    getEdgesNicheRaster_Bio: sqlPath('getNet/get_edges_raster_bio.sql'),
+    getEdgesNicheRaster_Raster: sqlPath('getNet/get_edges_raster_raster.sql')
   },
   getNodesNiche: {
-    getNodesNicheBioRaster_BioRaster: sqlPath('niche/getNet/get_nodes.sql'),
+    getNodesNicheBioRaster_BioRaster: sqlPath('getNet/get_nodes.sql'),
     
-    getNodesNicheBioRaster_Bio: sqlPath('niche/getNet/get_nodes_bioraster_bio.sql'),
-    getNodesNicheBioRaster_Raster: sqlPath('niche/getNet/get_nodes_bioraster_raster.sql'),
+    getNodesNicheBioRaster_Bio: sqlPath('getNet/get_nodes_bioraster_bio.sql'),
+    getNodesNicheBioRaster_Raster: sqlPath('getNet/get_nodes_bioraster_raster.sql'),
 
-    getNodesNicheBio_BioRaster: sqlPath('niche/getNet/get_nodes_bio_bioraster.sql'),
-    getNodesNicheRaster_BioRaster: sqlPath('niche/getNet/get_nodes_raster_bioraster.sql'),
+    getNodesNicheBio_BioRaster: sqlPath('getNet/get_nodes_bio_bioraster.sql'),
+    getNodesNicheRaster_BioRaster: sqlPath('getNet/get_nodes_raster_bioraster.sql'),
 
-    getNodesNicheBio_Bio: sqlPath('niche/getNet/get_nodes_bio_bio.sql'),
-    getNodesNicheBio_Raster: sqlPath('niche/getNet/get_nodes_bio_raster.sql'),
-    getNodesNicheRaster_Bio: sqlPath('niche/getNet/get_nodes_raster_bio.sql'),
-    getNodesNicheRaster_Raster: sqlPath('niche/getNet/get_nodes_raster_raster.sql')
+    getNodesNicheBio_Bio: sqlPath('getNet/get_nodes_bio_bio.sql'),
+    getNodesNicheBio_Raster: sqlPath('getNet/get_nodes_bio_raster.sql'),
+    getNodesNicheRaster_Bio: sqlPath('getNet/get_nodes_raster_bio.sql'),
+    getNodesNicheRaster_Raster: sqlPath('getNet/get_nodes_raster_raster.sql')
   }
 }
 

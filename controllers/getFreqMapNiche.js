@@ -507,8 +507,8 @@ function getFreqMapNiche(req, res, next) {
 
 
 /**
- * Está variable es un arreglo donde se define el flujo que debe de tener una 
- * petición al verbo getFreqMapNiche. Actualmente el flujo es getFreqMapNiche_M,
+ * EstÃ¡ variable es un arreglo donde se define el flujo que debe de tener una 
+ * peticiÃ³n al verbo getFreqMapNiche. Actualmente el flujo es getFreqMapNiche_M,
  * getFreqMapNiche_A, getFreqMapNiche_T y getFreqMapNiche.
  *
  * @see controllers/getFreqMapNiche~getFreqMapNiche_M
