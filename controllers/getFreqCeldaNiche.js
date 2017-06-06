@@ -180,7 +180,7 @@ function getFreqCeldaNiche_V(req, res, next) {
         next(error)
       })
   } else if (hasBios === 'true' && discardedids != undefined && 
-	     discardedids.length > 0 ) {
+             discardedids.length > 0 ) {
     debug('B')
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
     // debug(whereVar)
@@ -205,7 +205,7 @@ function getFreqCeldaNiche_V(req, res, next) {
         next(error)
       })
   } else if (hasRaster === 'true' && discardedids != undefined && 
-	     discardedids.length > 0 ){
+             discardedids.length > 0 ){
     debug('Ra')
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
     // debug(whereVarRaster)
@@ -263,11 +263,11 @@ function getFreqCeldaNiche_T(req, res, next) {
   // filtros por tiempo
   var sfecha            = verb_utils.getParam(req, 'sfecha', false)
   var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'), 
-				 ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+                                 ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
   var fecha_fin         = moment(verb_utils.getParam(req, 'lim_sup', 
-						     moment().
-						     format('YYYY-MM-DD') ), 
-				 ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+                                                     moment().
+                                                     format('YYYY-MM-DD') ), 
+                                 ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
   var discardedFilterids = verb_utils.getParam(req, 'discardedDateFilterids')
 
   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])

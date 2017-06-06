@@ -53,7 +53,7 @@ function getGridSpeciesNiche_M(req, res, next) {
 
   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
     
-  if (hasBios === 'true' && hasRaster === 'true' && mapa_prob === 'mapa_prob' ) {
+  if (hasBios === 'true' && hasRaster === 'true' && mapa_prob === 'mapa_prob' ){
     debug('T')
 
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
@@ -291,14 +291,18 @@ function getGridSpeciesNiche_T(req, res, next) {
     
   // filtros por tiempo
   var sfecha            = verb_utils.getParam(req, 'sfecha', false)
-  var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
-  var fecha_fin         = moment(verb_utils.getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+  var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'), 
+                                 ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+  var fecha_fin         = moment(verb_utils.getParam(req, 'lim_sup', moment().
+                                                     format('YYYY-MM-DD') ), 
+                                 ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
   var discardedFilterids = verb_utils.getParam(req, 'discardedDateFilterids')
 
   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
 
   // debug(discardedFilterids)
-  if (hasBios === 'true' && hasRaster === 'true' && discardedFilterids === 'true') {
+  if (hasBios === 'true' && hasRaster === 'true' && 
+      discardedFilterids === 'true') {
     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
     // debug(caso)
 

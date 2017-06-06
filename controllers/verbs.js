@@ -36,13 +36,13 @@ var N = 94544; // MX y EU sin alaska y hawuaii 16km
  *
  */
 var getParam = function (req, name, defaultValue) {
-  var body = req.body || {}
-  var query = req.query || {}
+    var body = req.body || {}
+    var query = req.query || {}
 
-  if (body[name] != null) return body[name]
-  if (query[name] != null) return query[name]
+    if (body[name] != null) return body[name]
+    if (query[name] != null) return query[name]
 
-  return defaultValue
+    return defaultValue
 }
 
 
@@ -58,9 +58,8 @@ var getParam = function (req, name, defaultValue) {
  *
  */
 exports.getGridIds = function (req, res, next) {
-  pool.any(queries.grid.getIds)
-    .then(function (data) {
-      res.json({'data': data})
+    pool.any(queries.grid.getIds).then(function (data) {
+            res.json({'data': data})
     })
     .catch(function (error) {
       next(error)
@@ -393,20 +392,20 @@ exports.getUserReg = function (req, res, next) {
     })
 }
 
-/**************************************************************************************************************************/
-/**************************************************************************************************************************/
-/**************************************************************************************************************************/
-/************************************************************* VERBOS PARA EL NUEVO SERVIDOR ******************************/
-
-
-/******************************************************************** getGeoRelNiche */
+///////////////////////////////////
+// VERBOS PARA EL NUEVO SERVIDOR //
+//                               //
+//                               //
+// getGeoRelNiche                //
+///////////////////////////////////
 
 
 /**
  *
  * Servidor Niche: getGeoRelNiche_VT de SNIB DB, con validación y tiempo
  *
- * Obtiene epsilon y score de la relación de especie objetivo y conjunto de variables bioticas y raster.
+ * Obtiene epsilon y score de la relación de especie objetivo y conjunto de 
+ * variables bioticas y raster.
  *
  * @param {express.Request} req
  * @param {express.Response} res
@@ -433,19 +432,20 @@ exports.getGeoRelNiche_VT = function (req, res, next) {
     var discardedids    = getParam(req, 'discardedids', [])
     // filtros por tiempo
     var sfecha            = getParam(req, 'sfecha', false)
-    var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
-    var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+    var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), 
+                                   ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+    var fecha_fin         = moment(getParam(req, 'lim_sup', moment().
+                                            format('YYYY-MM-DD') ), 
+                                   ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
     var discardedFilterids = getParam(req, 'discardedDateFilterids')
     // debug(discardedFilterids)
 
     var discardedDeleted = getParam(req, 'discardedFilterids',[]);
     // debug(discardedFilterids)
-
-
     
-
-    
-    if ( hasBios === 'true' && hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 && discardedFilterids === "true" ){
+    if ( hasBios === 'true' && hasRaster === 'true' && discardedids != 
+         undefined && discardedids.length > 0 && 
+         discardedFilterids === "true" ){
 
       var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
       debug(caso)
@@ -480,7 +480,8 @@ exports.getGeoRelNiche_VT = function (req, res, next) {
 
       
     }
-    else if (hasBios === 'true' && discardedids != undefined && discardedids.length > 0 && discardedFilterids === "true" ){
+    else if (hasBios === 'true' && discardedids != undefined && 
+             discardedids.length > 0 && discardedFilterids === "true" ){
 
         var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
         debug(caso)
@@ -514,7 +515,8 @@ exports.getGeoRelNiche_VT = function (req, res, next) {
         })
       
     } 
-    else if (hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 && discardedFilterids === "true" ){
+    else if (hasRaster === 'true' && discardedids != undefined && 
+             discardedids.length > 0 && discardedFilterids === "true" ){
 
       var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
       debug(caso)
@@ -556,13 +558,12 @@ exports.getGeoRelNiche_VT = function (req, res, next) {
 }
 
 
-
-
 /**
  *
  * Servidor Niche: getGeoRelNiche_V de SNIB DB, con validación
  *
- * Obtiene epsilon y score de la relación de especie objetivo y conjunto de variables bioticas y raster.
+ * Obtiene epsilon y score de la relación de especie objetivo y conjunto de 
+ * variables bioticas y raster.
  *
  * @param {express.Request} req
  * @param {express.Response} res
@@ -593,7 +594,8 @@ exports.getGeoRelNiche_V = function (req, res, next) {
     // debug(discardedids)
 
     
-    if ( hasBios === 'true' && hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 ){
+    if ( hasBios === 'true' && hasRaster === 'true' && discardedids != 
+         undefined && discardedids.length > 0 ){
 
       debug("V")
       var whereVar = verb_utils.processBioFilters(tfilters, spid)
@@ -620,7 +622,8 @@ exports.getGeoRelNiche_V = function (req, res, next) {
 
       
     }
-    else if (hasBios === 'true' && discardedids != undefined && discardedids.length > 0 ){
+    else if (hasBios === 'true' && discardedids != undefined && 
+             discardedids.length > 0 ){
 
       debug("B")
       var whereVar = verb_utils.processBioFilters(tfilters, spid)
@@ -646,7 +649,8 @@ exports.getGeoRelNiche_V = function (req, res, next) {
       })
       
     } 
-    else if (hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 ){
+    else if (hasRaster === 'true' && discardedids != undefined && 
+             discardedids.length > 0 ){
 
       debug("Ra")
       var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
