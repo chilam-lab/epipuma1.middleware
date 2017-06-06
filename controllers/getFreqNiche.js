@@ -23,7 +23,7 @@ var N = verb_utils.N
 
 
 /**
- * Obtiene frecuencia de epsilon y score por especie con validaciÃ³n y tiempo.
+ * Obtiene frecuencia de epsilon y score por especie con validación y tiempo.
  *
  * @function
  * @param {express.Request} req - Express request object
@@ -49,16 +49,17 @@ function getFreqNiche_VT(req, res, next) {
   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
 
   // filtros por tiempo
-  var sfecha            = verb_utils.getParam(req, 'sfecha', false)
-  var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'), 
-                                 ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
-  var fecha_fin         = moment(verb_utils.getParam(req, 'lim_sup',
-                                                     moment().format('YYYY-MM-DD')),
+  var sfecha        = verb_utils.getParam(req, 'sfecha', false)
+  var fecha_incio   = moment(verb_utils.getParam(req, 'lim_inf', '1500'), 
+                             ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+  var fecha_fin     = moment(verb_utils.getParam(req, 'lim_sup',
+                                                 moment().format('YYYY-MM-DD')),
                                  ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
   var discardedFilterids = verb_utils.getParam(req, 'discardedDateFilterids')
   // debug(discardedFilterids)
 
-  if ( hasBios === 'true' && hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 && discardedFilterids === 'true' ) {
+  if ( hasBios === 'true' && hasRaster === 'true' && discardedids != undefined 
+       && discardedids.length > 0 && discardedFilterids === 'true' ) {
 
     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
     debug(caso)
@@ -90,7 +91,8 @@ function getFreqNiche_VT(req, res, next) {
         next(error)
       })
   }
-  else if (hasBios === 'true' && discardedids != undefined && discardedids.length > 0 && discardedFilterids === 'true' ) {
+  else if (hasBios === 'true' && discardedids != undefined && 
+           discardedids.length > 0 && discardedFilterids === 'true' ) {
 
     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
     debug(caso)
@@ -122,7 +124,8 @@ function getFreqNiche_VT(req, res, next) {
         next(error)
       })
   } 
-  else if (hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 && discardedFilterids === 'true' ) {
+  else if (hasRaster === 'true' && discardedids != undefined && 
+           discardedids.length > 0 && discardedFilterids === 'true' ) {
 
     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
     debug(caso)
@@ -188,7 +191,8 @@ function getFreqNiche_V(req, res, next) {
   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
   // debug(discardedids)
     
-  if ( hasBios === 'true' && hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 ) {
+  if ( hasBios === 'true' && hasRaster === 'true' && discardedids != undefined
+       && discardedids.length > 0 ) {
     debug('V')
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
@@ -212,7 +216,8 @@ function getFreqNiche_V(req, res, next) {
         next(error)
       })
   }
-  else if (hasBios === 'true' && discardedids != undefined && discardedids.length > 0 ) {
+  else if (hasBios === 'true' && discardedids != undefined && 
+           discardedids.length > 0 ) {
     debug('B')
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
     // debug(whereVar)
@@ -236,7 +241,8 @@ function getFreqNiche_V(req, res, next) {
         next(error)
       })
   } 
-  else if (hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 ) {
+  else if (hasRaster === 'true' && discardedids != undefined && 
+           discardedids.length > 0 ) {
     debug('Ra')
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
     // debug(whereVarRaster)
@@ -290,12 +296,12 @@ function getFreqNiche_T(req, res, next) {
   var hasRaster       = verb_utils.getParam(req, 'hasRaster')
     
   // filtros por tiempo
-  var sfecha            = verb_utils.getParam(req, 'sfecha', false)
-  var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'),
-                                 ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
-  var fecha_fin         = moment(verb_utils.getParam(req, 'lim_sup', 
-                                                     moment().format('YYYY-MM-DD')),
-                                 ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+  var sfecha       = verb_utils.getParam(req, 'sfecha', false)
+  var fecha_incio  = moment(verb_utils.getParam(req, 'lim_inf', '1500'),
+                            ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+  var fecha_fin    = moment(verb_utils.getParam(req, 'lim_sup', 
+                                                moment().format('YYYY-MM-DD')),
+                            ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
   var discardedFilterids = verb_utils.getParam(req, 'discardedDateFilterids')
 
   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])

@@ -1,6 +1,6 @@
 /**
 * Este verbo es responsable de obtener los valores de epsilon y score entre una
-* especie objetivo y un conjunto de variables biÃ³oticas y raster.
+* especie objetivo y un conjunto de variables bióticas y raster.
 *
 * @module controllers/getGeoRelNiche
 * @requires debug
@@ -289,8 +289,11 @@ function getGeoRelNiche_T(req, res, next) {
     
   // filtros por tiempo
   var sfecha            = verb_utils.getParam(req, 'sfecha', false)
-  var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
-  var fecha_fin         = moment(verb_utils.getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+  var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'), 
+                                 ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+  var fecha_fin         = moment(verb_utils.getParam(req, 'lim_sup', moment().
+                                                     format('YYYY-MM-DD') ), 
+                                 ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
     
   var discardedFilterids = verb_utils.getParam(req, 'discardedDateFilterids')
 
@@ -301,9 +304,10 @@ function getGeoRelNiche_T(req, res, next) {
     // debug(fecha_incio)
     // debug(fecha_fin)
     
-  if (hasBios === 'true' && hasRaster === 'true' && discardedFilterids === 'true') {
+  if (hasBios === 'true' && hasRaster === 'true' && 
+      discardedFilterids === 'true') {
     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
-    debug("caso: " + caso)
+    debug('caso: ' + caso)
 
     debug('T')  
 
@@ -337,7 +341,7 @@ function getGeoRelNiche_T(req, res, next) {
     debug('B')
 
     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
-    debug("caso: " + caso)
+    debug('caso: ' + caso)
 
     whereVar = verb_utils.processBioFilters(tfilters, spid)
 
@@ -521,8 +525,8 @@ function getGeoRelNiche(req, res, next) {
 
 
 /**
- * EstÃ¡ variable es un arreglo donde se define el flujo que debe de tener una 
- * peticiÃ³n al verbo getGeoRelNiche. Actualmente el flujo es getGeoRelNiche_VT,
+ * Esta variable es un arreglo donde se define el flujo que debe de tener una 
+ * petición al verbo getGeoRelNiche. Actualmente el flujo es getGeoRelNiche_VT,
  * getGeoRelNiche_V, getGeoRelNiche_T y getGeoRelNiche.
  *
  * @see controllers/getGeoRelNiche~getGeoRelNiche_VT
