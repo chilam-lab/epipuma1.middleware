@@ -1,4 +1,5 @@
 /*getGeoRel con proceso de validación*/
+/*
 WITH source AS (
 	SELECT spid, 
 			--$<res_celda:raw> as cells
@@ -74,7 +75,7 @@ counts AS (
 ) 
 SELECT 	--counts.source_spid,
 		--counts.source,
-		--counts.generovalido,
+		counts.generovalido,
 		counts.especievalidabusqueda,
 		counts.niyj as nij,
 		counts.nj,
@@ -108,3 +109,24 @@ SELECT 	--counts.source_spid,
 		)as numeric), 2) as score
 FROM counts 
 ORDER BY epsilon desc;
+*/
+select
+	out_generovalido,
+	out_especievalidabusqueda,
+	out_nij,
+	out_nj,
+	out_ni,  
+ 	out_n,
+ 	out_reinovalido,
+ 	out_phylumdivisionvalido,
+ 	out_clasevalida,
+ 	out_ordenvalido,
+ 	out_familiavalida
+	avg(out_epsilon) as avg_epsilon,
+	avg(out_score) as avg_score
+from iteratevalidationprocess(1, $<spid>, $<N>,$<alpha>, $<min_occ:raw>, array[$<discardedDeleted:raw>]::int[], $<res_celda:raw>, $<where_config:raw>)
+where out_spid is not null
+group by out_spid, out_reinovalido, out_phylumdivisionvalido, out_clasevalida, out_ordenvalido, out_familiavalida, out_generovalido, out_especievalidabusqueda
+order by out_spid
+
+

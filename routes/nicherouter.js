@@ -74,7 +74,8 @@ router.route('/getFreq')
  * @param {string} path - Express path
  * @param {callback} middleware - Express middleware.
  */
-router.route('/getFreqMap')
+// router.route('/getFreqMap')
+router.route('/getCellScore')
   .get(getFreqMapNiche.pipe)
   .post(getFreqMapNiche.pipe)
 
