@@ -1,4 +1,3 @@
-/*getFreqDecil sin filtros*/
 WITH source AS (
 	SELECT spid, 
 			--$<res_celda:raw> as cells
@@ -83,6 +82,24 @@ rawdata as (
 	FROM counts 
 	ORDER BY epsilon desc
 ),
+
+/*with rawdata as(
+	select 
+		out_spid,
+		out_reinovalido,
+		out_phylumdivisionvalido,
+	 	out_clasevalida,
+	 	out_ordenvalido,
+	 	out_familiavalida,
+	 	out_generovalido,
+	 	out_especievalidabusqueda,
+		avg(out_epsilon) as avg_epsilon,
+		avg(out_score) as avg_score
+	from iteratevalidationprocess(5, 27332, 14900, 0.01, 0, 'cells_16km', 'where clasevalida = ''Mammalia'' ')
+	where out_spid is not null
+	group by out_spid, out_reinovalido, out_phylumdivisionvalido, out_clasevalida, out_ordenvalido, out_familiavalida, out_generovalido, out_especievalidabusqueda
+	order by out_spid
+),*/
 basic_score as (
 	select 	unnest(cells) as gridid, 
 			array_agg(spid|| '|' ||label|| '|' ||epsilon::text|| '|' ||score::text|| '|' ||nj::text) as array_sp,

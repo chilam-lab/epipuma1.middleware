@@ -856,7 +856,7 @@ exports.getGeoRelNiche_T = function (req, res, next) {
 
 exports.getGeoRelNiche = function (req, res, next) {
 
-    debug("getGeoRelNiche")
+    debug("getGeoRelNiche YEAH!!")
 
     var spid        = parseInt(getParam(req, 'id'))
     var tfilters    = getParam(req, 'tfilters')
@@ -913,7 +913,7 @@ exports.getGeoRelNiche = function (req, res, next) {
     }
     else if (hasBios === 'true'){
 
-      debug("B")
+      debug("B GeoRel")
       var whereVar = verb_utils.processBioFilters(tfilters, spid)
       // debug(whereVar)
       // debug(queries.getGeoRelNiche.getGeoRelBio)
@@ -928,7 +928,7 @@ exports.getGeoRelNiche = function (req, res, next) {
         discardedDeleted: discardedDeleted
       })
       .then(function (data) {
-        // debug(data)
+        debug(data)
         res.json({'data': data})
       })
       .catch(function (error) {
