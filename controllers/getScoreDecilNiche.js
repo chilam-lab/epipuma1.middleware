@@ -20,6 +20,7 @@ var queries = require('./sql/queryProvider')
 
 var pool= pgp(config.db)
 var N = verb_utils.N 
+var iterations = verb_utils.iterations
 
 
 /**
@@ -173,7 +174,8 @@ function getScoreDecilNiche_V(req, res, next) {
 
   // debug(discardedids)
     
-  if ( hasBios === 'true' && hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 ) {
+  if ( hasBios === 'true' && hasRaster === 'true' && 
+       discardedids != undefined && discardedids.length > 0 ) {
     debug('V')
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
@@ -201,7 +203,8 @@ function getScoreDecilNiche_V(req, res, next) {
         debug(error)
         next(error)
       })
-  } else if (hasBios === 'true' && discardedids != undefined && discardedids.length > 0 ) {
+  } else if (hasBios === 'true' && discardedids != undefined && 
+             discardedids.length > 0 ) {
     debug('B')
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
     // debug(whereVar)
@@ -235,7 +238,8 @@ function getScoreDecilNiche_V(req, res, next) {
         debug(error)
         next(error)
       })
-  } else if (hasRaster === 'true' && discardedids != undefined && discardedids.length > 0 ) {
+  } else if (hasRaster === 'true' && discardedids != undefined && 
+             discardedids.length > 0 ) {
     debug('Ra')
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
     // debug(whereVarRaster)
@@ -298,14 +302,19 @@ function getScoreDecilNiche_T(req, res, next) {
     
   // filtros por tiempo
   var sfecha            = verb_utils.getParam(req, 'sfecha', false)
-  var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
-  var fecha_fin         = moment(verb_utils.getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+  var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'), 
+                                 ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+  var fecha_fin         = moment(verb_utils.getParam(req, 'lim_sup', 
+                                                     moment().
+                                                     format('YYYY-MM-DD') ), 
+                                 ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
   var discardedFilterids = verb_utils.getParam(req, 'discardedDateFilterids')
   // debug(discardedFilterids)
 
   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
     
-  if (hasBios === 'true' && hasRaster === 'true' && discardedFilterids === 'true') {
+  if (hasBios === 'true' && hasRaster === 'true' && 
+      discardedFilterids === 'true') {
     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
     debug(caso)
 
@@ -430,6 +439,10 @@ function getScoreDecilNiche(req, res, next) {
 
   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
 
+  debug("val_ process: " + verb_utils.getParam(req, 'val_process', false))
+  var iter = verb_utils.getParam(req, 'val_process', false) === "true" ? iterations : 1
+  debug("iterations: " + iter)
+
   // Siempre incluidos en query, nj >= 0
   var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
 
@@ -446,6 +459,7 @@ function getScoreDecilNiche(req, res, next) {
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
 
     pool.any(queries.getScoreDecilNiche.getScoreDecil, {
+      iterations: iter,
       spid: spid,
       N: N,
       alpha: alpha,
@@ -475,6 +489,7 @@ function getScoreDecilNiche(req, res, next) {
 
 
     pool.any(queries.getScoreDecilNiche.getScoreDecilBio, {
+      iterations: iter,
       spid: spid,
       N: N,
       alpha: alpha,
@@ -501,6 +516,7 @@ function getScoreDecilNiche(req, res, next) {
     // debug(whereVarRaster)
 
     pool.any(queries.getScoreDecilNiche.getScoreDecilRaster, {
+      iterations: iter,
       spid: spid,
       N: N,
       alpha: alpha,
@@ -529,7 +545,7 @@ function getScoreDecilNiche(req, res, next) {
 
 
 /**
- * Está variable es un arreglo donde se define el flujo que debe de tener una 
+ * Esta variable es un arreglo donde se define el flujo que debe de tener una 
  * petición al verbo getScoreDecilNiche. Actualmente el flujo es 
  * getScoreDecilNiche_A, getScoreDecilNiche_V, getScoreDecilNiche_T y 
  * getScoreDecilNiche.

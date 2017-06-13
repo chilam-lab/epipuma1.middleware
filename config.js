@@ -3,16 +3,14 @@
 var config = {}
 
 config.db = {}
-config.db.database = process.env.DBNAME || 'niche'
+config.db.database = process.env.DBNAME || 'snib'
 config.db.user = process.env.DBUSER || 'postgres'
 config.db.password = process.env.DBPWD || '***REMOVED***'
 config.db.host = process.env.DBHOST || '***REMOVED***'
 config.db.port = process.env.DBPORT || '5439'
-// config.db.host = process.env.DBHOST || '***REMOVED***'
-// config.db.port = process.env.DBPORT || '5432'
 config.db.application_name = 'expressMiddleware'
+ 
 // Configure pool of connections
-
 
 config.db.poolSize = 10
 

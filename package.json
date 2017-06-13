@@ -21,7 +21,6 @@
   "repository": {
     "type": "git",
     "url": "https://bitbucket.org/conabio_c3/snib-middleware.git"
-
   },
   "dependencies": {
     "body-parser": "~1.15.2",
@@ -32,7 +31,7 @@
     "pg-promise": "^5.3.5"
   },
   "devDependencies": {
-    "eslint": "^3.9.1",
+    "eslint": "^3.19.0",
     "jsdoc": "^3.4.3",
     "mocha": "~3.1.0",
     "nodemon": "^1.11.0",

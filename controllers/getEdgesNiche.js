@@ -1,3 +1,4 @@
+
 /**
 * getEdgesNiche module
 *
@@ -41,8 +42,8 @@ function getEdgesNiche(req, res, next) {
   var res_celda = verb_utils.getParam(req, 'res_celda', 'cells_16km')
 
 
-  var min_ep = 0.0
-  var max_edges = 1000
+  // var min_ep = 0.0
+  // var max_edges = 1000
 
   var hasBiosSource    = verb_utils.getParam(req, 'hasbiosource')
   var hasRasterSource    = verb_utils.getParam(req, 'hasrastersource')
@@ -51,7 +52,8 @@ function getEdgesNiche(req, res, next) {
 
 
 
-  if ( hasBiosSource === true && hasBiosTarget === true && hasRasterSource === true && hasRasterTarget === true ){
+  if ( hasBiosSource === true && hasBiosTarget === true && 
+       hasRasterSource === true && hasRasterTarget === true ){
 
     debug('T')
     var whereVarSource = verb_utils.processBioFilters(sfilters)
@@ -80,7 +82,8 @@ function getEdgesNiche(req, res, next) {
 
       
   }
-  else if ( hasBiosSource === true && hasRasterSource === true && hasBiosTarget === true ){
+  else if ( hasBiosSource === true && hasRasterSource === true && 
+            hasBiosTarget === true ){
 
     debug('T')
     var whereVarSource = verb_utils.processBioFilters(sfilters)
@@ -146,7 +149,7 @@ function getEdgesNiche(req, res, next) {
     debug('T')
     var whereVarSource = verb_utils.processBioFilters(sfilters)
         // var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters)
-
+      
     var whereVarTarget = verb_utils.processBioFilters(tfilters)
     var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters)
 
@@ -266,30 +269,27 @@ function getEdgesNiche(req, res, next) {
       
   }
   else if ( hasRasterSource === true && hasBiosTarget === true ){
-
     debug('T')
-
     debug(sfilters)
     debug(tfilters)
-        // var whereVarSource = verb_utils.processBioFilters(sfilters)
+    // var whereVarSource = verb_utils.processBioFilters(sfilters)
+
     var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters)
-
     var whereVarTarget = verb_utils.processBioFilters(tfilters)
-        // var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters)
-
+    // var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters)
         
-        debug(whereVarSourceRaster)
-        debug(whereVarTarget)
+    debug(whereVarSourceRaster)
+    debug(whereVarTarget)
 
     pool.any(queries.getEdgesNiche.getEdgesNicheRaster_Bio, {
       N: N,
       alpha: alpha,
       min_occ: min_occ,
-          // where_config_source: whereVarSource,
+      // where_config_source: whereVarSource,
       where_config_source_raster: whereVarSourceRaster,
       where_config_target: whereVarTarget,
       res_celda: res_celda
-          // where_config_target_raster: whereVarTargetRaster
+      // where_config_target_raster: whereVarTargetRaster
     })
         .then(function (data) {
           // debug(data)
@@ -300,8 +300,6 @@ function getEdgesNiche(req, res, next) {
           debug(error)
           next(error)
         })
-
-      
   }
   else if ( hasRasterSource === true && hasRasterTarget === true ){
 
