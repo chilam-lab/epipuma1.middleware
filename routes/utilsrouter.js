@@ -11,7 +11,7 @@
  * @namespace utilsRouter
  */
 var router = require('express').Router()
-var verbsCtrl = require('../controllers/verbsniche')
+var verbsCtrl = require('../controllers/verbs')
 
 /**
  * Ruta con diversas funciones útiles para el frontend
