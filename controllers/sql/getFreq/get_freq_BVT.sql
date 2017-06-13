@@ -1,201 +1,171 @@
-with first_rawdata as( 
-		select 	cal.spid,cal.reinovalido,cal.phylumdivisionvalido,cal.clasevalida,ordenvalido,cal.familiavalida,cal.generovalido,epitetovalido, 
-				cal.label, 
-				sum(cal.Nij) as nij,
-				cal.nj, 
-				cel.occ as Ni, 
-				 $<N> as n  -- 6473 as n ----  
-		from sp_occ as cel, ( 
-			select 	reinovalido,phylumdivisionvalido,clasevalida,ordenvalido,familiavalida,generovalido,epitetovalido, 
-					(generovalido || ' ' || epitetovalido)  as label, 
-					w2.spid as spid, 
-					w2.Nij as Nij, 
-					w2.Nj as Nj 
-			from sp_snib 
-			INNER JOIN ( 
-				select b.spids as spid, COALESCE(a.counts,0) as Nij,b.occ as Nj from ( select  cast(sum(counts) as integer) as counts, spids, occ 
-				from( 
-					select 
-						unnest(nbanimalia_counts||nbplantae_counts||nbfungi_counts||nbprotoctista_counts||nbprokaryotae_counts||nbanimalia_exoticas_counts||nbplantae_exoticas_counts||nbfungi_exoticas_counts||nbprotoctista_exoticas_counts||nbprokaryotae_exoticas_counts) as counts, 
-						unnest(nbanimalia_spids||nbplantae_spids||nbfungi_spids||nbprotoctista_spids||nbprokaryotae_spids||nbanimalia_exoticas_spids||nbplantae_exoticas_spids||nbfungi_exoticas_spids||nbprotoctista_exoticas_spids||nbprokaryotae_exoticas_spids) as spids, occ 
-					from sp_occ 
-					where spid = $<spid>  --49405 --  
-				) as d 
-				group by spids, occ 
-			) as a 
-			RIGHT JOIN ( 
-				select idsp as spids,0 as counts,occ 
-				from sp_idocc 
-			) as b 
-			ON a.spids = b.spids 
-		) as w2 
-		ON sp_snib.spid = w2.spid
-		$<where_config:raw>
-		 -- where 	sp_snib.spid <> 49405 and clasevalida = 'Mammalia' and epitetovalido <> ''   
-		order by spid  
-		) as cal 
-		where cel.spid = $<spid> -- 49405 --  
-		group by 
-			cal.spid, cal.reinovalido, cal.phylumdivisionvalido, cal.clasevalida,ordenvalido, cal.familiavalida, 
-			cal.generovalido,epitetovalido,  cal.label,  cal.nj,  cel.occ,  n
-), 
--- obtiene las especies y el numero de celdas que son descartadas por el filtro de tiempo del grupo de especies 
--- que estan relacionadas con la especie objetivo
-gridspddiscarded as ( 
-	select 	snib.spid, count(distinct snib.gridid) as num_gridids, 
-			array_agg(distinct snib.gridid) as arg_discarded 
-	from snib 
-	join first_rawdata on snib.spid = first_rawdata.spid
-	$<filter_dates:raw>
-	-- where (snib.especievalida = '' or snib.especievalida is null)  or ((EXTRACT(EPOCH FROM to_timestamp(fechacolecta, 'YYYY-MM--DD')) * 1000) < -14831748000000 or (EXTRACT(EPOCH FROM to_timestamp(fechacolecta, 'YYYY-MM--DD')) * 1000) > 1484460000000 ) 
-	group by snib.spid 
-), 
--- obtiene las especies de las celdas descartadas
-gridspddiscardedvalidation as ( 
-	select 	gridid, 
-			( 	animalia || plantae || fungi || protoctista || prokaryotae || animalia_exoticas || plantae_exoticas || fungi_exoticas || 
-				protoctista_exoticas || prokaryotae_exoticas || bio01 || bio02 || bio03 || bio04 || bio05 || bio06 || bio07 || bio08 || 
-				bio09 || bio10 || bio11 || bio12 || bio13 || bio14 || bio15 || bio16 || bio17 || bio18 || bio19 || elevacion || pendiente || 
-				topidx  ) as spids 
-	from sp_grid_terrestre 
-	-- where gridid in (14430,11015,14760,3518,2766,10546,6300,10478,4016,8050)
-	where gridid in ($<arg_gridids:raw>) 
-), 
--- De las celdas descartadas, se obtienen las celdas y las especies donde existe relacion con la especie objetivo
-gridObj as ( 
-	select sp_grid_terrestre.gridid, 
-			( animalia || plantae || fungi || protoctista || prokaryotae || animalia_exoticas || plantae_exoticas 
-				|| fungi_exoticas || protoctista_exoticas || prokaryotae_exoticas || bio01 || bio02 || bio03 || bio04 
-				|| bio05 || bio06 || bio07 || bio08 || bio09 || bio10 || bio11 || bio12 || bio13 || bio14 || bio15 
-				|| bio16 || bio17 || bio18 || bio19 || elevacion || pendiente || topidx  
-			) spids 
-	from sp_grid_terrestre 
-	join ( 
-		select unnest( 
-				-- ARRAY[$<arg_gridids:raw>]
-				-- es una concatenacion entre la celdas descartadas por validaciony por filtro de tiempo
-				ARRAY[$<arg_gridids_total:raw>]
-				-- ARRAY[1895,1897,1901,1917,2074,2249,2424,2431,2801,3131]
-				) as gridid 
-	) a2 
-	on a2.gridid = sp_grid_terrestre.gridid 
-	where   (animalia || plantae || fungi || protoctista || prokaryotae || animalia_exoticas || plantae_exoticas || fungi_exoticas 
-			|| protoctista_exoticas || prokaryotae_exoticas || bio01 || bio02 || bio03 || bio04 || bio05 || bio06 || bio07 
-			|| bio08 || bio09 || bio10 || bio11 || bio12 || bio13 || bio14 || bio15 || bio16 || bio17 || bio18 || bio19 || elevacion 
-			|| pendiente || topidx ) @> 
-			ARRAY[$<spid:value>]
-			--ARRAY[49405]
-), 
-gridObjSize as ( 
-	select count(*) as ni_length from gridObj 
+/*getFreq con proceso de validación y tiempo*/
+WITH source AS (
+	SELECT spid, $<res_celda:raw> as cells 
+	FROM sp_snib 
+	WHERE 
+		spid = $<spid>
+		--spid = 33553
+		and especievalidabusqueda <> ''
 ),
--- Para nj: del numero de celdas descartadas con presencia de las especies con relacion a la especie objetivo (num_gridids)
--- + el numero de presencias de cada especie que se encuentra dentro del conjutno de celdas descartadas.
--- es descontada al numero total de especies.
--- Para n: se descuenta el numeor total de celdas descartadas por validacion al numero total de celdas que compone la malla
-getval_n_nj as ( 
-	select 	first_rawdata.reinovalido, first_rawdata.phylumdivisionvalido, first_rawdata.clasevalida, first_rawdata.ordenvalido, 
-			first_rawdata.familiavalida, first_rawdata.generovalido, first_rawdata.epitetovalido, first_rawdata.spid,  
-			first_rawdata.label,
-			-- first_rawdata.nj,
-			-- num_gridids,
-			-- sum(case when gridspddiscardedvalidation.gridid is NULL  then 0 else 1 end),
-			case when COALESCE(num_gridids + sum(case when gridspddiscardedvalidation.gridid is NULL  then 0 else 1 end), sum(case when gridspddiscardedvalidation.gridid is NULL  then 0 else 1 end) ) > first_rawdata.nj 
-				then 0 
-				else (first_rawdata.nj - COALESCE(num_gridids + sum(case when gridspddiscardedvalidation.gridid is NULL  then 0 else 1 end), sum(case when gridspddiscardedvalidation.gridid is NULL  then 0 else 1 end) ) ) 
-			end as dis_nj,
-			-- descontar celdas solo de validacion
-			(first_rawdata.n - array_length(array[$<arg_gridids:raw>], 1)) as dis_n
-			-- (first_rawdata.n - array_length(array[14430,11015,14760,3518,2766,10546,6300,10478,4016,8050], 1)) as dis_n
-			-- first_rawdata.n as dis_n
-	from first_rawdata  
-	left join gridspddiscarded  
-	on gridspddiscarded.spid = first_rawdata.spid 
-	left join gridspddiscardedvalidation
-	on gridspddiscardedvalidation.spids @> ARRAY[first_rawdata.spid]
-	group by first_rawdata.reinovalido, first_rawdata.phylumdivisionvalido, first_rawdata.clasevalida, first_rawdata.ordenvalido, 
-			first_rawdata.familiavalida, first_rawdata.generovalido, first_rawdata.epitetovalido, first_rawdata.spid,  
-			first_rawdata.label,  nj,  n, num_gridids 
-	order by dis_nj desc 
+target AS (
+	SELECT  spid,
+			$<res_celda:raw> as cells 
+	FROM sp_snib
+	$<where_config:raw>
+	--WHERE clasevalida = 'Mammalia'
+	--WHERE ordenvalido = 'Carnivora'
+	and especievalidabusqueda <> ''
 ),
--- Para ni: se descuenta al numero de celdas de la especie objetivo menos el numero de celdas descartadas donde existe su presencia menos
--- el numero de celdas descartadas por filtro de tiempo (todo esta incluido en gridObj)
--- Para nij: de las espcies relacionadas con la especie objetivo (first_raw_data), se busca si esta dentro de las especies de las celdas descartadas
--- donde existe presencia tambien de la especie objetivo. Se suman las coincidencias y se resta al valor total de nij
-getval_ni_nij as ( 
-	select 	first_rawdata.reinovalido, first_rawdata.phylumdivisionvalido, first_rawdata.clasevalida, first_rawdata.ordenvalido, first_rawdata.familiavalida, 
-			first_rawdata.generovalido, first_rawdata.epitetovalido, first_rawdata.spid,  first_rawdata.label,
-			first_rawdata.nij,
-			case when first_rawdata.nij - sum(case when gridObj.gridid is NULL  then 0 else 1 end) > 0 
-				then first_rawdata.nij - sum(case when gridObj.gridid is NULL  then 0 else 1 end)
-				else 0 
-			end as dis_nij,
-			-- gridObjSize incluye registro s de timepo y validacion
-			first_rawdata.ni - gridObjSize.ni_length as dis_ni
-	from first_rawdata
-	left join gridObj 
-	on gridObj.spids @> ARRAY[first_rawdata.spid],
-	-- left join gridspddiscarded_nij 
-	-- on gridspddiscarded_nij.spid = first_rawdata.spid, 
-	gridObjSize
-	group by 	first_rawdata.reinovalido, first_rawdata.phylumdivisionvalido, first_rawdata.clasevalida, first_rawdata.ordenvalido, first_rawdata.familiavalida, first_rawdata.generovalido, first_rawdata.epitetovalido, spid, first_rawdata.label, 
-				nij, ni, gridObjSize.ni_length
-	order by spid--dis_nij desc , first_rawdata.nij desc --    
+-- celdas de ni resultantes despues de filtro de tiempo y validación
+filter_ni_tv AS (
+	SELECT 	spid,
+			array_agg(distinct $<res_grid:raw>) - array[$<arg_gridids:raw>] as cells
+			--icount(array_agg(distinct gridid)) as ni
+	FROM 	snib 
+			where --snib.fechacolecta <> ''
+			/*((
+			cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)>= cast( 2000  as integer)
+			and 
+			cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)<= cast( 2020  as integer)
+			)
+			or snib.fechacolecta = '')*/
+			(case when $<caso> = 1 
+				  then 
+				  		fechacolecta <> '' 
+				  when $<caso> = 2 
+				  then
+				  		cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)>= cast( $<lim_inf>  as integer)
+						and 
+						cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)<= cast( $<lim_sup>  as integer)
+				  else
+				  		((
+						cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)>= cast( $<lim_inf>  as integer)
+						and 
+						cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)<= cast( $<lim_sup>  as integer)
+						)
+						or snib.fechacolecta = '')
+			end) = true
+			--and spid = 33553
+			and spid = $<spid>
+			and especievalidabusqueda <> ''
+	group by spid
 ),
--- se agregaron validaciones por inconsistencias en los conteos
-rawdata as( 
-	select 	getval_n_nj.spid,  
-			dis_nij as nij, 
-			dis_ni as ni, 
-			dis_nj as nj, 
-			dis_n as n, 
-			case when dis_nij > dis_nj
-			then 
-				CASE WHEN dis_nj <> 0 then round(cast(get_epsilon(dis_nj::integer, dis_nj::integer, dis_ni::integer, dis_n::integer) as numeric),2) else 0 end
-			when dis_nij > dis_ni
-			then 
-				CASE WHEN dis_nj <> 0 then round(cast(get_epsilon(dis_nj::integer, dis_ni::integer, dis_ni::integer, dis_n::integer) as numeric),2) else 0 end
-			else
-				CASE WHEN dis_nj <> 0 then round(cast(get_epsilon(dis_nj::integer, dis_nij::integer, dis_ni::integer, dis_n::integer) as numeric),2) else 0 end
-			end 
-			as epsilon,
-			case when dis_nij > dis_nj
-			then
-				CASE WHEN dis_nj <> 0 then ln( get_score(0.01, dis_nj::integer, dis_nj::integer, dis_ni::integer, dis_n::integer) ) else 0 end
-			when dis_nij > dis_ni
-			then
-				CASE WHEN dis_nj <> 0 then ln( get_score(0.01, dis_nj::integer, dis_ni::integer, dis_ni::integer, dis_n::integer) ) else 0 end
-			else
-				CASE WHEN dis_nj <> 0 then ln( get_score(0.01, dis_nj::integer, dis_nij::integer, dis_ni::integer, dis_n::integer) ) else 0 end
-			end 
-			as score
-	from getval_n_nj  
-	join getval_ni_nij 
-	on getval_n_nj.spid = getval_ni_nij.spid  
-	order by score
-	-- order by spid -- nj desc, nij  desc
+-- celdas de nj resultantes despues de filtro de tiempo 
+filter_nj_tv AS (
+	SELECT 	
+		snib.spid, 
+		array_agg(distinct $<res_grid:raw>) - array[ $<arg_gridids:raw> ] as cells
+		--icount(array_agg(distinct gridid)) as nj
+	FROM snib, target
+	where --snib.fechacolecta <> ''
+		/*((
+		cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)>= cast( 2000  as integer)
+		and 
+		cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)<= cast( 2020  as integer)
+		)
+		or snib.fechacolecta = '')*/
+		(case when $<caso> = 1 
+			  then 
+			  		fechacolecta <> '' 
+			  when $<caso> = 2 
+			  then
+			  		cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)>= cast( $<lim_inf>  as integer)
+					and 
+					cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)<= cast( $<lim_sup>  as integer)
+			  else
+			  		((
+					cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)>= cast( $<lim_inf>  as integer)
+					and 
+					cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)<= cast( $<lim_sup>  as integer)
+					)
+					or snib.fechacolecta = '')
+		end) = true
+		and snib.spid = target.spid
+		and snib.especievalidabusqueda <> ''
+	group by snib.spid
+	--order by spid
+	--limit 1
+),
+-- celdas de nij resultantes despues de filtro de tiempo 
+filter_nij_tv AS(
+	select 	filter_nj_tv.spid, 
+			filter_ni_tv.cells & filter_nj_tv.cells AS cells
+			--icount(filter_ni_tiempo.ids_ni & filter_nj_tiempo.ids_nj) AS niyj
+	FROM filter_nj_tv, filter_ni_tv
+	--order by spid
+),
+counts AS (
+	SELECT 	--source.spid as source_spid,
+			target.spid,
+			icount(filter_nj_tv.cells) as nj,
+			icount(filter_ni_tv.cells) as ni,
+			icount(filter_nij_tv.cells) as niyj,
+			$<N> - icount(array[ $<arg_gridids:raw> ]) as n
+			--14707 - icount(array[ $<arg_gridids:raw> ]) as n
+	FROM 	target, 
+			filter_ni_tv, filter_nj_tv, filter_nij_tv
+	where 	
+			target.spid <> $<spid>
+			--target.spid <> 33553
+			--and source.spid = filter_ni.spid
+			and target.spid = filter_nj_tv.spid
+			and target.spid = filter_nij_tv.spid
+			and icount(filter_nj_tv.cells) > $<min_occ:raw>
+			--and icount(filter_nj_tv.cells) > 0
+			--and filter_nj.nj < filter_nij.niyj
+			order by spid
+),
+rawdata as (
+	SELECT 	round( cast(  
+			get_epsilon(
+				$<alpha>,
+				--0.01,
+				cast(counts.nj as integer), 
+				cast(counts.niyj as integer), 
+				cast(counts.ni as integer), 
+				cast($<N> as integer)
+				--cast(14707 as integer)
+		)as numeric), 2)  as epsilon,
+		round( cast(  ln(   
+			get_score(
+				$<alpha>,
+				--0.01,
+				cast(counts.nj as integer), 
+				cast(counts.niyj as integer), 
+				cast(counts.ni as integer), 
+				cast($<N> as integer)
+				--cast(14707 as integer)
+			)
+		)as numeric), 2) as score
+	FROM counts 
+	ORDER BY epsilon desc
 ), 
 minmax_scores as ( 
-	select min(score) as mineps, (max(score)) as maxeps from rawdata
+	select 	min(score) as mineps, (max(score)) as maxeps from rawdata
 ), 
 minmax_epsilon as ( 
-	select min(epsilon) as mineps, (max(epsilon)) as maxeps from rawdata
+	select min(epsilon) as mineps, (max(epsilon)) as maxeps 
+	from rawdata
 ), 
 histogram_scores as ( 
 	select mineps, maxeps, hist.bucket as bucket, hist.freq as freq 
 	from ( 
 		select CASE WHEN mineps-maxeps = 0 THEN 1 ELSE width_bucket(score, mineps, maxeps, 20) END as bucket, count(*) as freq 
 		from minmax_scores, rawdata 
-		group by bucket order by bucket 
+		group by bucket 
+		order by bucket 
 	) as hist, minmax_scores
 ), 
 histogram_epsilon as ( 
 	select mineps, maxeps, hist.bucket as bucket, hist.freq as freq 
 	from ( 
 		select CASE WHEN mineps-maxeps = 0 THEN 1 ELSE width_bucket(epsilon, mineps, maxeps, 20) END as bucket, count(*) as freq 
-		from minmax_epsilon, rawdata 
-		group by bucket order by bucket 
-	) as hist, minmax_epsilon
+		from minmax_epsilon, 
+		rawdata 
+		group by bucket 
+		order by bucket 
+	) as hist, 
+	minmax_epsilon
 ) 
 select 	b1.bucket, 
 		round( cast( b1.freq_score as numeric ), 2 ) as freq_score, 

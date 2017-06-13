@@ -13,7 +13,7 @@
 var router = require('express').Router()
 var getGeoRel = require('../controllers/getGeoRelNiche')
 var getFreqNiche = require('../controllers/getFreqNiche')
-var getFreqMapNiche = require('../controllers/getFreqMapNiche') 
+var getCellScore = require('../controllers/getCellScoreNiche') 
 var getFreqCeldaNiche = require('../controllers/getFreqCeldaNiche') 
 var getScoreDecilNiche = require('../controllers/getScoreDecilNiche') 
 var getGridSpeciesNiche = require('../controllers/getGridSpeciesNiche') 
@@ -67,7 +67,7 @@ router.route('/getFreq')
 
 /**
  * Ruta que obtiene la suma del score por celda.
- * @name get/getFreqMap
+ * @name get/getCellScore
  * @function
  * @memberof module:routes/nicherouter~nicheRouter
  * @inner
@@ -76,8 +76,8 @@ router.route('/getFreq')
  */
 // router.route('/getFreqMap')
 router.route('/getCellScore')
-  .get(getFreqMapNiche.pipe)
-  .post(getFreqMapNiche.pipe)
+  .get(getCellScore.pipe)
+  .post(getCellScore.pipe)
 
 
 /**

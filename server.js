@@ -24,14 +24,12 @@ var port = process.env.PORT || 8080        // set our port
 // console.log("port: " + port)
 
 // Routes for our api
-var verbsRouter = require('./routes/router')
-var nicheRouter = require('./routes/nicherouter')
+var nicheRouter = require('./routes/router')
 var netRouter = require('./routes/networkrouter')
 var utilsRouter = require('./routes/utilsrouter')
 
 // Register our routes
 // all of our routes will be prefixed with /snib
-app.use('/snib', verbsRouter)
 app.use('/niche', 
         nicheRouter, 
         netRouter,

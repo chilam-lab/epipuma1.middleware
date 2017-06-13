@@ -1,4 +1,3 @@
-/*getFreqDecil sin filtros*/
 WITH source AS (
 	SELECT spid, 
 			--$<res_celda:raw> as cells
@@ -23,24 +22,6 @@ target AS (
 	--WHERE clasevalida = 'Mammalia'
 	$<where_config:raw>	 
 	and especievalidabusqueda <> ''
-	
-	union
-	
-	SELECT  cast('' as text) generovalido,
-			case when type = 1 then
-			layer
-			else
-			(label || ' ' || tag) 
-			end as especievalidabusqueda,
-			bid as spid,
-			cast('' as text) reinovalido,
-			cast('' as text) phylumdivisionvalido,
-			cast('' as text) clasevalida,
-			cast('' as text) ordenvalido,
-			cast('' as text) familiavalida,
-			$<res_celda:raw> as cells 
-	FROM raster_bins 
-	$<where_config_raster:raw>	 
 ),
 counts AS (
 	SELECT 	--source.spid as source_spid,
@@ -101,6 +82,23 @@ rawdata as (
 	FROM counts 
 	ORDER BY epsilon desc
 ),
+/*with rawdata as(
+	select 
+		out_spid,
+		out_reinovalido,
+		out_phylumdivisionvalido,
+	 	out_clasevalida,
+	 	out_ordenvalido,
+	 	out_familiavalida,
+	 	out_generovalido,
+	 	out_especievalidabusqueda,
+		avg(out_epsilon) as avg_epsilon,
+		avg(out_score) as avg_score
+	from iteratevalidationprocess(5, 27332, 14900, 0.01, 0, 'cells_16km', 'where clasevalida = ''Mammalia'' ')
+	where out_spid is not null
+	group by out_spid, out_reinovalido, out_phylumdivisionvalido, out_clasevalida, out_ordenvalido, out_familiavalida, out_generovalido, out_especievalidabusqueda
+	order by out_spid
+),*/
 basic_score as (
 	select 	unnest(cells) as gridid, 
 			array_agg(spid|| '|' ||label|| '|' ||epsilon::text|| '|' ||score::text|| '|' ||nj::text) as array_sp,
@@ -112,23 +110,19 @@ basic_score as (
 allgridis as(
 	select $<res_grid:raw> as gridid from grid_16km_aoi
 ),
-apriori as (
-	select ln( rawdata.ni / ( rawdata.n - rawdata.ni::numeric) ) as val 
-	from rawdata limit 1
-),
 prenorm as (
 	select 	allgridis.gridid,
 			array_sp,
-			COALESCE(tscore+apriori.val, apriori.val) as tscore
+			tscore
 	from basic_score
 	inner join allgridis
-	on basic_score.gridid = allgridis.gridid,
-	apriori
+	on basic_score.gridid = allgridis.gridid
 	order by tscore desc
 ),
 deciles as ( 
 	SELECT gridid, tscore, array_sp, ntile(10) over (order by tscore) AS decil 
-	FROM prenorm ORDER BY tscore 
+	FROM prenorm 
+	ORDER BY tscore 
 ),
 names_col as (
 	select 

@@ -17,7 +17,7 @@ var moment = require('moment')
 
 verb_utils.N = 94544 // MX y US sin Alaska y Hawaii a 16km
 // verb_utils.N = 19968 // MX a 16km
-verb_utils.iterations = 10
+verb_utils.iterations = 5
 
 
 /**
@@ -69,19 +69,24 @@ verb_utils.processBioFilters = function(tfilters_total, spid){
 
   for (var i = 0; i < tfilters.length; i++) {
     if (first_bio == true) {
-			// si existe mas de un elemento deben ir entre parentesis, ej: and (familiavalida = 'Felidae' or familiavalida = 'Canidae')
+	// si existe mas de un elemento deben ir entre parentesis, ej: 
+        // and (familiavalida = 'Felidae' or familiavalida = 'Canidae')
       if(tfilters.length > 1) {
-        whereVar = whereVar + ' where ' + filter_disj + ' (' + tfilters[i].field + ' = \'' + tfilters[i].value + '\''
+        whereVar = whereVar + ' where ' + filter_disj + ' (' + 
+              tfilters[i].field + ' = \'' + tfilters[i].value + '\''
       } else {
-        whereVar = whereVar + ' where ' + filter_disj + tfilters[i].field + ' = \'' + tfilters[i].value + '\''	
+        whereVar = whereVar + ' where ' + filter_disj + tfilters[i].field + 
+              ' = \'' + tfilters[i].value + '\''	
       }
       first_bio = false
     } else {
-      whereVar = whereVar + ' OR ' + tfilters[i].field + ' = \'' + tfilters[i].value + '\' '
+      whereVar = whereVar + ' OR ' + tfilters[i].field + ' = \'' + 
+            tfilters[i].value + '\' '
     }
   }
 		
-  // si existe mas de un elemento deben ir entre parentesis, ej: and (familiavalida = 'Felidae' or familiavalida = 'Canidae')
+  // si existe mas de un elemento deben ir entre parentesis, ej: 
+    // and (familiavalida = 'Felidae' or familiavalida = 'Canidae')
   if(tfilters.length > 1) {
     whereVar = whereVar + ') '
   }
@@ -162,21 +167,25 @@ verb_utils.processDateRecords = function(lim_inf, lim_sup, sfecha){
   // debug(sfecha);
 
   if(lim_inf || sfecha === 'false') {
-    filterDates += 'where (snib.especievalidabusqueda = \'\' or snib.especievalidabusqueda is null)  or '
+    filterDates += 'where (snib.especievalidabusqueda = \'\' or ' + 
+          'snib.especievalidabusqueda is null)  or '
     if(lim_inf) {
-      filterDates +=  '(( EXTRACT( EPOCH FROM to_timestamp(fechacolecta, \'YYYY-MM--DD\') ) * 1000 ) < ' + lim_inf + ' ' +
-							'or ' + 
-							'(EXTRACT(EPOCH FROM to_timestamp(fechacolecta, \'YYYY-MM--DD\')) * 1000) > ' + lim_sup + ' ) '
+      filterDates +=  '(( EXTRACT( EPOCH FROM to_timestamp(fechacolecta, ' + 
+            '\'YYYY-MM--DD\') ) * 1000 ) < ' + lim_inf + ' ' +
+            'or ' + '(EXTRACT(EPOCH FROM to_timestamp(fechacolecta, ' + 
+            '\'YYYY-MM--DD\')) * 1000) > ' + lim_sup + ' ) '
       if(sfecha === 'false') {
-					// debug("Filtros y sin fecha");
-					// los valores nulos y vacios de fechacolecta son menores al valor establecido en la condicion de tiempo anteior 
+	// debug("Filtros y sin fecha");
+	// los valores nulos y vacios de fechacolecta son menores al valor 
+        // establecido en la condicion de tiempo anteior 
       } else {
-				// debug("Solo filtros");
-        filterDates += ' and (fechacolecta <> \'\' and fechacolecta is not null)  '
+	// debug("Solo filtros");
+        filterDates += ' and (fechacolecta <> \'\' and ' + 
+              'fechacolecta is not null)  '
       }
     }
     if(lim_inf == undefined && sfecha === 'false') {
-			// debug("Solo registros sin fecha");
+        // debug("Solo registros sin fecha");
       filterDates += ' (fechacolecta = \'\' or fechacolecta is null) '
     }
   }
@@ -201,22 +210,42 @@ verb_utils.processTitleGroup = function(groupid, tfilters){
   if(groupid != undefined) {
     // group_item = 0 ->> root
     if (tfilters[0].type == 4) {
-      title_valor = JSON.stringify({'title':'Grupo Bio ' + groupid, 'type': tfilters[0].type , 'group_item': tfilters[0].group_item, 'is_parent':true })
+      title_valor = JSON.stringify(
+        {'title':'Grupo Bio ' + groupid, 
+          'type': tfilters[0].type , 
+          'group_item': tfilters[0].group_item, 
+          'is_parent':true })
     } else if (tfilters[0].type == 0) {
-      title_valor = JSON.stringify({'title':'Grupo Abio ' + groupid, 'type': tfilters[0].type , 'group_item': tfilters[0].group_item, 'is_parent':true })
-			// title_valor = "Grupo Abio " + groupid;
+      title_valor = JSON.stringify(
+        {'title':'Grupo Abio ' + groupid, 
+          'type': tfilters[0].type , 
+          'group_item': tfilters[0].group_item, 
+          'is_parent':true })
+	// title_valor = "Grupo Abio " + groupid;
     } else { // if (tfilters[0].type == 1){
-      title_valor = JSON.stringify({'title':'Grupo Topo ' + groupid, 'type': tfilters[0].type , 'group_item': tfilters[0].group_item, 'is_parent':true })
-			// title_valor = "Grupo Abio " + groupid;
+      title_valor = JSON.stringify(
+        {'title':'Grupo Topo ' + groupid, 
+          'type': tfilters[0].type , 
+          'group_item': tfilters[0].group_item, 
+          'is_parent':true })
+	// title_valor = "Grupo Abio " + groupid;
     }
   } else if (tfilters[0].value) {
     // debug("title: " + tfilters[0].value);
     // debug("title: " + tfilters[0].label);
     // debug(group_item);
     if (tfilters[0].type == 4) {
-      title_valor = JSON.stringify({'title':tfilters[0].value, 'type':tfilters[0].type , 'group_item': tfilters[0].group_item, 'is_parent':false })
+      title_valor = JSON.stringify(
+        {'title':tfilters[0].value, 
+          'type':tfilters[0].type , 
+          'group_item': tfilters[0].group_item, 
+          'is_parent':false })
     } else {
-      title_valor = JSON.stringify({'title':tfilters[0].label, 'type':tfilters[0].type , 'group_item': tfilters[0].group_item, 'is_parent':false })
+      title_valor = JSON.stringify(
+        {'title':tfilters[0].label, 
+          'type':tfilters[0].type , 
+          'group_item': tfilters[0].group_item, 
+          'is_parent':false })
     }
   }
 		
@@ -234,7 +263,8 @@ verb_utils.processTitleGroup = function(groupid, tfilters){
  */
 verb_utils.getColumns = function(issource, nivel) {
   if(issource == 1) {
-    return 'spid, reinovalido, phylumdivisionvalido, clasevalida, ordenvalido, familiavalida, generovalido, especievalidabusqueda'
+    return 'spid, reinovalido, phylumdivisionvalido, clasevalida, ' + 
+          'ordenvalido, familiavalida, generovalido, especievalidabusqueda'
   } else {
     return 'distinct ' + nivel + ' '
   }
@@ -256,13 +286,19 @@ verb_utils.getTimeCase = function(fecha_incio, fecha_fin, sfecha){
 
   var caso
 
-  if( (parseInt(fecha_incio.format('YYYY')) != 1500 || parseInt(fecha_fin.format('YYYY')) != parseInt(moment().format('YYYY')) ) && sfecha === 'false') {
+  if( (parseInt(fecha_incio.format('YYYY')) != 1500 || 
+       parseInt(fecha_fin.format('YYYY')) != 
+       parseInt(moment().format('YYYY')) ) && sfecha === 'false') {
     debug('rango y sin fecha')
     caso = 2
-  } else if( parseInt(fecha_incio.format('YYYY')) == 1500 && parseInt(fecha_fin.format('YYYY')) == parseInt(moment().format('YYYY'))  && sfecha === 'false') {
+  } else if( parseInt(fecha_incio.format('YYYY')) == 1500 && 
+             parseInt(fecha_fin.format('YYYY')) == 
+             parseInt(moment().format('YYYY'))  && sfecha === 'false') {
     debug('solo sin fecha')
     caso = 1
-  } else if( parseInt(fecha_incio.format('YYYY')) != 1500 || parseInt(fecha_fin.format('YYYY')) != parseInt(moment().format('YYYY')) ) {
+  } else if( parseInt(fecha_incio.format('YYYY')) != 1500 || 
+             parseInt(fecha_fin.format('YYYY')) != 
+             parseInt(moment().format('YYYY')) ) {
     debug('solo rango')
     caso = 3
   }
@@ -292,7 +328,9 @@ verb_utils.getRasterCategories = function(tfilters_total) {
     }	else if(tfilters_total[i].type == 0 && abio==false) {
       if(i>0) 
         categorias += '||'
-      categorias += 'bio01||bio02||bio03||bio04||bio05||bio06||bio07||bio08||bio09||bio10||bio11||bio12||bio13||bio14||bio15||bio16||bio17||bio18||bio19'
+      categorias += 'bio01||bio02||bio03||bio04||bio05||bio06||bio07||bio08' +
+            '||bio09||bio10||bio11||bio12||bio13||bio14||bio15||bio16||bio17'+
+            '||bio18||bio19'
       abio = true
     } else if(tfilters_total[i].type == 2 && topo==false) {
       if(i>0) 
@@ -302,7 +340,8 @@ verb_utils.getRasterCategories = function(tfilters_total) {
     } else if(tfilters_total[i].type == 1 && suelo==false) {
       if(i>0) 
         categorias += '||'
-      categorias += 'mexca || mexce || mexco || mexk || mexmg || mexmo || mexna || mexph || mexras'
+      categorias += 'mexca || mexce || mexco || mexk || mexmg || mexmo || ' + 
+            'mexna || mexph || mexras'
       suelo = true
     }
   }
