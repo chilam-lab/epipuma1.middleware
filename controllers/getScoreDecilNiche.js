@@ -21,6 +21,7 @@ var queries = require('./sql/queryProvider')
 var pool= pgp(config.db)
 var N = verb_utils.N 
 var iterations = verb_utils.iterations
+var alpha = verb_utils.alpha
 
 
 /**
@@ -36,10 +37,18 @@ function getScoreDecilNiche_A(req, res, next) {
 
   var spid        = parseInt(verb_utils.getParam(req, 'id'))
   var tfilters    = verb_utils.getParam(req, 'tfilters')
-  var alpha       = 0.01
+  // var alpha       = 0.01
   // var N           = 14707
   var res_celda = verb_utils.getParam(req, 'res_celda', 'cells_16km')
   var res_grid = verb_utils.getParam(req, 'res_grid', 'gridid_16km')
+
+   // filtros por tiempo
+  var sfecha            = verb_utils.getParam(req, 'sfecha', false)
+  var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+  var fecha_fin         = moment(verb_utils.getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+  
+  filter_time = false;
+
 
   // Siempre incluidos en query, nj >= 0
   var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
@@ -58,6 +67,15 @@ function getScoreDecilNiche_A(req, res, next) {
   if (hasBios === 'true' && hasRaster === 'true' && apriori === 'apriori' ) {
     debug('TA')
 
+    var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+    debug('caso: ' + caso)
+
+    filter_time = caso !== -1 ? true : filter_time
+    debug('filter_time: ' + filter_time)
+
+    res_celda = caso !== -1 ? res_celda.replace("cells","gridid") : res_celda
+    debug('res_celda: ' + res_celda)
+
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
 
@@ -70,7 +88,11 @@ function getScoreDecilNiche_A(req, res, next) {
       where_config_raster: whereVarRaster,
       res_celda: res_celda,
       res_grid: res_grid,
-      discardedDeleted: discardedDeleted
+      discardedDeleted: discardedDeleted,
+      lim_inf: fecha_incio.format('YYYY'),
+      lim_sup: fecha_fin.format('YYYY'),
+      caso: caso,
+      filter_time: filter_time
     })
       .then(function (data) {
         for(var i = 0; i < data.length; i++){
@@ -86,6 +108,15 @@ function getScoreDecilNiche_A(req, res, next) {
   } else if (hasBios === 'true' && apriori === 'apriori' ) {
     debug('BA')
 
+    var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+    debug('caso: ' + caso)
+
+    filter_time = caso !== -1 ? true : filter_time
+    debug('filter_time: ' + filter_time)
+
+    res_celda = caso !== -1 ? res_celda.replace("cells","gridid") : res_celda
+    debug('res_celda: ' + res_celda)
+
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
 
     pool.any(queries.getScoreDecilNiche.getScoreDecilBioA, {
@@ -96,7 +127,11 @@ function getScoreDecilNiche_A(req, res, next) {
       where_config: whereVar,
       res_celda: res_celda,
       res_grid: res_grid,
-      discardedDeleted: discardedDeleted
+      discardedDeleted: discardedDeleted,
+      lim_inf: fecha_incio.format('YYYY'),
+      lim_sup: fecha_fin.format('YYYY'),
+      caso: caso,
+      filter_time: filter_time
     })
       .then(function (data) {
         for(var i = 0; i < data.length; i++){
@@ -112,6 +147,15 @@ function getScoreDecilNiche_A(req, res, next) {
   } else if (hasRaster === 'true' && apriori === 'apriori' ) {
     debug('RaA')
 
+    var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+    debug('caso: ' + caso)
+
+    filter_time = caso !== -1 ? true : filter_time
+    debug('filter_time: ' + filter_time)
+
+    res_celda = caso !== -1 ? res_celda.replace("cells","gridid") : res_celda
+    debug('res_celda: ' + res_celda)
+
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
 
     pool.any(queries.getScoreDecilNiche.getScoreDecilRaA, {
@@ -122,7 +166,11 @@ function getScoreDecilNiche_A(req, res, next) {
       where_config_raster: whereVarRaster,
       res_celda: res_celda,
       res_grid: res_grid,
-      discardedDeleted: discardedDeleted
+      discardedDeleted: discardedDeleted,
+      lim_inf: fecha_incio.format('YYYY'),
+      lim_sup: fecha_fin.format('YYYY'),
+      caso: caso,
+      filter_time: filter_time
     })
       .then(function (data) {
         for(var i = 0; i < data.length; i++){
@@ -149,127 +197,127 @@ function getScoreDecilNiche_A(req, res, next) {
  * @param {express.Response} res - Express response object 
  * @param {function} next - Express next middleware function
  */
-function getScoreDecilNiche_V(req, res, next) {
-  debug('getScoreDecilNiche_V')
+// function getScoreDecilNiche_V(req, res, next) {
+//   debug('getScoreDecilNiche_V')
 
-  var spid        = parseInt(verb_utils.getParam(req, 'id'))
-  var tfilters    = verb_utils.getParam(req, 'tfilters')
-  var alpha       = 0.01
-  // var N           = 14707; // Verificar N, que se esta contemplando
-  var res_celda = verb_utils.getParam(req, 'res_celda', 'cells_16km')
-  var res_grid = verb_utils.getParam(req, 'res_grid', 'gridid_16km')
+//   var spid        = parseInt(verb_utils.getParam(req, 'id'))
+//   var tfilters    = verb_utils.getParam(req, 'tfilters')
+//   var alpha       = 0.01
+//   // var N           = 14707; // Verificar N, que se esta contemplando
+//   var res_celda = verb_utils.getParam(req, 'res_celda', 'cells_16km')
+//   var res_grid = verb_utils.getParam(req, 'res_grid', 'gridid_16km')
 
-  // Siempre incluidos en query, nj >= 0
-  var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
-  var groupid        = verb_utils.getParam(req, 'groupid')
+//   // Siempre incluidos en query, nj >= 0
+//   var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
+//   var groupid        = verb_utils.getParam(req, 'groupid')
 
-  var title_valor = verb_utils.processTitleGroup(groupid, tfilters)
+//   var title_valor = verb_utils.processTitleGroup(groupid, tfilters)
 
-  // variables configurables
-  var hasBios         = verb_utils.getParam(req, 'hasBios')
-  var hasRaster       = verb_utils.getParam(req, 'hasRaster')
-  var discardedids    = verb_utils.getParam(req, 'discardedids', [])
+//   // variables configurables
+//   var hasBios         = verb_utils.getParam(req, 'hasBios')
+//   var hasRaster       = verb_utils.getParam(req, 'hasRaster')
+//   var discardedids    = verb_utils.getParam(req, 'discardedids', [])
 
-  var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
+//   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
 
-  // debug(discardedids)
+//   // debug(discardedids)
     
-  if ( hasBios === 'true' && hasRaster === 'true' && 
-       discardedids != undefined && discardedids.length > 0 ) {
-    debug('V')
-    var whereVar = verb_utils.processBioFilters(tfilters, spid)
-    var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
+//   if ( hasBios === 'true' && hasRaster === 'true' && 
+//        discardedids != undefined && discardedids.length > 0 ) {
+//     debug('V')
+//     var whereVar = verb_utils.processBioFilters(tfilters, spid)
+//     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
 
-    pool.any(queries.getScoreDecilNiche.getScoreDecilV, {
-      spid: spid,
-      N: N,
-      alpha: alpha,
-      min_occ: min_occ,
-      where_config: whereVar,
-      where_config_raster: whereVarRaster,
-      arg_gridids: discardedids.toString(),
-      res_celda: res_celda,
-      res_grid: res_grid,
-      discardedDeleted: discardedDeleted
-    })
-      .then(function (data) {
-        for(var i = 0; i < data.length; i++){
-          var item = data[i]
-          item['title'] = title_valor
-        }
-        res.json({'data': data})
-      })
-      .catch(function (error) {
-        debug(error)
-        next(error)
-      })
-  } else if (hasBios === 'true' && discardedids != undefined && 
-             discardedids.length > 0 ) {
-    debug('B')
-    var whereVar = verb_utils.processBioFilters(tfilters, spid)
-    // debug(whereVar)
+//     pool.any(queries.getScoreDecilNiche.getScoreDecilV, {
+//       spid: spid,
+//       N: N,
+//       alpha: alpha,
+//       min_occ: min_occ,
+//       where_config: whereVar,
+//       where_config_raster: whereVarRaster,
+//       arg_gridids: discardedids.toString(),
+//       res_celda: res_celda,
+//       res_grid: res_grid,
+//       discardedDeleted: discardedDeleted
+//     })
+//       .then(function (data) {
+//         for(var i = 0; i < data.length; i++){
+//           var item = data[i]
+//           item['title'] = title_valor
+//         }
+//         res.json({'data': data})
+//       })
+//       .catch(function (error) {
+//         debug(error)
+//         next(error)
+//       })
+//   } else if (hasBios === 'true' && discardedids != undefined && 
+//              discardedids.length > 0 ) {
+//     debug('B')
+//     var whereVar = verb_utils.processBioFilters(tfilters, spid)
+//     // debug(whereVar)
 
-      // debug(discardedDeleted)
-      // debug(discardedids)
+//       // debug(discardedDeleted)
+//       // debug(discardedids)
 
-    pool.any(queries.getScoreDecilNiche.getScoreDecilBioV, {
-      spid: spid,
-      N: N,
-      alpha: alpha,
-      min_occ: min_occ,
-      where_config: whereVar,
-      arg_gridids: discardedids,
-      res_celda: res_celda,
-      res_grid: res_grid,
-      discardedDeleted: discardedDeleted
-    })
-      .then(function (data) {
+//     pool.any(queries.getScoreDecilNiche.getScoreDecilBioV, {
+//       spid: spid,
+//       N: N,
+//       alpha: alpha,
+//       min_occ: min_occ,
+//       where_config: whereVar,
+//       arg_gridids: discardedids,
+//       res_celda: res_celda,
+//       res_grid: res_grid,
+//       discardedDeleted: discardedDeleted
+//     })
+//       .then(function (data) {
 
-        // debug(data)
+//         // debug(data)
         
-        for(var i = 0; i < data.length; i++){
-          var item = data[i]
-          item['title'] = title_valor
-        }
+//         for(var i = 0; i < data.length; i++){
+//           var item = data[i]
+//           item['title'] = title_valor
+//         }
 
-        res.json({'data': data})
-      })
-      .catch(function (error) {
-        debug(error)
-        next(error)
-      })
-  } else if (hasRaster === 'true' && discardedids != undefined && 
-             discardedids.length > 0 ) {
-    debug('Ra')
-    var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
-    // debug(whereVarRaster)
+//         res.json({'data': data})
+//       })
+//       .catch(function (error) {
+//         debug(error)
+//         next(error)
+//       })
+//   } else if (hasRaster === 'true' && discardedids != undefined && 
+//              discardedids.length > 0 ) {
+//     debug('Ra')
+//     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
+//     // debug(whereVarRaster)
 
-    pool.any(queries.getScoreDecilNiche.getScoreDecilRaV, {
-      spid: spid,
-      N: N,
-      alpha: alpha,
-      min_occ: min_occ,
-      where_config_raster: whereVarRaster,
-      arg_gridids: discardedids.toString(),
-      res_celda: res_celda,
-      res_grid: res_grid,
-      discardedDeleted: discardedDeleted
-    })
-      .then(function (data) {
-        for(var i = 0; i < data.length; i++){
-          var item = data[i]
-          item['title'] = title_valor
-        }
-        res.json({'data': data})
-      })
-      .catch(function (error) {
-        debug(error)
-        next(error)
-      })
-  } else {
-    next()
-  }
-}
+//     pool.any(queries.getScoreDecilNiche.getScoreDecilRaV, {
+//       spid: spid,
+//       N: N,
+//       alpha: alpha,
+//       min_occ: min_occ,
+//       where_config_raster: whereVarRaster,
+//       arg_gridids: discardedids.toString(),
+//       res_celda: res_celda,
+//       res_grid: res_grid,
+//       discardedDeleted: discardedDeleted
+//     })
+//       .then(function (data) {
+//         for(var i = 0; i < data.length; i++){
+//           var item = data[i]
+//           item['title'] = title_valor
+//         }
+//         res.json({'data': data})
+//       })
+//       .catch(function (error) {
+//         debug(error)
+//         next(error)
+//       })
+//   } else {
+//     next()
+//   }
+// }
 
 
 /**
@@ -280,143 +328,143 @@ function getScoreDecilNiche_V(req, res, next) {
  * @param {express.Response} res - Express response object 
  * @param {function} next - Express next middleware function
  */
-function getScoreDecilNiche_T(req, res, next) {
-  debug('getScoreDecilNiche_T')
+// function getScoreDecilNiche_T(req, res, next) {
+//   debug('getScoreDecilNiche_T')
 
-  var spid        = parseInt(verb_utils.getParam(req, 'id'))
-  var tfilters    = verb_utils.getParam(req, 'tfilters')
-  var alpha       = 0.01
-  // var N           = 14707; // Verificar N, que se esta contemplando
-  var res_celda = verb_utils.getParam(req, 'res_celda', 'cells_16km')
-  var res_grid = verb_utils.getParam(req, 'res_grid', 'gridid_16km')
+//   var spid        = parseInt(verb_utils.getParam(req, 'id'))
+//   var tfilters    = verb_utils.getParam(req, 'tfilters')
+//   var alpha       = 0.01
+//   // var N           = 14707; // Verificar N, que se esta contemplando
+//   var res_celda = verb_utils.getParam(req, 'res_celda', 'cells_16km')
+//   var res_grid = verb_utils.getParam(req, 'res_grid', 'gridid_16km')
 
-  // Siempre incluidos en query, nj >= 0
-  var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
+//   // Siempre incluidos en query, nj >= 0
+//   var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
 
-  // variables configurables
-  var hasBios         = verb_utils.getParam(req, 'hasBios')
-  var hasRaster       = verb_utils.getParam(req, 'hasRaster')
-  var groupid        = verb_utils.getParam(req, 'groupid')
+//   // variables configurables
+//   var hasBios         = verb_utils.getParam(req, 'hasBios')
+//   var hasRaster       = verb_utils.getParam(req, 'hasRaster')
+//   var groupid        = verb_utils.getParam(req, 'groupid')
 
-  var title_valor = verb_utils.processTitleGroup(groupid, tfilters)
+//   var title_valor = verb_utils.processTitleGroup(groupid, tfilters)
     
-  // filtros por tiempo
-  var sfecha            = verb_utils.getParam(req, 'sfecha', false)
-  var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'), 
-                                 ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
-  var fecha_fin         = moment(verb_utils.getParam(req, 'lim_sup', 
-                                                     moment().
-                                                     format('YYYY-MM-DD') ), 
-                                 ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
-  var discardedFilterids = verb_utils.getParam(req, 'discardedDateFilterids')
-  // debug(discardedFilterids)
+//   // filtros por tiempo
+//   var sfecha            = verb_utils.getParam(req, 'sfecha', false)
+//   var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'), 
+//                                  ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+//   var fecha_fin         = moment(verb_utils.getParam(req, 'lim_sup', 
+//                                                      moment().
+//                                                      format('YYYY-MM-DD') ), 
+//                                  ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+//   var discardedFilterids = verb_utils.getParam(req, 'discardedDateFilterids')
+//   // debug(discardedFilterids)
 
-  var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
+//   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
     
-  if (hasBios === 'true' && hasRaster === 'true' && 
-      discardedFilterids === 'true') {
-    var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
-    debug(caso)
+//   if (hasBios === 'true' && hasRaster === 'true' && 
+//       discardedFilterids === 'true') {
+//     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+//     debug(caso)
 
-    debug('T')  
+//     debug('T')  
 
-    whereVar = verb_utils.processBioFilters(tfilters, spid)
-    whereVarRaster = verb_utils.processRasterFilters(tfilters,spid)
+//     whereVar = verb_utils.processBioFilters(tfilters, spid)
+//     whereVarRaster = verb_utils.processRasterFilters(tfilters,spid)
       
-    pool.any(queries.getScoreDecilNiche.getScoreDecilT, {
-      spid: spid,
-      N: N,
-      alpha: alpha,
-      min_occ: min_occ,
-      where_config: whereVar,
-      where_config_raster: whereVarRaster,
-      lim_inf: fecha_incio.format('YYYY'),
-      lim_sup: fecha_fin.format('YYYY'),
-      caso: caso,
-      res_celda: res_celda,
-      res_grid: res_grid,
-      discardedDeleted: discardedDeleted
-    })
-      .then(function (data) {
-        for(var i = 0; i < data.length; i++){
-          var item = data[i]
-          item['title'] = title_valor
-        }
-        res.json({'data': data})
-      })
-      .catch(function (error) {
-        debug(error)
-        next(error)
-      })
-  } else if (hasBios === 'true' && discardedFilterids === 'true' ) {
-    debug('B')
+//     pool.any(queries.getScoreDecilNiche.getScoreDecilT, {
+//       spid: spid,
+//       N: N,
+//       alpha: alpha,
+//       min_occ: min_occ,
+//       where_config: whereVar,
+//       where_config_raster: whereVarRaster,
+//       lim_inf: fecha_incio.format('YYYY'),
+//       lim_sup: fecha_fin.format('YYYY'),
+//       caso: caso,
+//       res_celda: res_celda,
+//       res_grid: res_grid,
+//       discardedDeleted: discardedDeleted
+//     })
+//       .then(function (data) {
+//         for(var i = 0; i < data.length; i++){
+//           var item = data[i]
+//           item['title'] = title_valor
+//         }
+//         res.json({'data': data})
+//       })
+//       .catch(function (error) {
+//         debug(error)
+//         next(error)
+//       })
+//   } else if (hasBios === 'true' && discardedFilterids === 'true' ) {
+//     debug('B')
 
-    var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
-    debug(caso)  
+//     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+//     debug(caso)  
 
-    whereVar = verb_utils.processBioFilters(tfilters, spid)
-    // debug(whereVar)
+//     whereVar = verb_utils.processBioFilters(tfilters, spid)
+//     // debug(whereVar)
       
-    pool.any(queries.getScoreDecilNiche.getScoreDecilBioT, {
-      spid: spid,
-      N: N,
-      alpha: alpha,
-      min_occ: min_occ,
-      where_config: whereVar,
-      lim_inf: fecha_incio.format('YYYY'),
-      lim_sup: fecha_fin.format('YYYY'),
-      caso: caso,
-      res_celda: res_celda,
-      res_grid: res_grid,
-      discardedDeleted: discardedDeleted
-    })
-      .then(function (data) {
-        for(var i = 0; i < data.length; i++){
-          var item = data[i]
-          item['title'] = title_valor
-        }
-        res.json({'data': data})
-      })
-      .catch(function (error) {
-        debug(error)
-        next(error)
-      })
-  } else if (hasRaster === 'true' && discardedFilterids === 'true' ) {
-    var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
-    debug(caso)
+//     pool.any(queries.getScoreDecilNiche.getScoreDecilBioT, {
+//       spid: spid,
+//       N: N,
+//       alpha: alpha,
+//       min_occ: min_occ,
+//       where_config: whereVar,
+//       lim_inf: fecha_incio.format('YYYY'),
+//       lim_sup: fecha_fin.format('YYYY'),
+//       caso: caso,
+//       res_celda: res_celda,
+//       res_grid: res_grid,
+//       discardedDeleted: discardedDeleted
+//     })
+//       .then(function (data) {
+//         for(var i = 0; i < data.length; i++){
+//           var item = data[i]
+//           item['title'] = title_valor
+//         }
+//         res.json({'data': data})
+//       })
+//       .catch(function (error) {
+//         debug(error)
+//         next(error)
+//       })
+//   } else if (hasRaster === 'true' && discardedFilterids === 'true' ) {
+//     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+//     debug(caso)
 
-    debug('Ra')
+//     debug('Ra')
 
-    whereVarRaster = verb_utils.processRasterFilters(tfilters,spid)
+//     whereVarRaster = verb_utils.processRasterFilters(tfilters,spid)
       
-    pool.any(queries.getScoreDecilNiche.getScoreDecilRaT, {
-      spid: spid,
-      N: N,
-      alpha: alpha,
-      min_occ: min_occ,
-      where_config_raster: whereVarRaster,
-      lim_inf: fecha_incio.format('YYYY'),
-      lim_sup: fecha_fin.format('YYYY'),
-      caso: caso,
-      res_celda: res_celda,
-      res_grid: res_grid,
-      discardedDeleted: discardedDeleted
-    })
-      .then(function (data) {
-        for(var i = 0; i < data.length; i++){
-          var item = data[i]
-          item['title'] = title_valor
-        }
-        res.json({'data': data})
-      })
-      .catch(function (error) {
-        debug(error)
-        next(error)
-      })
-  } else {
-    next()
-  }
-}
+//     pool.any(queries.getScoreDecilNiche.getScoreDecilRaT, {
+//       spid: spid,
+//       N: N,
+//       alpha: alpha,
+//       min_occ: min_occ,
+//       where_config_raster: whereVarRaster,
+//       lim_inf: fecha_incio.format('YYYY'),
+//       lim_sup: fecha_fin.format('YYYY'),
+//       caso: caso,
+//       res_celda: res_celda,
+//       res_grid: res_grid,
+//       discardedDeleted: discardedDeleted
+//     })
+//       .then(function (data) {
+//         for(var i = 0; i < data.length; i++){
+//           var item = data[i]
+//           item['title'] = title_valor
+//         }
+//         res.json({'data': data})
+//       })
+//       .catch(function (error) {
+//         debug(error)
+//         next(error)
+//       })
+//   } else {
+//     next()
+//   }
+// }
 
 
 /**
@@ -443,6 +491,13 @@ function getScoreDecilNiche(req, res, next) {
   var iter = verb_utils.getParam(req, 'val_process', false) === "true" ? iterations : 1
   debug("iterations: " + iter)
 
+  // filtros por tiempo
+  var sfecha            = verb_utils.getParam(req, 'sfecha', false)
+  var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+  var fecha_fin         = moment(verb_utils.getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+  
+  filter_time = false;
+
   // Siempre incluidos en query, nj >= 0
   var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
 
@@ -455,6 +510,15 @@ function getScoreDecilNiche(req, res, next) {
     
   if (hasBios === 'true' && hasRaster === 'true' ) {
     debug('T')
+    var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+    debug('caso: ' + caso)
+
+    filter_time = caso !== -1 ? true : filter_time
+    debug('filter_time: ' + filter_time)
+
+    res_celda = caso !== -1 ? res_celda.replace("cells","gridid") : res_celda
+    debug('res_celda: ' + res_celda)
+
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
 
@@ -468,7 +532,11 @@ function getScoreDecilNiche(req, res, next) {
       where_config_raster: whereVarRaster,
       res_celda: res_celda,
       res_grid: res_grid,
-      discardedDeleted: discardedDeleted
+      discardedDeleted: discardedDeleted,
+      lim_inf: fecha_incio.format('YYYY'),
+      lim_sup: fecha_fin.format('YYYY'),
+      caso: caso,
+      filter_time: filter_time
     })
       .then(function (data) {
         for(var i = 0; i < data.length; i++){
@@ -483,6 +551,15 @@ function getScoreDecilNiche(req, res, next) {
       })
   } else if (hasBios === 'true') {
     debug('B')
+    var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+    debug('caso: ' + caso)
+
+    filter_time = caso !== -1 ? true : filter_time
+    debug('filter_time: ' + filter_time)
+
+    res_celda = caso !== -1 ? res_celda.replace("cells","gridid") : res_celda
+    debug('res_celda: ' + res_celda)
+
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
     // debug(whereVar)
 
@@ -497,7 +574,11 @@ function getScoreDecilNiche(req, res, next) {
       where_config: whereVar,
       res_celda: res_celda,
       res_grid: res_grid,
-      discardedDeleted: discardedDeleted
+      discardedDeleted: discardedDeleted,
+      lim_inf: fecha_incio.format('YYYY'),
+      lim_sup: fecha_fin.format('YYYY'),
+      caso: caso,
+      filter_time: filter_time
     })
       .then(function (data) {
         for(var i = 0; i < data.length; i++){
@@ -512,6 +593,15 @@ function getScoreDecilNiche(req, res, next) {
       })
   } else if (hasRaster === 'true') {
     debug('Ra')
+    var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+    debug('caso: ' + caso)
+
+    filter_time = caso !== -1 ? true : filter_time
+    debug('filter_time: ' + filter_time)
+
+    res_celda = caso !== -1 ? res_celda.replace("cells","gridid") : res_celda
+    debug('res_celda: ' + res_celda)
+
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
     // debug(whereVarRaster)
 
@@ -524,7 +614,11 @@ function getScoreDecilNiche(req, res, next) {
       where_config_raster: whereVarRaster,
       res_celda: res_celda,
       res_grid: res_grid,
-      discardedDeleted: discardedDeleted
+      discardedDeleted: discardedDeleted,
+      lim_inf: fecha_incio.format('YYYY'),
+      lim_sup: fecha_fin.format('YYYY'),
+      caso: caso,
+      filter_time: filter_time
     })
       .then(function (data) {
         for(var i = 0; i < data.length; i++){
@@ -561,8 +655,8 @@ exports.pipe = [
   // getScoreDecil_VA,
   // getScoreDecil_TA,
   getScoreDecilNiche_A,
-  getScoreDecilNiche_V,
-  getScoreDecilNiche_T,
+  // getScoreDecilNiche_V,
+  // getScoreDecilNiche_T,
   getScoreDecilNiche   
 ]
 
