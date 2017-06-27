@@ -24,7 +24,7 @@ var port = process.env.PORT || 8080        // set our port
 // console.log("port: " + port)
 
 // Routes for our api
-var nicheRouter = require('./routes/router')
+var nicheRouter = require('./routes/nicherouter')
 var netRouter = require('./routes/networkrouter')
 var utilsRouter = require('./routes/utilsrouter')
 

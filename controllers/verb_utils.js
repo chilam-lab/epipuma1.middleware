@@ -18,6 +18,7 @@ var moment = require('moment')
 verb_utils.N = 94544 // MX y US sin Alaska y Hawaii a 16km
 // verb_utils.N = 19968 // MX a 16km
 verb_utils.iterations = 5
+verb_utils.alpha = 0.01
 
 
 /**
@@ -64,7 +65,8 @@ verb_utils.processBioFilters = function(tfilters_total, spid){
 
   var filter_disj = ''
   if(spid) {
-    filter_disj = 'sp_snib.spid <> ' + spid + ' and '
+    // spid esta presente en la tabla snib y sp_snib
+    filter_disj = 'spid <> ' + spid + ' and '
   }
 
   for (var i = 0; i < tfilters.length; i++) {
@@ -284,7 +286,7 @@ verb_utils.getTimeCase = function(fecha_incio, fecha_fin, sfecha){
   // debug(fecha_fin.format('YYYY'));
   // debug(sfecha);
 
-  var caso
+  var caso = -1
 
   if( (parseInt(fecha_incio.format('YYYY')) != 1500 || 
        parseInt(fecha_fin.format('YYYY')) != 

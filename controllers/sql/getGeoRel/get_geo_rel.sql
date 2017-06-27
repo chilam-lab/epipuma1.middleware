@@ -15,8 +15,8 @@ select
  	out_familiavalida as familiavalida,
 	round(avg(out_epsilon),2) as epsilon,
 	round(avg(out_score),2) as score
-from iteratevalidationprocess($<iterations>, $<spid>, $<N>, $<alpha>, $<min_occ>, array[$<discardedDeleted:raw>]::int[], '$<res_celda:raw>', '$<where_config:value>', '$<where_config_raster:value>', 'both')
--- from iteratevalidationprocess(5, $<spid>, $<N>,$<alpha>, $<min_occ>, array[$<discardedDeleted:raw>]::int[], $<res_celda:text>, $<where_config:text>)
+from iteratevalidationprocess($<iterations>, $<spid>, $<N>, $<alpha>, $<min_occ>, array[$<discardedDeleted:raw>]::int[], '$<res_celda:raw>', '$<where_config:value>', '$<where_config_raster:value>', 'both', $<filter_time>, $<caso>, $<lim_inf>, $<lim_sup>)
+-- from iteratevalidationprocess(5, 28923, 94544, 0.01, 0, array[]::int[], 'gridid_16km', 'where clasevalida = ''Mammalia'' ', 'where layer = ''bio01'' ', 'both', true, 3, 2010, 2020)
 where out_spid is not null
 group by 	out_spid,
 			out_especievalidabusqueda,
