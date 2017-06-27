@@ -1,162 +1,101 @@
-WITH source AS (
-	SELECT spid, 
-			--$<res_celda:raw> as cells
-			($<res_celda:raw> - array[$<discardedDeleted:raw>]::int[])  as cells 
-	FROM sp_snib 
-	WHERE 
-		spid = $<spid>
-		--spid = 33553		
-		and especievalidabusqueda <> ''
+with prerawdata as (
+	select
+		out_cell as gridid,
+		out_score as tscore,
+		type_value
+	from iteratevalidationprocessbycells($<iterations>, $<spid>, $<N>, $<alpha>, $<min_occ>, array[$<discardedDeleted:raw>]::int[], '$<res_celda:raw>', '$<where_config:value>', '', 'bio', $<filter_time>, $<caso>, $<lim_inf>, $<lim_sup>, true)
+	-- from iteratevalidationprocessbycells(5, 28923, 94544, 0.01, 0, array[]::int[], 'gridid_16km', 'where clasevalida = ''Mammalia'' ', '', 'bio', true, 1, 2010, 2020, true)
+	where out_cell is not null
 ),
-target AS (
-	SELECT  generovalido,
-			especievalidabusqueda,
-			spid,
-			reinovalido,
-			phylumdivisionvalido,
-			clasevalida,
-			ordenvalido,
-			familiavalida,
-			$<res_celda:raw> as cells 
-	FROM sp_snib 
-	--WHERE clasevalida = 'Mammalia'
-	$<where_config:raw>	 
-	and especievalidabusqueda <> ''
-),
-counts AS (
-	SELECT 	--source.spid as source_spid,
-			target.spid,
-			target.cells,
-			target.generovalido,
-			target.especievalidabusqueda,
-			icount(source.cells & target.cells) AS niyj,
-			icount(target.cells) AS nj,
-			icount(source.cells) AS ni,
-			target.reinovalido,
-			target.phylumdivisionvalido,
-			target.clasevalida,
-			target.ordenvalido,
-			target.familiavalida
-	FROM source,target
-	where 
-	target.spid <> $<spid>
-	--target.spid <> 33553
-	and icount(target.cells) > $<min_occ:raw>
-	--and icount(target.cells) > 0
+valdata as (
+	select
+		gridid,
+		tscore
+	from prerawdata
+	where type_value = 'test'
 ),
 rawdata as (
-	SELECT 	counts.spid,
-			counts.cells,
-			counts.especievalidabusqueda as label,
-			counts.niyj as nij,
-			counts.nj,
-			counts.ni,
-			$<N> as n,
-			--14707 as n,
-			counts.reinovalido,
-			counts.phylumdivisionvalido,
-			counts.clasevalida,
-			counts.ordenvalido,
-			counts.familiavalida,
-			round( cast(  
-			get_epsilon(
-				$<alpha>,
-				--0.01,
-				cast(counts.nj as integer), 
-				cast(counts.niyj as integer), 
-				cast(counts.ni as integer), 
-				cast($<N> as integer)
-				--cast(14707 as integer)
-			)as numeric), 2)  as epsilon,
-			round( cast(  ln(   
-				get_score(
-					$<alpha>,
-					--0.01,
-					cast(counts.nj as integer), 
-					cast(counts.niyj as integer), 
-					cast(counts.ni as integer), 
-					cast($<N> as integer)
-					--cast(14707 as integer)
-				)
-			)as numeric), 2) as score
-	FROM counts 
-	ORDER BY epsilon desc
-),
-/*with rawdata as(
-	select 
-		out_spid,
-		out_reinovalido,
-		out_phylumdivisionvalido,
-	 	out_clasevalida,
-	 	out_ordenvalido,
-	 	out_familiavalida,
-	 	out_generovalido,
-	 	out_especievalidabusqueda,
-		avg(out_epsilon) as avg_epsilon,
-		avg(out_score) as avg_score
-	from iteratevalidationprocess(5, 27332, 14900, 0.01, 0, 'cells_16km', 'where clasevalida = ''Mammalia'' ')
-	where out_spid is not null
-	group by out_spid, out_reinovalido, out_phylumdivisionvalido, out_clasevalida, out_ordenvalido, out_familiavalida, out_generovalido, out_especievalidabusqueda
-	order by out_spid
-),*/
-basic_score as (
-	select 	unnest(cells) as gridid, 
-			array_agg(spid|| '|' ||label|| '|' ||epsilon::text|| '|' ||score::text|| '|' ||nj::text) as array_sp,
-			sum(score) as tscore
-	from rawdata
-	group by gridid
-	order by tscore desc
-),
-allgridis as(
-	select $<res_grid:raw> as gridid from grid_16km_aoi
+	select
+		gridid,
+		tscore
+	from prerawdata
+	where type_value = 'train'
 ),
 prenorm as (
-	select 	allgridis.gridid,
-			array_sp,
-			tscore
-	from basic_score
-	inner join allgridis
-	on basic_score.gridid = allgridis.gridid
+	select 	grid_16km_aoi.gridid_16km as gridid, 
+			COALESCE(tscore, 0) as tscore 
+	from rawdata
+	right join grid_16km_aoi
+	on rawdata.gridid = grid_16km_aoi.gridid_16km
 	order by tscore desc
 ),
 deciles as ( 
-	SELECT gridid, tscore, array_sp, ntile(10) over (order by tscore) AS decil 
+	SELECT 
+			gridid, 
+			tscore, 
+			-- array_sp, 
+			ntile(10) over (order by tscore) AS decil 
 	FROM prenorm 
 	ORDER BY tscore 
 ),
-names_col as (
+boundaries as (
 	select 
 		decil,
-		unnest(array_sp) as specie_data,
-		sum(1) as decil_occ
+		cast(round( cast(max(deciles.tscore) as numeric),2) as float) as l_sup, 
+		cast(round( cast(min(deciles.tscore) as numeric),2) as float) as l_inf, 
+		cast(round( cast(sum(deciles.tscore) as numeric),2) as float) as sum, 
+		cast(round( cast(avg(deciles.tscore) as numeric),2) as float) as avg
+		-- array_agg(gridid) as gridids
 	from deciles 
-	group by decil, specie_data 
+	group by decil 
 	order by decil desc
-),
-names_col_occ as (
-	select
-		decil,
-		( specie_data||'|'||decil_occ ) as specie_data
-	from names_col
-),
-gruop_decil_data as (
-	select 	decil,
-			array_agg( specie_data ) as arraynames
-	from names_col_occ
-	group by decil
-	order by decil
 )
-select 
-	cast(round( cast(max(tscore) as numeric),2) as float) as l_sup, 
-	cast(round( cast(min(tscore) as numeric),2) as float) as l_inf, 
-	cast(round( cast(sum(tscore) as numeric),2) as float) as sum, 
-	cast(round( cast(avg(tscore) as numeric),2) as float) as avg, 
-	deciles.decil, 
-	array_agg(distinct gridid) as gridids,
-	gruop_decil_data.arraynames
-	--array_agg(array_to_string( array_sp,',')) as arraynames
-from deciles 
-join gruop_decil_data
-on deciles.decil = gruop_decil_data.decil
-group by deciles.decil, arraynames
-order by deciles.decil desc
+select 	decil, 
+		l_sup,
+		l_inf,
+		sum, avg,
+		 case when 2>1
+		-- case when $<iterations> >1 
+			then count(valdata.*) filter (WHERE valdata.tscore > l_inf) 
+		else 0 end as vp,
+		case when 2>1
+		-- case when $<iterations> >1 
+			then count(valdata) - count(valdata.*) filter (WHERE valdata.tscore > l_inf) 
+		else 0 end as fn,
+		case when 2>1
+		-- case when $<iterations> >1 
+			then (count(valdata.*) filter (WHERE valdata.tscore > l_inf))::float / (count(valdata.*) filter (WHERE valdata.tscore > l_inf) + (count(valdata) - count(valdata.*) filter (WHERE valdata.tscore > l_inf)))
+		else 0 end as recall
+from boundaries
+full outer join valdata
+on true
+group by decil, l_sup, l_inf, sum, avg
+order by decil desc
+
+
+/*select *
+from iteratevalidationprocessbycells(5, 28923, 94544, 0.01, 0, array[]::int[], 'cells_16km', 'where clasevalida = ''Mammalia'' ', '', 'bio', true)
+where out_cell is not null and type_value = 'test'
+order by out_cell
+-- and type_value = 'test'
+
+with boundaries as (
+	select 
+		unnest(array[0,10,20,30,40]::int[]) as l_inf,
+		unnest(array[9,19,29,39,49]::int[]) as l_sup,
+		unnest(array[1,2,3,4,5]::int[]) as decil
+),
+values_res as (
+	select unnest (array[1,2,13,4,35,6,7,8,29,45]::int[]) as score
+)
+select 	decil, l_inf, l_sup, 
+		count(values_res.*) filter (WHERE values_res.score > l_inf) as vp,
+		count(values_res) - count(values_res.*) filter (WHERE values_res.score > l_inf) as fn,
+		(count(values_res.*) filter (WHERE values_res.score > l_inf))::float / (count(values_res.*) filter (WHERE values_res.score > l_inf) + (count(values_res) - count(values_res.*) filter (WHERE values_res.score > l_inf))) as recall
+from boundaries,
+values_res
+group by decil, l_inf, l_sup
+order by decil desc */
+
+	
+	

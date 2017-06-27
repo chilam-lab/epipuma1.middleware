@@ -4941,22 +4941,26 @@ exports.getEntListNiche = function (req, res, next) {
       debug(getParam(req, 'qtype'))
       debug("getEntListNiche")
 
-      var str     = getParam(req, 'searchStr')
-      var source  = parseInt(getParam(req, 'source'))
-      var nivel  = getParam(req, 'nivel')
-      var limit   = 15; // numero de resultados a desplegar
-       var columnas = verb_utils.getColumns(source, nivel)
-       var res_celda = getParam(req, 'res_celda', "gridid_16km")
+      var str       = getParam(req, 'searchStr')
+      var limite    = parseInt(getParam(req, 'limit', -1))
+      var source    = parseInt(getParam(req, 'source'))
+      var nivel     = getParam(req, 'nivel')
+      var columnas  = verb_utils.getColumns(source, nivel)
+      var res_celda = getParam(req, 'res_celda', "gridid_16km")
 
-      debug(nivel)
-      debug(str)
-      debug(columnas)
+      // debug(nivel)
+      // debug(str)
+      // debug(columnas)
+      debug(limite)
+      limite = limite == -1 ? "" : "limit " + limite
+      debug(limite)
 
       pool.any(queries.getEntListNiche.getEntList, {
             str: str,
             columnas: columnas,
             nivel: nivel,
-            res_celda: res_celda
+            res_celda: res_celda,
+            limite: limite
       })
           .then(function (data) {
             // debug(data)

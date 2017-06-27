@@ -1,33 +1,54 @@
 /*getGeoRel con tiempo*/
 WITH source AS (
-	SELECT spid, 
-			--$<res_celda:raw> as cells
-			cells_16km as cells
-	FROM sp_snib 
-	WHERE 
-		--spid = $<spid>
-		spid = 27332
-		and especievalidabusqueda <> ''
+	SELECT 	spid,
+			array_agg(distinct gridid_16km) as ids_ni
+	FROM public.snib
+	where aniocolecta >= 2000 
+	and aniocolecta <= 2020
+	and aniocolecta is not null
+	and spid = 28923
+	and generovalido <> ''
+	and familiavalida <> ''
+	and ordenvalido <> ''
+	and clasevalida <> ''
+	and phylumdivisionvalido <> ''
+	and reinovalido <> ''
+	group by spid
 ),
 target AS (
-	SELECT  generovalido,
+	SELECT 	spid,
+			generovalido,
 			especievalidabusqueda,
-			spid,
 			reinovalido,
 			phylumdivisionvalido,
 			clasevalida,
 			ordenvalido,
 			familiavalida,
-			--$<res_celda:raw> as cells
-			cells_16km as cells  
-	FROM sp_snib
-	--$<where_config:raw>
-	WHERE clasevalida = 'Mammalia'
-	--WHERE ordenvalido = 'Carnivora'
+			-- fechacolecta, aniocolecta, mescolecta, diacolecta, urlejemplar,
+			array_agg(distinct gridid_16km) as ids_nj
+	FROM public.snib
+	where aniocolecta >= 2000 
+	and aniocolecta <= 2020
+	and aniocolecta is not null
+	and clasevalida = 'Mammalia'
 	and especievalidabusqueda <> ''
-)
+	and generovalido <> ''
+	and familiavalida <> ''
+	and ordenvalido <> ''
+	and clasevalida <> ''
+	and phylumdivisionvalido <> ''
+	and reinovalido <> ''
+	group by spid,
+			generovalido,
+			especievalidabusqueda,
+			reinovalido,
+			phylumdivisionvalido,
+			clasevalida,
+			ordenvalido,
+			familiavalida
+),
 -- el arreglo contiene las celdas donde la especie objetivo debe ser descartada 
---filter_ni AS (
+filter_ni AS (
 	SELECT 	spid,
 			--array_agg(distinct $<res_grid:raw>) as ids_ni,
 			array_agg(distinct gridid_16km) as ids_ni,
@@ -35,11 +56,12 @@ target AS (
 			icount(array_agg(distinct gridid_16km)) as ni
 	FROM snib 
 			where --snib.fechacolecta <> '' -- and snib.fechacolecta is not null
-			((
-			cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)>= cast( 2000  as integer)
-			and 
-			cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)<= cast( 2020  as integer)
-			)
+			(
+				(
+					aniocolecta>= cast( 2000  as integer)
+					and 
+					aniocolecta<= cast( 2020  as integer)
+				)
 			or snib.fechacolecta = '')
 			/*(case when $<caso> = 1 
 				  then 
@@ -57,44 +79,33 @@ target AS (
 						)
 						or snib.fechacolecta = '')
 			end) = true*/
-			and spid = 27332
+			and spid = 28923
 			--and spid = $<spid>
 			and especievalidabusqueda <> ''
 	group by spid
-),
-filter_nj AS (
-		SELECT 	
-			snib.spid,
-			--array_agg(distinct $<res_grid:raw>) as ids_ni,
-			array_agg(distinct gridid_16km) as ids_nj,
-			--icount(array_agg(distinct $<res_grid:raw>)) as ni
-			icount(array_agg(distinct gridid_16km)) as nj
-		FROM snib join target
-		on snib.spid = target.spid
-		where snib.fechacolecta <> '' -- and snib.fechacolecta is not null
-			/*(case when $<caso> = 1 
-				  then 
-				  		fechacolecta <> '' 
-				  when $<caso> = 2 
-				  then
-				  		cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)>= cast( $<lim_inf>  as integer)
-						and 
-						cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)<= cast( $<lim_sup>  as integer)
-				  else
-				  		((
-						cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)>= cast( $<lim_inf>  as integer)
-						and 
-						cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)<= cast( $<lim_sup>  as integer)
-						)
-						or snib.fechacolecta = '')
-			end) = true*/
-		-- TODO: este cruce esta demorando las queries, optimizar!!! 
-			--and 
-			and snib.especievalidabusqueda <> ''
-		group by snib.spid
-		--order by spid
-		--limit 1
-),
+)
+-- filter_nj AS (
+	SELECT 	
+		snib.spid,
+		--array_agg(distinct $<res_grid:raw>) as ids_ni,
+		array_agg(distinct gridid_16km) as ids_nj,
+		--icount(array_agg(distinct $<res_grid:raw>)) as ni
+		icount(array_agg(distinct gridid_16km)) as nj
+	FROM snib join target
+	on snib.spid = target.spid
+	where aniocolecta is not null and  --snib.fechacolecta <> '' -- and snib.fechacolecta is not null
+		(
+			(
+				aniocolecta>= cast( 2000  as integer)
+				and 
+				aniocolecta<= cast( 2020  as integer)
+			)
+		or snib.fechacolecta = '')
+		and snib.especievalidabusqueda <> ''
+	group by snib.spid
+	--order by spid
+	--limit 1
+/*),
 filter_nij AS(
 		select 	distinct filter_nj.spid, 
 				icount(filter_ni.ids_ni & filter_nj.ids_nj) AS niyj
