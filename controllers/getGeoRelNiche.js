@@ -53,7 +53,9 @@ function getGeoRelNiche(req, res, next) {
   var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
   var fecha_fin         = moment(verb_utils.getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
   
-  filter_time = false;
+  var filter_time = false;
+
+ 
 
 
   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
@@ -62,12 +64,24 @@ function getGeoRelNiche(req, res, next) {
   var iter = verb_utils.getParam(req, 'val_process', false) === "true" ? iterations : 1
   debug("iterations: " + iter)
 
+  var idtabla = verb_utils.getParam(req, 'idtabla')
+  idtabla = iter > 1 ? idtabla : ""
   
     
   if (hasBios === 'true' && hasRaster === 'true' ){
     debug('T')
+    
     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
     debug('caso: ' + caso)
+
+    filter_time = caso !== -1 ? true : filter_time
+    debug('filter_time: ' + filter_time)
+
+    res_celda = caso !== -1 ? res_celda.replace("cells","gridid") : res_celda
+    debug('res_celda: ' + res_celda)
+
+
+
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
 
@@ -84,7 +98,8 @@ function getGeoRelNiche(req, res, next) {
       lim_inf: fecha_incio.format('YYYY'),
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
-      filter_time: filter_time
+      filter_time: filter_time,
+      idtabla: idtabla
     })
       .then(function (data) {
 
@@ -125,7 +140,8 @@ function getGeoRelNiche(req, res, next) {
       lim_inf: fecha_incio.format('YYYY'),
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
-      filter_time: filter_time
+      filter_time: filter_time,
+      idtabla: idtabla
     })
       .then(function (data) {
         // debug(data)
@@ -138,8 +154,15 @@ function getGeoRelNiche(req, res, next) {
   } 
   else if (hasRaster === 'true'){
     debug('Ra')
+    
     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
     debug('caso: ' + caso)
+
+    filter_time = caso !== -1 ? true : filter_time
+    debug('filter_time: ' + filter_time)
+
+    res_celda = caso !== -1 ? res_celda.replace("cells","gridid") : res_celda
+    debug('res_celda: ' + res_celda)
 
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
     // debug(whereVarRaster)
@@ -156,7 +179,8 @@ function getGeoRelNiche(req, res, next) {
       lim_inf: fecha_incio.format('YYYY'),
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
-      filter_time: filter_time
+      filter_time: filter_time,
+      idtabla: idtabla
     })
       .then(function (data) {
         res.json({'data': data})
