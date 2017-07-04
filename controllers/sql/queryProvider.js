@@ -78,6 +78,15 @@ var queryProvider = {
 
 
 /************************************************************* VERBOS ÚTILES ******************************/
+  getValuesFromToken: {
+    getValues: sqlPath('especie/get_values_token.sql')
+  },
+  getToken: {
+    setLinkValues: sqlPath('especie/set_link_values.sql')
+  },
+  getValidationTables: {
+    createTables: sqlPath('especie/get_validation_tables.sql')
+  },
   getVariablesNiche: {
     getVariablesReino: sqlPath('especie/get_variables_reino.sql'),
     getVariables: sqlPath('especie/get_variables.sql')
