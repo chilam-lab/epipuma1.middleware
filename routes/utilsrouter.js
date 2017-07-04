@@ -25,6 +25,9 @@ var verbsCtrl = require('../controllers/verbsniche')
  */
 router.route('/especie')
   .get(
+    verbsCtrl.getValuesFromToken,
+    verbsCtrl.getToken,
+    verbsCtrl.getValidationTables,
     verbsCtrl.getGridGeoJsonNiche,
     verbsCtrl.getVariablesNiche,
     verbsCtrl.getRasterNiche,
@@ -34,6 +37,9 @@ router.route('/especie')
     verbsCtrl.getEntListNiche
   )
   .post(
+    verbsCtrl.getValuesFromToken,
+    verbsCtrl.getToken,
+    verbsCtrl.getValidationTables,
     verbsCtrl.getGridGeoJsonNiche,
     verbsCtrl.getVariablesNiche,
     verbsCtrl.getRasterNiche,
