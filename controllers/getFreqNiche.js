@@ -42,6 +42,11 @@ function getFreqNiche(req, res, next) {
   // Siempre incluidos en query, nj >= 0
   var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
 
+  var sfosil        = verb_utils.getParam(req, 'fossil', false)
+  // debug(sfosil)
+  var lb_fosil = sfosil === "false" || sfosil === false ? " and (ejemplarfosil <> 'SI' or ejemplarfosil is null) " : "";
+  // debug(lb_fosil)
+
   // variables configurables
   var hasBios         = verb_utils.getParam(req, 'hasBios')
   var hasRaster       = verb_utils.getParam(req, 'hasRaster')
@@ -68,7 +73,7 @@ function getFreqNiche(req, res, next) {
     filter_time = caso !== -1 ? true : filter_time
     debug('filter_time: ' + filter_time)
 
-    res_celda = caso !== -1 ? res_celda.replace("cells","gridid") : res_celda
+    res_celda = caso !== -1 || lb_fosil.length > 1 ? res_celda.replace("cells","gridid") : res_celda
     debug('res_celda: ' + res_celda)
 
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
@@ -80,6 +85,7 @@ function getFreqNiche(req, res, next) {
       N: N,
       alpha: alpha,
       min_occ: min_occ,
+      fossil: lb_fosil,
       where_config: whereVar,
       where_config_raster: whereVarRaster,
       res_celda: res_celda,
@@ -105,7 +111,7 @@ function getFreqNiche(req, res, next) {
     filter_time = caso !== -1 ? true : filter_time
     debug('filter_time: ' + filter_time)
 
-    res_celda = caso !== -1 ? res_celda.replace("cells","gridid") : res_celda
+    res_celda = caso !== -1 || lb_fosil.length > 1 ? res_celda.replace("cells","gridid") : res_celda
     debug('res_celda: ' + res_celda)
 
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
@@ -116,6 +122,7 @@ function getFreqNiche(req, res, next) {
       N: N,
       alpha: alpha,
       min_occ: min_occ,
+      fossil: lb_fosil,
       where_config: whereVar,
       res_celda: res_celda,
       discardedDeleted: discardedDeleted,
@@ -140,7 +147,7 @@ function getFreqNiche(req, res, next) {
     filter_time = caso !== -1 ? true : filter_time
     debug('filter_time: ' + filter_time)
 
-    res_celda = caso !== -1 ? res_celda.replace("cells","gridid") : res_celda
+    res_celda = caso !== -1 || lb_fosil.length > 1 ? res_celda.replace("cells","gridid") : res_celda
     debug('res_celda: ' + res_celda)
 
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
@@ -152,6 +159,7 @@ function getFreqNiche(req, res, next) {
       N: N,
       alpha: alpha,
       min_occ: min_occ,
+      fossil: lb_fosil,
       where_config_raster: whereVarRaster,
       res_celda: res_celda,
       discardedDeleted: discardedDeleted,

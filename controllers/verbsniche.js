@@ -875,10 +875,13 @@ exports.getSpeciesNiche = function (req, res, next) {
 
       var spid              = parseInt(getParam(req, 'id'))
       var sfecha            = getParam(req, 'sfecha', false)
+      var sfosil            = getParam(req, 'sfosil', false)
+      var lb_fosil = sfosil === "false" || sfosil === false ? " and (ejemplarfosil <> 'SI' or ejemplarfosil is null) " : "";
       var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
       var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
       var res_celda = getParam(req, 'res_celda', "gridid_16km")
-
+      
+      
       // debug(spid)
       // debug(sfecha)
       // debug(fecha_incio.format('YYYY'))
@@ -892,7 +895,8 @@ exports.getSpeciesNiche = function (req, res, next) {
                 spid: spid,
                 lim_inf: fecha_incio.format('YYYY'),
                 lim_sup: fecha_fin.format('YYYY'),
-                res_celda: res_celda
+                res_celda: res_celda,
+                sfosil: lb_fosil
           })
           .then(function (data) {
                 // debug(data)
@@ -907,7 +911,8 @@ exports.getSpeciesNiche = function (req, res, next) {
           debug("solo sin fecha")
           pool.any(queries.getSpeciesNiche.getSpeciesSD, {
                 spid: spid,
-                res_celda: res_celda
+                res_celda: res_celda,
+                sfosil: lb_fosil
           })
           .then(function (data) {
                 // debug(data)
@@ -924,7 +929,8 @@ exports.getSpeciesNiche = function (req, res, next) {
                 spid: spid,
                 lim_inf: fecha_incio.format('YYYY'),
                 lim_sup: fecha_fin.format('YYYY'),
-                res_celda: res_celda
+                res_celda: res_celda,
+                sfosil: lb_fosil
           })
           .then(function (data) {
                 // debug(data)
@@ -939,7 +945,8 @@ exports.getSpeciesNiche = function (req, res, next) {
           debug("sin filtros")
           pool.any(queries.getSpeciesNiche.getSpecies, {
                 spid: spid,
-                res_celda: res_celda
+                res_celda: res_celda,
+                sfosil: lb_fosil
           })
           .then(function (data) {
                 // debug(data)
