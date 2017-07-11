@@ -6,3 +6,6 @@ FROM snib
 WHERE 	spid = $<spid> AND 
 		especievalidabusqueda <> ''
 		and fechacolecta <> ''
+		and $<res_celda:raw> is not null
+		-- gridid_16km is not null
+		$<sfosil:raw>
