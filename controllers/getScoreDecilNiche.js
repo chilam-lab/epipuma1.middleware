@@ -487,9 +487,19 @@ function getScoreDecilNiche(req, res, next) {
 
   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
 
-  debug("val_ process: " + verb_utils.getParam(req, 'val_process', false))
-  var iter = verb_utils.getParam(req, 'val_process', false) === "true" ? iterations : 1
-  debug("iterations: " + iter)
+
+  var sfosil        = verb_utils.getParam(req, 'fossil', false)
+  // debug(sfosil)
+  var lb_fosil = sfosil === "false" || sfosil === false ? " and (ejemplarfosil <> 'SI' or ejemplarfosil is null) " : "";
+
+
+  var val_process = verb_utils.getParam(req, 'val_process', false)
+  var iter =  val_process === "true" ? iterations : 1
+  
+
+  var idtabla = verb_utils.getParam(req, 'idtabla')
+  idtabla = iter > 1 ? idtabla : ""
+  debug(idtabla)
 
   // filtros por tiempo
   var sfecha            = verb_utils.getParam(req, 'sfecha', false)
@@ -519,6 +529,9 @@ function getScoreDecilNiche(req, res, next) {
     res_celda = caso !== -1 ? res_celda.replace("cells","gridid") : res_celda
     debug('res_celda: ' + res_celda)
 
+    res_celda = caso !== -1 || lb_fosil.length > 1 ? res_celda.replace("cells","gridid") : res_celda
+    debug('res_celda: ' + res_celda)
+
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
 
@@ -528,6 +541,7 @@ function getScoreDecilNiche(req, res, next) {
       N: N,
       alpha: alpha,
       min_occ: min_occ,
+      fossil: lb_fosil,
       where_config: whereVar,
       where_config_raster: whereVarRaster,
       res_celda: res_celda,
@@ -536,7 +550,8 @@ function getScoreDecilNiche(req, res, next) {
       lim_inf: fecha_incio.format('YYYY'),
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
-      filter_time: filter_time
+      filter_time: filter_time,
+      idtabla: idtabla
     })
       .then(function (data) {
         for(var i = 0; i < data.length; i++){
@@ -549,6 +564,7 @@ function getScoreDecilNiche(req, res, next) {
         debug(error)
         next(error)
       })
+
   } else if (hasBios === 'true') {
     debug('B')
     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
@@ -558,6 +574,9 @@ function getScoreDecilNiche(req, res, next) {
     debug('filter_time: ' + filter_time)
 
     res_celda = caso !== -1 ? res_celda.replace("cells","gridid") : res_celda
+    debug('res_celda: ' + res_celda)
+
+    res_celda = caso !== -1 || lb_fosil.length > 1 ? res_celda.replace("cells","gridid") : res_celda
     debug('res_celda: ' + res_celda)
 
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
@@ -571,6 +590,7 @@ function getScoreDecilNiche(req, res, next) {
       N: N,
       alpha: alpha,
       min_occ: min_occ,
+      fossil: lb_fosil,
       where_config: whereVar,
       res_celda: res_celda,
       res_grid: res_grid,
@@ -578,7 +598,8 @@ function getScoreDecilNiche(req, res, next) {
       lim_inf: fecha_incio.format('YYYY'),
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
-      filter_time: filter_time
+      filter_time: filter_time,
+      idtabla: idtabla
     })
       .then(function (data) {
         for(var i = 0; i < data.length; i++){
@@ -602,6 +623,9 @@ function getScoreDecilNiche(req, res, next) {
     res_celda = caso !== -1 ? res_celda.replace("cells","gridid") : res_celda
     debug('res_celda: ' + res_celda)
 
+    res_celda = caso !== -1 || lb_fosil.length > 1 ? res_celda.replace("cells","gridid") : res_celda
+    debug('res_celda: ' + res_celda)
+
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
     // debug(whereVarRaster)
 
@@ -611,6 +635,7 @@ function getScoreDecilNiche(req, res, next) {
       N: N,
       alpha: alpha,
       min_occ: min_occ,
+      fossil: lb_fosil,
       where_config_raster: whereVarRaster,
       res_celda: res_celda,
       res_grid: res_grid,
@@ -618,7 +643,8 @@ function getScoreDecilNiche(req, res, next) {
       lim_inf: fecha_incio.format('YYYY'),
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
-      filter_time: filter_time
+      filter_time: filter_time,
+      idtabla: idtabla
     })
       .then(function (data) {
         for(var i = 0; i < data.length; i++){

@@ -224,7 +224,8 @@ var queryProvider = {
     // getFreqCeldaVTA: sqlPath('getFreqCelda/get_freq_celda_VTA.sql')
   },
   getScoreDecilNiche: {
-    getScoreDecilBio: sqlPath('getScoreDecil/get_score_decil_bio.sql'),
+    getScoreDecilBio: sqlPath('getScoreDecil/get_score_decil_bio_temp.sql'),
+
     getScoreDecilRaster: sqlPath('getScoreDecil/get_score_decil_raster.sql'),
     getScoreDecil: sqlPath('getScoreDecil/get_score_decil.sql'),
 
