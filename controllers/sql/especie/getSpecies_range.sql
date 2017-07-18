@@ -1,6 +1,6 @@
 SELECT DISTINCT st_asgeojson(the_geom) as json_geom, 
 				$<res_celda:raw> as gridid, 
-				urlejemplar, 
+				urlejemplar,
 				fechacolecta
 FROM snib 
 WHERE 	--spid = 33553 AND
