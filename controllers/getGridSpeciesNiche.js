@@ -19,7 +19,8 @@ var queries = require('./sql/queryProvider')
 
 var pool= pgp(config.db)
 var N = verb_utils.N 
-
+var iterations = verb_utils.iterations
+var alpha = verb_utils.alpha
 
 /**
  * Obtiene el score por celda agrupado por decil con mapa de proabilidad
@@ -43,6 +44,22 @@ function getGridSpeciesNiche_M(req, res, next) {
   // Siempre incluidos en query, nj >= 0
   var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
 
+
+  var sfosil        = verb_utils.getParam(req, 'fossil', false)
+  // debug(sfosil)
+  var lb_fosil      = sfosil === "false" || sfosil === false ? " and (ejemplarfosil <> 'SI' or ejemplarfosil is null) " : "";
+
+  debug("val_ process: " + verb_utils.getParam(req, 'val_process', false))
+  var iter = verb_utils.getParam(req, 'val_process', false) === "true" ? iterations : 1
+  debug("iterations: " + iter)
+
+   // filtros por tiempo
+  var sfecha            = verb_utils.getParam(req, 'sfecha', false)
+  var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+  var fecha_fin         = moment(verb_utils.getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+  
+  filter_time = false;
+
   // variables configurables
   var hasBios     = verb_utils.getParam(req, 'hasBios')
   var hasRaster   = verb_utils.getParam(req, 'hasRaster')
@@ -56,15 +73,26 @@ function getGridSpeciesNiche_M(req, res, next) {
   if (hasBios === 'true' && hasRaster === 'true' && mapa_prob === 'mapa_prob' ){
     debug('T')
 
+    var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+    debug('caso: ' + caso)
+
+    filter_time = caso !== -1 ? true : filter_time
+    debug('filter_time: ' + filter_time)
+
+    res_celda = caso !== -1 || lb_fosil.length > 1 ? res_celda.replace("cells","gridid") : res_celda
+    debug('res_celda: ' + res_celda)
+
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
     var categorias = verb_utils.getRasterCategories(tfilters)
       
     pool.any(queries.getGridSpeciesNiche.getGridSpeciesM, {
+     iterations: iter,
       spid: spid,
       N: N,
       alpha: alpha,
       min_occ: min_occ,
+      fossil: lb_fosil,
       where_config: whereVar,
       where_config_raster: whereVarRaster,
       long: long,
@@ -73,7 +101,11 @@ function getGridSpeciesNiche_M(req, res, next) {
       maxscore: maxscore,
       res_celda: res_celda,
       res_grid: res_grid,
-      discardedDeleted: discardedDeleted
+      discardedDeleted: discardedDeleted,
+      lim_inf: fecha_incio.format('YYYY'),
+      lim_sup: fecha_fin.format('YYYY'),
+      caso: caso,
+      filter_time: filter_time
     })
       .then(function (data) {
         res.json({'data': data})
@@ -85,14 +117,25 @@ function getGridSpeciesNiche_M(req, res, next) {
   } else if (hasBios === 'true' && mapa_prob === 'mapa_prob' ) {
     debug('B')
 
+    var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+    debug('caso: ' + caso)
+
+    filter_time = caso !== -1 ? true : filter_time
+    debug('filter_time: ' + filter_time)
+
+    res_celda = caso !== -1 || lb_fosil.length > 1 ? res_celda.replace("cells","gridid") : res_celda
+    debug('res_celda: ' + res_celda)
+
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
     var categorias = verb_utils.getRasterCategories(tfilters)
       
     pool.any(queries.getGridSpeciesNiche.getGridSpeciesBioM, {
+      iterations: iter,
       spid: spid,
       N: N,
       alpha: alpha,
       min_occ: min_occ,
+      fossil: lb_fosil,
       where_config: whereVar,
       long: long,
       lat: lat,
@@ -100,9 +143,14 @@ function getGridSpeciesNiche_M(req, res, next) {
       maxscore: maxscore,
       res_celda: res_celda,
       res_grid: res_grid,
-      discardedDeleted: discardedDeleted
+      discardedDeleted: discardedDeleted,
+      lim_inf: fecha_incio.format('YYYY'),
+      lim_sup: fecha_fin.format('YYYY'),
+      caso: caso,
+      filter_time: filter_time
     })
       .then(function (data) {
+        // debug(data)
         res.json({'data': data})
       })
       .catch(function (error) {
@@ -115,10 +163,12 @@ function getGridSpeciesNiche_M(req, res, next) {
     var categorias = verb_utils.getRasterCategories(tfilters)
 
     pool.any(queries.getGridSpeciesNiche.getGridSpeciesRaM, {
+      iterations: iter,
       spid: spid,
       N: N,
       alpha: alpha,
       min_occ: min_occ,
+      fossil: lb_fosil,
       where_config_raster: whereVarRaster,
       long: long,
       lat: lat,
@@ -126,7 +176,11 @@ function getGridSpeciesNiche_M(req, res, next) {
       maxscore: maxscore,
       res_celda: res_celda,
       res_grid: res_grid,
-      discardedDeleted: discardedDeleted
+      discardedDeleted: discardedDeleted,
+      lim_inf: fecha_incio.format('YYYY'),
+      lim_sup: fecha_fin.format('YYYY'),
+      caso: caso,
+      filter_time: filter_time
     })
       .then(function (data) {
         res.json({'data': data})
@@ -163,6 +217,24 @@ function getGridSpeciesNiche_A(req, res, next) {
   // Siempre incluidos en query, nj >= 0
   var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
 
+
+  var sfosil        = verb_utils.getParam(req, 'fossil', false)
+  // debug(sfosil)
+  var lb_fosil      = sfosil === "false" || sfosil === false ? " and (ejemplarfosil <> 'SI' or ejemplarfosil is null) " : "";
+
+  debug("val_ process: " + verb_utils.getParam(req, 'val_process', false))
+  var iter = verb_utils.getParam(req, 'val_process', false) === "true" ? iterations : 1
+  debug("iterations: " + iter)
+
+   // filtros por tiempo
+  var sfecha            = verb_utils.getParam(req, 'sfecha', false)
+  var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+  var fecha_fin         = moment(verb_utils.getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+  
+  filter_time = false;
+
+
+
   // variables configurables
   var hasBios     = verb_utils.getParam(req, 'hasBios')
   var hasRaster   = verb_utils.getParam(req, 'hasRaster')
@@ -175,15 +247,26 @@ function getGridSpeciesNiche_A(req, res, next) {
   if (hasBios === 'true' && hasRaster === 'true' && apriori === 'apriori' ){
     debug('T')
 
+    var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+    debug('caso: ' + caso)
+
+    filter_time = caso !== -1 ? true : filter_time
+    debug('filter_time: ' + filter_time)
+
+    res_celda = caso !== -1 || lb_fosil.length > 1 ? res_celda.replace("cells","gridid") : res_celda
+    debug('res_celda: ' + res_celda)
+
     var whereVar  = verb_utils.processBioFilters(tfilters, spid)
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
     var categorias = verb_utils.getRasterCategories(tfilters)
       
     pool.any(queries.getGridSpeciesNiche.getGridSpeciesA, {
+      iterations: iter,
       spid: spid,
       N: N,
       alpha: alpha,
       min_occ: min_occ,
+      fossil: lb_fosil,
       where_config: whereVar,
       where_config_raster: whereVarRaster,
       long: long,
@@ -192,7 +275,11 @@ function getGridSpeciesNiche_A(req, res, next) {
       maxscore: maxscore,
       res_celda: res_celda,
       res_grid: res_grid,
-      discardedDeleted: discardedDeleted
+      discardedDeleted: discardedDeleted,
+      lim_inf: fecha_incio.format('YYYY'),
+      lim_sup: fecha_fin.format('YYYY'),
+      caso: caso,
+      filter_time: filter_time
     })
       .then(function (data) {
         res.json({'data': data})
@@ -204,14 +291,25 @@ function getGridSpeciesNiche_A(req, res, next) {
   } else if (hasBios === 'true' && apriori === 'apriori' ) {
     debug('B')
 
+    var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+    debug('caso: ' + caso)
+
+    filter_time = caso !== -1 ? true : filter_time
+    debug('filter_time: ' + filter_time)
+
+    res_celda = caso !== -1 || lb_fosil.length > 1 ? res_celda.replace("cells","gridid") : res_celda
+    debug('res_celda: ' + res_celda)
+
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
     var categorias = verb_utils.getRasterCategories(tfilters)
 
     pool.any(queries.getGridSpeciesNiche.getGridSpeciesBioA, {
+      iterations: iter,
       spid: spid,
       N: N,
       alpha: alpha,
       min_occ: min_occ,
+      fossil: lb_fosil,
       where_config: whereVar,
       long: long,
       lat: lat,
@@ -219,7 +317,11 @@ function getGridSpeciesNiche_A(req, res, next) {
       maxscore: maxscore,
       res_celda: res_celda,
       res_grid: res_grid,
-      discardedDeleted: discardedDeleted
+      discardedDeleted: discardedDeleted,
+      lim_inf: fecha_incio.format('YYYY'),
+      lim_sup: fecha_fin.format('YYYY'),
+      caso: caso,
+      filter_time: filter_time
     })
       .then(function (data) {
         res.json({'data': data})
@@ -230,14 +332,18 @@ function getGridSpeciesNiche_A(req, res, next) {
       })
   } else if (hasRaster === 'true' && apriori === 'apriori' ) {
     debug('Ra')
+
+
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
     var categorias = verb_utils.getRasterCategories(tfilters)
 
     pool.any(queries.getGridSpeciesNiche.getGridSpeciesRaA, {
+      iterations: iter,
       spid: spid,
       N: N,
       alpha: alpha,
       min_occ: min_occ,
+      fossil: lb_fosil,
       where_config_raster: whereVarRaster,
       long: long,
       lat: lat,
@@ -245,7 +351,11 @@ function getGridSpeciesNiche_A(req, res, next) {
       maxscore: maxscore,
       res_celda: res_celda,
       res_grid: res_grid,
-      discardedDeleted: discardedDeleted
+      discardedDeleted: discardedDeleted,
+      lim_inf: fecha_incio.format('YYYY'),
+      lim_sup: fecha_fin.format('YYYY'),
+      caso: caso,
+      filter_time: filter_time
     })
       .then(function (data) {
         res.json({'data': data})
@@ -268,146 +378,146 @@ function getGridSpeciesNiche_A(req, res, next) {
  * @param {express.Response} res - Express response object 
  * @param {function} next - Express next middleware function
  */
-function getGridSpeciesNiche_T(req, res, next) {
-  debug('getGridSpeciesNiche_T')
+// function getGridSpeciesNiche_T(req, res, next) {
+//   debug('getGridSpeciesNiche_T')
 
-  var spid        = parseInt(verb_utils.getParam(req, 'id'))
-  var tfilters    = verb_utils.getParam(req, 'tfilters')
-  var alpha       = 0.01
-  // var N           = 14707; // Verificar N, que se esta contemplando
-  var maxscore    = 700
-  var res_celda = verb_utils.getParam(req, 'res_celda', 'cells_16km')
-  var res_grid = verb_utils.getParam(req, 'res_grid', 'gridid_16km')
+//   var spid        = parseInt(verb_utils.getParam(req, 'id'))
+//   var tfilters    = verb_utils.getParam(req, 'tfilters')
+//   var alpha       = 0.01
+//   // var N           = 14707; // Verificar N, que se esta contemplando
+//   var maxscore    = 700
+//   var res_celda = verb_utils.getParam(req, 'res_celda', 'cells_16km')
+//   var res_grid = verb_utils.getParam(req, 'res_grid', 'gridid_16km')
 
-  // Siempre incluidos en query, nj >= 0
-  var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
+//   // Siempre incluidos en query, nj >= 0
+//   var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
 
-  // variables configurables
-  var hasBios         = verb_utils.getParam(req, 'hasBios')
-  var hasRaster       = verb_utils.getParam(req, 'hasRaster')
+//   // variables configurables
+//   var hasBios         = verb_utils.getParam(req, 'hasBios')
+//   var hasRaster       = verb_utils.getParam(req, 'hasRaster')
 
-  var lat      = verb_utils.getParam(req, 'lat')
-  var long      = verb_utils.getParam(req, 'long')
+//   var lat      = verb_utils.getParam(req, 'lat')
+//   var long      = verb_utils.getParam(req, 'long')
     
-  // filtros por tiempo
-  var sfecha            = verb_utils.getParam(req, 'sfecha', false)
-  var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'), 
-                                 ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
-  var fecha_fin         = moment(verb_utils.getParam(req, 'lim_sup', moment().
-                                                     format('YYYY-MM-DD') ), 
-                                 ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
-  var discardedFilterids = verb_utils.getParam(req, 'discardedDateFilterids')
+//   // filtros por tiempo
+//   var sfecha            = verb_utils.getParam(req, 'sfecha', false)
+//   var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'), 
+//                                  ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+//   var fecha_fin         = moment(verb_utils.getParam(req, 'lim_sup', moment().
+//                                                      format('YYYY-MM-DD') ), 
+//                                  ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+//   var discardedFilterids = verb_utils.getParam(req, 'discardedDateFilterids')
 
-  var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
+//   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
 
-  // debug(discardedFilterids)
-  if (hasBios === 'true' && hasRaster === 'true' && 
-      discardedFilterids === 'true') {
-    var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
-    // debug(caso)
+//   // debug(discardedFilterids)
+//   if (hasBios === 'true' && hasRaster === 'true' && 
+//       discardedFilterids === 'true') {
+//     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+//     // debug(caso)
 
-    debug('T')  
+//     debug('T')  
 
-    var whereVar = verb_utils.processBioFilters(tfilters, spid)
-    var whereVarRaster = verb_utils.processRasterFilters(tfilters,spid)
-    var categorias = verb_utils.getRasterCategories(tfilters)
+//     var whereVar = verb_utils.processBioFilters(tfilters, spid)
+//     var whereVarRaster = verb_utils.processRasterFilters(tfilters,spid)
+//     var categorias = verb_utils.getRasterCategories(tfilters)
       
-    pool.any(queries.getGridSpeciesNiche.getGridSpeciesT, {
-      spid: spid,
-      N: N,
-      alpha: alpha,
-      min_occ: min_occ,
-      where_config: whereVar,
-      where_config_raster: whereVarRaster,
-      lim_inf: fecha_incio.format('YYYY'),
-      lim_sup: fecha_fin.format('YYYY'),
-      caso: caso,
-      long: long,
-      lat: lat,
-      categorias: categorias,
-      maxscore: maxscore,
-      res_celda: res_celda,
-      res_grid: res_grid,
-      discardedDeleted: discardedDeleted
-    })
-      .then(function (data) {
-        // debug(data)
-        res.json({'data': data})
-      })
-      .catch(function (error) {
-        debug(error)
-        next(error)
-      })
-  } else if (hasBios === 'true' && discardedFilterids === 'true' ) {
-    debug('B')
+//     pool.any(queries.getGridSpeciesNiche.getGridSpeciesT, {
+//       spid: spid,
+//       N: N,
+//       alpha: alpha,
+//       min_occ: min_occ,
+//       where_config: whereVar,
+//       where_config_raster: whereVarRaster,
+//       lim_inf: fecha_incio.format('YYYY'),
+//       lim_sup: fecha_fin.format('YYYY'),
+//       caso: caso,
+//       long: long,
+//       lat: lat,
+//       categorias: categorias,
+//       maxscore: maxscore,
+//       res_celda: res_celda,
+//       res_grid: res_grid,
+//       discardedDeleted: discardedDeleted
+//     })
+//       .then(function (data) {
+//         // debug(data)
+//         res.json({'data': data})
+//       })
+//       .catch(function (error) {
+//         debug(error)
+//         next(error)
+//       })
+//   } else if (hasBios === 'true' && discardedFilterids === 'true' ) {
+//     debug('B')
 
-    var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
-    var whereVar = verb_utils.processBioFilters(tfilters, spid)
-    var categorias = verb_utils.getRasterCategories(tfilters)
+//     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+//     var whereVar = verb_utils.processBioFilters(tfilters, spid)
+//     var categorias = verb_utils.getRasterCategories(tfilters)
       
-    pool.any(queries.getGridSpeciesNiche.getGridSpeciesBioT, {
-      spid: spid,
-      N: N,
-      alpha: alpha,
-      min_occ: min_occ,
-      where_config: whereVar,
-      lim_inf: fecha_incio.format('YYYY'),
-      lim_sup: fecha_fin.format('YYYY'),
-      caso: caso,
-      long: long,
-      lat: lat,
-      categorias: categorias,
-      maxscore: maxscore,
-      res_celda: res_celda,
-      res_grid: res_grid,
-      discardedDeleted: discardedDeleted
-    })
-      .then(function (data) {
-        // debug(data)
-        res.json({'data': data})
-      })
-      .catch(function (error) {
-        debug(error)
-        next(error)
-      })
+//     pool.any(queries.getGridSpeciesNiche.getGridSpeciesBioT, {
+//       spid: spid,
+//       N: N,
+//       alpha: alpha,
+//       min_occ: min_occ,
+//       where_config: whereVar,
+//       lim_inf: fecha_incio.format('YYYY'),
+//       lim_sup: fecha_fin.format('YYYY'),
+//       caso: caso,
+//       long: long,
+//       lat: lat,
+//       categorias: categorias,
+//       maxscore: maxscore,
+//       res_celda: res_celda,
+//       res_grid: res_grid,
+//       discardedDeleted: discardedDeleted
+//     })
+//       .then(function (data) {
+//         // debug(data)
+//         res.json({'data': data})
+//       })
+//       .catch(function (error) {
+//         debug(error)
+//         next(error)
+//       })
       
-  } else if (hasRaster === 'true' && discardedFilterids === 'true' ) {
-    var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
-    var categorias = verb_utils.getRasterCategories(tfilters)
+//   } else if (hasRaster === 'true' && discardedFilterids === 'true' ) {
+//     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+//     var categorias = verb_utils.getRasterCategories(tfilters)
 
-    debug('Ra')
+//     debug('Ra')
 
-    whereVarRaster = verb_utils.processRasterFilters(tfilters,spid)
+//     whereVarRaster = verb_utils.processRasterFilters(tfilters,spid)
       
-    pool.any(queries.getGridSpeciesNiche.getGridSpeciesRaT, {
-      spid: spid,
-      N: N,
-      alpha: alpha,
-      min_occ: min_occ,
-      where_config_raster: whereVarRaster,
-      lim_inf: fecha_incio.format('YYYY'),
-      lim_sup: fecha_fin.format('YYYY'),
-      caso: caso,
-      long: long,
-      lat: lat,
-      categorias: categorias,
-      maxscore: maxscore,
-      res_celda: res_celda,
-      res_grid: res_grid,
-      discardedDeleted: discardedDeleted
-    })
-      .then(function (data) {
-        // debug(data)
-        res.json({'data': data})
-      })
-      .catch(function (error) {
-        debug(error)
-        next(error)
-      })
-  } else {
-    next()
-  }
-}
+//     pool.any(queries.getGridSpeciesNiche.getGridSpeciesRaT, {
+//       spid: spid,
+//       N: N,
+//       alpha: alpha,
+//       min_occ: min_occ,
+//       where_config_raster: whereVarRaster,
+//       lim_inf: fecha_incio.format('YYYY'),
+//       lim_sup: fecha_fin.format('YYYY'),
+//       caso: caso,
+//       long: long,
+//       lat: lat,
+//       categorias: categorias,
+//       maxscore: maxscore,
+//       res_celda: res_celda,
+//       res_grid: res_grid,
+//       discardedDeleted: discardedDeleted
+//     })
+//       .then(function (data) {
+//         // debug(data)
+//         res.json({'data': data})
+//       })
+//       .catch(function (error) {
+//         debug(error)
+//         next(error)
+//       })
+//   } else {
+//     next()
+//   }
+// }
 
 
 /**
@@ -435,6 +545,26 @@ function getGridSpeciesNiche(req, res, next) {
   // Siempre incluidos en query, nj >= 0
   var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
 
+
+
+
+  var sfosil        = verb_utils.getParam(req, 'fossil', false)
+  // debug(sfosil)
+  var lb_fosil      = sfosil === "false" || sfosil === false ? " and (ejemplarfosil <> 'SI' or ejemplarfosil is null) " : "";
+
+  debug("val_ process: " + verb_utils.getParam(req, 'val_process', false))
+  var iter = verb_utils.getParam(req, 'val_process', false) === "true" ? iterations : 1
+  debug("iterations: " + iter)
+
+   // filtros por tiempo
+  var sfecha            = verb_utils.getParam(req, 'sfecha', false)
+  var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+  var fecha_fin         = moment(verb_utils.getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+  
+  filter_time = false;
+
+
+
   // variables configurables
   var hasBios     = verb_utils.getParam(req, 'hasBios')
   var hasRaster   = verb_utils.getParam(req, 'hasRaster')
@@ -442,24 +572,43 @@ function getGridSpeciesNiche(req, res, next) {
   var lat      = verb_utils.getParam(req, 'lat')
   var long      = verb_utils.getParam(req, 'long')
 
+
+
   // debug(idGrid)
   // var groupid        = verb_utils.getParam(req, 'groupid')
   // var title_valor = verb_utils.processTitleGroup(groupid, tfilters)
     
   if (hasBios === 'true' && hasRaster === 'true') {
     debug('T')
+
+
+    var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+    debug('caso: ' + caso)
+
+    filter_time = caso !== -1 ? true : filter_time
+    debug('filter_time: ' + filter_time)
+
+    res_celda = caso !== -1 || lb_fosil.length > 1 ? res_celda.replace("cells","gridid") : res_celda
+    debug('res_celda: ' + res_celda)
+
+
       
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
     var categorias = verb_utils.getRasterCategories(tfilters)
 
+
+
+
     // debug(categorias)
 
     pool.any(queries.getGridSpeciesNiche.getGridSpecies, {
+      iterations: iter,
       spid: spid,
       N: N,
       alpha: alpha,
       min_occ: min_occ,
+      fossil: lb_fosil,
       where_config: whereVar,
       where_config_raster: whereVarRaster,
       long: long,
@@ -468,7 +617,11 @@ function getGridSpeciesNiche(req, res, next) {
       maxscore: maxscore,
       res_celda: res_celda,
       res_grid: res_grid,
-      discardedDeleted: discardedDeleted
+      discardedDeleted: discardedDeleted,
+      lim_inf: fecha_incio.format('YYYY'),
+      lim_sup: fecha_fin.format('YYYY'),
+      caso: caso,
+      filter_time: filter_time
     })
       .then(function (data) {
         // debug(data)
@@ -481,14 +634,25 @@ function getGridSpeciesNiche(req, res, next) {
   } else if (hasBios === 'true') {
     debug('B')
 
+    var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+    debug('caso: ' + caso)
+
+    filter_time = caso !== -1 ? true : filter_time
+    debug('filter_time: ' + filter_time)
+
+    res_celda = caso !== -1 || lb_fosil.length > 1 ? res_celda.replace("cells","gridid") : res_celda
+    debug('res_celda: ' + res_celda)
+
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
     var categorias = verb_utils.getRasterCategories(tfilters)
       
     pool.any(queries.getGridSpeciesNiche.getGridSpeciesBio, {
+      iterations: iter,
       spid: spid,
       N: N,
       alpha: alpha,
       min_occ: min_occ,
+      fossil: lb_fosil,
       where_config: whereVar,
       long: long,
       lat: lat,
@@ -496,7 +660,11 @@ function getGridSpeciesNiche(req, res, next) {
       maxscore: maxscore,
       res_celda: res_celda,
       res_grid: res_grid,
-      discardedDeleted: discardedDeleted
+      discardedDeleted: discardedDeleted,
+      lim_inf: fecha_incio.format('YYYY'),
+      lim_sup: fecha_fin.format('YYYY'),
+      caso: caso,
+      filter_time: filter_time
     })
       .then(function (data) {
         // debug(data)
@@ -511,6 +679,15 @@ function getGridSpeciesNiche(req, res, next) {
   } else if (hasRaster === 'true') {
     debug('Ra')
 
+    // var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+    // debug('caso: ' + caso)
+
+    // filter_time = caso !== -1 ? true : filter_time
+    // debug('filter_time: ' + filter_time)
+
+    // res_celda = caso !== -1 || lb_fosil.length > 1 ? res_celda.replace("cells","gridid") : res_celda
+    // debug('res_celda: ' + res_celda)
+
     // debug(tfilters)
 
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
@@ -519,10 +696,12 @@ function getGridSpeciesNiche(req, res, next) {
     // debug(whereVarRaster)
 
     pool.any(queries.getGridSpeciesNiche.getGridSpeciesRaster, {
+      iterations: iter,
       spid: spid,
       N: N,
       alpha: alpha,
       min_occ: min_occ,
+      fossil: lb_fosil,
       where_config_raster: whereVarRaster,
       long: long,
       lat: lat,
@@ -530,9 +709,14 @@ function getGridSpeciesNiche(req, res, next) {
       maxscore: maxscore,
       res_celda: res_celda,
       res_grid: res_grid,
-      discardedDeleted: discardedDeleted
+      discardedDeleted: discardedDeleted,
+      lim_inf: fecha_incio.format('YYYY'),
+      lim_sup: fecha_fin.format('YYYY'),
+      caso: caso,
+      filter_time: filter_time
     })
       .then(function (data) {
+        // debug(data)
         res.json({'data': data})
       })
       .catch(function (error) {
@@ -559,6 +743,6 @@ function getGridSpeciesNiche(req, res, next) {
 exports.pipe = [
   getGridSpeciesNiche_M,
   getGridSpeciesNiche_A,
-  getGridSpeciesNiche_T,
+  // getGridSpeciesNiche_T,
   getGridSpeciesNiche        
 ]
