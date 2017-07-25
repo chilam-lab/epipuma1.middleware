@@ -164,14 +164,14 @@ function getGeoRelNiche(req, res, next) {
   else if (hasRaster === 'true'){
     debug('Ra')
     
-    var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
-    debug('caso: ' + caso)
+    // var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+    // debug('caso: ' + caso)
 
-    filter_time = caso !== -1 ? true : filter_time
-    debug('filter_time: ' + filter_time)
+    // filter_time = caso !== -1 ? true : filter_time
+    // debug('filter_time: ' + filter_time)
 
-    res_celda = caso !== -1 || lb_fosil.length > 1 ? res_celda.replace("cells","gridid") : res_celda
-    debug('res_celda: ' + res_celda)
+    // res_celda = caso !== -1 || lb_fosil.length > 1 ? res_celda.replace("cells","gridid") : res_celda
+    // debug('res_celda: ' + res_celda)
 
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
     // debug(whereVarRaster)
