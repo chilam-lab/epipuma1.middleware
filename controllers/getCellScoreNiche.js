@@ -145,18 +145,18 @@ function getFreqMapNiche_M(req, res, next) {
   } 
   else if (hasRaster === 'true' && mapa_prob === 'mapa_prob' ) {
     debug('RaM')
-     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
-    debug('caso: ' + caso)
+    //  var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+    // debug('caso: ' + caso)
 
-    filter_time = caso !== -1 ? true : filter_time
-    debug('filter_time: ' + filter_time)
+    // filter_time = caso !== -1 ? true : filter_time
+    // debug('filter_time: ' + filter_time)
 
-    res_celda = caso !== -1 || lb_fosil.length > 1 ? res_celda.replace("cells","gridid") : res_celda
-    debug('res_celda: ' + res_celda)
+    // res_celda = caso !== -1 || lb_fosil.length > 1 ? res_celda.replace("cells","gridid") : res_celda
+    // debug('res_celda: ' + res_celda)
 
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
 
-    debug(queries.getFreqMapNiche.getFreqMapRaM)
+    // debug(queries.getFreqMapNiche.getFreqMapRaM)
 
     pool.any(queries.getFreqMapNiche.getFreqMapRaM, {
       iterations: iter,
@@ -314,14 +314,14 @@ function getFreqMapNiche_A(req, res, next) {
   else if (hasRaster === 'true' && apriori === 'apriori' ) {
     debug('RaA')
 
-     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
-    debug('caso: ' + caso)
+    //  var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+    // debug('caso: ' + caso)
 
-    filter_time = caso !== -1 ? true : filter_time
-    debug('filter_time: ' + filter_time)
+    // filter_time = caso !== -1 ? true : filter_time
+    // debug('filter_time: ' + filter_time)
 
-    res_celda = caso !== -1 || lb_fosil.length > 1 ? res_celda.replace("cells","gridid") : res_celda
-    debug('res_celda: ' + res_celda)
+    // res_celda = caso !== -1 || lb_fosil.length > 1 ? res_celda.replace("cells","gridid") : res_celda
+    // debug('res_celda: ' + res_celda)
 
 
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
@@ -585,7 +585,7 @@ function getFreqMapNiche(req, res, next) {
   if (hasBios === 'true' && hasRaster === 'true' ){
     debug('T')
 
-     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+    var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
     debug('caso: ' + caso)
 
     filter_time = caso !== -1 ? true : filter_time
@@ -663,14 +663,14 @@ function getFreqMapNiche(req, res, next) {
   else if (hasRaster === 'true'){
     debug('Ra')
 
-     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
-    debug('caso: ' + caso)
+    //  var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+    // debug('caso: ' + caso)
 
-    filter_time = caso !== -1 ? true : filter_time
-    debug('filter_time: ' + filter_time)
+    // filter_time = caso !== -1 ? true : filter_time
+    // debug('filter_time: ' + filter_time)
 
-    res_celda = caso !== -1 || lb_fosil.length > 1 ? res_celda.replace("cells","gridid") : res_celda
-    debug('res_celda: ' + res_celda)
+    // res_celda = caso !== -1 || lb_fosil.length > 1 ? res_celda.replace("cells","gridid") : res_celda
+    // debug('res_celda: ' + res_celda)
 
 
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)

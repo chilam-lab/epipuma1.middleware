@@ -1,80 +1,31 @@
 /*getGridSpecies sin filtros*/
-WITH source AS (
-	SELECT spid, 
-			--$<res_celda:raw> as cells
-			($<res_celda:raw> - array[$<discardedDeleted:raw>]::int[])  as cells
-	FROM sp_snib 
-	WHERE 
-		spid = $<spid>	
-		--spid = 31981
-		and especievalidabusqueda <> ''
-),
-target AS (
-	SELECT  cast('' as text) generovalido,
-			case when type = 1 then
-			layer
-			else
-			(label || ' ' || round(cast(split_part(split_part(tag,':',1),'.',1) as numeric)/10,2)  ||' ºC - ' || round(cast(split_part(split_part(tag,':',2),'.',1) as numeric)/10,2) || ' ºC') 
-			end as especievalidabusqueda,
-			bid as spid,
-			cast('' as text) reinovalido,
-			cast('' as text) phylumdivisionvalido,
-			cast('' as text) clasevalida,
-			cast('' as text) ordenvalido,
-			cast('' as text) familiavalida,
-			--cells_16km as cells
-			$<res_celda:raw> as cells 
-	FROM raster_bins 
-	$<where_config_raster:raw>
-	--where type = 0
-),
-counts AS (
-	SELECT 	target.spid,
-			target.cells,
-			target.generovalido,
-			target.especievalidabusqueda,
-			icount(source.cells & target.cells) AS niyj,
-			icount(target.cells) AS nj,
-			icount(source.cells) AS ni,
-			$<N> as n,
-			target.reinovalido,
-			target.phylumdivisionvalido,
-			target.clasevalida,
-			target.ordenvalido,
-			target.familiavalida
-	FROM source,target
-	where 
-	target.spid <> $<spid>
-	--target.spid <> 31981
-	and icount(target.cells) > $<min_occ:raw>
-	--and icount(target.cells) > 0
-),
-rawdata as (
-	SELECT 	counts.spid,
-			counts.cells,
-			--counts.source,
-			--counts.generovalido,
-			counts.especievalidabusqueda,
-			counts.niyj as nij,
-			counts.nj,
-			counts.ni,
-			counts.n,
-			counts.reinovalido,
-			counts.phylumdivisionvalido,
-			counts.clasevalida,
-			counts.ordenvalido,
-			counts.familiavalida,
-			round( cast(  ln(   
-				get_score(
-					$<alpha>,
-					--0.01,
-					cast(counts.nj as integer), 
-					cast(counts.niyj as integer), 
-					cast(counts.ni as integer), 
-					cast(counts.n as integer)
-				)
-			)as numeric), 2) as score
-	FROM counts 
+with rawdata as (
+	select
+		-- out_generovalido,
+		out_spid as spid,
+		out_cells as cells,
+		out_especievalidabusqueda as especievalidabusqueda,
+		round(avg(out_nij),2) as nij,
+		round(avg(out_nj),2) as nj,
+		-- avg(out_ni),
+		avg(out_ni)::int as ni,  
+	 	avg(out_n)::int as n,
+	 	out_reinovalido as reinovalido,
+	 	out_phylumdivisionvalido as phylumdivisionvalido,
+	 	out_clasevalida as clasevalida,
+	 	out_ordenvalido as ordenvalido,
+	 	out_familiavalida as familiavalida,
+		round(avg(out_epsilon),2) as epsilon,
+		round(avg(out_score),2) as score		
+	from iteratevalidationprocess($<iterations>, $<spid>, $<N>, $<alpha>, $<min_occ>, array[$<discardedDeleted:raw>]::int[], '$<res_celda:raw>', '', '$<where_config_raster:value>', 'abio', $<filter_time>, $<caso>, $<lim_inf>, $<lim_sup>, '$<fossil:value>')
+	-- from iteratevalidationprocess(1, 28923, 94544, 0.01, 0, array[]::int[], 'gridid_16km', 'where clasevalida = ''Mammalia'' ', '', 'bio', true, 1, 2010, 2020, '')
+	-- from iteratevalidationprocess(1, 28923, 94544, 0.01, 0, array[]::int[], 'cells_16km', 'where clasevalida = ''Mammalia'' ', '', 'bio', false, -1, 1500, 2017, '')
+	where out_spid is not null
+	group by 	out_spid,
+				out_cells,
+				out_especievalidabusqueda,
+				out_reinovalido, out_phylumdivisionvalido, out_clasevalida, out_ordenvalido, out_familiavalida
+	order by epsilon desc
 ),
 grid_selected as (
 	SELECT 
@@ -104,50 +55,3 @@ from (
 where 	rango <> ''  
 order by score desc 
 
-/*
-grid_spid as (
-	SELECT 
-		--$<res_grid:raw> as gridid,
-		gridid_16km as gridid,
-	unnest( 
-			-- NOTA DINAMICO: verificar cuando se envian las variables depediendo de los filtros rastersleccionados!!!!
-			animalia||plantae||fungi||protoctista||prokaryotae
-			--$<categorias:raw>
-			--bio01||bio02||bio03||bio04||bio05||bio06|| bio07||bio08||bio09||bio10||bio11||bio12||bio13||bio14||bio15||bio16||bio17||bio18||bio19
-			--||elevacion || pendiente || topidx
-			--||mexca || mexce || mexco || mexk || mexmg || mexmo || mexna || mexph || mexras
-			) as spid
-	FROM grid_16km_aoi 
-	--where ST_Intersects( the_geom, ST_GeomFromText('POINT($<long:raw> $<lat:raw>)',4326))
-	-- -96.339111328125 19.427484900299145	| score total: -0.72 | celda:588870   
-	-- -96.3720703125 19.27718395845517 	: score total: -1.3 | celda:588869
-	-- -96.712646484375 19.27718395845517	: -1.22
-	--19.468922818336207, -96.383056640625
-	where ST_Intersects( the_geom, ST_GeomFromText('POINT(-96.3720703125 19.27718395845517)',4326))
-),
-gridsps as ( 
-	select 	gridid, 
-			spid,
-			especievalidabusqueda as nom_sp,
-			rango,
-			label 
-	from ( 
-		select 	gridid, 
-				grid_spid.spid, 
-				cast('' as text) as especievalidabusqueda, 
-				especievalidabusqueda as rango, 
-				especievalidabusqueda as label 
-		from rawdata 
-		join grid_spid 
-		on grid_spid.spid = rawdata.spid
-	--) 
-	) as total 
-	where 	rango <> ''  
-	order by spid 
-)
-select gridsps.*,  score 
-from gridsps  
-join rawdata 
-on gridsps.spid = rawdata.spid 
-order by score desc
-*/
