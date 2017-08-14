@@ -53,6 +53,11 @@ function getGridSpeciesNiche_M(req, res, next) {
   var iter = verb_utils.getParam(req, 'val_process', false) === "true" ? iterations : 1
   debug("iterations: " + iter)
 
+  var idtabla = verb_utils.getParam(req, 'idtabla')
+  idtabla = iter > 1 ? idtabla : ""
+
+  debug("idtabla: " + idtabla)
+
    // filtros por tiempo
   var sfecha            = verb_utils.getParam(req, 'sfecha', false)
   var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
@@ -105,7 +110,8 @@ function getGridSpeciesNiche_M(req, res, next) {
       lim_inf: fecha_incio.format('YYYY'),
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
-      filter_time: filter_time
+      filter_time: filter_time,
+      idtabla: idtabla
     })
       .then(function (data) {
         res.json({'data': data})
@@ -147,7 +153,8 @@ function getGridSpeciesNiche_M(req, res, next) {
       lim_inf: fecha_incio.format('YYYY'),
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
-      filter_time: filter_time
+      filter_time: filter_time,
+      idtabla: idtabla
     })
       .then(function (data) {
         // debug(data)
@@ -180,7 +187,8 @@ function getGridSpeciesNiche_M(req, res, next) {
       lim_inf: fecha_incio.format('YYYY'),
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
-      filter_time: filter_time
+      filter_time: filter_time,
+      idtabla: idtabla
     })
       .then(function (data) {
         res.json({'data': data})
@@ -225,6 +233,11 @@ function getGridSpeciesNiche_A(req, res, next) {
   debug("val_ process: " + verb_utils.getParam(req, 'val_process', false))
   var iter = verb_utils.getParam(req, 'val_process', false) === "true" ? iterations : 1
   debug("iterations: " + iter)
+
+  var idtabla = verb_utils.getParam(req, 'idtabla')
+  idtabla = iter > 1 ? idtabla : ""
+
+  debug("idtabla: " + idtabla)
 
    // filtros por tiempo
   var sfecha            = verb_utils.getParam(req, 'sfecha', false)
@@ -279,7 +292,8 @@ function getGridSpeciesNiche_A(req, res, next) {
       lim_inf: fecha_incio.format('YYYY'),
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
-      filter_time: filter_time
+      filter_time: filter_time,
+      idtabla: idtabla
     })
       .then(function (data) {
         res.json({'data': data})
@@ -321,7 +335,8 @@ function getGridSpeciesNiche_A(req, res, next) {
       lim_inf: fecha_incio.format('YYYY'),
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
-      filter_time: filter_time
+      filter_time: filter_time,
+      idtabla: idtabla
     })
       .then(function (data) {
         res.json({'data': data})
@@ -355,7 +370,8 @@ function getGridSpeciesNiche_A(req, res, next) {
       lim_inf: fecha_incio.format('YYYY'),
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
-      filter_time: filter_time
+      filter_time: filter_time,
+      idtabla: idtabla
     })
       .then(function (data) {
         res.json({'data': data})
@@ -556,6 +572,12 @@ function getGridSpeciesNiche(req, res, next) {
   var iter = verb_utils.getParam(req, 'val_process', false) === "true" ? iterations : 1
   debug("iterations: " + iter)
 
+
+  var idtabla = verb_utils.getParam(req, 'idtabla')
+  idtabla = iter > 1 ? idtabla : ""
+
+  debug("idtabla: " + idtabla)
+
    // filtros por tiempo
   var sfecha            = verb_utils.getParam(req, 'sfecha', false)
   var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
@@ -621,7 +643,8 @@ function getGridSpeciesNiche(req, res, next) {
       lim_inf: fecha_incio.format('YYYY'),
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
-      filter_time: filter_time
+      filter_time: filter_time,
+      idtabla: idtabla
     })
       .then(function (data) {
         // debug(data)
@@ -664,7 +687,8 @@ function getGridSpeciesNiche(req, res, next) {
       lim_inf: fecha_incio.format('YYYY'),
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
-      filter_time: filter_time
+      filter_time: filter_time,
+      idtabla: idtabla
     })
       .then(function (data) {
         // debug(data)
@@ -713,7 +737,8 @@ function getGridSpeciesNiche(req, res, next) {
       lim_inf: fecha_incio.format('YYYY'),
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
-      filter_time: filter_time
+      filter_time: filter_time,
+      idtabla: idtabla
     })
       .then(function (data) {
         // debug(data)
