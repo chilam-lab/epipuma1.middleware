@@ -64,6 +64,12 @@ function getFreqCeldaNiche_A(req, res, next) {
   // debug(lb_fosil)
 
 
+  var idtabla = verb_utils.getParam(req, 'idtabla')
+  idtabla = iter > 1 ? idtabla : ""
+
+  debug("idtabla: " + idtabla)
+
+
   // Siempre incluidos en query, nj >= 0
   var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
 
@@ -101,7 +107,8 @@ function getFreqCeldaNiche_A(req, res, next) {
       lim_inf: fecha_incio.format('YYYY'),
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
-      filter_time: filter_time
+      filter_time: filter_time,
+      idtabla: idtabla
     })
       .then(function (data) {
         res.json({'data': data})
@@ -138,7 +145,8 @@ function getFreqCeldaNiche_A(req, res, next) {
       lim_inf: fecha_incio.format('YYYY'),
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
-      filter_time: filter_time
+      filter_time: filter_time,
+      idtabla: idtabla
     })
       .then(function (data) {
         res.json({'data': data})
@@ -175,7 +183,8 @@ function getFreqCeldaNiche_A(req, res, next) {
       lim_inf: fecha_incio.format('YYYY'),
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
-      filter_time: filter_time
+      filter_time: filter_time,
+      idtabla: idtabla
     })
       .then(function (data) {
         res.json({'data': data})
@@ -375,6 +384,12 @@ function getFreqCeldaNiche(req, res, next) {
   filter_time = false;
 
 
+  var idtabla = verb_utils.getParam(req, 'idtabla')
+  idtabla = iter > 1 ? idtabla : ""
+
+  debug("idtabla: " + idtabla)
+
+
     
   if (hasBios === 'true' && hasRaster === 'true' ) {
     debug('T')
@@ -405,7 +420,8 @@ function getFreqCeldaNiche(req, res, next) {
       lim_inf: fecha_incio.format('YYYY'),
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
-      filter_time: filter_time
+      filter_time: filter_time,
+      idtabla: idtabla
     })
       .then(function (data) {
         res.json({'data': data})
@@ -443,7 +459,8 @@ function getFreqCeldaNiche(req, res, next) {
       lim_inf: fecha_incio.format('YYYY'),
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
-      filter_time: filter_time
+      filter_time: filter_time,
+      idtabla: idtabla
     })
       .then(function (data) {
         res.json({'data': data})
@@ -482,7 +499,8 @@ function getFreqCeldaNiche(req, res, next) {
       lim_inf: fecha_incio.format('YYYY'),
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
-      filter_time: filter_time
+      filter_time: filter_time,
+      idtabla: idtabla
     })
       .then(function (data) {
         res.json({'data': data})
