@@ -87,6 +87,12 @@ var queryProvider = {
   getValidationTables: {
     createTables: sqlPath('especie/get_validation_tables.sql')
   },
+  processValidationTables: {
+    processTables: sqlPath('especie/process_validation_tables.sql')
+  },
+  deleteValidationTables: {
+    deleteTables: sqlPath('especie/delete_validation_tables.sql')
+  },
   getVariablesNiche: {
     getVariablesReino: sqlPath('especie/get_variables_reino.sql'),
     getVariables: sqlPath('especie/get_variables.sql')

@@ -72,6 +72,8 @@ function getGeoRelNiche(req, res, next) {
 
   var idtabla = verb_utils.getParam(req, 'idtabla')
   idtabla = iter > 1 ? idtabla : ""
+
+  debug("idtabla: " + idtabla)
   
     
   if (hasBios === 'true' && hasRaster === 'true' ){
