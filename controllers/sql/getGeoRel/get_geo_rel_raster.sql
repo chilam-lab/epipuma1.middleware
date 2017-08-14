@@ -15,7 +15,7 @@ select
  	out_familiavalida as familiavalida,
 	round(avg(out_epsilon),2) as epsilon,
 	round(avg(out_score),2) as score
-from iteratevalidationprocess($<iterations>, $<spid>, $<N>, $<alpha>, $<min_occ>, array[$<discardedDeleted:raw>]::int[], '$<res_celda:raw>', '', '$<where_config_raster:value>', 'abio', $<filter_time>, $<caso>, $<lim_inf>, $<lim_sup>, '$<fossil:value>')
+from iteratevalidationprocess($<iterations>, $<spid>, $<N>, $<alpha>, $<min_occ>, array[$<discardedDeleted:raw>]::int[], '$<res_celda:raw>', '', '$<where_config_raster:value>', 'abio', $<filter_time>, $<caso>, $<lim_inf>, $<lim_sup>, '$<fossil:value>', '$<idtabla:value>')
 -- from iteratevalidationprocess(1, 28923, 94544, 0.01, 0, array[]::int[], 'cells_16km', '', 'where layer = ''bio01'' ', 'abio', true, 1, 1500, 2017)
 where out_spid is not null
 group by 	out_spid,

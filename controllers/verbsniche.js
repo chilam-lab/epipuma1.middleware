@@ -504,8 +504,6 @@ exports.getToken = function (req, res, next) {
  * @param {express.Response} res
  *
  */
-
-
 exports.getValidationTables = function (req, res, next) {
 
   if(getParam(req, 'qtype') === "getValidationTables"){
@@ -515,14 +513,24 @@ exports.getValidationTables = function (req, res, next) {
 
       var spid = getParam(req, 'spid')
       var iter = getParam(req, 'iter')
-
+      var idtbl = getParam(req, 'idtable')
+      var iter = getParam(req, 'iterations',iterations)
+      
+      var res_celda_sp = verb_utils.getParam(req, 'res_celda_sp', 'cells_16km')
+      var res_celda_snib = verb_utils.getParam(req, 'res_celda_snib', 'gridid_16km')
+      var res_celda_snib_tb = verb_utils.getParam(req, 'res_celda_snib_tb', 'grid_16km_aoi')
+      
 
       pool.any(queries.getValidationTables.createTables, {
           spid: spid,
-          iter: iter
+          iterations: iter,
+          idtbl: idtbl,
+          res_celda_sp: res_celda_sp,
+          res_celda_snib: res_celda_snib,
+          res_celda_snib_tb: res_celda_snib_tb
       })
           .then(function (data) {
-            // debug(data)
+            debug(data)
             res.json({'data': data})
       })
           .catch(function (error) {
@@ -542,6 +550,91 @@ exports.getValidationTables = function (req, res, next) {
 
 /**
  *
+ * Servidor Niche: processValidationTables
+ *
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ *
+ */
+exports.processValidationTables = function (req, res, next) {
+
+  if(getParam(req, 'qtype') === "processValidationTables"){
+
+      debug(getParam(req, 'qtype'))
+      debug("processValidationTables")
+
+      var idtbl = getParam(req, 'idtable')
+
+
+      pool.any(queries.processValidationTables.processTables, {
+          idtbl: idtbl
+      })
+          .then(function (data) {
+            debug(data)
+            res.json({'data': data})
+      })
+          .catch(function (error) {
+            debug(error)
+            next(error)
+      })
+
+
+  }
+  else{
+      next()
+  }
+
+}
+
+
+
+
+/**
+ *
+ * Servidor Niche: processValidationTables
+ *
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ *
+ */
+exports.deleteValidationTables = function (req, res, next) {
+
+  if(getParam(req, 'qtype') === "deleteValidationTables"){
+
+      debug(getParam(req, 'qtype'))
+      debug("deleteValidationTables")
+
+      var idtbl = getParam(req, 'idtable')
+
+
+      pool.any(queries.deleteValidationTables.deleteTables, {
+          idtbl: idtbl
+      })
+          .then(function (data) {
+            debug(data)
+            res.json({'data': data})
+      })
+          .catch(function (error) {
+            debug(error)
+            next(error)
+      })
+
+
+  }
+  else{
+      next()
+  }
+
+}
+
+
+
+
+
+/**
+ *
  * Servidor Niche: getGridGeoJsonNiche
  *
  *
@@ -549,8 +642,6 @@ exports.getValidationTables = function (req, res, next) {
  * @param {express.Response} res
  *
  */
-
-
 exports.getGridGeoJsonNiche = function (req, res, next) {
 
   if(getParam(req, 'qtype') === "getGridGeoJsonMX"){

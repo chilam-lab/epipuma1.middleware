@@ -64,6 +64,11 @@ function getFreqNiche(req, res, next) {
   var iter = verb_utils.getParam(req, 'val_process', false) === "true" ? iterations : 1
   debug("iterations: " + iter)
 
+  var idtabla = verb_utils.getParam(req, 'idtabla')
+  idtabla = iter > 1 ? idtabla : ""
+
+  debug("idtabla: " + idtabla)
+
 
   if (hasBios === 'true' && hasRaster === 'true' ) {
     debug('T')
@@ -93,7 +98,8 @@ function getFreqNiche(req, res, next) {
       lim_inf: fecha_incio.format('YYYY'),
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
-      filter_time: filter_time
+      filter_time: filter_time,
+      idtabla: idtabla
     })
       .then(function (data) {
         res.json({'data': data})
@@ -129,7 +135,8 @@ function getFreqNiche(req, res, next) {
       lim_inf: fecha_incio.format('YYYY'),
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
-      filter_time: filter_time
+      filter_time: filter_time,
+      idtabla: idtabla
     })
       .then(function (data) {
         res.json({'data': data})
@@ -166,7 +173,8 @@ function getFreqNiche(req, res, next) {
       lim_inf: fecha_incio.format('YYYY'),
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
-      filter_time: filter_time
+      filter_time: filter_time,
+      idtabla: idtabla
     })
       .then(function (data) {
         res.json({'data': data})

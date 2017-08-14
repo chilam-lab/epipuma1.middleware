@@ -1,0 +1,1 @@
+select deletetemptableforvalidation('$<idtbl:raw>'::text);
