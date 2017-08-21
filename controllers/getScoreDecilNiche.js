@@ -49,6 +49,10 @@ function getScoreDecilNiche_A(req, res, next) {
   
   filter_time = false;
 
+  var idtabla = verb_utils.getParam(req, 'idtabla')
+  idtabla = iter > 1 ? idtabla : ""
+  debug(idtabla)
+
 
   // Siempre incluidos en query, nj >= 0
   var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
@@ -92,7 +96,8 @@ function getScoreDecilNiche_A(req, res, next) {
       lim_inf: fecha_incio.format('YYYY'),
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
-      filter_time: filter_time
+      filter_time: filter_time,
+      idtabla: idtabla
     })
       .then(function (data) {
         for(var i = 0; i < data.length; i++){
@@ -131,7 +136,8 @@ function getScoreDecilNiche_A(req, res, next) {
       lim_inf: fecha_incio.format('YYYY'),
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
-      filter_time: filter_time
+      filter_time: filter_time,
+      idtabla: idtabla
     })
       .then(function (data) {
         for(var i = 0; i < data.length; i++){
@@ -170,7 +176,8 @@ function getScoreDecilNiche_A(req, res, next) {
       lim_inf: fecha_incio.format('YYYY'),
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
-      filter_time: filter_time
+      filter_time: filter_time,
+      idtabla: idtabla
     })
       .then(function (data) {
         for(var i = 0; i < data.length; i++){
@@ -476,11 +483,12 @@ function getScoreDecilNiche_A(req, res, next) {
  * @param {function} next - Express next middleware function
  */
 function getScoreDecilNiche(req, res, next) {
+
   debug('getScoreDecilNiche')
 
   var spid        = parseInt(verb_utils.getParam(req, 'id'))
   var tfilters    = verb_utils.getParam(req, 'tfilters')
-  var alpha       = 0.01
+
   // var N           = 14707
   var res_celda = verb_utils.getParam(req, 'res_celda', 'cells_16km')
   var res_grid = verb_utils.getParam(req, 'res_grid', 'gridid_16km')
@@ -526,6 +534,9 @@ function getScoreDecilNiche(req, res, next) {
     filter_time = caso !== -1 ? true : filter_time
     debug('filter_time: ' + filter_time)
 
+
+    //TODO: Revisar si se envian los dos parametros es necesaria esta validación
+
     res_celda = caso !== -1 ? res_celda.replace("cells","gridid") : res_celda
     debug('res_celda: ' + res_celda)
 
@@ -534,6 +545,7 @@ function getScoreDecilNiche(req, res, next) {
 
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
+    
 
     pool.any(queries.getScoreDecilNiche.getScoreDecil, {
       iterations: iter,
