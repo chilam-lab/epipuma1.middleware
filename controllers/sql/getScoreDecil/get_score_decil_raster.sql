@@ -1,5 +1,5 @@
-/*getFreqDecil sin filtros*/
-WITH source AS (
+
+/*WITH source AS (
 	SELECT spid, 
 		--$<res_celda:raw> as cells
 		--cells_16km as cells
@@ -94,6 +94,30 @@ basic_score as (
 	from rawdata
 	group by gridid
 	order by tscore desc
+),*/
+
+with prerawdata as (
+	select
+		out_cell as gridid,
+		out_score as tscore,
+		type_value
+	from iteratevalidationprocessbycells($<iterations>, $<spid>, $<N>, $<alpha>, $<min_occ>, array[$<discardedDeleted:raw>]::int[], '$<res_celda:raw>', '', '$<where_config_raster:value>', 'abio', $<filter_time>, $<caso>, $<lim_inf>, $<lim_sup>, true, '$<fossil:value>', '$<idtabla:value>')
+	-- from iteratevalidationprocessbycells(5, 28923, 94544, 0.01, 0, array[]::int[], 'gridid_16km', 'where ordenvalido = ''Carnivora'' ', '', 'bio', true, 1, 2010, 2020, true, '', 'tbl_1502773073345')
+	where out_cell is not null
+),
+valdata as (
+	select
+		gridid,
+		tscore
+	from prerawdata
+	where type_value = 'test'
+),
+rawdata as (
+	select
+		gridid,
+		tscore
+	from prerawdata
+	where type_value = 'train'
 ),
 prenorm as (
 	select 	grid_16km_aoi.gridid_16km as gridid,

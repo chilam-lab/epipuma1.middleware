@@ -3,8 +3,8 @@ with prerawdata as (
 		out_cell as gridid,
 		out_score as tscore,
 		type_value
-	from iteratevalidationprocessbycells($<iterations>, $<spid>, $<N>, $<alpha>, $<min_occ>, array[$<discardedDeleted:raw>]::int[], '$<res_celda:raw>', '$<where_config:value>', '', 'bio', $<filter_time>, $<caso>, $<lim_inf>, $<lim_sup>, true, '$<fossil:value>', '$<idtabla:value>')
-	-- from iteratevalidationprocessbycells(5, 28923, 94544, 0.01, 0, array[]::int[], 'gridid_16km', 'where ordenvalido = ''Carnivora'' ', '', 'bio', true, 1, 2010, 2020, true, '', 'tbl_1502773073345')
+	-- from iteratevalidationprocessbycells($<iterations>, $<spid>, $<N>, $<alpha>, $<min_occ>, array[$<discardedDeleted:raw>]::int[], '$<res_celda:raw>', '$<where_config:value>', '', 'bio', $<filter_time>, $<caso>, $<lim_inf>, $<lim_sup>, true, '$<fossil:value>', '$<idtabla:value>')
+	from iteratevalidationprocessbycells(5, 28923, 94544, 0.01, 0, array[]::int[], 'gridid_16km', 'where clasevalida = ''Mammalia'' ', '', 'bio', true, 1, 2010, 2020, true, '', 'temp_02')
 	where out_cell is not null
 ),
 valdata as (
