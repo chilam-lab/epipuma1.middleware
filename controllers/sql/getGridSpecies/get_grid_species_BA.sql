@@ -17,7 +17,7 @@ with rawdata as (
 	 	out_familiavalida as familiavalida,
 		round(avg(out_epsilon),2) as epsilon,
 		round(avg(out_score),2) as score		
-	from iteratevalidationprocess($<iterations>, $<spid>, $<N>, $<alpha>, $<min_occ>, array[$<discardedDeleted:raw>]::int[], '$<res_celda:raw>', '$<where_config:value>', '', 'bio', $<filter_time>, $<caso>, $<lim_inf>, $<lim_sup>, '$<fossil:value>', '$<idtabla:value>')
+	from iteratevalidationprocess($<iterations>, $<spid>, $<N>, $<alpha>, $<min_occ>, array[$<discardedDeleted:raw>]::int[], '$<res_celda_sp:raw>', '$<res_celda_snib:raw>', '$<res_celda_snib_tb:raw>', '$<where_config:value>', '', 'bio', $<filter_time>, $<caso>, $<lim_inf>, $<lim_sup>, '$<fossil:value>', '$<idtabla:value>')
 	-- from iteratevalidationprocess(1, 28923, 94544, 0.01, 0, array[]::int[], 'gridid_16km', 'where clasevalida = ''Mammalia'' ', '', 'bio', true, 1, 2010, 2020, '')
 	-- from iteratevalidationprocess(1, 28923, 94544, 0.01, 0, array[]::int[], 'cells_16km', 'where clasevalida = ''Mammalia'' ', '', 'bio', false, -1, 1500, 2017, '')
 	where out_spid is not null
@@ -29,9 +29,9 @@ with rawdata as (
 ),
 grid_selected as (
 	SELECT 
-		$<res_grid:raw> as gridid
+		$<res_celda_snib:raw> as gridid
 		--gridid_16km as gridid
-	FROM grid_16km_aoi 
+	FROM $<res_celda_snib_tb:raw> 
 	where ST_Intersects( the_geom, ST_GeomFromText('POINT($<long:raw> $<lat:raw>)',4326))
 	--where ST_Intersects( the_geom, ST_GeomFromText('POINT(-96.3720703125 19.27718395845517)',4326))
 )
@@ -65,71 +65,7 @@ union
 		ln( ni / ( n - ni::numeric) ) as score,
 		ln( ni / ( n - ni::numeric) ) as apriori
 from rawdata limit 1)
-
 order by score desc  
 
 
-
-
-/*
-
-grid_spid as (
-	SELECT $<res_grid:raw> as gridid,
-	unnest( $<categorias:raw>
-			--animalia||plantae||fungi||protoctista||prokaryotae
-			--||bio01||bio02||bio03||bio04||bio05||bio06|| bio07||bio08||bio09||bio10||bio11||bio12||bio13||bio14||bio15||bio16||bio17||bio18||bio19
-			--||elevacion || pendiente || topidx
-			--||mexca || mexce || mexco || mexk || mexmg || mexmo || mexna || mexph || mexras
-			) as spid
-	FROM grid_16km_aoi 
-	where ST_Intersects( the_geom, ST_GeomFromText('POINT($<long:raw> $<lat:raw>)',4326))
-	--where ST_Intersects( the_geom, ST_GeomFromText('POINT(-103.271484375 23.017053740980547)',4326))
-),
-gridsps as ( 
-	select  gridid, 
-			spid, 
-			especievalidabusqueda as nom_sp, 
-			rango, 
-			label 
-	from ( 
-		select 	gridid, 
-				grid_spid.spid, 
-				especievalidabusqueda, 
-				''::text as rango, 
-				''::text as label 
-		from rawdata 
-		join grid_spid 
-		on grid_spid.spid = rawdata.spid 
-	) as total 
-	where 	especievalidabusqueda <> '' 
-			--and rango <> ''  
-	order by spid 
-)
-select 	gridid, 
-		spid, 
-		nom_sp, 
-		rango, 
-		label,
-		score,
-		apriori
-from (
-	select 	gridsps.*,  
-			score, 
-			ln( rawdata.ni / ( rawdata.n - rawdata.ni::numeric) ) as apriori
-	from gridsps  
-	join rawdata 
-	on gridsps.spid = rawdata.spid
-	
-	union 
-	-- se genera row para agregar apriori en caso de que la celda escogida no tenga valor
-	( select 	0 as gridid, 
-			0 as spid, 
-			'-'::text as nom_sp,
-			'-'::text as rango,
-			'-'::text as label, 
-			ln( ni / ( n - ni::numeric) ) as score,
-			ln( ni / ( n - ni::numeric) ) as apriori
-	from rawdata limit 1)
-) as tabla
-order by score desc*/
 

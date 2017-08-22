@@ -611,6 +611,7 @@ exports.deleteValidationTables = function (req, res, next) {
       debug("deleteValidationTables")
 
       var idtbl = getParam(req, 'idtable')
+      debug("delete idtable: " + idtabl)
 
 
       pool.any(queries.deleteValidationTables.deleteTables, {
