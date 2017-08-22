@@ -1,26 +1,36 @@
+-- total celdas: 94544
+-- iteraciones: 5
 with prerawdata as (
-	select
-		out_cell as gridid,
-		out_score as tscore,
-		type_value
-	-- from iteratevalidationprocessbycells($<iterations>, $<spid>, $<N>, $<alpha>, $<min_occ>, array[$<discardedDeleted:raw>]::int[], '$<res_celda:raw>', '$<where_config:value>', '', 'bio', $<filter_time>, $<caso>, $<lim_inf>, $<lim_sup>, true, '$<fossil:value>', '$<idtabla:value>')
-	from iteratevalidationprocessbycells(5, 28923, 94544, 0.01, 0, array[]::int[], 'gridid_16km', 'where clasevalida = ''Mammalia'' ', '', 'bio', true, 1, 2010, 2020, true, '', 'temp_02')
-	where out_cell is not null
+	select *
+		-- out_cell as gridid,
+		-- out_score as tscore,
+		-- type_value,
+		-- iter
+	-- from iteratevalidationprocessbycells($<iterations>, $<spid>, $<N>, $<alpha>, $<min_occ>, array[$<discardedDeleted:raw>]::int[], '$<res_celda_sp:raw>', '$<res_celda_snib:raw>', '$<res_celda_snib_tb:raw>', '$<where_config:value>', '', 'bio', $<filter_time>, $<caso>, $<lim_inf>, $<lim_sup>, true, '$<fossil:value>', '$<idtabla:value>')
+	from iteratevalidationprocessbydecil(5, 28923, 94544, 0.01, 0, array[]::int[], 'cells_16km', 'gridid_16km', 'grid_16km_aoi', 'where ordenvalido = ''Carnivora'' ', '', 'bio', false, -1, 2010, 2020, '', 'temp_01')
+	where decil is not null 
+	-- and iter = 1
+	-- and out_score is null
+	-- order by out_cell
+	-- and (type_value = 'test' or type_value = 'test-n')
 ),
 valdata as (
 	select
 		gridid,
-		tscore
+		tscore,
+		iter
 	from prerawdata
 	where type_value = 'test'
 ),
 rawdata as (
 	select
 		gridid,
-		tscore
+		tscore,
+		iter
 	from prerawdata
 	where type_value = 'train'
 ),
+-- obtiene el score de las coovariables y con cero el resto de las celdas de la malla 
 prenorm as (
 	select 	grid_16km_aoi.gridid_16km as gridid, 
 			COALESCE(tscore, 0) as tscore 
@@ -54,23 +64,29 @@ select 	decil,
 		l_sup,
 		l_inf,
 		sum, avg,
-		 case when 2>1
+		case when 2>1
 		-- case when $<iterations> >1 
 			then count(valdata.*) filter (WHERE valdata.tscore > l_inf) 
 		else 0 end as vp,
 		case when 2>1
 		-- case when $<iterations> >1 
-			then count(valdata) - count(valdata.*) filter (WHERE valdata.tscore > l_inf) 
+			then count(valdata.*) filter (WHERE valdata.tscore is null) 
+		else 0 end as nulos,
+		case when 2>1
+		-- case when $<iterations> >1 
+			then count(valdata) - ( count(valdata.*) filter (WHERE valdata.tscore > l_inf) ) 
 		else 0 end as fn,
 		case when 2>1
 		-- case when $<iterations> >1 
-			then (count(valdata.*) filter (WHERE valdata.tscore > l_inf))::float / (count(valdata.*) filter (WHERE valdata.tscore > l_inf) + (count(valdata) - count(valdata.*) filter (WHERE valdata.tscore > l_inf)))
+			then (count(valdata.*) filter (WHERE valdata.tscore > l_inf))::float / (count(valdata.*) filter (WHERE valdata.tscore > l_inf) + (count(valdata) - ( count(valdata.*) filter (WHERE valdata.tscore > l_inf) ) ))
 		else 0 end as recall
 from boundaries
 full outer join valdata
 on true
 group by decil, l_sup, l_inf, sum, avg
 order by decil desc
+
+*/
 
 
 /*select *

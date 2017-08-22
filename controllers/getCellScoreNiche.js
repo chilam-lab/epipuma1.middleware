@@ -22,6 +22,7 @@ var pool= pgp(config.db)
 var N = verb_utils.N 
 var iterations = verb_utils.iterations
 var alpha = verb_utils.alpha
+var maxscore = verb_utils.maxscore
 
 
 /**
@@ -36,10 +37,10 @@ function getFreqMapNiche_M(req, res, next) {
   debug('getFreqMapNiche_M')
   var spid        = parseInt(verb_utils.getParam(req, 'id'))
   var tfilters    = verb_utils.getParam(req, 'tfilters')
-  // var alpha       = 0.01
-  // var N           = 14707
-  var maxscore    = 700
-  var res_celda = verb_utils.getParam(req, 'res_celda', 'cells_16km')
+
+  var res_celda_sp = verb_utils.getParam(req, 'res_celda_sp', 'cells_16km')
+  var res_celda_snib = verb_utils.getParam(req, 'res_celda_snib', 'gridid_16km')
+  var res_celda_snib_tb = verb_utils.getParam(req, 'res_celda_snib_tb', 'grid_16km_aoi')
 
   // Siempre incluidos en query, nj >= 0
   var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
@@ -50,7 +51,6 @@ function getFreqMapNiche_M(req, res, next) {
   var mapa_prob       = verb_utils.getParam(req, 'mapa_prob')
 
   var sfosil        = verb_utils.getParam(req, 'fossil', false)
-  // debug(sfosil)
   var lb_fosil      = sfosil === "false" || sfosil === false ? " and (ejemplarfosil <> 'SI' or ejemplarfosil is null) " : "";
   // debug(lb_fosil)
 
@@ -80,9 +80,6 @@ function getFreqMapNiche_M(req, res, next) {
     filter_time = caso !== -1 ? true : filter_time
     debug('filter_time: ' + filter_time)
 
-    res_celda = caso !== -1 || lb_fosil.length > 1 ? res_celda.replace("cells","gridid") : res_celda
-    debug('res_celda: ' + res_celda)
-
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
 
@@ -96,7 +93,9 @@ function getFreqMapNiche_M(req, res, next) {
       fossil: lb_fosil,
       where_config: whereVar,
       where_config_raster: whereVarRaster,
-      res_celda: res_celda,
+      res_celda_sp: res_celda_sp,
+      res_celda_snib: res_celda_snib,
+      res_celda_snib_tb: res_celda_snib_tb, 
       discardedDeleted: discardedDeleted,
       lim_inf: fecha_incio.format('YYYY'),
       lim_sup: fecha_fin.format('YYYY'),
@@ -120,9 +119,6 @@ function getFreqMapNiche_M(req, res, next) {
     filter_time = caso !== -1 ? true : filter_time
     debug('filter_time: ' + filter_time)
 
-    res_celda = caso !== -1 || lb_fosil.length > 1 ? res_celda.replace("cells","gridid") : res_celda
-    debug('res_celda: ' + res_celda)
-
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
 
     pool.any(queries.getFreqMapNiche.getFreqMapBioM, {
@@ -134,7 +130,9 @@ function getFreqMapNiche_M(req, res, next) {
       min_occ: min_occ,
       fossil: lb_fosil,
       where_config: whereVar,
-      res_celda: res_celda,
+      res_celda_sp: res_celda_sp,
+      res_celda_snib: res_celda_snib,
+      res_celda_snib_tb: res_celda_snib_tb, 
       discardedDeleted: discardedDeleted,
       lim_inf: fecha_incio.format('YYYY'),
       lim_sup: fecha_fin.format('YYYY'),
@@ -152,14 +150,6 @@ function getFreqMapNiche_M(req, res, next) {
   } 
   else if (hasRaster === 'true' && mapa_prob === 'mapa_prob' ) {
     debug('RaM')
-    //  var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
-    // debug('caso: ' + caso)
-
-    // filter_time = caso !== -1 ? true : filter_time
-    // debug('filter_time: ' + filter_time)
-
-    // res_celda = caso !== -1 || lb_fosil.length > 1 ? res_celda.replace("cells","gridid") : res_celda
-    // debug('res_celda: ' + res_celda)
 
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
 
@@ -174,7 +164,9 @@ function getFreqMapNiche_M(req, res, next) {
       min_occ: min_occ,
       fossil: lb_fosil,
       where_config_raster: whereVarRaster,
-      res_celda: res_celda,
+      res_celda_sp: res_celda_sp,
+      res_celda_snib: res_celda_snib,
+      res_celda_snib_tb: res_celda_snib_tb, 
       discardedDeleted: discardedDeleted,
       lim_inf: fecha_incio.format('YYYY'),
       lim_sup: fecha_fin.format('YYYY'),
@@ -209,10 +201,10 @@ function getFreqMapNiche_A(req, res, next) {
   debug('getFreqMapNiche_A')
   var spid        = parseInt(verb_utils.getParam(req, 'id'))
   var tfilters    = verb_utils.getParam(req, 'tfilters')
-  // var alpha       = 0.01
-  // var N           = 14707
-  var res_celda = verb_utils.getParam(req, 'res_celda', 'cells_16km')
-  var res_grid = verb_utils.getParam(req, 'res_grid', 'gridid_16km')
+  
+  var res_celda_sp = verb_utils.getParam(req, 'res_celda_sp', 'cells_16km')
+  var res_celda_snib = verb_utils.getParam(req, 'res_celda_snib', 'gridid_16km')
+  var res_celda_snib_tb = verb_utils.getParam(req, 'res_celda_snib_tb', 'grid_16km_aoi')
 
   // Siempre incluidos en query, nj >= 0
   var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
@@ -254,9 +246,6 @@ function getFreqMapNiche_A(req, res, next) {
     filter_time = caso !== -1 ? true : filter_time
     debug('filter_time: ' + filter_time)
 
-    res_celda = caso !== -1 || lb_fosil.length > 1 ? res_celda.replace("cells","gridid") : res_celda
-    debug('res_celda: ' + res_celda)
-
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
 
@@ -269,8 +258,9 @@ function getFreqMapNiche_A(req, res, next) {
       fossil: lb_fosil,
       where_config: whereVar,
       where_config_raster: whereVarRaster,
-      res_celda: res_celda,
-      res_grid: res_grid,
+      res_celda_sp: res_celda_sp,
+      res_celda_snib: res_celda_snib,
+      res_celda_snib_tb: res_celda_snib_tb, 
       discardedDeleted: discardedDeleted,
       lim_inf: fecha_incio.format('YYYY'),
       lim_sup: fecha_fin.format('YYYY'),
@@ -295,10 +285,6 @@ function getFreqMapNiche_A(req, res, next) {
     filter_time = caso !== -1 ? true : filter_time
     debug('filter_time: ' + filter_time)
 
-    res_celda = caso !== -1 || lb_fosil.length > 1 ? res_celda.replace("cells","gridid") : res_celda
-    debug('res_celda: ' + res_celda)
-
-
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
 
     pool.any(queries.getFreqMapNiche.getFreqMapBioA, {
@@ -309,8 +295,9 @@ function getFreqMapNiche_A(req, res, next) {
       min_occ: min_occ,
       fossil: lb_fosil,
       where_config: whereVar,
-      res_celda: res_celda,
-      res_grid: res_grid,
+      res_celda_sp: res_celda_sp,
+      res_celda_snib: res_celda_snib,
+      res_celda_snib_tb: res_celda_snib_tb, 
       discardedDeleted: discardedDeleted,
       lim_inf: fecha_incio.format('YYYY'),
       lim_sup: fecha_fin.format('YYYY'),
@@ -329,16 +316,6 @@ function getFreqMapNiche_A(req, res, next) {
   else if (hasRaster === 'true' && apriori === 'apriori' ) {
     debug('RaA')
 
-    //  var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
-    // debug('caso: ' + caso)
-
-    // filter_time = caso !== -1 ? true : filter_time
-    // debug('filter_time: ' + filter_time)
-
-    // res_celda = caso !== -1 || lb_fosil.length > 1 ? res_celda.replace("cells","gridid") : res_celda
-    // debug('res_celda: ' + res_celda)
-
-
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
 
     pool.any(queries.getFreqMapNiche.getFreqMapRaA, {
@@ -349,8 +326,9 @@ function getFreqMapNiche_A(req, res, next) {
       min_occ: min_occ,
       fossil: lb_fosil,
       where_config_raster: whereVarRaster,
-      res_celda: res_celda,
-      res_grid: res_grid,
+      res_celda_sp: res_celda_sp,
+      res_celda_snib: res_celda_snib,
+      res_celda_snib_tb: res_celda_snib_tb, 
       discardedDeleted: discardedDeleted,
       lim_inf: fecha_incio.format('YYYY'),
       lim_sup: fecha_fin.format('YYYY'),
@@ -373,144 +351,6 @@ function getFreqMapNiche_A(req, res, next) {
 
 
 /**
- * Obtiene frecuencia score por celda para desplegar el mapa de probabilidad
- * con filtro temporal
- *
- * @function
- * @param {express.Request} req - Express request object
- * @param {express.Response} res - Express response object 
- * @param {function} next - Express next middleware function
- */
-// function getFreqMapNiche_T(req, res, next) {
-//   debug('getFreqMapNiche_T')
-//   var spid        = parseInt(verb_utils.getParam(req, 'id'))
-//   var tfilters    = verb_utils.getParam(req, 'tfilters')
-//   var alpha       = 0.01
-//   // var N           = 14707; // Verificar N, que se esta contemplando
-//   var res_celda = verb_utils.getParam(req, 'res_celda', 'cells_16km')
-//   var res_grid = verb_utils.getParam(req, 'res_grid', 'gridid_16km')
-
-
-//   // Siempre incluidos en query, nj >= 0
-//   var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
-
-//   // variables configurables
-//   var hasBios         = verb_utils.getParam(req, 'hasBios')
-//   var hasRaster       = verb_utils.getParam(req, 'hasRaster')
-    
-//   // filtros por tiempo
-//   var sfecha            = verb_utils.getParam(req, 'sfecha', false)
-//   var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'),
-//                                  ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'],
-//                                  'es')
-//   var fecha_fin         = moment(verb_utils.getParam(req, 'lim_sup', 
-//                                                      moment().
-//                                                      format('YYYY-MM-DD')), 
-//                                  ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
-//   var discardedFilterids = verb_utils.getParam(req, 'discardedDateFilterids')
-
-//   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
-//   // debug(discardedFilterids)
-    
-//   if (hasBios === 'true' && hasRaster === 'true' && 
-//       discardedFilterids === 'true') {
-//     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
-//     // debug(caso)
-
-//     debug('T')  
-
-//     whereVar = verb_utils.processBioFilters(tfilters, spid)
-//     whereVarRaster = verb_utils.processRasterFilters(tfilters,spid)
-      
-//     pool.any(queries.getFreqMapNiche.getFreqMapT, {
-//       spid: spid,
-//       N: N,
-//       alpha: alpha,
-//       min_occ: min_occ,
-//       where_config: whereVar,
-//       where_config_raster: whereVarRaster,
-//       lim_inf: fecha_incio.format('YYYY'),
-//       lim_sup: fecha_fin.format('YYYY'),
-//       caso: caso,
-//       res_celda: res_celda,
-//       res_grid: res_grid,
-//       discardedDeleted: discardedDeleted
-//     })
-//       .then(function (data) {
-//         // debug(data)
-//         res.json({'data': data})
-//       })
-//       .catch(function (error) {
-//         debug(error)
-//         next(error)
-//       })
-//   }
-//   else if (hasBios === 'true' && discardedFilterids === 'true' ) {
-//     debug('B')
-//     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
-//     // debug(caso);  
-
-//     var whereVar = verb_utils.processBioFilters(tfilters, spid)
-//     // debug(whereVar)
-      
-//     pool.any(queries.getFreqMapNiche.getFreqMapBioT, {
-//       spid: spid,
-//       N: N,
-//       alpha: alpha,
-//       min_occ: min_occ,
-//       where_config: whereVar,
-//       lim_inf: fecha_incio.format('YYYY'),
-//       lim_sup: fecha_fin.format('YYYY'),
-//       caso: caso,
-//       res_celda: res_celda,
-//       res_grid: res_grid,
-//       discardedDeleted: discardedDeleted
-//     })
-//       .then(function (data) {
-//         // debug(data)
-//         res.json({'data': data})
-//       })
-//       .catch(function (error) {
-//         debug(error)
-//         next(error)
-//       })
-//   } 
-//   else if (hasRaster === 'true' && discardedFilterids === 'true' ) {
-//     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
-//     // debug(caso)
-
-//     debug('Ra')
-//     var whereVarRaster = verb_utils.processRasterFilters(tfilters,spid)
-      
-//     pool.any(queries.getFreqMapNiche.getFreqMapRaT, {
-//       spid: spid,
-//       N: N,
-//       alpha: alpha,
-//       min_occ: min_occ,
-//       where_config_raster: whereVarRaster,
-//       lim_inf: fecha_incio.format('YYYY'),
-//       lim_sup: fecha_fin.format('YYYY'),
-//       caso: caso,
-//       res_celda: res_celda,
-//       res_grid: res_grid,
-//       discardedDeleted: discardedDeleted
-//     })
-//       .then(function (data) {
-//         // debug(data)
-//         res.json({'data': data})
-//       })
-//       .catch(function (error) {
-//         debug(error)
-//         next(error)
-//       })
-//   } 
-//   else{
-//     next()
-//   }
-// }
-
-
-/**
  * Obtiene frecuencia score por celda para desplegar el mapa de probabilidad 
  * sin filtros
  *
@@ -523,10 +363,7 @@ function getFreqMapNiche(req, res, next) {
   debug('getFreqMapNiche')
   var spid        = parseInt(verb_utils.getParam(req, 'id'))
   var tfilters    = verb_utils.getParam(req, 'tfilters')
-  // var alpha       = 0.01
-  // var res_celda = verb_utils.getParam(req, 'res_celda', 'cells_16km')
-  // var N           = 14707; // Verificar N, que se esta contemplando
-
+  
   var res_celda_sp = verb_utils.getParam(req, 'res_celda_sp', 'cells_16km')
   var res_celda_snib = verb_utils.getParam(req, 'res_celda_snib', 'gridid_16km')
   var res_celda_snib_tb = verb_utils.getParam(req, 'res_celda_snib_tb', 'grid_16km_aoi')
@@ -616,10 +453,6 @@ function getFreqMapNiche(req, res, next) {
     filter_time = caso !== -1 ? true : filter_time
     debug('filter_time: ' + filter_time)
 
-    // res_celda = caso !== -1 || lb_fosil.length > 1 ? res_celda.replace("cells","gridid") : res_celda
-    // debug('res_celda: ' + res_celda)
-
-
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
 
@@ -659,10 +492,6 @@ function getFreqMapNiche(req, res, next) {
     filter_time = caso !== -1 ? true : filter_time
     debug('filter_time: ' + filter_time)
 
-    res_celda = caso !== -1 || lb_fosil.length > 1 ? res_celda.replace("cells","gridid") : res_celda
-    debug('res_celda: ' + res_celda)
-
-
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
 
     pool.any(queries.getFreqMapNiche.getFreqMapBio, {
@@ -693,16 +522,6 @@ function getFreqMapNiche(req, res, next) {
   } 
   else if (hasRaster === 'true'){
     debug('Ra')
-
-    //  var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
-    // debug('caso: ' + caso)
-
-    // filter_time = caso !== -1 ? true : filter_time
-    // debug('filter_time: ' + filter_time)
-
-    // res_celda = caso !== -1 || lb_fosil.length > 1 ? res_celda.replace("cells","gridid") : res_celda
-    // debug('res_celda: ' + res_celda)
-
 
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
     // debug(whereVarRaster)
