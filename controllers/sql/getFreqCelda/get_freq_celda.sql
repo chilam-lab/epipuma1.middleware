@@ -6,9 +6,6 @@ with rawdata as (
 	-- from iteratevalidationprocessbycells(1, 28923, 94544, 0.01, 0, array[]::int[], 'cells_16km', 'where clasevalida = ''Mammalia'' ', '', 'bio')
 	where out_cell is not null
 ),
-/*allgridis as(
-	select $<res_grid:raw> as gridid from grid_16km_aoi
-),*/
 prenorm as (
 	select 	grid_16km_aoi.gridid_16km, 
 			COALESCE(tscore, 0) as tscore 

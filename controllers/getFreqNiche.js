@@ -35,9 +35,6 @@ function getFreqNiche(req, res, next) {
   debug('getFreqNiche')
   var spid        = parseInt(verb_utils.getParam(req, 'id'))
   var tfilters    = verb_utils.getParam(req, 'tfilters')
-  // var alpha       = 0.01
-  // var N           = 14707; // Verificar N, que se esta contemplando
-  // var res_celda = verb_utils.getParam(req, 'res_celda', 'cells_16km')
 
   var res_celda_sp = verb_utils.getParam(req, 'res_celda_sp', 'cells_16km')
   var res_celda_snib = verb_utils.getParam(req, 'res_celda_snib', 'gridid_16km')
@@ -82,9 +79,6 @@ function getFreqNiche(req, res, next) {
     filter_time = caso !== -1 ? true : filter_time
     debug('filter_time: ' + filter_time)
 
-    // res_celda = caso !== -1 || lb_fosil.length > 1 ? res_celda.replace("cells","gridid") : res_celda
-    // debug('res_celda: ' + res_celda)
-
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
 
@@ -123,9 +117,6 @@ function getFreqNiche(req, res, next) {
     filter_time = caso !== -1 ? true : filter_time
     debug('filter_time: ' + filter_time)
 
-    // res_celda = caso !== -1 || lb_fosil.length > 1 ? res_celda.replace("cells","gridid") : res_celda
-    // debug('res_celda: ' + res_celda)
-
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
 
     pool.any(queries.getFreqNiche.getFreqBio, {
@@ -156,14 +147,6 @@ function getFreqNiche(req, res, next) {
   } 
   else if (hasRaster === 'true'){
     debug('Ra')
-    // var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
-    // debug('caso: ' + caso)
-
-    // filter_time = caso !== -1 ? true : filter_time
-    // debug('filter_time: ' + filter_time)
-
-    // res_celda = caso !== -1 || lb_fosil.length > 1 ? res_celda.replace("cells","gridid") : res_celda
-    // debug('res_celda: ' + res_celda)
 
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
     // debug(whereVarRaster)
@@ -201,7 +184,7 @@ function getFreqNiche(req, res, next) {
 
 
 /**
- * EstÃ¡ variable es un arreglo donde se define el flujo que debe de tener una 
+ * Está variable es un arreglo donde se define el flujo que debe de tener una 
  * peticiÃ³n al verbo getFreqNiche. Actualmente el flujo es getFreqNiche_VT,
  * getFreqNiche_V, getFreqNiche_T y getFreqNiche.
  *
