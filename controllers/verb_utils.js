@@ -19,6 +19,7 @@ verb_utils.N = 94544 // MX y US sin Alaska y Hawaii a 16km
 // verb_utils.N = 19968 // MX a 16km
 verb_utils.iterations = 5
 verb_utils.alpha = 0.01
+verb_utils.maxscore = 700
 
 
 /**

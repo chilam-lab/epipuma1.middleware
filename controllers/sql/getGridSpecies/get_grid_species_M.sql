@@ -18,7 +18,7 @@ with rawdata as (
 	 	out_familiavalida as familiavalida,
 		round(avg(out_epsilon),2) as epsilon,
 		round(avg(out_score),2) as score		
-	from iteratevalidationprocess($<iterations>, $<spid>, $<N>, $<alpha>, $<min_occ>, array[$<discardedDeleted:raw>]::int[], '$<res_celda:raw>', '$<where_config:value>', '$<where_config_raster:value>', 'both', $<filter_time>, $<caso>, $<lim_inf>, $<lim_sup>, '$<fossil:value>', '$<idtabla:value>')
+	from iteratevalidationprocess($<iterations>, $<spid>, $<N>, $<alpha>, $<min_occ>, array[$<discardedDeleted:raw>]::int[], '$<res_celda_sp:raw>', '$<res_celda_snib:raw>', '$<res_celda_snib_tb:raw>', '$<where_config:value>', '$<where_config_raster:value>', 'both', $<filter_time>, $<caso>, $<lim_inf>, $<lim_sup>, '$<fossil:value>', '$<idtabla:value>')
 	-- from iteratevalidationprocess(1, 28923, 94544, 0.01, 0, array[]::int[], 'gridid_16km', 'where clasevalida = ''Mammalia'' ', '', 'bio', true, 1, 2010, 2020, '')
 	-- from iteratevalidationprocess(1, 28923, 94544, 0.01, 0, array[]::int[], 'cells_16km', 'where clasevalida = ''Mammalia'' ', '', 'bio', false, -1, 1500, 2017, '')
 	where out_spid is not null
@@ -31,9 +31,9 @@ with rawdata as (
 ),
 grid_selected as (
 	SELECT 
-		$<res_grid:raw> as gridid
+		$<res_celda_snib:raw> as gridid
 		--gridid_16km as gridid
-	FROM grid_16km_aoi 
+	FROM $<res_celda_snib_tb:raw> 
 	where ST_Intersects( the_geom, ST_GeomFromText('POINT($<long:raw> $<lat:raw>)',4326))
 	--where ST_Intersects( the_geom, ST_GeomFromText('POINT(-96.3720703125 19.27718395845517)',4326))
 ),
@@ -84,51 +84,3 @@ select -1 as gridid,
 from apriori
 order by score desc
 
-
-/*
-grid_spid as (
-	SELECT $<res_grid:raw> as gridid,
-	unnest( 
-			$<categorias:raw>
-			) as spid
-	FROM grid_16km_aoi 
-	where ST_Intersects( the_geom, ST_GeomFromText('POINT($<long:raw> $<lat:raw>)',4326))
-	--where ST_Intersects( the_geom, ST_GeomFromText('POINT(-96.3720703125 19.27718395845517)',4326))
-),
-gridsps as ( 
-	select 	gridid, 
-			grid_spid.spid, 
-			case when tipo = 0
-			then especievalidabusqueda
-			else ''
-			end as nom_sp,
-			case when tipo = 1
-			then especievalidabusqueda
-			else ''
-			end as label,
-			score
-	from rawdata 
-	join grid_spid 
-	on grid_spid.spid = rawdata.spid  
-	where 	especievalidabusqueda <> '' 
-			--and rango <> ''  
-	order by spid 
-),
-apriori as (
-	select ln( rawdata.ni / ( rawdata.n - rawdata.ni::numeric) ) as val
-	from rawdata limit 1
-),
-celda_score as (
-	select 	gridid,
-			case when (sum(score) + val) <= -$<maxscore:raw> then 0.00 * 100 
-				when (sum(score) + val) >= $<maxscore:raw> then 1.00 * 100 
-				else exp(sum(score) + val) / (1 + exp( sum(score) + val ))  * 100 
-			end as prob 
-	from gridsps, apriori
-	group by gridid, val
-)
-select 	*
-from gridsps,
-celda_score
-order by score desc
-*/
