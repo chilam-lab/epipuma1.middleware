@@ -4,7 +4,32 @@ Esta aplicación es responsable de crear el API necesaria para [SPECIES][sp].
 
 En `docs/api-doc.md` se puede consultar la documentación de la API.
 
-## Uso
+## Instalación
+La instalción requiere node versión 6. 
+
+En el caso de macOS, node se puede hacer mediante brew (https://brew.sh/).
+
+Si node no está instalado:
+
+```
+  $ brew install node@6
+```
+
+Si node está instalado con una versión mayor:
+
+```
+  $ brew unlink node
+  $ brew install node@6
+  $ brew link node@6
+```
+
+Si brew link node@6 no funciona, es posible que se requiera usar --force para crear la liga:
+
+```
+  $ brew link --force node@6
+```
+
+
 
 Clonar el repositorio
 
@@ -19,6 +44,8 @@ Después instalar la aplicación y lanzarla
   $ npm install
   $ npm start
 ```
+
+## Uso
 
 >  _Nota:_ Hay que conifgurar la conexión a la base de datos en el archivo 
 >  `config.js`.
