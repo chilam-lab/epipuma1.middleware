@@ -4,10 +4,13 @@ Esta aplicación es responsable de crear el API necesaria para [SPECIES][sp].
 
 En `docs/api-doc.md` se puede consultar la documentación de la API.
 
-## Instalación
-La instalción requiere node versión 6. 
+## Instalación y uso
 
-En el caso de macOS, node se puede hacer mediante brew (https://brew.sh/).
+La instalación requiere node versión 6. 
+
+En el caso de macOS, node se puede instalar mediante [brew][brew]. Para otros sistemas consultar la documentación en [Installing Node.js via package manage][node-package-managers].
+
+### Instalación con [brew][brew]
 
 Si node no está instalado:
 
@@ -23,7 +26,7 @@ Si node está instalado con una versión mayor:
   $ brew link node@6
 ```
 
-Si brew link node@6 no funciona, es posible que se requiera usar --force para crear la liga:
+Si `brew link node@6` no funciona, es posible que se requiera usar `--force` para crear la liga:
 
 ```
   $ brew link --force node@6
@@ -37,15 +40,20 @@ Clonar el repositorio
   $ git clone https://bitbucket.org/conabio_c3/snib-middleware.git
 ```
 
-Después instalar la aplicación y lanzarla
+Para instalar la aplicación
 
 ```
   $ cd snib-middleware
   $ npm install
-  $ npm start
 ```
 
-## Uso
+### Uso
+
+Una vez instalada
+
+```
+  $ npm start
+```
 
 >  _Nota:_ Hay que conifgurar la conexión a la base de datos en el archivo 
 >  `config.js`.
@@ -67,3 +75,5 @@ de controladores deben de tener un debugger.
 
 [sp]: http://species.conabio.gob.mx/ 
 [swagger]: http://swagger.io/
+[node-package-managers]: https://nodejs.org/en/download/package-manager/
+[brew]: https://brew.sh/
