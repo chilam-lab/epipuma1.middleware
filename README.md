@@ -49,14 +49,17 @@ Para instalar la aplicación
 
 ### Uso
 
-Una vez instalada
+Una vez instalada. Hay que conifgurar la conexión a la base de datos en el archivo `config.js`, para hacer esto hay que configurar las variables de ambiente: DBNAME, DBPWD, DBUSER, DBPORT. Ejemplo en `bash`:
+
+```
+  $ export DBNAME=mi_db
+```
+
+Una vez configuradas.
 
 ```
   $ npm start
 ```
-
->  _Nota:_ Hay que conifgurar la conexión a la base de datos en el archivo 
->  `config.js`.
 
 ## Desarrollo
 
