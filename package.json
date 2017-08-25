@@ -21,12 +21,12 @@
   "repository": {
     "type": "git",
     "url": "https://bitbucket.org/conabio_c3/snib-middleware.git"
-
   },
   "dependencies": {
     "body-parser": "~1.15.2",
     "connect-timeout": "^1.8.0",
     "cors": "^2.8.1",
+    "debug": "^3.0.1",
     "express": "~4.14.0",
     "moment": "^2.15.1",
     "pg-promise": "^5.3.5"
