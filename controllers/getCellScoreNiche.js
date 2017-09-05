@@ -2,7 +2,7 @@
 * Este verbo regresa la frecuencia del score por celda para poder desplegar el
 * mapa de probabilidad
 *
-* @module controllers/getFreqMapNiche
+* @module controllers/getCellScoreNiche
 * @requires debug
 * @requires pg-promise
 * @requires moment

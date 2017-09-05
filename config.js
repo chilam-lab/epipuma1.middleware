@@ -2,8 +2,6 @@
 
 var config = {}
 
-
-
 config.db = {}
 config.db.database = process.env.DBNAME 
 config.db.user = process.env.DBUSER 
