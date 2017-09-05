@@ -1,6 +1,7 @@
 /**
-* Este verbo es responsable de obtener los valores de epsilon y score entre una
-* especie objetivo y un conjunto de variables bióticas y raster.
+* ENG: This verb obtains epsilon and score values by specie.
+*
+* ESP: Este verbo es responsable de obtener los valores de epsilon y score por especie.
 *
 * @module controllers/getGeoRelNiche
 * @requires debug
@@ -25,8 +26,9 @@ var alpha = verb_utils.alpha
 
 
 /**
- * Obtiene epsilon y score de la elaciÃ³n de especie objetivo y conjunto de 
- * variables bioticas y raster, sin filtros
+ * ENG: This method obtains epsilon and score values by specie. The results are based on a target species and a group of variables given.
+ *
+ * ESP: Obtiene epsilon y score de la selección de especie objetivo y conjunto de variables bióticas y abióticas.
  *
  * @function
  * @param {express.Request} req - Express request object
@@ -197,19 +199,13 @@ function getGeoRelNiche(req, res, next) {
 
 
 /**
- * Esta variable es un arreglo donde se define el flujo que debe de tener una 
- * petición al verbo getGeoRelNiche. Actualmente el flujo es getGeoRelNiche_VT,
- * getGeoRelNiche_V, getGeoRelNiche_T y getGeoRelNiche.
+ * ENG: This variable defines the order of methods to be executed when getGeoRelNiche verb is called.
+ * 
+ * ESP: Esta variable es un arreglo donde se define el flujo que debe de tener una 
+ * petición al verbo getGeoRelNiche.
  *
- * @see controllers/getGeoRelNiche~getGeoRelNiche_VT
- * @see controllers/getGeoRelNiche~getGeoRelNiche_V
- * @see controllers/getGeoRelNiche~getGeoRelNiche_T
- * @see controllers/getGeoRelNiche~getGeoRelNiche
  */
 exports.pipe = [
-  // getGeoRelNiche_VT,
-  // getGeoRelNiche_V,
-  // getGeoRelNiche_T,
   getGeoRelNiche
 ]
 
