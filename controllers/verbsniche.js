@@ -653,15 +653,37 @@ exports.getGridGeoJsonNiche = function (req, res, next) {
   if(getParam(req, 'qtype') === "getGridGeoJsonMX"){
 
       debug(getParam(req, 'qtype'))
-      debug("getGridGeoJson")
+
+      var grid_res = getParam(req, 'grid_res')
+      debug(grid_res)
+      
 
       try {
-          // var filePath = path.join(__dirname, "../geofiles/niche/MX_cells.json");
-          var filePath = path.join(__dirname, "../geofiles/niche/gridQGIS_nueva.json");
+
+          if(grid_res === "8"){
+            debug("8")
+            // var filePath = path.join(__dirname, "../geofiles/niche/grid_8km.json");
+            var filePath = path.join(__dirname, "../geofiles/niche/grid_16km.json");
+          }
+          else if(grid_res === "16"){
+            debug("16")
+            // var filePath = path.join(__dirname, "../geofiles/niche/MX_cells.json");
+            var filePath = path.join(__dirname, "../geofiles/niche/grid_16km.json");
+          }
+          else if(grid_res === "32"){
+            debug("32")
+            var filePath = path.join(__dirname, "../geofiles/niche/grid_32km.json"); 
+          }
+          else{
+            debug("64")
+            var filePath = path.join(__dirname, "../geofiles/niche/grid_64km.json");
+          }
+          
+
           debug(filePath);
 
           var stat = fs.statSync(filePath);
-          debug(stat.size);
+          // debug(stat.size);
 
       }
       catch (e) {

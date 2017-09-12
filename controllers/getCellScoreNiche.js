@@ -368,6 +368,8 @@ function getFreqMapNiche(req, res, next) {
   var res_celda_snib = verb_utils.getParam(req, 'res_celda_snib', 'gridid_16km')
   var res_celda_snib_tb = verb_utils.getParam(req, 'res_celda_snib_tb', 'grid_16km_aoi')
 
+  debug("res_celda_sp: " + res_celda_sp)
+
 
   // Siempre incluidos en query, nj >= 0
   var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
