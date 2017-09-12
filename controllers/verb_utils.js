@@ -15,7 +15,8 @@ var moment = require('moment')
  * Definición del número de celdas en la malla
  */
 
-verb_utils.N = 94544 // MX y US sin Alaska y Hawaii a 16km
+verb_utils.N = 0 // Se obtiene la cuenta del store en tiempo de ejecución dependiendo de la resolución enviada
+// verb_utils.N = 378176
 // verb_utils.N = 19968 // MX a 16km
 verb_utils.iterations = 5
 verb_utils.alpha = 0.01
