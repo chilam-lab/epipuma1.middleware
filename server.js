@@ -17,12 +17,17 @@ app.use(bodyParser.json({limit: '50mb'}))
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true, parameterLimit:50000}))
 //app.use(bodyParser.urlencoded({extended: true}))
 
-app.use(timeout('180000')) //3min
-app.use(haltOnTimedout);
 
-function haltOnTimedout(req, res, next){
-  if (!req.timedout) next();
-}
+
+// app.use(timeout('240000')) //4min
+// app.use(haltOnTimedout);
+
+// function haltOnTimedout(req, res, next){
+//   if (!req.timedout) next();
+// }
+
+
+
 
 var port = process.env.PORT || 8080        // set our port
 
@@ -69,5 +74,7 @@ app.use(function (err, req, res, next) {
       message: err.message
     })
 })
+
+server.setTimeout(10 * 60 * 1000);
 
 module.exports = server
