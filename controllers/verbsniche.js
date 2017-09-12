@@ -662,12 +662,10 @@ exports.getGridGeoJsonNiche = function (req, res, next) {
 
           if(grid_res === "8"){
             debug("8")
-            // var filePath = path.join(__dirname, "../geofiles/niche/grid_8km.json");
-            var filePath = path.join(__dirname, "../geofiles/niche/grid_16km.json");
+            var filePath = path.join(__dirname, "../geofiles/niche/grid_8km.json");
           }
           else if(grid_res === "16"){
             debug("16")
-            // var filePath = path.join(__dirname, "../geofiles/niche/MX_cells.json");
             var filePath = path.join(__dirname, "../geofiles/niche/grid_16km.json");
           }
           else if(grid_res === "32"){
