@@ -17,15 +17,17 @@ target AS (
 	$<where_config_target:raw>	 
 	and especievalidabusqueda <> ''	  
 ),
+n_res AS (
+	SELECT count(*) AS n FROM $<res_celda_snib_tb:raw>
+),
 counts AS (
 	SELECT 	source.spid as source,
 			target.spid as target,
 			icount(source.cells & target.cells) AS niyj,
 			icount(target.cells) AS nj,
 			icount(source.cells) AS ni,
-			$<N> as n
-			--19968 as n
-	FROM source,target
+			n_res.n AS n
+	FROM source, target, n_res
 	--where icount(target.cells) > 0
 	where icount(target.cells) > $<min_occ:raw>
 ) 

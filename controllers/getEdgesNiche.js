@@ -14,7 +14,7 @@ var config = require('../config')
 var queries = require('./sql/queryProvider')
 
 var pool= pgp(config.db)
-var N = verb_utils.N 
+// var N = verb_utils.N 
 
 
 /**
@@ -41,6 +41,10 @@ function getEdgesNiche(req, res, next) {
   var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
   var res_celda = verb_utils.getParam(req, 'res_celda', 'cells_16km')
 
+  var res_celda_snib_tb = verb_utils.getParam(req, 'res_celda_snib_tb', 'grid_16km_aoi')
+  var res_celda_snib = verb_utils.getParam(req, 'res_celda_snib', 'gridid_16km')
+
+
 
   // var min_ep = 0.0
   // var max_edges = 1000
@@ -63,7 +67,9 @@ function getEdgesNiche(req, res, next) {
     var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters)
 
     pool.any(queries.getEdgesNiche.getEdgesNicheBioRaster_BioRaster, {
-      N: N,
+      // N: N,
+      res_celda_snib_tb: res_celda_snib_tb,
+      res_celda_snib: res_celda_snib,
       alpha: alpha,
       min_occ: min_occ,
       where_config_source: whereVarSource,
@@ -94,7 +100,9 @@ function getEdgesNiche(req, res, next) {
 
 
     pool.any(queries.getEdgesNiche.getEdgesNicheBioRaster_Bio, {
-      N: N,
+      // N: N,
+      res_celda_snib_tb: res_celda_snib_tb,
+      res_celda_snib: res_celda_snib,
       alpha: alpha,
       min_occ: min_occ,
       where_config_source: whereVarSource,
@@ -125,7 +133,9 @@ function getEdgesNiche(req, res, next) {
 
         
     pool.any(queries.getEdgesNiche.getEdgesNicheBioRaster_Raster, {
-      N: N,
+      // N: N,
+      res_celda_snib_tb: res_celda_snib_tb,
+      res_celda_snib: res_celda_snib,
       alpha: alpha,
       min_occ: min_occ,
       where_config_source: whereVarSource,
@@ -156,7 +166,9 @@ function getEdgesNiche(req, res, next) {
 
 
     pool.any(queries.getEdgesNiche.getEdgesNicheBio_BioRaster, {
-      N: N,
+      // N: N,
+      res_celda_snib_tb: res_celda_snib_tb,
+      res_celda_snib: res_celda_snib,
       alpha: alpha,
       min_occ: min_occ,
       where_config_source: whereVarSource,
@@ -187,7 +199,9 @@ function getEdgesNiche(req, res, next) {
 
 
     pool.any(queries.getEdgesNiche.getEdgesNicheRaster_BioRaster, {
-      N: N,
+      // N: N,
+      res_celda_snib_tb: res_celda_snib_tb,
+      res_celda_snib: res_celda_snib,
       alpha: alpha,
       min_occ: min_occ,
           // where_config_source: whereVarSource,
@@ -219,7 +233,9 @@ function getEdgesNiche(req, res, next) {
     debug(whereVarTarget)
 
     pool.any(queries.getEdgesNiche.getEdgesNicheBio_Bio, {
-      N: N,
+      // N: N,
+      res_celda_snib_tb: res_celda_snib_tb,
+      res_celda_snib: res_celda_snib,
       alpha: alpha,
       min_occ: min_occ,
       where_config_source: whereVarSource,
@@ -249,7 +265,9 @@ function getEdgesNiche(req, res, next) {
 
         
     pool.any(queries.getEdgesNiche.getEdgesNicheBio_Raster, {
-      N: N,
+      // N: N,
+      res_celda_snib_tb: res_celda_snib_tb,
+      res_celda_snib: res_celda_snib,
       alpha: alpha,
       min_occ: min_occ,
       where_config_source: whereVarSource,
@@ -282,7 +300,9 @@ function getEdgesNiche(req, res, next) {
     debug(whereVarTarget)
 
     pool.any(queries.getEdgesNiche.getEdgesNicheRaster_Bio, {
-      N: N,
+      // N: N,
+      res_celda_snib_tb: res_celda_snib_tb,
+      res_celda_snib: res_celda_snib,
       alpha: alpha,
       min_occ: min_occ,
       // where_config_source: whereVarSource,
@@ -315,7 +335,9 @@ function getEdgesNiche(req, res, next) {
 
 
     pool.any(queries.getEdgesNiche.getEdgesNicheRaster_Raster, {
-      N: N,
+      // N: N,
+      res_celda_snib_tb: res_celda_snib_tb,
+      res_celda_snib: res_celda_snib,
       alpha: alpha,
       min_occ: min_occ,
           // where_config_source: whereVarSource,
