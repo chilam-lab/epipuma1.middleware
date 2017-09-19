@@ -3,22 +3,12 @@
 var config = {}
 
 config.db = {}
-config.db.database = process.env.DBNAME || 'niche'
-config.db.user = process.env.DBUSER || 'postgres'
-config.db.password = process.env.DBPWD || 'conabio2008'
-config.db.host = process.env.DBHOST || 'niche2.conabio.gob.mx'
-// config.db.host = process.env.DBHOST || 'niche.conabio.gob.mx'
-config.db.port = process.env.DBPORT || '5439'
-// config.db.port = process.env.DBPORT || '5432'
+config.db.database = process.env.DBNAME 
+config.db.user = process.env.DBUSER 
+config.db.password = process.env.DBPWD 
+config.db.host = process.env.DBHOST 
+config.db.port = process.env.DBPORT 
 config.db.application_name = 'expressMiddleware'
-
-// config.db = {}
-// config.db.database = process.env.DBNAME 
-// config.db.user = process.env.DBUSER 
-// config.db.password = process.env.DBPWD 
-// config.db.host = process.env.DBHOST 
-// config.db.port = process.env.DBPORT 
-// config.db.application_name = 'expressMiddleware'
 
  
 // Configure pool of connections
