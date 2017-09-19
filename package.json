@@ -27,6 +27,7 @@
     "connect-timeout": "^1.9.0",
     "cors": "^2.8.1",
     "express": "~4.14.0",
+    "mocha": "^3.1.2",
     "moment": "^2.15.1",
     "pg-promise": "^5.3.5"
   },
@@ -38,5 +39,8 @@
     "pg-monitor": "^0.5.11",
     "supertest": "~2.0.0",
     "swagger-markdown": "^0.1.8"
+  },
+  "scripts": {
+    "test": "mocha"
   }
 }
