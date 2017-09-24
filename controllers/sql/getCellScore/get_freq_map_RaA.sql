@@ -8,10 +8,13 @@ with rawdata as (
 	-- from iteratevalidationprocessbycells(1, 28923, 94544, 0.01, 0, array[]::int[], 'cells_16km', '', 'where layer = ''bio01'' ', 'abio')
 	where out_cell is not null
 ),
+n_res AS (
+	SELECT count(*) AS n FROM $<res_celda_snib_tb:raw>
+),
 apriori as (
-	select ln( rawdata.ni / ( $<N> - rawdata.ni::numeric) ) as val
+	select ln( rawdata.ni / ( n_res.n - rawdata.ni::numeric) ) as val
 	-- select ln( rawdata.ni / ( 94544 - rawdata.ni::numeric) ) as val 
-	from rawdata limit 1
+	from rawdata, n_res limit 1
 )
 select 	grid_16km_aoi.gridid_16km AS gridid, 
 		COALESCE(tscore+apriori.val, apriori.val) as tscore 
