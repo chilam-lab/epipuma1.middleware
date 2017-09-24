@@ -40,8 +40,5 @@
     "pg-monitor": "^0.5.11",
     "supertest": "~2.0.0",
     "swagger-markdown": "^0.1.8"
-  },
-  "scripts": {
-    "test": "mocha"
   }
 }
