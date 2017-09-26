@@ -25,6 +25,8 @@ var verbsCtrl = require('../controllers/verbsniche')
  */
 router.route('/especie')
   .get(
+    // verbsCtrl.getUserReg,
+    // verbsCtrl.setUserReg,
     verbsCtrl.getValuesFromToken,
     verbsCtrl.getToken,
     verbsCtrl.getValidationTables,
@@ -39,6 +41,7 @@ router.route('/especie')
     verbsCtrl.getEntListNiche
   )
   .post(
+    // verbsCtrl.getUserReg,
     verbsCtrl.getValuesFromToken,
     verbsCtrl.getToken,
     verbsCtrl.getValidationTables,

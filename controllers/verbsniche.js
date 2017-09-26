@@ -369,6 +369,16 @@ exports.getStates = function (req, res, next) {
 }
 
 
+
+
+
+
+
+/**************************************************************************************************************************/
+/************************************************************* VERBOS PARA EL NUEVO SERVIDOR ******************************/
+/******************************************************************** UTILS Niche */
+
+
 /**
  * getUserReg de SNIB DB
  *
@@ -380,8 +390,6 @@ exports.getStates = function (req, res, next) {
  */
 exports.getUserReg = function (req, res, next) {
 
-  // debug("getUserReg")
-  
   var user_email = getParam(req, 'email')
 
   pool.any(queries.users.getUser, {email: user_email})
@@ -394,11 +402,28 @@ exports.getUserReg = function (req, res, next) {
 }
 
 
+/**
+ * getUserReg de SNIB DB
+ *
+ * Verifica si existe el usuario por medio de su email
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ *
+ */
+exports.getUserReg = function (req, res, next) {
 
+  var user_email = getParam(req, 'email')
+  var user = getParam(req, 'usuario')
 
-/**************************************************************************************************************************/
-/************************************************************* VERBOS PARA EL NUEVO SERVIDOR ******************************/
-/******************************************************************** UTILS Niche */
+  pool.any(queries.users.setUserReg, {email: user_email, user: user })
+    .then(function (data) {
+      res.json({'data': data})
+    })
+    .catch(function (error) {
+      next(error)
+    })
+}
 
 
 
