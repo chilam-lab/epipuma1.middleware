@@ -9,13 +9,11 @@
 * @requires module:controllers/sql/queryProvider
 */
 var debug = require('debug')('verbs:getNodesNiche')
-var pgp = require('pg-promise')()
 
-var config = require('../config')
 var verb_utils = require('./verb_utils')
 var queries = require('./sql/queryProvider')
 
-var pool= pgp(config.db)
+var pool = verb_utils.pool 
 var N = verb_utils.N 
 
 
