@@ -17,11 +17,11 @@ describe('verificacion que la rutas funcionen',
       it('revisa que conteste raiz con el mensaje de bienvenida', 
         function testSlash(done) {
           request(server)
-            .get('/snib/')
-            .expect('Content-Type', /json/)
-            .expect(200, {
-              data: {message: '¡Yey! Bienvenido al API de SNIB'}
-            }, done)
+          .get('/snib/')
+          .expect('Content-Type', /json/)
+          .expect(200, {
+            data: {message: '¡Yey! Bienvenido al API de SNIB'}
+          }, done)
         })
     })
     
@@ -29,15 +29,15 @@ describe('verificacion que la rutas funcionen',
       it('no se debe de responder al metodo POST', 
         function testSlash(done) {
           request(server)
-            .post('/snib/getGridIds')
-            .expect(404, 'Cannot POST /snib/getGridIds\n', done)
+          .post('/snib/getGridIds')
+          .expect(404, 'Cannot POST /snib/getGridIds\n', done)
         })
     })
     
     it('404 para las demas rutas', function testPath(done) {
       request(server)
-        .get('/foo/bar')
-        .expect(404, done)
+      .get('/foo/bar')
+      .expect(404, done)
     })
   }
-)
+  )
