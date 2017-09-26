@@ -1,4 +1,3 @@
-
 /**
 * getEdgesNiche module
 *
@@ -7,15 +6,10 @@
 * @module controllers/getEdgesNiche
 */
 var debug = require('debug')('verbs:getEdgesNiche')
-var pgp = require('pg-promise')()
 var verb_utils = require('./verb_utils')
 
-var config = require('../config')
 var queries = require('./sql/queryProvider')
-
-var pool= pgp(config.db)
-// var N = verb_utils.N 
-
+var pool = verb_utils.pool
 
 /**
  *
