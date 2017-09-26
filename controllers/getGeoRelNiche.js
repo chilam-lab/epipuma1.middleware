@@ -12,14 +12,13 @@
 * @requires module:controllers/sql/queryProvider
 */
 var debug = require('debug')('verbs:getGeoRelNiche')
-var pgp = require('pg-promise')()
 var moment = require('moment')
 
-var config = require('../config')
 var verb_utils = require('./verb_utils')
 var queries = require('./sql/queryProvider')
 
-var pool= pgp(config.db)
+var pool = verb_utils.pool
+
 var N = verb_utils.N 
 var iterations = verb_utils.iterations
 var alpha = verb_utils.alpha
