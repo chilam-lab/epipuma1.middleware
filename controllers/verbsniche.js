@@ -3,17 +3,15 @@
 * @module controllers/verbs
 */
 var debug = require('debug')('verbs:old')
-var pgp = require('pg-promise')()
 var moment = require('moment')
 var verb_utils = require('./verb_utils')
 
-var config = require('../config.js')
 var queries = require('./sql/queryProvider.js')
 
 var path = require('path')
 var fs = require("fs")
 
-var pool = pgp(config.db)
+var pool = verb_utils.pool 
 var N = verb_utils.N 
 var iterations = verb_utils.iterations
 var alpha = verb_utils.alpha

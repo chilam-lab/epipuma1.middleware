@@ -9,12 +9,18 @@ var verb_utils = {}
 
 var debug = require('debug')('verbs:verbsUtils')
 var moment = require('moment')
+var pgp = require('pg-promise')()
+var config = require('../config')
+// var pool= pgp(config.db)
 
+/**
+ * Pool de conexiones a la base de datos
+ */
+verb_utils.pool = pgp(config.db)
 
 /**
  * Definición del número de celdas en la malla
  */
-
 verb_utils.N = 0 // Se obtiene la cuenta del store en tiempo de ejecución dependiendo de la resolución enviada
 // verb_utils.N = 378176
 // verb_utils.N = 19968 // MX a 16km
