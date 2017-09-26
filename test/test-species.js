@@ -1,7 +1,7 @@
 var supertest = require("supertest");
 var should = require("should");
 
-var server = supertest.agent("http://localhost:8080");
+// var server = supertest.agent("http://localhost:8080");
 
 
 
@@ -11,13 +11,22 @@ console.info("\n************************************")
 console.info("\nABREVIACIONES:\nNP: No parametros \nNF: No filtros \nB: Bioticos \nA: Abioticos \nAB: Ambos \nReg: Registros \nSF:Sin Filtros");
 console.info("\n************************************\n")
 
+var server
 
+beforeEach(function () {
+	delete require.cache[require.resolve('../server')]
+	server = require('../server')
+})
+
+afterEach(function (done) {
+	server.close(done)
+})
 
 describe("Prueba de acceso al Middleware",function(){
 
 	it("Middleware - DISPONIBLE", function(done){
 
-		server.get("/niche/")
+		supertest(server).get("/niche/")
 		.expect("Content-type",/json/)
 		.expect(200, {
 			data: {message: '¡Yey! Bienvenido al API de NICHE'}
@@ -32,7 +41,7 @@ describe("Prueba petición variables abioticas",function(){
 
 	it("Árbol variables abioticas - DISPONIBLE", function(done){
 
-		server.post("/niche/especie")
+		supertest(server).post("/niche/especie")
 		.send({level : 0, qtype : "getRasterVariables", type: 1})
 		.expect("Content-type",/json/)
 		.expect(200)
@@ -50,7 +59,7 @@ describe("Prueba busqueda de especies",function(){
 
 	it("Buscador de especies - DISPONIBLE", function(done){
 
-		server.post("/niche/especie")
+		supertest(server).post("/niche/especie")
 		.send({limit : 15, nivel: "especievalidabusqueda", qtype : "getEntList", searchStr: "Lynx", source: 1})
 		.expect("Content-type",/json/)
 		.expect(200)
@@ -71,11 +80,11 @@ describe("Prueba recuperación de ocurrencias de especies",function(){
 	this.timeout(1000 * 60 * 2); // 3 minutos maximo
 	var spid = 28923;
 
-	describe("\n\tOcurrencias de especies | SF ",function(){
+	describe("\nOcurrencias de especies | SF ",function(){
 
 		it("Ocurrencias de especies SF - DISPONIBLE", function(done){
 
-			server.post("/niche/especie")
+			supertest(server).post("/niche/especie")
 			.send({
 				id : spid, 
 				idtime: "1506398422062", 
@@ -97,11 +106,11 @@ describe("Prueba recuperación de ocurrencias de especies",function(){
 	})
 
 
-	describe("\n\tOcurrencias de especies | F: Reg sin Fecha ",function(){
+	describe("\nOcurrencias de especies | F: Reg sin Fecha ",function(){
 
 		it("Ocurrencias de especies | F: Reg sin Fecha - DISPONIBLE", function(done){
 
-			server.post("/niche/especie")
+			supertest(server).post("/niche/especie")
 			.send({
 				id : spid, 
 				idtime: "1506398422062", 
@@ -122,11 +131,11 @@ describe("Prueba recuperación de ocurrencias de especies",function(){
 	})
 
 
-	describe("\n\tOcurrencias de especies | F: Sin Fosiles ",function(){
+	describe("\nOcurrencias de especies | F: Sin Fosiles ",function(){
 
 		it("Ocurrencias de especies | F: Sin Fosiles - DISPONIBLE", function(done){
 
-			server.post("/niche/especie")
+			supertest(server).post("/niche/especie")
 			.send({
 				id : spid, 
 				idtime: "1506398422062", 
@@ -147,11 +156,11 @@ describe("Prueba recuperación de ocurrencias de especies",function(){
 	})
 
 
-	describe("\n\tOcurrencias de especies | F: Con Rango de fechas ",function(){
+	describe("\nOcurrencias de especies | F: Con Rango de fechas ",function(){
 
 		it("Ocurrencias de especies | F: Con Rango de fechas - DISPONIBLE", function(done){
 
-			server.post("/niche/especie")
+			supertest(server).post("/niche/especie")
 			.send({
 				id : spid, 
 				idtime: "1506398422062", 
@@ -180,11 +189,11 @@ describe("Prueba recuperación de ocurrencias de especies",function(){
 
 describe("Prueba de petición de mallas.",function(){
 
-	describe("\n\tPetición de la malla de 8km:",function(){
+	describe("\nPetición de la malla de 8km:",function(){
 
 		it("Malla de 8km - DISPONIBLE", function(done){
 
-			server.post("/niche/especie")
+			supertest(server).post("/niche/especie")
 			.send({grid_res : 8, qtype : "getGridGeoJsonMX"})
 			.expect("Content-type",/json/)
 			.expect(200)
@@ -200,11 +209,11 @@ describe("Prueba de petición de mallas.",function(){
 	});
 
 
-	describe("\n\tPetición de la malla de 16km:",function(){
+	describe("\nPetición de la malla de 16km:",function(){
 
 		it("Malla de 16km - DISPONIBLE", function(done){
 
-			server.post("/niche/especie")
+			supertest(server).post("/niche/especie")
 			.send({grid_res : 16, qtype : "getGridGeoJsonMX"})
 			.expect("Content-type",/json/)
 			.expect(200)
@@ -219,11 +228,11 @@ describe("Prueba de petición de mallas.",function(){
 
 	});
 
-	describe("\n\tPetición de la malla de 32km:",function(){
+	describe("\nPetición de la malla de 32km:",function(){
 
 		it("Malla de 32km - DISPONIBLE", function(done){
 
-			server.post("/niche/especie")
+			supertest(server).post("/niche/especie")
 			.send({grid_res : 32, qtype : "getGridGeoJsonMX"})
 			.expect("Content-type",/json/)
 			.expect(200)
@@ -238,11 +247,11 @@ describe("Prueba de petición de mallas.",function(){
 
 	});
 
-	describe("\n\tPetición de la malla de 64km:",function(){
+	describe("\nPetición de la malla de 64km:",function(){
 
 		it("Malla de 64km  - DISPONIBLE", function(done){
 
-			server.post("/niche/especie")
+			supertest(server).post("/niche/especie")
 			.send({grid_res : 64, qtype : "getGridGeoJsonMX"})
 			.expect("Content-type",/json/)
 			.expect(200)
@@ -267,13 +276,13 @@ describe("Prueba de verbo getGeoRel",function(){
 
 	
 	
-	describe("\n\tVerbo getGeoRel | NP | NF | B ",function(){
+	describe("\nVerbo getGeoRel | NP | NF | B ",function(){
 
 		it("Verbo: getGeoRel | NP | NF | B  - DISPONIBLE", function(done){
 
 			var spid = 28923;
 
-			server.post("/niche/getGeoRel")
+			supertest(server).post("/niche/getGeoRel")
 			.send({
 				qtype:"getGeoRel", 
 				id: spid,
@@ -308,13 +317,13 @@ describe("Prueba de verbo getGeoRel",function(){
 	})
 
 
-	describe("\n\tVerbo getGeoRel | NP | F: Sin Reg Fosiles | B ",function(){
+	describe("\nVerbo getGeoRel | NP | F: Sin Reg Fosiles | B ",function(){
 
 		it("Verbo: getGeoRel | NP | F: Sin Reg Fosiles | B - DISPONIBLE", function(done){
 
 			var spid = 28923;
 
-			server.post("/niche/getGeoRel")
+			supertest(server).post("/niche/getGeoRel")
 			.send({
 				qtype:"getGeoRel", 
 				id: spid,
@@ -349,13 +358,13 @@ describe("Prueba de verbo getGeoRel",function(){
 	})
 
 
-	describe("\n\tVerbo getGeoRel | NP | F: Sin Reg sin Fecha | B ",function(){
+	describe("\nVerbo getGeoRel | NP | F: Sin Reg sin Fecha | B ",function(){
 
 		it("Verbo: getGeoRel | NP | F: Sin Reg sin Fecha | B - DISPONIBLE", function(done){
 
 			var spid = 28923;
 
-			server.post("/niche/getGeoRel")
+			supertest(server).post("/niche/getGeoRel")
 			.send({
 				qtype:"getGeoRel", 
 				id: spid,
@@ -390,13 +399,13 @@ describe("Prueba de verbo getGeoRel",function(){
 	})
 
 
-	describe("\n\tVerbo getGeoRel | NP | F: Con Rango de fechas | B ",function(){
+	describe("\nVerbo getGeoRel | NP | F: Con Rango de fechas | B ",function(){
 
 		it("Verbo: getGeoRel | NP | F: Con Rango de fechas | B - DISPONIBLE", function(done){
 
 			var spid = 28923;
 
-			server.post("/niche/getGeoRel")
+			supertest(server).post("/niche/getGeoRel")
 			.send({
 				qtype:"getGeoRel", 
 				id: spid,
@@ -433,13 +442,13 @@ describe("Prueba de verbo getGeoRel",function(){
 	})
 
 
-	describe("\n\tVerbo getGeoRel | NP | F: Sin Reg Fosiles & Sin Reg sin Fecha | B ",function(){
+	describe("\nVerbo getGeoRel | NP | F: Sin Reg Fosiles & Sin Reg sin Fecha | B ",function(){
 
 		it("Verbo: getGeoRel | NP | F: Sin Reg Fosiles & Sin Reg sin Fecha | B - DISPONIBLE", function(done){
 
 			var spid = 28923;
 
-			server.post("/niche/getGeoRel")
+			supertest(server).post("/niche/getGeoRel")
 			.send({
 				qtype:"getGeoRel", 
 				id: spid,
@@ -474,13 +483,13 @@ describe("Prueba de verbo getGeoRel",function(){
 	})
 
 
-	describe("\n\tVerbo getGeoRel | NP | F: Sin Reg Fosiles & Con Rango de fechas | B ",function(){
+	describe("\nVerbo getGeoRel | NP | F: Sin Reg Fosiles & Con Rango de fechas | B ",function(){
 
 		it("Verbo: getGeoRel | NP | F: Sin Reg Fosiles & Con Rango de fechas | B - DISPONIBLE", function(done){
 
 			var spid = 28923;
 
-			server.post("/niche/getGeoRel")
+			supertest(server).post("/niche/getGeoRel")
 			.send({
 				qtype:"getGeoRel", 
 				id: spid,
@@ -517,13 +526,13 @@ describe("Prueba de verbo getGeoRel",function(){
 	})
 
 
-	describe("\n\tVerbo getGeoRel | NP | F: Sin Reg sin Fecha & Con Rango de fechas | B ",function(){
+	describe("\nVerbo getGeoRel | NP | F: Sin Reg sin Fecha & Con Rango de fechas | B ",function(){
 
 		it("Verbo: getGeoRel | NP | F: Sin Reg sin Fecha & Con Rango de fechas | B - DISPONIBLE", function(done){
 
 			var spid = 28923;
 
-			server.post("/niche/getGeoRel")
+			supertest(server).post("/niche/getGeoRel")
 			.send({
 				qtype:"getGeoRel", 
 				id: spid,
@@ -559,13 +568,13 @@ describe("Prueba de verbo getGeoRel",function(){
 
 	})
 
-	describe("\n\tVerbo getGeoRel | NP | F: Sin Reg Fosiles & Sin Reg sin Fecha & Con Rango de fechas | B ",function(){
+	describe("\nVerbo getGeoRel | NP | F: Sin Reg Fosiles & Sin Reg sin Fecha & Con Rango de fechas | B ",function(){
 
 		it("Verbo: getGeoRel | NP | F: Sin Reg Fosiles & Sin Reg sin Fecha & Con Rango de fechas | B - DISPONIBLE", function(done){
 
 			var spid = 28923;
 
-			server.post("/niche/getGeoRel")
+			supertest(server).post("/niche/getGeoRel")
 			.send({
 				qtype:"getGeoRel", 
 				id: spid,
@@ -602,13 +611,13 @@ describe("Prueba de verbo getGeoRel",function(){
 	})
 
 
-	describe("\n\tVerbo getGeoRel | P: Con Validacion | NF | B ",function(){
+	describe("\nVerbo getGeoRel | P: Con Validacion | NF | B ",function(){
 
 		it("Verbo: getGeoRel | P: Con Validacion | NF | B - DISPONIBLE", function(done){
 
 			var spid = 28923;
 
-			server.post("/niche/getGeoRel")
+			supertest(server).post("/niche/getGeoRel")
 			.send({
 				qtype:"getGeoRel", 
 				id: spid,
@@ -643,13 +652,13 @@ describe("Prueba de verbo getGeoRel",function(){
 	})
 
 
-	describe("\n\tVerbo getGeoRel | P: Min Occ | NF | B ",function(){
+	describe("\nVerbo getGeoRel | P: Min Occ | NF | B ",function(){
 
 		it("Verbo: getGeoRel | P: Min Occ | NF | B - DISPONIBLE", function(done){
 
 			var spid = 28923;
 
-			server.post("/niche/getGeoRel")
+			supertest(server).post("/niche/getGeoRel")
 			.send({
 				qtype:"getGeoRel", 
 				id: spid,
@@ -685,13 +694,13 @@ describe("Prueba de verbo getGeoRel",function(){
 	})
 
 
-	describe("\n\tVerbo getGeoRel | P: Con Apriori | NF | B ",function(){
+	describe("\nVerbo getGeoRel | P: Con Apriori | NF | B ",function(){
 
 		it("Verbo: getGeoRel | P: Con Apriori | NF | B - DISPONIBLE", function(done){
 
 			var spid = 28923;
 
-			server.post("/niche/getGeoRel")
+			supertest(server).post("/niche/getGeoRel")
 			.send({
 				qtype:"getGeoRel", 
 				id: spid,
@@ -727,13 +736,13 @@ describe("Prueba de verbo getGeoRel",function(){
 	})
 
 
-	describe("\n\tVerbo getGeoRel | P: Con Mapa Prob | NF | B ",function(){
+	describe("\nVerbo getGeoRel | P: Con Mapa Prob | NF | B ",function(){
 
 		it("Verbo: getGeoRel | P: Con Mapa Prob | NF | B - DISPONIBLE", function(done){
 
 			var spid = 28923;
 
-			server.post("/niche/getGeoRel")
+			supertest(server).post("/niche/getGeoRel")
 			.send({
 				qtype:"getGeoRel", 
 				id: spid,
@@ -770,13 +779,13 @@ describe("Prueba de verbo getGeoRel",function(){
 	
 
 
-	describe("\n\tVerbo getGeoRel | P: Res 8km | NF | B ",function(){
+	describe("\nVerbo getGeoRel | P: Res 8km | NF | B ",function(){
 
 		it("Verbo: getGeoRel | P: Res 8km | NF | B - DISPONIBLE", function(done){
 
 			var spid = 28923;
 
-			server.post("/niche/getGeoRel")
+			supertest(server).post("/niche/getGeoRel")
 			.send({
 				qtype:"getGeoRel", 
 				id: spid,
@@ -810,13 +819,13 @@ describe("Prueba de verbo getGeoRel",function(){
 
 	})
 
-	describe("\n\tVerbo getGeoRel | P: Res 32km | NF | B ",function(){
+	describe("\nVerbo getGeoRel | P: Res 32km | NF | B ",function(){
 
 		it("Verbo: getGeoRel | P: Res 32km | NF | B - DISPONIBLE", function(done){
 
 			var spid = 28923;
 
-			server.post("/niche/getGeoRel")
+			supertest(server).post("/niche/getGeoRel")
 			.send({
 				qtype:"getGeoRel", 
 				id: spid,
@@ -851,13 +860,13 @@ describe("Prueba de verbo getGeoRel",function(){
 	})
 
 
-	describe("\n\tVerbo getGeoRel | P: Res 64km | NF | B ",function(){
+	describe("\nVerbo getGeoRel | P: Res 64km | NF | B ",function(){
 
 		it("Verbo: getGeoRel | P: Res 64km | NF | B - DISPONIBLE", function(done){
 
 			var spid = 28923;
 
-			server.post("/niche/getGeoRel")
+			supertest(server).post("/niche/getGeoRel")
 			.send({
 				qtype:"getGeoRel", 
 				id: spid,
