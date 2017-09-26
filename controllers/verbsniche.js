@@ -3,17 +3,15 @@
 * @module controllers/verbs
 */
 var debug = require('debug')('verbs:old')
-var pgp = require('pg-promise')()
 var moment = require('moment')
 var verb_utils = require('./verb_utils')
 
-var config = require('../config.js')
 var queries = require('./sql/queryProvider.js')
 
 var path = require('path')
 var fs = require("fs")
 
-var pool = pgp(config.db)
+var pool = verb_utils.pool 
 var N = verb_utils.N 
 var iterations = verb_utils.iterations
 var alpha = verb_utils.alpha
@@ -369,6 +367,16 @@ exports.getStates = function (req, res, next) {
 }
 
 
+
+
+
+
+
+/**************************************************************************************************************************/
+/************************************************************* VERBOS PARA EL NUEVO SERVIDOR ******************************/
+/******************************************************************** UTILS Niche */
+
+
 /**
  * getUserReg de SNIB DB
  *
@@ -380,8 +388,6 @@ exports.getStates = function (req, res, next) {
  */
 exports.getUserReg = function (req, res, next) {
 
-  // debug("getUserReg")
-  
   var user_email = getParam(req, 'email')
 
   pool.any(queries.users.getUser, {email: user_email})
@@ -394,11 +400,28 @@ exports.getUserReg = function (req, res, next) {
 }
 
 
+/**
+ * getUserReg de SNIB DB
+ *
+ * Verifica si existe el usuario por medio de su email
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ *
+ */
+exports.getUserReg = function (req, res, next) {
 
+  var user_email = getParam(req, 'email')
+  var user = getParam(req, 'usuario')
 
-/**************************************************************************************************************************/
-/************************************************************* VERBOS PARA EL NUEVO SERVIDOR ******************************/
-/******************************************************************** UTILS Niche */
+  pool.any(queries.users.setUserReg, {email: user_email, user: user })
+    .then(function (data) {
+      res.json({'data': data})
+    })
+    .catch(function (error) {
+      next(error)
+    })
+}
 
 
 

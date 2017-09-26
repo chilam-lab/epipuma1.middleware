@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "DEBUG=express:router,verbs:*,snib-middleware:* nodemon server.js",
-    "test": "DEBUG=verbs:*,snib-middleware:* mocha -R spec tests/",
+    "test": "DEBUG=verbs:*,snib-middleware:* mocha",
     "api-docs": "swagger-markdown -i api/swagger/swagger.yaml -o docs/api-docs.md",
     "lint": "eslint .",
     "docs": "jsdoc -c jsdoc.conf"
@@ -38,6 +38,7 @@
     "mocha": "~3.1.0",
     "nodemon": "^1.11.0",
     "pg-monitor": "^0.5.11",
+    "should": "^13.1.0",
     "supertest": "~2.0.0",
     "swagger-markdown": "^0.1.8"
   }
