@@ -678,26 +678,31 @@ exports.getGridGeoJsonNiche = function (req, res, next) {
       debug(getParam(req, 'qtype'))
 
       var grid_res = getParam(req, 'grid_res')
+      var api = getParam(req, 'api')
+      var  api_file = (api === "pro" || api === "rc") ? "mx_" : "";
+
       debug(grid_res)
+      debug(api)
+      debug(api_file)
       
 
       try {
 
           if(grid_res === "8"){
             debug("8")
-            var filePath = path.join(__dirname, "../geofiles/niche/grid_8km.json");
+            var filePath = path.join(__dirname, "../geofiles/niche/"+api_file+"grid_8km.json");
           }
           else if(grid_res === "16"){
             debug("16")
-            var filePath = path.join(__dirname, "../geofiles/niche/grid_16km.json");
+            var filePath = path.join(__dirname, "../geofiles/niche/"+api_file+"grid_16km.json");
           }
           else if(grid_res === "32"){
             debug("32")
-            var filePath = path.join(__dirname, "../geofiles/niche/grid_32km.json"); 
+            var filePath = path.join(__dirname, "../geofiles/niche/"+api_file+"grid_32km.json"); 
           }
           else{
             debug("64")
-            var filePath = path.join(__dirname, "../geofiles/niche/grid_64km.json");
+            var filePath = path.join(__dirname, "../geofiles/niche/"+api_file+"grid_64km.json");
           }
           
 
