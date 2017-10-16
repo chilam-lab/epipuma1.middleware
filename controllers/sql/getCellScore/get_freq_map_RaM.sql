@@ -15,7 +15,7 @@ apriori as (
 	-- select ln( rawdata.ni / ( 94544 - rawdata.ni::numeric) ) as val 
 	from rawdata, n_res limit 1
 )
-select 	grid_16km_aoi.gridid_16km AS gridid, 
+select 	$<res_celda_snib_tb:raw>.$<res_celda_snib:raw> AS gridid, 
 		case when tscore <= -$<maxscore>
 		-- case when tscore <= -700
 		then 
@@ -29,8 +29,8 @@ select 	grid_16km_aoi.gridid_16km AS gridid,
 			-- exp(tscore+val) / (1 + exp(tscore+val))    
 		end as tscore  
 from rawdata
-right join grid_16km_aoi
-on rawdata.gridid = grid_16km_aoi.gridid_16km,
+right join $<res_celda_snib:raw>
+on rawdata.gridid = $<res_celda_snib_tb:raw>.$<res_celda_snib:raw>,
 apriori
 order by tscore DESC
 
