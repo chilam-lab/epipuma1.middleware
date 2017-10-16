@@ -679,11 +679,11 @@ exports.getGridGeoJsonNiche = function (req, res, next) {
 
       var grid_res = getParam(req, 'grid_res')
       var api = getParam(req, 'api')
-      var  api_file = (api === "pro" || api === "rc") ? "mx_" : "";
+      var  api_file = (api === "pro" || api === "rc" || api === "local") ? "mx_" : "";
 
-      debug(grid_res)
-      debug(api)
-      debug(api_file)
+      // debug(grid_res)
+      // debug(api)
+      // debug(api_file)
       
 
       try {
