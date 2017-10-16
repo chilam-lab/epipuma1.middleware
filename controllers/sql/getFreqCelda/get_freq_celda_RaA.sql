@@ -16,11 +16,11 @@ apriori as (
 	from rawdata, n_res limit 1
 ),
 prenorm as (
-	select 	grid_16km_aoi.gridid_16km AS gridid, 
+	select 	$<res_celda_snib_tb:raw>.$<res_celda_snib:raw> AS gridid, 
 			COALESCE(tscore+apriori.val, apriori.val) as tscore 
 	from rawdata
-	right join grid_16km_aoi
-	on rawdata.gridid = grid_16km_aoi.gridid_16km,
+	right join $<res_celda_snib_tb:raw>
+	on rawdata.gridid = $<res_celda_snib_tb:raw>.$<res_celda_snib:raw>,
 	apriori
 	order by tscore desc
 ),
