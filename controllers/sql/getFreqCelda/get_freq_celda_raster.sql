@@ -7,11 +7,12 @@ with rawdata as (
 	where out_cell is not null
 ),
 prenorm as (
-	select 	grid_16km_aoi.gridid_16km, 
+	select 	$<res_celda_snib_tb:raw>.$<res_celda_snib:raw> as gridid, 
+			-- grid_16km_aoi.gridid_16km as gridid, 
 			COALESCE(tscore, 0) as tscore 
 	from rawdata
-	right join grid_16km_aoi
-	on rawdata.gridid = grid_16km_aoi.gridid_16km
+	right join $<res_celda_snib_tb:raw>
+	on rawdata.gridid = $<res_celda_snib_tb:raw>.$<res_celda_snib:raw>
 	order by tscore desc
 ),
 minmax as ( 
