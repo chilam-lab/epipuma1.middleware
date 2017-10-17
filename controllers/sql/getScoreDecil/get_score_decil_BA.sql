@@ -8,5 +8,5 @@ from iteratevalidationprocessbydecil($<iterations>, $<spid>, $<N>, $<alpha>, $<m
 -- 27332 28923
 -- where layer = ''bio01'' 
 where decil is not null 
-group by decil, arraynames
+group by decil
 order by decil desc
