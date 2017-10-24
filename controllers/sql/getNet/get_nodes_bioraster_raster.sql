@@ -13,8 +13,9 @@ with source AS (
 			layer as reinovalido, label as phylumdivisionvalido, tag as clasevalida, ''::text as  ordenvalido, ''::text as familiavalida, ''::text as generovalido,
 			case when type = 1 then
 			layer
-			else
-			(label || ' ' || tag) 
+			ELSE
+			(label || ' ' || round(cast(split_part(split_part(tag,':',1),'.',1) as numeric)/10,2)  ||' ºC - ' || round(cast(split_part(split_part(tag,':',2),'.',1) as numeric)/10,2) || ' ºC')
+			--(label || ' ' || tag) 
 			end as especievalidabusqueda,
 			1 as grp,
 			$<res_celda:raw> AS cells 
@@ -27,8 +28,9 @@ target AS (
 			layer as reinovalido, label as phylumdivisionvalido, tag as clasevalida, ''::text as  ordenvalido, ''::text as familiavalida, ''::text as generovalido,
 			case when type = 1 then
 			layer
-			else
-			(label || ' ' || tag) 
+			ELSE
+			(label || ' ' || round(cast(split_part(split_part(tag,':',1),'.',1) as numeric)/10,2)  ||' ºC - ' || round(cast(split_part(split_part(tag,':',2),'.',1) as numeric)/10,2) || ' ºC')
+			--(label || ' ' || tag) 
 			end as especievalidabusqueda,
 			2 as grp,
 			$<res_celda:raw> AS cells 
