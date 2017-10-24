@@ -75,6 +75,6 @@ app.use(function (err, req, res, next) {
     })
 })
 
-server.setTimeout(10 * 60 * 1000);
+server.setTimeout(20 * 60 * 1000);
 
 module.exports = server
