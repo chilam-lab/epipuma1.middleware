@@ -303,7 +303,8 @@ var queryProvider = {
 
 /************************************************************* VERBOS PARA OBTENER INFO de CELDAS ******************************/
   getCells: {
-    forSpecies: sqlPath('getCells/get_species_cells.sql')
+    forSpecies: sqlPath('getCells/get_species_cells.sql'),
+    forTaxon: sqlPath('getCells/get_taxon_cells.sql')
   }
 }
 

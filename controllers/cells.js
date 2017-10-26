@@ -2,7 +2,7 @@
 * @Author: Raul Sierra
 * @Date:   2017-10-25 18:02:27
 * @Last Modified by:   Raul Sierra
-* @Last Modified time: 2017-10-26 13:36:31
+* @Last Modified time: 2017-10-26 15:55:53
 */
 /**
 * Este verbo regresa la frecuencia del score por celda para poder desplegar el
@@ -23,6 +23,32 @@ var queries = require('./sql/queryProvider')
 
 var pool = verb_utils.pool 
 
+function getTaxonCells(req, res, next) {
+	var tax_level = verb_utils.getParam(req, 'tax_level')
+	var tax_name = verb_utils.getParam(req, 'tax_name')
+
+	var cell_res = verb_utils.getParam(req, 'cells_res', 16)
+ 	var cells_col = "cells_" + cell_res + "km"
+
+	if(tax_level) {
+		pool.any(queries.getCells.forTaxon, {
+				"tax_level": tax_level,
+				"tax_name": tax_name,
+				"res_celda": cells_col
+    		})
+			.then(function (data) {
+				res.json({'data': data[0], 'cells_col': cells_col})
+			})
+			.catch(function (error) {
+				debug(error)
+				next(error)
+			})
+	}
+	else {
+		next()
+	}
+}
+
 function getSpeciesCells(req, res, next) {
 	var sp_id = verb_utils.getParam(req, 'sp_id')
 	var cell_res = verb_utils.getParam(req, 'cells_res', 16)
@@ -31,8 +57,7 @@ function getSpeciesCells(req, res, next) {
 	if(sp_id) {
 		pool.any(queries.getCells.forSpecies, {
 				"spid": sp_id,
-				"res_celda": cells_col,
-				"sfosil": true
+				"res_celda": cells_col
     		})
 			.then(function (data) {
 				res.json({'data': data[0], 'cells_col': cells_col})
@@ -63,6 +88,7 @@ function getHelloMessage(req, res, next) {
  * @see controllers/getScoreDecilNiche~getScoreDecilNiche
  */
 exports.pipe = [
+	getTaxonCells,
 	getSpeciesCells,
   	getHelloMessage 
 ]
