@@ -2,7 +2,7 @@
 * @Author: Raul Sierra
 * @Date:   2017-10-26 15:48:28
 * @Last Modified by:   Raul Sierra
-* @Last Modified time: 2017-10-26 16:04:47
+* @Last Modified time: 2017-10-26 16:12:41
 */
 var supertest = require("supertest");
 var should = require("should");
@@ -161,4 +161,28 @@ describe("Test cells endpoint",function(){
 			})
 		});
 	});
+
+	[8, 16, 32, 64].forEach(cell_res => {
+		it("Should get the cells for genus Panthera at resolution " + cell_res, function(done){
+
+			supertest(server).post("/niche/cells")
+			.send({
+				tax_level: "generovalido",
+				tax_name: "Panthera",
+				cell_res: cell_res
+			})
+			.expect("Content-type",/json/)
+			.expect(200)
+			.end(function(err, res){
+				expect(res.body).to.have.property("cells_col")
+				expect(res.body.cells_col).to.equal("cells_" + cell_res + "km")
+				expect(res.body).to.have.property("data")
+				expect(res.body.data).to.have.property("cell_ids")
+				expect(res.body.data.cell_ids).to.be.an("array")
+				expect(res.body.data.cell_ids).to.have.length.above(0)
+				done();
+			})
+		});
+	});
+
 });
