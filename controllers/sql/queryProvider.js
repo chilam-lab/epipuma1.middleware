@@ -299,6 +299,11 @@ var queryProvider = {
     getNodesNicheBio_Raster: sqlPath('getNet/get_nodes_bio_raster.sql'),
     getNodesNicheRaster_Bio: sqlPath('getNet/get_nodes_raster_bio.sql'),
     getNodesNicheRaster_Raster: sqlPath('getNet/get_nodes_raster_raster.sql')
+  },
+
+/************************************************************* VERBOS PARA OBTENER INFO de CELDAS ******************************/
+  getCells: {
+    forSpecies: sqlPath('getCells/get_species_cells.sql')
   }
 }
 
