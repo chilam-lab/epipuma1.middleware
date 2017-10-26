@@ -1,5 +1,6 @@
 var supertest = require("supertest");
 var should = require("should");
+var expect = require('chai').expect;
 
 // var server = supertest.agent("http://localhost:8080");
 
@@ -903,4 +904,92 @@ describe("Prueba de verbo getGeoRel",function(){
 	
 	// TODO: Faltan agregar prueba de combinaciones en parametros y parametros con filtros
 	
+});
+
+describe("Test cells endpoint",function(){
+	var last_cells_size = 0;
+
+	it("Should return a 200 response", function(done){
+
+		supertest(server).post("/niche/cells")
+		.send({})
+		.expect("Content-type",/json/)
+		.expect(200, done);
+	});
+
+	it("Should respond with a listening message", function(done){
+
+		supertest(server).post("/niche/cells")
+		.send({})
+		.expect("Content-type",/json/)
+		.expect(200)
+		.end(function(err, res) {
+			expect(res.body).to.have.property("msg");
+			expect(res.body.msg).to.equal("cells endpoint listening")
+			done();
+		})
+	});
+
+	it("Should get resolution of 16km as default", function(done){
+		var spid = 28923;
+
+		supertest(server).post("/niche/cells")
+		.send({
+			sp_id : spid
+		})
+		.expect("Content-type",/json/)
+		.expect(200)
+		.end(function(err, res){
+			expect(res.body).to.have.property("cells_col")
+			expect(res.body.cells_col).to.equal("cells_16km")
+			done();
+		})
+
+	});
+
+	it("Should get the cells containing a given species at default resolution", function(done){
+		var spid = 28923;
+
+		supertest(server).post("/niche/cells")
+		.send({
+			sp_id : spid
+		})
+		.expect("Content-type",/json/)
+		.expect(200)
+		.end(function(err, res){
+			expect(res.body).to.have.property("data")
+			expect(res.body.data).to.not.equal(null)
+			expect(res.body).to.have.property("cells_col")
+			expect(res.body.cells_col).to.equal("cells_16km")
+			expect(res.body.data).to.have.property("cell_ids")
+			expect(res.body.data.cell_ids).to.be.an("array")
+			expect(res.body.data.cell_ids).to.have.length.above(0)
+			done();
+		})
+
+	});
+
+	[8, 16, 32, 64].forEach(value => {
+		it("Should get the cells containing a given species at res " + value + " km", function(done){
+			var spid = 28923;
+
+			supertest(server).post("/niche/cells")
+			.send({
+				sp_id: spid,
+				cells_res: value
+			})
+			.expect("Content-type",/json/)
+			.expect(200)
+			.end(function(err, res){
+				expect(res.body).to.have.property("data")
+				expect(res.body.data).to.not.equal(null)
+				expect(res.body).to.have.property("cells_col")
+				expect(res.body.cells_col).to.equal("cells_" + value + "km")
+				expect(res.body.data).to.have.property("cell_ids")
+				expect(res.body.data.cell_ids).to.be.an("array")
+				expect(res.body.data.cell_ids).to.have.length.above(0)
+				done();
+			})
+		});
+	});
 });
