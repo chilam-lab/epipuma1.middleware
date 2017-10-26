@@ -2,7 +2,7 @@
 * @Author: Raul Sierra
 * @Date:   2017-10-26 15:48:28
 * @Last Modified by:   Raul Sierra
-* @Last Modified time: 2017-10-26 16:12:41
+* @Last Modified time: 2017-10-26 16:15:09
 */
 var supertest = require("supertest");
 var should = require("should");
@@ -169,7 +169,7 @@ describe("Test cells endpoint",function(){
 			.send({
 				tax_level: "generovalido",
 				tax_name: "Panthera",
-				cell_res: cell_res
+				cells_res: cell_res
 			})
 			.expect("Content-type",/json/)
 			.expect(200)
