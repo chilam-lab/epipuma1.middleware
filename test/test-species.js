@@ -983,8 +983,35 @@ describe("Test cells endpoint",function(){
 			.end(function(err, res){
 				expect(res.body).to.have.property("data")
 				expect(res.body.data).to.not.equal(null)
+				expect(res.body.data).to.be.an("array")
+				expect(res.body.data).to.have.length.equal(1)
 				expect(res.body).to.have.property("cells_col")
 				expect(res.body.cells_col).to.equal("cells_" + value + "km")
+				expect(res.body.data).to.have.property("cell_ids")
+				expect(res.body.data.cell_ids).to.be.an("array")
+				expect(res.body.data.cell_ids).to.have.length.above(0)
+				done();
+			})
+		});
+	});
+
+	var niveles_tax = [ 
+		["generovalido", "Panthera"]];
+
+	niveles_tax.forEach(pair => {
+		it("Should get the cells for " + pair, function(done){
+
+			supertest(server).post("/niche/cells")
+			.send({
+				tax_level: pair[0],
+				tax_name: pair[1]
+			})
+			.expect("Content-type",/json/)
+			.expect(200)
+			.end(function(err, res){
+				expect(res.body).to.have.property("cells_col")
+				expect(res.body.cells_col).to.equal("cells_16km")
+				expect(res.body).to.have.property("data")
 				expect(res.body.data).to.have.property("cell_ids")
 				expect(res.body.data.cell_ids).to.be.an("array")
 				expect(res.body.data.cell_ids).to.have.length.above(0)
