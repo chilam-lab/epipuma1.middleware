@@ -2,7 +2,7 @@
 * @Author: Raul Sierra
 * @Date:   2017-10-25 18:02:27
 * @Last Modified by:   Raul Sierra
-* @Last Modified time: 2017-10-26 15:55:53
+* @Last Modified time: 2017-10-26 17:43:37
 */
 /**
 * Este verbo regresa la frecuencia del score por celda para poder desplegar el
@@ -28,13 +28,18 @@ function getTaxonCells(req, res, next) {
 	var tax_name = verb_utils.getParam(req, 'tax_name')
 
 	var cell_res = verb_utils.getParam(req, 'cells_res', 16)
- 	var cells_col = "cells_" + cell_res + "km"
+ 	var cells_col = "gridid_" + cell_res + "km"
+
+ 	var fossil = verb_utils.getParam(req, 'fossil')
+	var sfecha = verb_utils.getParam(req, 'sfecha')
 
 	if(tax_level) {
 		pool.any(queries.getCells.forTaxon, {
 				"tax_level": tax_level,
 				"tax_name": tax_name,
-				"res_celda": cells_col
+				"res_celda": cells_col,
+				"fossil": fossil,
+				"sfecha": sfecha
     		})
 			.then(function (data) {
 				res.json({'data': data[0], 'cells_col': cells_col})
