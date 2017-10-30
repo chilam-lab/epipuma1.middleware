@@ -2,7 +2,7 @@
 * @Author: Raul Sierra
 * @Date:   2017-10-26 15:48:28
 * @Last Modified by:   Raul Sierra
-* @Last Modified time: 2017-10-26 16:15:09
+* @Last Modified time: 2017-10-27 14:32:05
 */
 var supertest = require("supertest");
 var should = require("should");
@@ -138,21 +138,23 @@ describe("Test cells endpoint",function(){
 		["ordenvalido", "Carnivora"],
 		["clasevalida", "Mammalia"],
 		["phylumdivisionvalido", "Craniata"],
-		["reinovalido", "Animalia"]];
+		["reinovalido", "Animalia"]
+	];
 
 	niveles_tax.forEach(pair => {
 		it("Should get the cells for " + pair, function(done){
-
+			this.timeout(120000);
 			supertest(server).post("/niche/cells")
 			.send({
 				tax_level: pair[0],
-				tax_name: pair[1]
+				tax_name: pair[1],
+				cells_res: 64
 			})
 			.expect("Content-type",/json/)
 			.expect(200)
 			.end(function(err, res){
 				expect(res.body).to.have.property("cells_col")
-				expect(res.body.cells_col).to.equal("cells_16km")
+				expect(res.body.cells_col).to.equal("gridid_64km")
 				expect(res.body).to.have.property("data")
 				expect(res.body.data).to.have.property("cell_ids")
 				expect(res.body.data.cell_ids).to.be.an("array")
@@ -175,7 +177,31 @@ describe("Test cells endpoint",function(){
 			.expect(200)
 			.end(function(err, res){
 				expect(res.body).to.have.property("cells_col")
-				expect(res.body.cells_col).to.equal("cells_" + cell_res + "km")
+				expect(res.body.cells_col).to.equal("gridid_" + cell_res + "km")
+				expect(res.body).to.have.property("data")
+				expect(res.body.data).to.have.property("cell_ids")
+				expect(res.body.data.cell_ids).to.be.an("array")
+				expect(res.body.data.cell_ids).to.have.length.above(0)
+				done();
+			})
+		});
+	});
+
+	[[false, false], [true, true], [false, true], [false, false]].forEach(pair => {
+		it("Should get the cells for genus Panthera with (fossil, sfecha) = " + pair, function(done){
+
+			supertest(server).post("/niche/cells")
+			.send({
+				tax_level: "generovalido",
+				tax_name: "Panthera",
+				fossil: pair[0],
+				sfecha: pair[1]
+			})
+			.expect("Content-type",/json/)
+			.expect(200)
+			.end(function(err, res){
+				expect(res.body).to.have.property("cells_col")
+				expect(res.body.cells_col).to.equal("gridid_16km")
 				expect(res.body).to.have.property("data")
 				expect(res.body.data).to.have.property("cell_ids")
 				expect(res.body.data.cell_ids).to.be.an("array")
