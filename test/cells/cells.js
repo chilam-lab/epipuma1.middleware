@@ -2,7 +2,7 @@
 * @Author: Raul Sierra
 * @Date:   2017-10-26 15:48:28
 * @Last Modified by:   Raul Sierra
-* @Last Modified time: 2017-10-27 14:32:05
+* @Last Modified time: 2017-10-30 10:04:53
 */
 var supertest = require("supertest");
 var should = require("should");
@@ -187,7 +187,7 @@ describe("Test cells endpoint",function(){
 		});
 	});
 
-	[[false, false], [true, true], [false, true], [false, false]].forEach(pair => {
+	[[false, false], [true, true], [false, true], [true, false]].forEach(pair => {
 		it("Should get the cells for genus Panthera with (fossil, sfecha) = " + pair, function(done){
 
 			supertest(server).post("/niche/cells")
@@ -210,5 +210,30 @@ describe("Test cells endpoint",function(){
 			})
 		});
 	});
+
+	it("Should get the cells containing a given taxon for a given time period in years", function(done){
+		supertest(server).post("/niche/cells")
+		.send({
+			tax_level : "generovalido",
+			tax_name: "Panthera",
+			start_year: 1990,
+			end_year: 2010
+		})
+		.expect("Content-type",/json/)
+		.expect(200)
+		.end(function(err, res){
+			expect(res.body).to.have.property("data")
+			expect(res.body.data).to.not.equal(null)
+			expect(res.body).to.have.property("cells_col")
+			expect(res.body.cells_col).to.equal("cells_16km")
+			expect(res.body.data).to.have.property("cell_ids")
+			expect(res.body.data.cell_ids).to.be.an("array")
+			expect(res.body.data.cell_ids).to.have.length.above(0)
+			expect(res.body.data).to.have.property("year")
+			done();
+		})
+
+	});
+
 
 });
