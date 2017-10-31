@@ -2,12 +2,14 @@
 * @Author: Raul Sierra
 * @Date:   2017-10-26 15:48:28
 * @Last Modified by:   Raul Sierra
-* @Last Modified time: 2017-10-30 10:04:53
+* @Last Modified time: 2017-10-30 12:42:38
 */
 var supertest = require("supertest");
-var should = require("should");
 var expect = require('chai').expect;
 
+var chai = require("chai");
+chai.should();
+chai.use(require('chai-things'));
 // var server = supertest.agent("http://localhost:8080");
 
 
@@ -156,9 +158,8 @@ describe("Test cells endpoint",function(){
 				expect(res.body).to.have.property("cells_col")
 				expect(res.body.cells_col).to.equal("gridid_64km")
 				expect(res.body).to.have.property("data")
-				expect(res.body.data).to.have.property("cell_ids")
-				expect(res.body.data.cell_ids).to.be.an("array")
-				expect(res.body.data.cell_ids).to.have.length.above(0)
+				expect(res.body.data).all.have.property("cell_id")
+				expect(res.body.data).not.to.include({"cell_id": null})
 				done();
 			})
 		});
@@ -179,9 +180,7 @@ describe("Test cells endpoint",function(){
 				expect(res.body).to.have.property("cells_col")
 				expect(res.body.cells_col).to.equal("gridid_" + cell_res + "km")
 				expect(res.body).to.have.property("data")
-				expect(res.body.data).to.have.property("cell_ids")
-				expect(res.body.data.cell_ids).to.be.an("array")
-				expect(res.body.data.cell_ids).to.have.length.above(0)
+				expect(res.body.data).all.have.property("cell_id")
 				done();
 			})
 		});
@@ -203,33 +202,42 @@ describe("Test cells endpoint",function(){
 				expect(res.body).to.have.property("cells_col")
 				expect(res.body.cells_col).to.equal("gridid_16km")
 				expect(res.body).to.have.property("data")
-				expect(res.body.data).to.have.property("cell_ids")
-				expect(res.body.data.cell_ids).to.be.an("array")
-				expect(res.body.data.cell_ids).to.have.length.above(0)
+				expect(res.body.data).all.have.property("cell_id")
 				done();
 			})
 		});
 	});
 
 	it("Should get the cells containing a given taxon for a given time period in years", function(done){
+		var cells_res = 32
 		supertest(server).post("/niche/cells")
 		.send({
 			tax_level : "generovalido",
 			tax_name: "Panthera",
-			start_year: 1990,
-			end_year: 2010
+			start_year: 2000,
+			end_year: 2010,
+			cells_res: cells_res
 		})
 		.expect("Content-type",/json/)
 		.expect(200)
 		.end(function(err, res){
 			expect(res.body).to.have.property("data")
 			expect(res.body.data).to.not.equal(null)
+			expect(res.body.data).to.be.an("array")
 			expect(res.body).to.have.property("cells_col")
-			expect(res.body.cells_col).to.equal("cells_16km")
-			expect(res.body.data).to.have.property("cell_ids")
-			expect(res.body.data.cell_ids).to.be.an("array")
-			expect(res.body.data.cell_ids).to.have.length.above(0)
-			expect(res.body.data).to.have.property("year")
+			expect(res.body.cells_col).to.equal("gridid_" + cells_res + "km")
+			expect(res.body.data).all.have.property("cell_id")
+			expect(res.body.data).to.not.include({cell_id: null})
+			expect(res.body.data).all.have.property("max_year")
+			expect(res.body.data).all.have.property("min_year")
+			expect(res.body.data).all.have.property("num_records")
+			expect(res.body.data).contain.an.item.with.property("cell_id", 2062)
+			expect(res.body.data).to.include.something.deep.equals(
+				{"cell_id": 2062,
+				"generovalido": "Panthera",
+				 "max_year": 2002,
+				 "min_year": 2000,
+				 "num_records": "2"})
 			done();
 		})
 
