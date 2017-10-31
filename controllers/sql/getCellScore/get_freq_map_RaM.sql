@@ -1,23 +1,30 @@
 with rawdata as (
 	select
 		out_cell as gridid,
-		out_ni as ni,
-		out_score as tscore
+		--out_ni as ni,
+		--out_score as tscore
+		avg(out_ni) as ni,
+		avg(out_score) as tscore
 	from iteratevalidationprocessbycells($<iterations>, $<spid>, $<N>, $<alpha>, $<min_occ>, array[$<discardedDeleted:raw>]::int[], '$<res_celda_sp:raw>', '$<res_celda_snib:raw>', '$<res_celda_snib_tb:raw>', '', '$<where_config_raster:value>', 'abio', $<filter_time>, $<caso>, $<lim_inf>, $<lim_sup>, false, '$<fossil:value>', '$<idtabla:value>')
-	-- from iteratevalidationprocessbycells(1, 28923, 94544, 0.01, 0, array[]::int[], 'cells_16km', '', 'where layer = ''bio01'' ', 'abio')
+	--from iteratevalidationprocessbycells(1,  27332, 26944, 0.01, 0, array[]::int[], 'cells_16km', 'gridid_16km', 'grid_16km_aoi', '', 'where layer = ''bio01'' ', 'abio', false, -1, 2010, 2020, false, '', 'temp_01')
 	where out_cell is not null
+	group by gridid
+	--order by gridid
 ),
 n_res AS (
-	SELECT count(*) AS n FROM $<res_celda_snib_tb:raw>
+	SELECT count(*) AS n from $<res_celda_snib_tb:raw>
+	--SELECT count(*) AS n from grid_16km_aoi
 ),
 apriori as (
 	select ln( rawdata.ni / ( n_res.n - rawdata.ni::numeric) ) as val
-	-- select ln( rawdata.ni / ( 94544 - rawdata.ni::numeric) ) as val 
+	--select ln( rawdata.ni / ( 94544 - rawdata.ni::numeric) ) as val 
 	from rawdata, n_res limit 1
 )
-select 	$<res_celda_snib_tb:raw>.$<res_celda_snib:raw> AS gridid, 
+select 	
+		$<res_celda_snib_tb:raw>.$<res_celda_snib:raw> AS gridid,
+		--grid_16km_aoi.gridid_16km,
 		case when tscore <= -$<maxscore>
-		-- case when tscore <= -700
+		--case when tscore <= -700
 		then 
 			0 
 		when tscore >= $<maxscore>
@@ -29,8 +36,11 @@ select 	$<res_celda_snib_tb:raw>.$<res_celda_snib:raw> AS gridid,
 			-- exp(tscore+val) / (1 + exp(tscore+val))    
 		end as tscore  
 from rawdata
-right join $<res_celda_snib:raw>
+right join 
+		--grid_16km_aoi 
+		$<res_celda_snib_tb:raw>
 on rawdata.gridid = $<res_celda_snib_tb:raw>.$<res_celda_snib:raw>,
+--on rawdata.gridid = grid_16km_aoi.gridid_16km,
 apriori
 order by tscore DESC
 

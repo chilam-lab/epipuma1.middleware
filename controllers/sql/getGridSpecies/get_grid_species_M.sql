@@ -40,7 +40,8 @@ grid_selected as (
 gridsps as ( 
 	select 	gridid, 
 			rawdata.spid,
-			rawdata.score,
+			--rawdata.score,
+			round(avg(score),2)  as score,
 			case when tipo = 0
 			then especievalidabusqueda
 			else ''
@@ -53,6 +54,7 @@ gridsps as (
 	join grid_selected 
 	on intset(grid_selected.gridid) && rawdata.cells
 	where 	especievalidabusqueda <> '' 
+	group by gridid, spid, tipo, especievalidabusqueda::text
 	order by spid 
 ),
 apriori as (
