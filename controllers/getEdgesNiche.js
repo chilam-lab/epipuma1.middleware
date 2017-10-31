@@ -10,6 +10,8 @@ var verb_utils = require('./verb_utils')
 
 var queries = require('./sql/queryProvider')
 var pool = verb_utils.pool
+var alpha = verb_utils.alpha
+var N = verb_utils.N
 
 /**
  *
@@ -30,7 +32,8 @@ function getEdgesNiche(req, res, next) {
     // var spids = verb_utils.getParam(req, 'spids')
   var sfilters    = verb_utils.getParam(req, 's_tfilters')
   var tfilters    = verb_utils.getParam(req, 't_tfilters')
-  var alpha       = 0.01
+  
+  // var alpha       = 0.01
     // var N           = 14707
   var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
   var res_celda = verb_utils.getParam(req, 'res_celda', 'cells_16km')
@@ -223,8 +226,9 @@ function getEdgesNiche(req, res, next) {
     var whereVarTarget = verb_utils.processBioFilters(tfilters)
         // var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters)
 
-    debug(whereVarSource)
-    debug(whereVarTarget)
+    // debug(whereVarSource)
+    // debug(whereVarTarget)
+    debug(alpha)
 
     pool.any(queries.getEdgesNiche.getEdgesNicheBio_Bio, {
       // N: N,
