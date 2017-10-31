@@ -34,6 +34,7 @@ counts AS (
 	FROM source, target, n_res
 	--where icount(source.cells & target.cells) > 0
 	where icount(target.cells) > $<min_occ:raw>
+	and icount(source.cells) > 0
 ) 
 SELECT 	counts.source,
 		counts.target,
