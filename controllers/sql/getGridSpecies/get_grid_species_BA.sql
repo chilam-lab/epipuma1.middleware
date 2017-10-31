@@ -37,11 +37,12 @@ grid_selected as (
 )
 select gridid, 
 		spid, 
-		especievalidabusqueda as nom_sp, 
-		rango, 
-		label,
-		score,
-		apriori
+		especievalidabusqueda::text as nom_sp, 
+		label::text,
+		rango::text,
+		--score
+		round(avg(score),2)  as score,
+		round(avg(apriori),2) as apriori
 from ( 
 	select 	gridid, 
 			rawdata.spid, 
@@ -55,6 +56,7 @@ from (
 	on intset(grid_selected.gridid) && rawdata.cells 
 ) as total 
 where 	especievalidabusqueda <> ''
+group by gridid, spid, especievalidabusqueda::text, rango::text, label::text
 union 
 -- se genera row para agregar apriori en caso de que la celda escogida no tenga valor
 ( select 	0 as gridid, 
