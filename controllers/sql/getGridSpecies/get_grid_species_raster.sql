@@ -37,10 +37,11 @@ grid_selected as (
 )
 select 	gridid, 
 		spid,
-		especievalidabusqueda as nom_sp,
-		rango,
-		label,
-		score
+		especievalidabusqueda::text as nom_sp,
+		rango::text, 
+		label::text,
+		--score
+		round(avg(score),2)  as score
 from ( 
 	select 	gridid, 
 			rawdata.spid, 
@@ -53,5 +54,6 @@ from (
 	on intset(grid_selected.gridid) && rawdata.cells 
 ) as total 
 where 	rango <> ''  
+group by gridid, spid, especievalidabusqueda::text, rango::text, label::text
 order by score desc 
 
