@@ -73,6 +73,7 @@ function getGeoRelNiche(req, res, next) {
   debug("val_ process: " + verb_utils.getParam(req, 'val_process', false))
   var iter = verb_utils.getParam(req, 'val_process', false) === "true" ? iterations : 1
   debug("iterations: " + iter)
+  debug("alpha: " + alpha)
 
   var idtabla = verb_utils.getParam(req, 'idtabla')
   idtabla = iter > 1 ? idtabla : ""

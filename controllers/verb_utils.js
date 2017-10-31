@@ -25,7 +25,7 @@ verb_utils.N = 0 // Se obtiene la cuenta del store en tiempo de ejecución depen
 // verb_utils.N = 378176
 // verb_utils.N = 19968 // MX a 16km
 verb_utils.iterations = 5
-verb_utils.alpha = 0.01
+verb_utils.alpha = 1/10000
 verb_utils.maxscore = 700
 
 
