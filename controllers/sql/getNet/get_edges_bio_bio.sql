@@ -19,6 +19,7 @@ target AS (
 ),
 n_res AS (
 	SELECT count(*) AS n FROM $<res_celda_snib_tb:raw>
+	--SELECT count(*) AS n FROM grid_16km_aoi
 ),
 counts AS (
 	SELECT 	source.spid as source,
@@ -40,12 +41,13 @@ SELECT 	counts.source,
 		counts.n,
 		round( cast(  
 			get_epsilon(
-				$<alpha>,
-				--0.01,
+				--$<alpha>,
+				1/n_res.n,
 				cast(counts.nj as integer), 
 				cast(counts.niyj as integer), 
 				cast(counts.ni as integer), 
 				cast(counts.n as integer)
 		)as numeric), 2)  as value
-FROM counts 
+FROM counts, n_res
 ORDER BY value desc;
+-- 1416
