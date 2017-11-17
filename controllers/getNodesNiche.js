@@ -15,6 +15,7 @@ var queries = require('./sql/queryProvider')
 
 var pool = verb_utils.pool 
 var N = verb_utils.N 
+var alpha = verb_utils.alpha
 
 
 /**
@@ -35,7 +36,7 @@ function getNodesNiche(req, res, next) {
   var min_occ     = verb_utils.getParam(req, 'min_occ', 0)
   var res_celda = verb_utils.getParam(req, 'res_celda', 'cells_16km')
 
-  var alpha       = 0.01
+  // var alpha       = 0.01
   // var N           = 14707
   var min_ep      = 0.0
   var max_edges   = 1000
@@ -196,6 +197,7 @@ function getNodesNiche(req, res, next) {
 
     // debug(whereVarSource)
     // debug(whereVarTarget)
+    debug(alpha)
 
     pool.any(queries.getNodesNiche.getNodesNicheBio_Bio, {
       N: N,
