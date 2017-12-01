@@ -2,7 +2,7 @@
 * @Author: Raul Sierra
 * @Date:   2017-11-28 15:51:19
 * @Last Modified by:   Raul Sierra
-* @Last Modified time: 2017-12-01 10:08:35
+* @Last Modified time: 2017-12-01 10:28:36
 */
 var debug = require('debug')('verbs:getChildrenTaxa')
 var verb_utils = require('./verb_utils')
@@ -16,7 +16,8 @@ function getHelloMessage(req, res, next) {
 }
 
 exports.getTaxonData = function (req, res) {
-	var spid = verb_utils.getParam(req, ':id')
+	console.log(req.params)
+	var spid = req.params.id
 
 
 	res.json({'err': 'Not implemented, got id = ' + spid})
