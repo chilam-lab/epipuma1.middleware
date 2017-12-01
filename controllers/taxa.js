@@ -2,7 +2,7 @@
 * @Author: Raul Sierra
 * @Date:   2017-11-28 15:51:19
 * @Last Modified by:   Raul Sierra
-* @Last Modified time: 2017-12-01 10:28:36
+* @Last Modified time: 2017-12-01 11:29:31
 */
 var debug = require('debug')('verbs:getChildrenTaxa')
 var verb_utils = require('./verb_utils')
@@ -16,11 +16,25 @@ function getHelloMessage(req, res, next) {
 }
 
 exports.getTaxonData = function (req, res) {
-	console.log(req.params)
 	var spid = req.params.id
 
-
-	res.json({'err': 'Not implemented, got id = ' + spid})
+	if(spid) {
+		pool.any(queries.getTaxon.getData, {
+			"spid": spid
+		})
+			.then(function (data) {
+				data[0]['tax_level'] = 'species'
+				res.json(data[0])
+			})
+			.catch(function (error) {
+				console.log("error" + data)
+				debug(error)
+				next(error)
+			})
+	}
+	else {
+			next()
+	}
 }
 
 function getTaxonChildren(req, res, next) {

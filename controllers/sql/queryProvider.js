@@ -216,7 +216,10 @@ var queryProvider = {
 /************************************************************* VERBOS PARA OBTENER INFO DE TAXA ******************************/
   getChildren: {
     ofTaxon: sqlPath('taxa/get_taxon_children.sql')
-  }
+  },
+  getTaxon: {
+    getData: sqlPath('taxa/get_taxon_data.sql')
+  } 
 }
 
 module.exports = queryProvider
