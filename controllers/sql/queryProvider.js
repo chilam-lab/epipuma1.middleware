@@ -211,6 +211,11 @@ var queryProvider = {
   getCells: {
     forSpecies: sqlPath('getCells/get_species_cells.sql'),
     forTaxon: sqlPath('getCells/get_taxon_cells.sql')
+  },
+
+/************************************************************* VERBOS PARA OBTENER INFO DE TAXA ******************************/
+  getChildren: {
+    ofTaxon: sqlPath('taxa/get_taxon_children.sql')
   }
 }
 
