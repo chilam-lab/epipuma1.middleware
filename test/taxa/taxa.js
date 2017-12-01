@@ -2,7 +2,7 @@
 * @Author: Raul Sierra
 * @Date:   2017-11-28 13:09:01
 * @Last Modified by:   Raul Sierra
-* @Last Modified time: 2017-12-01 09:25:16
+* @Last Modified time: 2017-12-01 11:38:18
 */
 var supertest = require("supertest");
 var expect = require('chai').expect;
@@ -37,7 +37,12 @@ describe("Test taxa endpoint",function(){
 		.expect("Content-type", /json/)
 		.expect(200)
 		.end(function(err, res) {
-			expect(res.body).to.have.property("id")
+			expect(res.body).to.have.property("spid")
+			expect(res.body.spid).to.equal(spid)
+			expect(res.body).to.have.property("valid_name")
+			expect(res.body.valid_name).to.equal("Panthera onca")
+			expect(res.body).to.have.property("tax_level")
+			expect(res.body.tax_level).to.equal("species")
 			done();
 		})
 	});
