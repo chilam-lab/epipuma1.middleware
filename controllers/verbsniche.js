@@ -1144,6 +1144,7 @@ exports.getEntListNiche = function (req, res, next) {
       var res_celda_snib_tb = verb_utils.getParam(req, 'res_celda_snib_tb', 'grid_16km_aoi')
 
       res_celda_sp = (source == 1) ? res_celda_sp : "array[]::int[]";
+      var val_tree = (source == 1) ? " and icount("+res_celda_sp+") > 0 " : "";
 
       // debug(nivel)
       // debug(str)
@@ -1152,7 +1153,9 @@ exports.getEntListNiche = function (req, res, next) {
       limite = limite == -1 ? "" : "limit " + limite
       debug(limite)
 
+      debug("columnas: " + columnas)
       debug("res_celda_sp: " + res_celda_sp)
+      debug("val_tree: " + val_tree)
 
       pool.any(queries.getEntListNiche.getEntList, {
             str: str,
@@ -1161,6 +1164,7 @@ exports.getEntListNiche = function (req, res, next) {
             res_celda_sp: res_celda_sp,
             res_celda_snib: res_celda_snib,
             res_celda_snib_tb: res_celda_snib_tb, 
+            val_tree: val_tree,
             limite: limite
       })
           .then(function (data) {

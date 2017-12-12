@@ -1,13 +1,15 @@
 select 	
 		$<columnas:raw>,
 		--reinovalido, phylumdivisionvalido, clasevalida, ordenvalido, familiavalida, generovalido, especievalidabusqueda,
-		--distinct ordenvalido,
+		--distinct clasevalida,
 		--icount(array[]::int[]) as occ
 		icount($<res_celda_sp:raw>) as occ
 from sp_snib
 where   
+		--lower(clasevalida) like lower('Ma%')
 		lower($(nivel:raw)) like lower($<str>||'%')
-		--lower(ordenvalido) like lower('carn%')
+		$<val_tree:raw>
+		--and icount($<res_celda_sp:raw>) > 0
 $<limite:raw>
 --limit 15
 
