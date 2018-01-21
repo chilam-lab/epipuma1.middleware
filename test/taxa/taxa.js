@@ -2,7 +2,7 @@
 * @Author: Raul Sierra
 * @Date:   2017-11-28 13:09:01
 * @Last Modified by:   Raul Sierra
-* @Last Modified time: 2017-12-01 11:38:18
+* @Last Modified time: 2017-12-01 11:55:48
 */
 var supertest = require("supertest");
 var expect = require('chai').expect;
@@ -31,7 +31,7 @@ afterEach(function (done) {
 })
 
 describe("Test taxa endpoint",function(){
-	it("Should get taxon data by id", function(done){
+	it("Should get species data by id", function(done){
 		var spid = 27336
 		supertest(server).get("/taxa/" + spid)
 		.expect("Content-type", /json/)
@@ -46,6 +46,23 @@ describe("Test taxa endpoint",function(){
 			done();
 		})
 	});
+
+	it("Should get genus data by id", function(done){
+		var tid = -1
+		supertest(server).get("/taxa/" + tid)
+		.expect("Content-type", /json/)
+		.expect(200)
+		.end(function(err, res) {
+			expect(res.body).to.have.property("tid")
+			expect(res.body.spid).to.equal(id)
+			expect(res.body).to.have.property("valid_name")
+			expect(res.body.valid_name).to.equal("Panthera")
+			expect(res.body).to.have.property("tax_level")
+			expect(res.body.tax_level).to.equal("genus")
+			done();
+		})
+	});
+
 })
 
 describe("Test taxa/children endpoint",function(){
