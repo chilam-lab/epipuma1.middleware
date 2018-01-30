@@ -2,7 +2,7 @@
 * @Author: Raul Sierra
 * @Date:   2017-11-28 13:09:01
 * @Last Modified by:   Raul Sierra
-* @Last Modified time: 2017-12-01 11:55:48
+* @Last Modified time: 2018-01-24 11:34:22
 */
 var supertest = require("supertest");
 var expect = require('chai').expect;
@@ -31,6 +31,23 @@ afterEach(function (done) {
 })
 
 describe("Test taxa endpoint",function(){
+	it("Should return a 200 response", function(done){
+
+		supertest(server).post("/taxa/")
+		.send({})
+		.expect("Content-type",/json/)
+		.expect(200, done);
+	});
+
+	it("It should display a welcome message", function(done){
+
+		supertest(server).get("/taxa/")
+		.expect("Content-type",/json/)
+		.expect(200, {
+			data: {message: 'Hola, este endpoint contiene servicios para obtener info taxonomica'}
+		}, done)
+	});
+
 	it("Should get species data by id", function(done){
 		var spid = 27336
 		supertest(server).get("/taxa/" + spid)
