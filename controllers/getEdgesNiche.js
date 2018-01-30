@@ -36,10 +36,13 @@ function getEdgesNiche(req, res, next) {
   // var alpha       = 0.01
     // var N           = 14707
   var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
-  var res_celda = verb_utils.getParam(req, 'res_celda', 'cells_16km')
-
-  var res_celda_snib_tb = verb_utils.getParam(req, 'res_celda_snib_tb', 'grid_16km_aoi')
+  var res_celda_sp = verb_utils.getParam(req, 'res_celda_sp', 'cells_16km')
   var res_celda_snib = verb_utils.getParam(req, 'res_celda_snib', 'gridid_16km')
+  var res_celda_snib_tb = verb_utils.getParam(req, 'res_celda_snib_tb', 'grid_16km_aoi')
+
+  console.log(res_celda_sp);
+  console.log(res_celda_snib);
+  console.log(res_celda_snib_tb);
 
 
 
@@ -73,7 +76,7 @@ function getEdgesNiche(req, res, next) {
       where_config_source_raster: whereVarSourceRaster,
       where_config_target: whereVarTarget,
       where_config_target_raster: whereVarTargetRaster,
-      res_celda: res_celda
+      res_celda: res_celda_sp
     })
         .then(function (data) {
           res.json({'data': data})
@@ -105,7 +108,7 @@ function getEdgesNiche(req, res, next) {
       where_config_source: whereVarSource,
       where_config_source_raster: whereVarSourceRaster,
       where_config_target: whereVarTarget,
-      res_celda: res_celda
+      res_celda: res_celda_sp
           // where_config_target_raster: whereVarTargetRaster
     })
         .then(function (data) {
@@ -139,7 +142,7 @@ function getEdgesNiche(req, res, next) {
       where_config_source_raster: whereVarSourceRaster,
           // where_config_target: whereVarTarget,
       where_config_target_raster: whereVarTargetRaster,
-      res_celda: res_celda
+      res_celda: res_celda_sp
     })
         .then(function (data) {
           res.json({'data': data})
@@ -172,7 +175,7 @@ function getEdgesNiche(req, res, next) {
           // where_config_source_raster: whereVarSourceRaster,
       where_config_target: whereVarTarget,
       where_config_target_raster: whereVarTargetRaster,
-      res_celda: res_celda
+      res_celda: res_celda_sp
     })
         .then(function (data) {
           res.json({'data': data})
@@ -205,7 +208,7 @@ function getEdgesNiche(req, res, next) {
       where_config_source_raster: whereVarSourceRaster,
       where_config_target: whereVarTarget,
       where_config_target_raster: whereVarTargetRaster,
-      res_celda: res_celda
+      res_celda: res_celda_sp
     })
         .then(function (data) {
           res.json({'data': data})
@@ -239,7 +242,7 @@ function getEdgesNiche(req, res, next) {
       where_config_source: whereVarSource,
           // where_config_source_raster: whereVarSourceRaster,
       where_config_target: whereVarTarget,
-      res_celda: res_celda
+      res_celda: res_celda_sp
           // where_config_target_raster: whereVarTargetRaster
     })
         .then(function (data) {
@@ -272,7 +275,7 @@ function getEdgesNiche(req, res, next) {
           // where_config_source_raster: whereVarSourceRaster,
           // where_config_target: whereVarTarget,
       where_config_target_raster: whereVarTargetRaster,
-      res_celda: res_celda
+      res_celda: res_celda_sp
     })
         .then(function (data) {
           res.json({'data': data})
@@ -306,7 +309,7 @@ function getEdgesNiche(req, res, next) {
       // where_config_source: whereVarSource,
       where_config_source_raster: whereVarSourceRaster,
       where_config_target: whereVarTarget,
-      res_celda: res_celda
+      res_celda: res_celda_sp
       // where_config_target_raster: whereVarTargetRaster
     })
         .then(function (data) {
@@ -342,7 +345,7 @@ function getEdgesNiche(req, res, next) {
       where_config_source_raster: whereVarSourceRaster,
           // where_config_target: whereVarTarget,
       where_config_target_raster: whereVarTargetRaster,
-      res_celda: res_celda
+      res_celda: res_celda_sp
     })
         .then(function (data) {
 
