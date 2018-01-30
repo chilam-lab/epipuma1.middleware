@@ -1138,20 +1138,33 @@ exports.getEntListNiche = function (req, res, next) {
       var source    = parseInt(getParam(req, 'source'))
       var nivel     = getParam(req, 'nivel')
       var columnas  = verb_utils.getColumns(source, nivel)
-      var res_celda = getParam(req, 'res_celda', "gridid_16km")
+      
+      var res_celda_sp = verb_utils.getParam(req, 'res_celda_sp', 'cells_16km')
+      var res_celda_snib = verb_utils.getParam(req, 'res_celda_snib', 'gridid_16km')
+      var res_celda_snib_tb = verb_utils.getParam(req, 'res_celda_snib_tb', 'grid_16km_aoi')
+
+      res_celda_sp = (source == 1) ? res_celda_sp : "array[]::int[]";
+      var val_tree = (source == 1) ? " and icount("+res_celda_sp+") > 0 " : "";
 
       // debug(nivel)
       // debug(str)
       // debug(columnas)
-      debug(limite)
+      // debug(limite)
       limite = limite == -1 ? "" : "limit " + limite
       debug(limite)
+
+      debug("columnas: " + columnas)
+      debug("res_celda_sp: " + res_celda_sp)
+      debug("val_tree: " + val_tree)
 
       pool.any(queries.getEntListNiche.getEntList, {
             str: str,
             columnas: columnas,
             nivel: nivel,
-            res_celda: res_celda,
+            res_celda_sp: res_celda_sp,
+            res_celda_snib: res_celda_snib,
+            res_celda_snib_tb: res_celda_snib_tb, 
+            val_tree: val_tree,
             limite: limite
       })
           .then(function (data) {
