@@ -37,13 +37,19 @@ var port = process.env.PORT || 8080        // set our port
 var nicheRouter = require('./routes/nicherouter')
 var netRouter = require('./routes/networkrouter')
 var utilsRouter = require('./routes/utilsrouter')
+var cellsRouter = require('./routes/cellsrouter')
+var taxaRouter = require('./routes/taxarouter')
 
 // Register our routes
 // all of our routes will be prefixed with /snib
 app.use('/niche', 
         nicheRouter, 
         netRouter,
-        utilsRouter)
+        utilsRouter,
+        cellsRouter)
+
+app.use('/taxa',
+        taxaRouter)
 
 // Start the server
 var server = app.listen(port, function () {

@@ -33,7 +33,7 @@ function getNodesNiche(req, res, next) {
   // debug(sfilters)
   var tfilters    = verb_utils.getParam(req, 't_tfilters')
   // debug(tfilters)
-  var min_occ     = verb_utils.getParam(req, 'min_occ', 0)
+  var min_occ     = verb_utils.getParam(req, 'min_occ', 1)
   var res_celda = verb_utils.getParam(req, 'res_celda', 'cells_16km')
 
   // var alpha       = 0.01
