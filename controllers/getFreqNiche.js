@@ -39,7 +39,7 @@ function getFreqNiche(req, res, next) {
   var res_celda_snib_tb = verb_utils.getParam(req, 'res_celda_snib_tb', 'grid_16km_aoi')
 
   // Siempre incluidos en query, nj >= 0
-  var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
+  var min_occ       = verb_utils.getParam(req, 'min_occ', 1)
 
   var sfosil        = verb_utils.getParam(req, 'fossil', false)
   // debug(sfosil)
