@@ -2,7 +2,7 @@
 * @Author: Raul Sierra
 * @Date:   2017-10-25 18:02:27
 * @Last Modified by:   Raul Sierra
-* @Last Modified time: 2017-10-30 11:35:11
+* @Last Modified time: 2018-01-31 10:24:35
 */
 /**
 * Este verbo regresa la frecuencia del score por celda para poder desplegar el
@@ -23,6 +23,11 @@ var queries = require('./sql/queryProvider')
 
 var pool = verb_utils.pool 
 
+/**
+* Get all the grid cells that contain at least one observation of a given taxon
+* 
+* 
+*/
 function getTaxonCells(req, res, next) {
 	var tax_level = verb_utils.getParam(req, 'tax_level')
 	var tax_name = verb_utils.getParam(req, 'tax_name')

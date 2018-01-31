@@ -2,7 +2,7 @@
 * @Author: Raul Sierra
 * @Date:   2017-10-26 15:48:28
 * @Last Modified by:   Raul Sierra
-* @Last Modified time: 2018-01-25 16:12:12
+* @Last Modified time: 2018-01-31 11:21:27
 */
 var supertest = require("supertest");
 var expect = require('chai').expect;
@@ -138,9 +138,7 @@ describe("Test cells endpoint",function(){
 		["generovalido", "Panthera"],
 		["familiavalida", "Felidae"],
 		["ordenvalido", "Carnivora"],
-		["clasevalida", "Mammalia"],
-		["phylumdivisionvalido", "Craniata"],
-		["reinovalido", "Animalia"]
+		["clasevalida", "Mammalia"]
 	];
 
 	niveles_tax.forEach(pair => {
@@ -292,13 +290,14 @@ describe("Test cells endpoint",function(){
 			expect(res.body.data).all.have.property("max_year")
 			expect(res.body.data).all.have.property("min_year")
 			expect(res.body.data).all.have.property("num_records")
-			expect(res.body.data).contain.an.item.with.property("cell_id", 2062)
+			expect(res.body.data).to.have.length(13)
+			expect(res.body.data).contain.an.item.with.property("cell_id", 12141)
 			expect(res.body.data).to.include.something.deep.equals(
-				{"cell_id": 2062,
+				{"cell_id": 12141,
 				"generovalido": "Panthera",
-				 "max_year": 2002,
-				 "min_year": 2000,
-				 "num_records": "2"})
+				 "max_year": 2009,
+				 "min_year": 2007,
+				 "num_records": "3"})
 			done();
 		})
 
