@@ -62,7 +62,7 @@ function getScoreDecilNiche_A(req, res, next) {
 
 
   // Siempre incluidos en query, nj >= 0
-  var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
+  var min_occ       = verb_utils.getParam(req, 'min_occ', 1)
 
   // variables configurables
   var hasBios         = verb_utils.getParam(req, 'hasBios')
@@ -248,7 +248,7 @@ function getScoreDecilNiche(req, res, next) {
   filter_time = false;
 
   // Siempre incluidos en query, nj >= 0
-  var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
+  var min_occ       = verb_utils.getParam(req, 'min_occ', 1)
 
   // variables configurables
   var hasBios         = verb_utils.getParam(req, 'hasBios')
