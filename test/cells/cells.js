@@ -2,7 +2,7 @@
 * @Author: Raul Sierra
 * @Date:   2017-10-26 15:48:28
 * @Last Modified by:   Raul Sierra
-* @Last Modified time: 2017-10-30 12:42:38
+* @Last Modified time: 2018-01-31 11:21:27
 */
 var supertest = require("supertest");
 var expect = require('chai').expect;
@@ -138,9 +138,7 @@ describe("Test cells endpoint",function(){
 		["generovalido", "Panthera"],
 		["familiavalida", "Felidae"],
 		["ordenvalido", "Carnivora"],
-		["clasevalida", "Mammalia"],
-		["phylumdivisionvalido", "Craniata"],
-		["reinovalido", "Animalia"]
+		["clasevalida", "Mammalia"]
 	];
 
 	niveles_tax.forEach(pair => {
@@ -207,6 +205,67 @@ describe("Test cells endpoint",function(){
 			})
 		});
 	});
+	
+	it("Should get the right number of cells for species Panthera onca with (fossil=true, sfecha=true) = ", function(done){
+		supertest(server).post("/niche/cells")
+		.send({
+			tax_level: "especievalida",
+			tax_name: "Panthera onca",
+			fossil: "true",
+			sfecha: "true"
+		})
+		.expect("Content-type",/json/)
+		.expect(200)
+		.end(function(err, res){
+			expect(res.body).to.have.property("cells_col")
+			expect(res.body.cells_col).to.equal("gridid_16km")
+			expect(res.body).to.have.property("data")
+			expect(res.body.data).all.have.property("cell_id")
+			expect(res.body.data).to.have.length(102)
+			done();
+		})
+	});
+
+	it("Should get the right number of cells for species Panthera onca with (fossil=true, sfecha=false) = ", function(done){
+		supertest(server).post("/niche/cells")
+		.send({
+			tax_level: "especievalida",
+			tax_name: "Panthera onca",
+			fossil: "true",
+			sfecha: "false"
+		})
+		.expect("Content-type",/json/)
+		.expect(200)
+		.end(function(err, res){
+			expect(res.body).to.have.property("cells_col")
+			expect(res.body.cells_col).to.equal("gridid_16km")
+			expect(res.body).to.have.property("data")
+			expect(res.body.data).all.have.property("cell_id")
+			expect(res.body.data).to.have.length(54)
+			done();
+		})
+	});
+
+	it("Should get the right number of cells for species Panthera onca with (fossil=false, sfecha=true) = ", function(done){
+		supertest(server).post("/niche/cells")
+		.send({
+			tax_level: "especievalida",
+			tax_name: "Panthera onca",
+			fossil: "false",
+			sfecha: "true"
+		})
+		.expect("Content-type",/json/)
+		.expect(200)
+		.end(function(err, res){
+			expect(res.body).to.have.property("cells_col")
+			expect(res.body.cells_col).to.equal("gridid_16km")
+			expect(res.body).to.have.property("data")
+			expect(res.body.data).all.have.property("cell_id")
+			expect(res.body.data).to.have.length(93)
+			done();
+		})
+	});
+
 
 	it("Should get the cells containing a given taxon for a given time period in years", function(done){
 		var cells_res = 32
@@ -231,13 +290,14 @@ describe("Test cells endpoint",function(){
 			expect(res.body.data).all.have.property("max_year")
 			expect(res.body.data).all.have.property("min_year")
 			expect(res.body.data).all.have.property("num_records")
-			expect(res.body.data).contain.an.item.with.property("cell_id", 2062)
+			expect(res.body.data).to.have.length(13)
+			expect(res.body.data).contain.an.item.with.property("cell_id", 12141)
 			expect(res.body.data).to.include.something.deep.equals(
-				{"cell_id": 2062,
+				{"cell_id": 12141,
 				"generovalido": "Panthera",
-				 "max_year": 2002,
-				 "min_year": 2000,
-				 "num_records": "2"})
+				 "max_year": 2009,
+				 "min_year": 2007,
+				 "num_records": "3"})
 			done();
 		})
 
