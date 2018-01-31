@@ -2,7 +2,7 @@
 * @Author: Raul Sierra
 * @Date:   2017-10-25 18:02:27
 * @Last Modified by:   Raul Sierra
-* @Last Modified time: 2017-12-01 11:35:57
+* @Last Modified time: 2018-01-31 10:24:35
 */
 /**
 * Este verbo regresa la frecuencia del score por celda para poder desplegar el
