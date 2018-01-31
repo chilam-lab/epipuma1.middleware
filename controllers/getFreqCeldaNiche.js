@@ -69,7 +69,7 @@ function getFreqCeldaNiche_A(req, res, next) {
 
 
   // Siempre incluidos en query, nj >= 0
-  var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
+  var min_occ       = verb_utils.getParam(req, 'min_occ', 1)
 
   // variables configurables
   var hasBios         = verb_utils.getParam(req, 'hasBios')
@@ -220,7 +220,7 @@ function getFreqCeldaNiche(req, res, next) {
 
 
   // Siempre incluidos en query, nj >= 0
-  var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
+  var min_occ       = verb_utils.getParam(req, 'min_occ', 1)
 
   // variables configurables
   var hasBios         = verb_utils.getParam(req, 'hasBios')
