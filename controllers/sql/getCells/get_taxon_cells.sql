@@ -2,7 +2,7 @@
 * @Author: Raul Sierra
 * @Date:   2017-10-26 14:20:30
 * @Last Modified by:   Raul Sierra
-* @Last Modified time: 2017-10-30 12:42:21
+* @Last Modified time: 2018-01-31 11:11:30
 */
 /*getTaxonCells*/
 
@@ -11,13 +11,6 @@ SELECT $<res_celda:raw> AS cell_id, $<tax_level:raw>, MAX(aniocolecta) as max_ye
   FROM snib
   WHERE $<tax_level:raw> = $<tax_name> AND
   	$<res_celda:raw> IS NOT NULL AND
-  	ejemplarfosil = ANY(CASE 
-  						WHEN NOT $<fossil> THEN ARRAY['']
-  						ELSE ARRAY['SI','']
-  						END) AND
-  	aniocolecta <> (CASE 
-  						WHEN NOT $<sfecha> THEN 9999
-  						ELSE -1
-  						END) AND
-  	aniocolecta >= $<start_year> AND aniocolecta <= $<end_year>
+    ($<fossil:raw> OR ejemplarfosil <> 'SI') AND
+    ($<sfecha:raw> OR aniocolecta is not null)
   GROUP BY cell_id, $<tax_level:raw>
