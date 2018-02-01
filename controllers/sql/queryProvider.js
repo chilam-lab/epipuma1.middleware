@@ -219,7 +219,12 @@ var queryProvider = {
   },
   getTaxon: {
     getData: sqlPath('taxa/get_taxon_data.sql')
-  } 
+  }, 
+
+/************************************************************* VERBOS PARA OBTENER INFO DE TAXA ******************************/
+  getGridScores: {
+    forSpecies: sqlPath('getGridScores/get_grid_scores.sql')
+  }
 }
 
 module.exports = queryProvider
