@@ -40,6 +40,10 @@ function getEdgesNiche(req, res, next) {
   var res_celda_snib = verb_utils.getParam(req, 'res_celda_snib', 'gridid_16km')
   var res_celda_snib_tb = verb_utils.getParam(req, 'res_celda_snib_tb', 'grid_16km_aoi')
 
+  //Parametros posibes: full | species_coverage
+  var n_grid_coverage = verb_utils.getParam(req, 'n_grid_coverage', "full")
+  debug("n_grid_coverage: " + n_grid_coverage)
+
   console.log(res_celda_sp);
   console.log(res_celda_snib);
   console.log(res_celda_snib_tb);
@@ -76,7 +80,8 @@ function getEdgesNiche(req, res, next) {
       where_config_source_raster: whereVarSourceRaster,
       where_config_target: whereVarTarget,
       where_config_target_raster: whereVarTargetRaster,
-      res_celda: res_celda_sp
+      res_celda: res_celda_sp,
+      n_grid_coverage: n_grid_coverage
     })
         .then(function (data) {
           res.json({'data': data})
@@ -108,7 +113,8 @@ function getEdgesNiche(req, res, next) {
       where_config_source: whereVarSource,
       where_config_source_raster: whereVarSourceRaster,
       where_config_target: whereVarTarget,
-      res_celda: res_celda_sp
+      res_celda: res_celda_sp,
+      n_grid_coverage: n_grid_coverage
           // where_config_target_raster: whereVarTargetRaster
     })
         .then(function (data) {
@@ -142,7 +148,8 @@ function getEdgesNiche(req, res, next) {
       where_config_source_raster: whereVarSourceRaster,
           // where_config_target: whereVarTarget,
       where_config_target_raster: whereVarTargetRaster,
-      res_celda: res_celda_sp
+      res_celda: res_celda_sp,
+      n_grid_coverage: n_grid_coverage
     })
         .then(function (data) {
           res.json({'data': data})
@@ -175,7 +182,8 @@ function getEdgesNiche(req, res, next) {
           // where_config_source_raster: whereVarSourceRaster,
       where_config_target: whereVarTarget,
       where_config_target_raster: whereVarTargetRaster,
-      res_celda: res_celda_sp
+      res_celda: res_celda_sp,
+      n_grid_coverage: n_grid_coverage
     })
         .then(function (data) {
           res.json({'data': data})
@@ -208,7 +216,8 @@ function getEdgesNiche(req, res, next) {
       where_config_source_raster: whereVarSourceRaster,
       where_config_target: whereVarTarget,
       where_config_target_raster: whereVarTargetRaster,
-      res_celda: res_celda_sp
+      res_celda: res_celda_sp,
+      n_grid_coverage: n_grid_coverage
     })
         .then(function (data) {
           res.json({'data': data})
@@ -242,7 +251,8 @@ function getEdgesNiche(req, res, next) {
       where_config_source: whereVarSource,
           // where_config_source_raster: whereVarSourceRaster,
       where_config_target: whereVarTarget,
-      res_celda: res_celda_sp
+      res_celda: res_celda_sp,
+      n_grid_coverage: n_grid_coverage
           // where_config_target_raster: whereVarTargetRaster
     })
         .then(function (data) {
@@ -275,7 +285,8 @@ function getEdgesNiche(req, res, next) {
           // where_config_source_raster: whereVarSourceRaster,
           // where_config_target: whereVarTarget,
       where_config_target_raster: whereVarTargetRaster,
-      res_celda: res_celda_sp
+      res_celda: res_celda_sp,
+      n_grid_coverage: n_grid_coverage
     })
         .then(function (data) {
           res.json({'data': data})
@@ -309,7 +320,8 @@ function getEdgesNiche(req, res, next) {
       // where_config_source: whereVarSource,
       where_config_source_raster: whereVarSourceRaster,
       where_config_target: whereVarTarget,
-      res_celda: res_celda_sp
+      res_celda: res_celda_sp,
+      n_grid_coverage: n_grid_coverage
       // where_config_target_raster: whereVarTargetRaster
     })
         .then(function (data) {
@@ -345,7 +357,8 @@ function getEdgesNiche(req, res, next) {
       where_config_source_raster: whereVarSourceRaster,
           // where_config_target: whereVarTarget,
       where_config_target_raster: whereVarTargetRaster,
-      res_celda: res_celda_sp
+      res_celda: res_celda_sp,
+      n_grid_coverage: n_grid_coverage
     })
         .then(function (data) {
 
