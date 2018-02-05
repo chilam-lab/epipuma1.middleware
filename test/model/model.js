@@ -2,7 +2,7 @@
 * @Author: Raul Sierra
 * @Date:   2018-01-31 17:12:53
 * @Last Modified by:   Raul Sierra
-* @Last Modified time: 2018-02-05 16:04:08
+* @Last Modified time: 2018-02-05 17:02:51
 */
 var supertest = require("supertest");
 var expect = require('chai').expect;
@@ -71,6 +71,7 @@ describe("Test scores where the N depends on the species grid coverage:\n",funct
 	});
 
 	it("Should get cells with scores for one taxonomic group", function(done){
+		this.timeout(120000);
 		supertest(server).post("/niche/grid_scores")
 		.send({
 			sp_id : spid,
