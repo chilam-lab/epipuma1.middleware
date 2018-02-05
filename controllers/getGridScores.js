@@ -2,7 +2,7 @@
 * @Author: Raul Sierra
 * @Date:   2018-01-31 17:48:51
 * @Last Modified by:   Raul Sierra
-* @Last Modified time: 2018-02-05 16:58:17
+* @Last Modified time: 2018-02-05 17:10:08
 */
 
 /**
@@ -57,6 +57,22 @@ function getGridScores(req, res, next) {
 		debug('covar_tax_level: ' + covar_tax_level)
 		debug('covar_tax_name: ' + covar_tax_name)
 		debug('cells_col: ' + cells_col)
+		var tfilters    = verb_utils.getParam(req, 'tfilters')
+		var fossil = verb_utils.getParam(req, 'fossil', false)
+		var sfecha = verb_utils.getParam(req, 'sfecha', true)
+
+		var start_year = verb_utils.getParam(req, 'start_year', 0)
+		var end_year = verb_utils.getParam(req, 'end_year', 9999)
+
+		// var whereVar = verb_utils.processBioFilters(tfilters, sp_id)
+
+		var n = -1
+
+		var caso = -1
+		// debug('caso: ' + caso)
+
+		filter_time = caso !== -1 ? true : filter_time
+		// debug('filter_time: ' + filter_time)
 
 		pool.task(t => {
 			return t.one("select count(*) as n from (SELECT DISTINCT $1:raw FROM snib where $2:raw = $3) as s",
