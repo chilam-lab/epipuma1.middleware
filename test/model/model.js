@@ -2,7 +2,7 @@
 * @Author: Raul Sierra
 * @Date:   2018-01-31 17:12:53
 * @Last Modified by:   Raul Sierra
-* @Last Modified time: 2018-01-31 20:25:01
+* @Last Modified time: 2018-02-05 16:04:08
 */
 var supertest = require("supertest");
 var expect = require('chai').expect;
@@ -30,7 +30,7 @@ afterEach(function (done) {
 	server.close(done)
 })
 
-describe("Test scores where the N depends on the species grid coverage",function(){
+describe("Test scores where the N depends on the species grid coverage:\n",function(){
 	var cells_res = 32
 	var spid = 27336
 	var tax_level = "clasevalida"
@@ -49,7 +49,8 @@ describe("Test scores where the N depends on the species grid coverage",function
 		})
 	});
 
-	it("Should get cells with scores for one taxonomic group", function(done){
+	it("Should get the right number of occupied cells by " + tax_name, function(done){
+		this.timeout(120000);
 		supertest(server).post("/niche/grid_scores")
 		.send({
 			sp_id : spid,
@@ -63,11 +64,53 @@ describe("Test scores where the N depends on the species grid coverage",function
 			expect(res.body).to.have.property("cells_col")
 			expect(res.body.cells_col).to.equal("gridid_" + cells_res + "km")
 			expect(res.body).to.have.property("N")
+			expect(res.body.N).to.be.a('number')
 			expect(res.body.N).to.equal(3624)
-			expect(res.body).to.have.property("data")
-			expect(res.body.data).all.have.property("cell_id")
-			expect(res.body.data).all.have.property("score")
 			done();
 		})
 	});
+
+	it("Should get cells with scores for one taxonomic group", function(done){
+		supertest(server).post("/niche/grid_scores")
+		.send({
+			sp_id : spid,
+			covar_tax_level: tax_level,
+			covar_tax_name: tax_name,
+			cells_res: cells_res,
+			tfilters: [{
+				field:"clasevalida", 
+				value:"Mammalia", 
+				type:"4"
+			}],
+			qtype: "getMapScoreCeldaDecil",
+			id:27336,
+			idreg: "Estados",
+			idtime: 1517867953937,
+			min_occ: 1,
+			fossil: false,
+			sfecha: false,
+			discardedDateFilterids: true,
+			val_process: false,
+			idtabla: "no_table",
+			res_celda_sp: "cells_16km",
+			res_celda_snib: "gridid_16km",
+			res_celda_snib_tb: "grid_16km_aoi",
+			hasBios: true,
+			hasRaster: false		
+		})
+		.expect("Content-type",/json/)
+		.expect(200)
+		.end(function(err, res){
+			expect(res.body).to.have.property("cells_col")
+			expect(res.body.cells_col).to.equal("gridid_" + cells_res + "km")
+			expect(res.body).to.have.property("N")
+			expect(res.body.N).to.be.a('number')
+			expect(res.body.N).to.equal(3624)
+			expect(res.body).to.have.property("data")
+			expect(res.body.data).all.have.property("cell_id")
+			expect(res.body.data).all.have.property("tscore")
+			done();
+		})
+	});
+
 });

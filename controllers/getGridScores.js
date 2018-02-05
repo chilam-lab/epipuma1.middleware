@@ -2,7 +2,7 @@
 * @Author: Raul Sierra
 * @Date:   2018-01-31 17:48:51
 * @Last Modified by:   Raul Sierra
-* @Last Modified time: 2018-02-01 10:19:08
+* @Last Modified time: 2018-02-05 16:58:17
 */
 
 /**
@@ -37,12 +37,18 @@ function getGridScores(req, res, next) {
 
 	var cell_res = verb_utils.getParam(req, 'cells_res', 16)
  	var cells_col = "gridid_" + cell_res + "km"
+	var res_celda_sp = 'cells_' + cell_res + 'km'
+	var res_celda_snib = 'gridid_' + cell_res + 'km'
+	var res_celda_snib_tb = 'grid_' + cell_res + 'km_aoi'
+	var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
 
- 	var fossil = verb_utils.getParam(req, 'fossil', true)
-	var sfecha = verb_utils.getParam(req, 'sfecha', true)
+	// filtros por tiempo
+	var sfecha            = verb_utils.getParam(req, 'sfecha', false)
+	var fecha_incio       = '0'
+	var fecha_fin         = '9999'
 
-	var start_year = verb_utils.getParam(req, 'start_year', 0)
-	var end_year = verb_utils.getParam(req, 'end_year', 9999)
+	var filter_time = false;
+
 
 	var N = 0
 
@@ -52,20 +58,17 @@ function getGridScores(req, res, next) {
 		debug('covar_tax_name: ' + covar_tax_name)
 		debug('cells_col: ' + cells_col)
 
-		try {
-			pool.any("select count(*) from (SELECT DISTINCT $1:raw FROM snib where $2:raw = $3) as s",
-				[cells_col, covar_tax_level, covar_tax_name])
-				.then(data => {
-					debug(data)
-					res.json({'data': data, 'cells_col': cells_col, 'N': -1})
-				})
-				.catch(error => {
-					debug(error)
-				})			
-		}
-		catch(error) {
-			debug(error)
-		}
+		pool.task(t => {
+			return t.one("select count(*) as n from (SELECT DISTINCT $1:raw FROM snib where $2:raw = $3) as s",
+					[cells_col, covar_tax_level, covar_tax_name])
+		})
+		.then(data => {
+			res.json({'data': data, 'cells_col': cells_col, 'N': parseInt(data.n)})
+		})
+  		.catch(err => {
+			debug(err)
+			next(err)
+		})			
 
 	} else {
 		next()
