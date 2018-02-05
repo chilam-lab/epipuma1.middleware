@@ -40,6 +40,10 @@ function getScoreDecilNiche_A(req, res, next) {
   var res_celda_snib = verb_utils.getParam(req, 'res_celda_snib', 'gridid_16km')
   var res_celda_snib_tb = verb_utils.getParam(req, 'res_celda_snib_tb', 'grid_16km_aoi')
 
+  //Parametros posibes: full | species_coverage
+  var n_grid_coverage = verb_utils.getParam(req, 'n_grid_coverage', "full")
+  debug("n_grid_coverage: " + n_grid_coverage)
+
    // filtros por tiempo
   var sfecha            = verb_utils.getParam(req, 'sfecha', false)
   var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
@@ -105,7 +109,8 @@ function getScoreDecilNiche_A(req, res, next) {
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
       filter_time: filter_time,
-      idtabla: idtabla
+      idtabla: idtabla,
+      n_grid_coverage: n_grid_coverage
     })
       .then(function (data) {
         for(var i = 0; i < data.length; i++){
@@ -145,7 +150,8 @@ function getScoreDecilNiche_A(req, res, next) {
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
       filter_time: filter_time,
-      idtabla: idtabla
+      idtabla: idtabla,
+      n_grid_coverage: n_grid_coverage
     })
       .then(function (data) {
         for(var i = 0; i < data.length; i++){
@@ -185,7 +191,8 @@ function getScoreDecilNiche_A(req, res, next) {
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
       filter_time: filter_time,
-      idtabla: idtabla
+      idtabla: idtabla,
+      n_grid_coverage: n_grid_coverage
     })
       .then(function (data) {
         for(var i = 0; i < data.length; i++){
@@ -223,6 +230,10 @@ function getScoreDecilNiche(req, res, next) {
   var res_celda_sp = verb_utils.getParam(req, 'res_celda_sp', 'cells_16km')
   var res_celda_snib = verb_utils.getParam(req, 'res_celda_snib', 'gridid_16km')
   var res_celda_snib_tb = verb_utils.getParam(req, 'res_celda_snib_tb', 'grid_16km_aoi')
+
+  //Parametros posibes: full | species_coverage
+  var n_grid_coverage = verb_utils.getParam(req, 'n_grid_coverage', "full")
+  debug("n_grid_coverage: " + n_grid_coverage)
 
   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
 
@@ -292,7 +303,8 @@ function getScoreDecilNiche(req, res, next) {
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
       filter_time: filter_time,
-      idtabla: idtabla
+      idtabla: idtabla,
+      n_grid_coverage: n_grid_coverage
     })
       .then(function (data) {
         for(var i = 0; i < data.length; i++){
@@ -336,7 +348,8 @@ function getScoreDecilNiche(req, res, next) {
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
       filter_time: filter_time,
-      idtabla: idtabla
+      idtabla: idtabla,
+      n_grid_coverage: n_grid_coverage
     })
       .then(function (data) {
         for(var i = 0; i < data.length; i++){
@@ -376,7 +389,8 @@ function getScoreDecilNiche(req, res, next) {
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
       filter_time: filter_time,
-      idtabla: idtabla
+      idtabla: idtabla,
+      n_grid_coverage: n_grid_coverage
     })
       .then(function (data) {
         for(var i = 0; i < data.length; i++){
