@@ -44,13 +44,18 @@ function getGeoRelNiche(req, res, next) {
   var res_celda_snib = verb_utils.getParam(req, 'res_celda_snib', 'gridid_16km')
   var res_celda_snib_tb = verb_utils.getParam(req, 'res_celda_snib_tb', 'grid_16km_aoi')
 
+  //Parametros posibes: full | species_coverage
+  var n_grid_coverage = verb_utils.getParam(req, 'n_grid_coverage', "full")
+  debug("n_grid_coverage: " + n_grid_coverage)
+
   // Siempre incluidos en query, nj >= 0
-  var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
+  var min_occ       = verb_utils.getParam(req, 'min_occ', 1)
   
   var sfosil        = verb_utils.getParam(req, 'fossil', false)
-  // debug(sfosil)
+  debug("sfosil: " + sfosil)
+
   var lb_fosil = sfosil === "false" || sfosil === false ? " and (ejemplarfosil <> 'SI' or ejemplarfosil is null) " : "";
-  // debug(lb_fosil)
+  
 
 
   // variables configurables
@@ -110,7 +115,8 @@ function getGeoRelNiche(req, res, next) {
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
       filter_time: filter_time,
-      idtabla: idtabla
+      idtabla: idtabla,
+      n_grid_coverage: n_grid_coverage
     })
       .then(function (data) {
         // debug(data)
@@ -149,7 +155,8 @@ function getGeoRelNiche(req, res, next) {
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
       filter_time: filter_time,
-      idtabla: idtabla
+      idtabla: idtabla,
+      n_grid_coverage: n_grid_coverage
     })
       .then(function (data) {
         // debug(data)
@@ -182,7 +189,8 @@ function getGeoRelNiche(req, res, next) {
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
       filter_time: filter_time,
-      idtabla: idtabla
+      idtabla: idtabla,
+      n_grid_coverage: n_grid_coverage
     })
       .then(function (data) {
         res.json({'data': data})
