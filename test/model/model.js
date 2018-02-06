@@ -2,7 +2,7 @@
 * @Author: Raul Sierra
 * @Date:   2018-01-31 17:12:53
 * @Last Modified by:   Raul Sierra
-* @Last Modified time: 2018-02-05 17:02:51
+* @Last Modified time: 2018-02-06 12:47:16
 */
 var supertest = require("supertest");
 var expect = require('chai').expect;
@@ -56,7 +56,24 @@ describe("Test scores where the N depends on the species grid coverage:\n",funct
 			sp_id : spid,
 			covar_tax_level: tax_level,
 			covar_tax_name: tax_name,
-			cells_res: cells_res
+			cells_res: cells_res,
+			tfilters: [{
+				field:"clasevalida", 
+				value:"Mammalia", 
+				type:"4"
+			}],
+			qtype: "getMapScoreCeldaDecil",
+			id:27336,
+			idreg: "Estados",
+			idtime: 1517867953937,
+			min_occ: 1,
+			fossil: false,
+			sfecha: false,
+			discardedDateFilterids: true,
+			val_process: false,
+			idtabla: "no_table",
+			hasBios: true,
+			hasRaster: false
 		})
 		.expect("Content-type",/json/)
 		.expect(200)
@@ -93,9 +110,6 @@ describe("Test scores where the N depends on the species grid coverage:\n",funct
 			discardedDateFilterids: true,
 			val_process: false,
 			idtabla: "no_table",
-			res_celda_sp: "cells_16km",
-			res_celda_snib: "gridid_16km",
-			res_celda_snib_tb: "grid_16km_aoi",
 			hasBios: true,
 			hasRaster: false		
 		})
