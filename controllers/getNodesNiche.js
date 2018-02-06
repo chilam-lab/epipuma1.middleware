@@ -33,8 +33,12 @@ function getNodesNiche(req, res, next) {
   // debug(sfilters)
   var tfilters    = verb_utils.getParam(req, 't_tfilters')
   // debug(tfilters)
-  var min_occ     = verb_utils.getParam(req, 'min_occ', 0)
+  var min_occ     = verb_utils.getParam(req, 'min_occ', 1)
   var res_celda = verb_utils.getParam(req, 'res_celda', 'cells_16km')
+
+  //Parametros posibes: full | species_coverage
+  var n_grid_coverage = verb_utils.getParam(req, 'n_grid_coverage', "full")
+  debug("n_grid_coverage: " + n_grid_coverage)
 
   // var alpha       = 0.01
   // var N           = 14707

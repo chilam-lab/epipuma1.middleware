@@ -41,6 +41,10 @@ function getFreqCeldaNiche_A(req, res, next) {
   var res_celda_snib = verb_utils.getParam(req, 'res_celda_snib', 'gridid_16km')
   var res_celda_snib_tb = verb_utils.getParam(req, 'res_celda_snib_tb', 'grid_16km_aoi')
 
+  //Parametros posibes: full | species_coverage
+  var n_grid_coverage = verb_utils.getParam(req, 'n_grid_coverage', "full")
+  debug("n_grid_coverage: " + n_grid_coverage)
+
 
   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
 
@@ -69,7 +73,7 @@ function getFreqCeldaNiche_A(req, res, next) {
 
 
   // Siempre incluidos en query, nj >= 0
-  var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
+  var min_occ       = verb_utils.getParam(req, 'min_occ', 1)
 
   // variables configurables
   var hasBios         = verb_utils.getParam(req, 'hasBios')
@@ -104,7 +108,8 @@ function getFreqCeldaNiche_A(req, res, next) {
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
       filter_time: filter_time,
-      idtabla: idtabla
+      idtabla: idtabla,
+      n_grid_coverage: n_grid_coverage
     })
       .then(function (data) {
         res.json({'data': data})
@@ -140,7 +145,8 @@ function getFreqCeldaNiche_A(req, res, next) {
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
       filter_time: filter_time,
-      idtabla: idtabla
+      idtabla: idtabla,
+      n_grid_coverage: n_grid_coverage
     })
       .then(function (data) {
         res.json({'data': data})
@@ -171,7 +177,8 @@ function getFreqCeldaNiche_A(req, res, next) {
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
       filter_time: filter_time,
-      idtabla: idtabla
+      idtabla: idtabla,
+      n_grid_coverage: n_grid_coverage
     })
       .then(function (data) {
         res.json({'data': data})
@@ -207,6 +214,10 @@ function getFreqCeldaNiche(req, res, next) {
   var res_celda_snib = verb_utils.getParam(req, 'res_celda_snib', 'gridid_16km')
   var res_celda_snib_tb = verb_utils.getParam(req, 'res_celda_snib_tb', 'grid_16km_aoi')
 
+  //Parametros posibes: full | species_coverage
+  var n_grid_coverage = verb_utils.getParam(req, 'n_grid_coverage', "full")
+  debug("n_grid_coverage: " + n_grid_coverage)
+
   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
 
   debug("val_ process: " + verb_utils.getParam(req, 'val_process', false))
@@ -220,7 +231,7 @@ function getFreqCeldaNiche(req, res, next) {
 
 
   // Siempre incluidos en query, nj >= 0
-  var min_occ       = verb_utils.getParam(req, 'min_occ', 0)
+  var min_occ       = verb_utils.getParam(req, 'min_occ', 1)
 
   // variables configurables
   var hasBios         = verb_utils.getParam(req, 'hasBios')
@@ -269,7 +280,8 @@ function getFreqCeldaNiche(req, res, next) {
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
       filter_time: filter_time,
-      idtabla: idtabla
+      idtabla: idtabla,
+      n_grid_coverage: n_grid_coverage
     })
       .then(function (data) {
         res.json({'data': data})
@@ -306,7 +318,8 @@ function getFreqCeldaNiche(req, res, next) {
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
       filter_time: filter_time,
-      idtabla: idtabla
+      idtabla: idtabla,
+      n_grid_coverage: n_grid_coverage
     })
       .then(function (data) {
         res.json({'data': data})
@@ -339,7 +352,8 @@ function getFreqCeldaNiche(req, res, next) {
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
       filter_time: filter_time,
-      idtabla: idtabla
+      idtabla: idtabla,
+      n_grid_coverage: n_grid_coverage
     })
       .then(function (data) {
         // debug(data)
