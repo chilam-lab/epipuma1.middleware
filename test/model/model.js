@@ -2,7 +2,7 @@
 * @Author: Raul Sierra
 * @Date:   2018-01-31 17:12:53
 * @Last Modified by:   Raul Sierra
-* @Last Modified time: 2018-02-06 13:02:41
+* @Last Modified time: 2018-02-06 13:32:26
 */
 var supertest = require("supertest");
 var expect = require('chai').expect;
@@ -30,7 +30,7 @@ afterEach(function (done) {
 	server.close(done)
 })
 
-describe("Test scores where the N depends on the species grid coverage:\n",function(){
+describe("Test scores where the N depends on the species grid coverage:\nTesting with Panthera onca",function(){
 	var cells_res = 32
 	var spid = 27336
 	var tax_level = "clasevalida"
@@ -124,6 +124,7 @@ describe("Test scores where the N depends on the species grid coverage:\n",funct
 			expect(res.body).to.have.property("data")
 			expect(res.body.data).all.have.property("gridid")
 			expect(res.body.data).all.have.property("tscore")
+			expect(res.body.data).to.have.length(3599)
 			done();
 		})
 	});
