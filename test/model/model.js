@@ -2,7 +2,7 @@
 * @Author: Raul Sierra
 * @Date:   2018-01-31 17:12:53
 * @Last Modified by:   Raul Sierra
-* @Last Modified time: 2018-02-06 12:47:16
+* @Last Modified time: 2018-02-06 13:02:41
 */
 var supertest = require("supertest");
 var expect = require('chai').expect;
@@ -122,7 +122,7 @@ describe("Test scores where the N depends on the species grid coverage:\n",funct
 			expect(res.body.N).to.be.a('number')
 			expect(res.body.N).to.equal(3624)
 			expect(res.body).to.have.property("data")
-			expect(res.body.data).all.have.property("cell_id")
+			expect(res.body.data).all.have.property("gridid")
 			expect(res.body.data).all.have.property("tscore")
 			done();
 		})

@@ -2,7 +2,7 @@
 * @Author: Raul Sierra
 * @Date:   2018-01-31 17:48:51
 * @Last Modified by:   Raul Sierra
-* @Last Modified time: 2018-02-06 12:45:32
+* @Last Modified time: 2018-02-06 12:58:13
 */
 
 /**
@@ -59,9 +59,11 @@ function getGridScores(req, res, next) {
 		debug('covar_tax_name: ' + covar_tax_name)
 		debug('cells_col: ' + cells_col)
 		var tfilters    = verb_utils.getParam(req, 'tfilters')
-		var fossil = verb_utils.getParam(req, 'fossil', '')
-		var sfecha = verb_utils.getParam(req, 'sfecha', true)
+		var sfosil = verb_utils.getParam(req, 'fossil', true)
+		var sfecha = verb_utils.getParam(req, 'sfecha', false)
 
+		var lb_fosil = sfosil === "false" || sfosil === false ? " and (ejemplarfosil <> 'SI' or ejemplarfosil is null) " : "";
+		debug('lb_fosil; ' + lb_fosil)
 		var start_year = verb_utils.getParam(req, 'start_year', 0)
 		var end_year = verb_utils.getParam(req, 'end_year', 9999)
 
@@ -87,7 +89,7 @@ function getGridScores(req, res, next) {
 									  N: n,
 									  alpha: 0.0001,
 									  min_occ: 10,
-									  fossil: '',
+									  fossil: lb_fosil,
 									  sfecha: sfecha,
 									  where_config: whereVar,
 									  res_celda_sp: res_celda_sp,
