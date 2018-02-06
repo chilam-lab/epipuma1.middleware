@@ -2,7 +2,7 @@
 * @Author: Raul Sierra
 * @Date:   2018-01-31 17:48:51
 * @Last Modified by:   Raul Sierra
-* @Last Modified time: 2018-02-05 17:10:08
+* @Last Modified time: 2018-02-05 17:20:42
 */
 
 /**
@@ -64,8 +64,9 @@ function getGridScores(req, res, next) {
 		var start_year = verb_utils.getParam(req, 'start_year', 0)
 		var end_year = verb_utils.getParam(req, 'end_year', 9999)
 
-		// var whereVar = verb_utils.processBioFilters(tfilters, sp_id)
-
+		debug(tfilters)
+		var whereVar = verb_utils.processBioFilters(tfilters, sp_id)
+		debug(whereVar)
 		var n = -1
 
 		var caso = -1
@@ -77,9 +78,31 @@ function getGridScores(req, res, next) {
 		pool.task(t => {
 			return t.one("select count(*) as n from (SELECT DISTINCT $1:raw FROM snib where $2:raw = $3) as s",
 					[cells_col, covar_tax_level, covar_tax_name])
+					.then(count => {
+						n = count.n
+						return t.any(queries.getFreqMapNiche.getFreqMapBio, {
+									  iterations: 1,
+									  spid: sp_id,
+									  N: n,
+									  n_grid_coverage: n,
+									  alpha: 0.0001,
+									  min_occ: 10,
+									  fossil: 'false',
+									  where_config: whereVar,
+									  res_celda_sp: res_celda_sp,
+									  res_celda_snib: res_celda_snib,
+									  res_celda_snib_tb: res_celda_snib_tb, 
+									  discardedDeleted: discardedDeleted,
+									  lim_inf: fecha_incio,
+									  lim_sup: fecha_fin,
+									  caso: 1,
+									  filter_time: 'false',
+									  idtabla: ''
+									})
+					});
 		})
 		.then(data => {
-			res.json({'data': data, 'cells_col': cells_col, 'N': parseInt(data.n)})
+			res.json({'data': data, 'cells_col': cells_col, 'N': parseInt(n)})
 		})
   		.catch(err => {
 			debug(err)
