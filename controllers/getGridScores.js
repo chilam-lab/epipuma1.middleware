@@ -2,7 +2,7 @@
 * @Author: Raul Sierra
 * @Date:   2018-01-31 17:48:51
 * @Last Modified by:   Raul Sierra
-* @Last Modified time: 2018-02-05 17:20:42
+* @Last Modified time: 2018-02-06 12:45:32
 */
 
 /**
@@ -19,6 +19,7 @@
 
 var debug = require('debug')('verbs:getGridScores')
 var verb_utils = require('./verb_utils')
+var moment = require('moment')
 
 var queries = require('./sql/queryProvider')
 
@@ -44,8 +45,8 @@ function getGridScores(req, res, next) {
 
 	// filtros por tiempo
 	var sfecha            = verb_utils.getParam(req, 'sfecha', false)
-	var fecha_incio       = '0'
-	var fecha_fin         = '9999'
+	var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+	var fecha_fin         = moment(verb_utils.getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
 
 	var filter_time = false;
 
@@ -58,7 +59,7 @@ function getGridScores(req, res, next) {
 		debug('covar_tax_name: ' + covar_tax_name)
 		debug('cells_col: ' + cells_col)
 		var tfilters    = verb_utils.getParam(req, 'tfilters')
-		var fossil = verb_utils.getParam(req, 'fossil', false)
+		var fossil = verb_utils.getParam(req, 'fossil', '')
 		var sfecha = verb_utils.getParam(req, 'sfecha', true)
 
 		var start_year = verb_utils.getParam(req, 'start_year', 0)
@@ -73,7 +74,7 @@ function getGridScores(req, res, next) {
 		// debug('caso: ' + caso)
 
 		filter_time = caso !== -1 ? true : filter_time
-		// debug('filter_time: ' + filter_time)
+		debug('filter_time: ' + filter_time)
 
 		pool.task(t => {
 			return t.one("select count(*) as n from (SELECT DISTINCT $1:raw FROM snib where $2:raw = $3) as s",
@@ -84,20 +85,21 @@ function getGridScores(req, res, next) {
 									  iterations: 1,
 									  spid: sp_id,
 									  N: n,
-									  n_grid_coverage: n,
 									  alpha: 0.0001,
 									  min_occ: 10,
-									  fossil: 'false',
+									  fossil: '',
+									  sfecha: sfecha,
 									  where_config: whereVar,
 									  res_celda_sp: res_celda_sp,
 									  res_celda_snib: res_celda_snib,
 									  res_celda_snib_tb: res_celda_snib_tb, 
 									  discardedDeleted: discardedDeleted,
-									  lim_inf: fecha_incio,
-									  lim_sup: fecha_fin,
-									  caso: 1,
-									  filter_time: 'false',
-									  idtabla: ''
+									  lim_inf: fecha_incio.format('YYYY'),
+									  lim_sup: fecha_fin.format('YYYY'),
+									  caso: caso,
+									  filter_time: filter_time,
+									  idtabla: '',
+  									  n_grid_coverage: 'full'
 									})
 					});
 		})
