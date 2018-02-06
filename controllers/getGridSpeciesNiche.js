@@ -39,6 +39,10 @@ function getGridSpeciesNiche_M(req, res, next) {
   var res_celda_snib = verb_utils.getParam(req, 'res_celda_snib', 'gridid_16km')
   var res_celda_snib_tb = verb_utils.getParam(req, 'res_celda_snib_tb', 'grid_16km_aoi')
 
+  //Parametros posibes: full | species_coverage
+  var n_grid_coverage = verb_utils.getParam(req, 'n_grid_coverage', "full")
+  debug("n_grid_coverage: " + n_grid_coverage)
+
   // Siempre incluidos en query, nj >= 0
   var min_occ       = verb_utils.getParam(req, 'min_occ', 1)
 
@@ -107,7 +111,8 @@ function getGridSpeciesNiche_M(req, res, next) {
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
       filter_time: filter_time,
-      idtabla: idtabla
+      idtabla: idtabla,
+      n_grid_coverage: n_grid_coverage
     })
       .then(function (data) {
         res.json({'data': data})
@@ -148,7 +153,8 @@ function getGridSpeciesNiche_M(req, res, next) {
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
       filter_time: filter_time,
-      idtabla: idtabla
+      idtabla: idtabla,
+      n_grid_coverage: n_grid_coverage
     })
       .then(function (data) {
         // debug(data)
@@ -183,7 +189,8 @@ function getGridSpeciesNiche_M(req, res, next) {
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
       filter_time: filter_time,
-      idtabla: idtabla
+      idtabla: idtabla,
+      n_grid_coverage: n_grid_coverage
     })
       .then(function (data) {
         res.json({'data': data})
@@ -215,6 +222,10 @@ function getGridSpeciesNiche_A(req, res, next) {
   var res_celda_sp = verb_utils.getParam(req, 'res_celda_sp', 'cells_16km')
   var res_celda_snib = verb_utils.getParam(req, 'res_celda_snib', 'gridid_16km')
   var res_celda_snib_tb = verb_utils.getParam(req, 'res_celda_snib_tb', 'grid_16km_aoi')
+
+  //Parametros posibes: full | species_coverage
+  var n_grid_coverage = verb_utils.getParam(req, 'n_grid_coverage', "full")
+  debug("n_grid_coverage: " + n_grid_coverage)
 
   // Siempre incluidos en query, nj >= 0
   var min_occ       = verb_utils.getParam(req, 'min_occ', 1)
@@ -285,7 +296,8 @@ function getGridSpeciesNiche_A(req, res, next) {
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
       filter_time: filter_time,
-      idtabla: idtabla
+      idtabla: idtabla,
+      n_grid_coverage: n_grid_coverage
     })
       .then(function (data) {
         res.json({'data': data})
@@ -326,7 +338,8 @@ function getGridSpeciesNiche_A(req, res, next) {
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
       filter_time: filter_time,
-      idtabla: idtabla
+      idtabla: idtabla,
+      n_grid_coverage: n_grid_coverage
     })
       .then(function (data) {
         res.json({'data': data})
@@ -362,7 +375,8 @@ function getGridSpeciesNiche_A(req, res, next) {
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
       filter_time: filter_time,
-      idtabla: idtabla
+      idtabla: idtabla,
+      n_grid_coverage: n_grid_coverage
     })
       .then(function (data) {
         res.json({'data': data})
@@ -395,6 +409,10 @@ function getGridSpeciesNiche(req, res, next) {
   var res_celda_sp = verb_utils.getParam(req, 'res_celda_sp', 'cells_16km')
   var res_celda_snib = verb_utils.getParam(req, 'res_celda_snib', 'gridid_16km')
   var res_celda_snib_tb = verb_utils.getParam(req, 'res_celda_snib_tb', 'grid_16km_aoi')
+
+  //Parametros posibes: full | species_coverage
+  var n_grid_coverage = verb_utils.getParam(req, 'n_grid_coverage', "full")
+  debug("n_grid_coverage: " + n_grid_coverage)
 
   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
 
@@ -470,7 +488,8 @@ function getGridSpeciesNiche(req, res, next) {
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
       filter_time: filter_time,
-      idtabla: idtabla
+      idtabla: idtabla,
+      n_grid_coverage: n_grid_coverage
     })
       .then(function (data) {
         // debug(data)
@@ -512,7 +531,8 @@ function getGridSpeciesNiche(req, res, next) {
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
       filter_time: filter_time,
-      idtabla: idtabla
+      idtabla: idtabla,
+      n_grid_coverage: n_grid_coverage
     })
       .then(function (data) {
         // debug(data)
@@ -552,7 +572,8 @@ function getGridSpeciesNiche(req, res, next) {
       lim_sup: fecha_fin.format('YYYY'),
       caso: caso,
       filter_time: filter_time,
-      idtabla: idtabla
+      idtabla: idtabla,
+      n_grid_coverage: n_grid_coverage
     })
       .then(function (data) {
         // debug(data)
