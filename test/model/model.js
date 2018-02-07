@@ -2,7 +2,7 @@
 * @Author: Raul Sierra
 * @Date:   2018-01-31 17:12:53
 * @Last Modified by:   Raul Sierra
-* @Last Modified time: 2018-02-06 13:32:26
+* @Last Modified time: 2018-02-07 12:43:18
 */
 var supertest = require("supertest");
 var expect = require('chai').expect;
@@ -63,7 +63,7 @@ describe("Test scores where the N depends on the species grid coverage:\nTesting
 				type:"4"
 			}],
 			qtype: "getMapScoreCeldaDecil",
-			id:27336,
+			id: spid,
 			idreg: "Estados",
 			idtime: 1517867953937,
 			min_occ: 1,
@@ -87,7 +87,7 @@ describe("Test scores where the N depends on the species grid coverage:\nTesting
 		})
 	});
 
-	it("Should get cells with scores for one taxonomic group", function(done){
+	it("Should get cells with scores with one taxonomic group", function(done){
 		this.timeout(120000);
 		supertest(server).post("/niche/grid_scores")
 		.send({
@@ -101,7 +101,6 @@ describe("Test scores where the N depends on the species grid coverage:\nTesting
 				type:"4"
 			}],
 			qtype: "getMapScoreCeldaDecil",
-			id:27336,
 			idreg: "Estados",
 			idtime: 1517867953937,
 			min_occ: 1,
@@ -111,7 +110,8 @@ describe("Test scores where the N depends on the species grid coverage:\nTesting
 			val_process: false,
 			idtabla: "no_table",
 			hasBios: true,
-			hasRaster: false		
+			hasRaster: false,
+			n_grid_coverage: 'species_coverage'		
 		})
 		.expect("Content-type",/json/)
 		.expect(200)
@@ -128,5 +128,52 @@ describe("Test scores where the N depends on the species grid coverage:\nTesting
 			done();
 		})
 	});
-
 });
+
+describe("Test scores between a Species and co-variables\n",function(){
+	const grid_res = 32
+	const spid = 27336
+	const tax_level = "clasevalida"
+	const tax_name = "Mammalia"
+	const min_occ = 1;
+
+	it("Should get all the statistics for one species VS a group of species using only the selected cells from the grid", function(done) {
+		supertest(server).post("/niche/covar_scores")
+		.send({
+			sp_id : spid,
+			covar_tax_level: tax_level,
+			covar_tax_name: tax_name,
+			cells_res: cells_res,
+			tfilters: [{
+				field:"clasevalida", 
+				value:"Mammalia", 
+				type:"4"
+			}],
+			id: spid,
+			min_occ: min_occ,
+			fossil: false,
+			sfecha: false,
+			discardedDateFilterids: true,
+			val_process: false,
+			n_grid_coverage: 'species_coverage'		
+		})
+		.expect("Content-type",/json/)
+		.expect(200)
+		.end(function(err, res){
+			expect(res.body).to.have.property("grid_res")
+			expect(res.body.grid_col).to.equal(grid_res)
+			expect(res.body).to.have.property("N")
+			expect(res.body.N).to.be.a('number')
+			expect(res.body.N).to.equal(3624)
+			expect(res.body).to.have.property("data")
+			expect(res.body.data).all.have.property("epsilon")
+			expect(res.body.data).all.have.property("score")
+			expect(res.body.data).all.have.property("ni")
+			expect(res.body.data).all.have.property("nj")
+			expect(res.body.data).all.have.property("n")
+			expect(res.body.data).all.have.property("var_name")
+			done();
+		})
+	})
+
+})
