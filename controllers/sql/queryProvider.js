@@ -126,9 +126,8 @@ var queryProvider = {
   getGeoRelNiche: {
     getGeoRel: sqlPath('getGeoRel/get_geo_rel.sql'),
     getGeoRelBio: sqlPath('getGeoRel/get_geo_rel_bio.sql'),
-    getGeoRelRaster: sqlPath('getGeoRel/get_geo_rel_raster.sql')
-    
-    
+    getGeoRelRaster: sqlPath('getGeoRel/get_geo_rel_raster.sql'),
+    getBioScores: sqlPath('getGeoRel/get_bio_scores.sql')
   },
   getFreqNiche: {
     getFreqBio: sqlPath('getFreq/get_freq_bio.sql'),

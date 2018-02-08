@@ -2,7 +2,7 @@
 * @Author: Raul Sierra
 * @Date:   2018-01-31 17:12:53
 * @Last Modified by:   Raul Sierra
-* @Last Modified time: 2018-02-07 12:43:18
+* @Last Modified time: 2018-02-08 14:37:06
 */
 var supertest = require("supertest");
 var expect = require('chai').expect;
@@ -137,13 +137,27 @@ describe("Test scores between a Species and co-variables\n",function(){
 	const tax_name = "Mammalia"
 	const min_occ = 1;
 
+	it("Should respond with a listening message", function(done){
+
+		supertest(server).post("/niche/bio_scores")
+		.send({})
+		.expect("Content-type",/json/)
+		.expect(200)
+		.end(function(err, res) {
+			expect(res.body).to.have.property("msg");
+			expect(res.body.msg).to.equal("bio_scores endpoint listening")
+			done();
+		})
+	});
+
 	it("Should get all the statistics for one species VS a group of species using only the selected cells from the grid", function(done) {
-		supertest(server).post("/niche/covar_scores")
+		this.timeout(12000);
+		supertest(server).post("/niche/bio_scores")
 		.send({
 			sp_id : spid,
 			covar_tax_level: tax_level,
 			covar_tax_name: tax_name,
-			cells_res: cells_res,
+			grid_res: grid_res,
 			tfilters: [{
 				field:"clasevalida", 
 				value:"Mammalia", 
@@ -161,17 +175,25 @@ describe("Test scores between a Species and co-variables\n",function(){
 		.expect(200)
 		.end(function(err, res){
 			expect(res.body).to.have.property("grid_res")
-			expect(res.body.grid_col).to.equal(grid_res)
+			expect(res.body.grid_res).to.equal(grid_res)
 			expect(res.body).to.have.property("N")
-			expect(res.body.N).to.be.a('number')
 			expect(res.body.N).to.equal(3624)
+			expect(res.body).to.have.property("var_name")
+			expect(res.body.var_name).to.equal("Panthera onca")
 			expect(res.body).to.have.property("data")
+			expect(res.body.data).all.have.property("covar_name")
+			expect(res.body.data).all.have.property("ni", 117)
+			expect(res.body.data).all.have.property("nj")
+			expect(res.body.data).not.contain.an.item.with.property('nj', 0)
+			expect(res.body.data).all.have.property("nij")
+			expect(res.body.data).to.include.something.deep.equals(
+				{"covar_name": "Artibeus toltecus",
+				 "var_name": "Panthera onca",
+				 "ni": 117,
+				 "nj": 92,
+				 "nij": 24})
 			expect(res.body.data).all.have.property("epsilon")
 			expect(res.body.data).all.have.property("score")
-			expect(res.body.data).all.have.property("ni")
-			expect(res.body.data).all.have.property("nj")
-			expect(res.body.data).all.have.property("n")
-			expect(res.body.data).all.have.property("var_name")
 			done();
 		})
 	})
