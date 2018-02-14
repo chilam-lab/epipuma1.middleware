@@ -15,6 +15,9 @@ var pool = verb_utils.pool
 var N = verb_utils.N 
 var iterations = verb_utils.iterations
 var alpha = verb_utils.alpha
+var limite = verb_utils.limite
+var min_taxon_name = verb_utils.min_taxon_name
+var max_taxon_name = verb_utils.max_taxon_name
 
 
 /**
@@ -80,7 +83,7 @@ exports.getGridIds = function (req, res, next) {
 exports.getGroupsByName = function (req, res, next) {
   var query_name = getParam(req, 'q', '')
   var field = getParam(req, 'field')
-  var parent_field = getParam(req, 'parentfield', 'reinovalido')
+  var parent_field = getParam(req, 'parentfield', max_taxon_name)
   var parent_field_value = getParam(req, 'parentvalue', '')
   var limit = getParam(req, 'limit', 20)
 
@@ -223,7 +226,7 @@ exports.getCountGridid = function (req, res, next) {
  *
  */
 exports.getCountByGroup = function (req, res, next) {
-  var taxonomicLevel = getParam(req, 'field', 'reinovalido')
+  var taxonomicLevel = getParam(req, 'field', max_taxon_name)
   var taxonomicParent = getParam(req, 'parentfield', 'dominio')
   var taxnomicParentName = getParam(req, 'parentitem', 'Eukaryota')
 
@@ -446,8 +449,8 @@ exports.getValuesFromToken = function (req, res, next) {
       var tipo = getParam(req, 'tipo')
       var token = getParam(req, 'token')
 
-      debug("tipo: " + tipo)
-      debug("token: " + token)
+      // debug("tipo: " + tipo)
+      // debug("token: " + token)
 
 
       pool.any(queries.getValuesFromToken.getValues, {
@@ -500,7 +503,6 @@ exports.getToken = function (req, res, next) {
           params: params
       })
           .then(function (data) {
-            // debug(data)
             res.json({'data': data})
       })
           .catch(function (error) {
@@ -675,13 +677,14 @@ exports.getGridGeoJsonNiche = function (req, res, next) {
 
   if(getParam(req, 'qtype') === "getGridGeoJsonMX"){
 
+      debug("getGridGeoJsonNiche")
       debug(getParam(req, 'qtype'))
 
       var grid_res = getParam(req, 'grid_res')
       var api = getParam(req, 'api')
       var  api_file = (api === "pro" || api === "rc" || api === "local") ? "mx_" : "";
 
-      // debug(grid_res)
+      // debug("grid_res: " + grid_res)
       // debug(api)
       // debug(api_file)
       
@@ -689,24 +692,24 @@ exports.getGridGeoJsonNiche = function (req, res, next) {
       try {
 
           if(grid_res === "8"){
-            debug("8")
+            debug("grid_res: 8")
             var filePath = path.join(__dirname, "../geofiles/niche/"+api_file+"grid_8km.json");
           }
           else if(grid_res === "16"){
-            debug("16")
+            debug("grid_res: 16")
             var filePath = path.join(__dirname, "../geofiles/niche/"+api_file+"grid_16km.json");
           }
           else if(grid_res === "32"){
-            debug("32")
+            debug("grid_res: 32")
             var filePath = path.join(__dirname, "../geofiles/niche/"+api_file+"grid_32km.json"); 
           }
           else{
-            debug("64")
+            debug("grid_res: 64")
             var filePath = path.join(__dirname, "../geofiles/niche/"+api_file+"grid_64km.json");
           }
           
 
-          debug(filePath);
+          // debug(filePath);
 
           var stat = fs.statSync(filePath);
           // debug(stat.size);
@@ -754,23 +757,20 @@ exports.getVariablesNiche = function (req, res, next) {
   if(getParam(req, 'qtype') === "getVariables"){
 
       debug(getParam(req, 'qtype'))
-      // debug("getVariablesNiche")
+      debug("getVariablesNiche")
 
       
       var field = getParam(req, 'field',"")
       var parentfield = getParam(req, 'parentfield',"")
       var parentitem = getParam(req, 'parentitem',"")
 
-      debug(field)
-      debug(parentfield)
-      debug(parentitem)
+      // debug(field)
+      // debug(parentfield)
+      // debug(parentitem)
 
-      
+      if(field === max_taxon_name){
 
-      if(field === "reinovalido"){
-
-          debug("entra reino")
-
+          // debug("entra reino")
           pool.any(queries.getVariablesNiche.getVariablesReino, {
             taxon: field
           })
@@ -843,10 +843,10 @@ exports.getRasterNiche = function (req, res, next) {
       var level = parseInt(getParam(req, 'level', 0))
       var type = parseInt(getParam(req, 'type'))
 
-      debug(level)
-
+      // debug(level)
       // Si la peticion es de nicho, se requieren los spids
-      var coleccion = ""
+      // var coleccion = ""
+
       if(level == 0){
 
           pool.any(queries.getRasterNiche.getRasterBios, {})
@@ -1029,13 +1029,14 @@ exports.getSpeciesNiche = function (req, res, next) {
       
       // debug(spid)
       // debug(sfecha)
+      // debug(sfosil)
       // debug(fecha_incio.format('YYYY'))
       // debug(fecha_fin.format('YYYY'))
       // debug(moment().format('YYYY-MM-DD'))
 
 
       if( (parseInt(fecha_incio.format('YYYY')) != 1500 || parseInt(fecha_fin.format('YYYY')) != parseInt(moment().format('YYYY')) ) && sfecha === "false"){
-        debug("rango y sin fecha")
+        debug("CASO: rango y sin fecha")
         pool.any(queries.getSpeciesNiche.getSpeciesSDR, {
                 spid: spid,
                 lim_inf: fecha_incio.format('YYYY'),
@@ -1053,7 +1054,7 @@ exports.getSpeciesNiche = function (req, res, next) {
           })
       }
       else if( parseInt(fecha_incio.format('YYYY')) == 1500 && parseInt(fecha_fin.format('YYYY')) == parseInt(moment().format('YYYY'))  && sfecha === "false"){
-          debug("solo sin fecha")
+          debug("CASO: solo sin fecha")
           pool.any(queries.getSpeciesNiche.getSpeciesSD, {
                 spid: spid,
                 res_celda: res_celda,
@@ -1069,7 +1070,7 @@ exports.getSpeciesNiche = function (req, res, next) {
           })
       }
       else if( parseInt(fecha_incio.format('YYYY')) != 1500 || parseInt(fecha_fin.format('YYYY')) != parseInt(moment().format('YYYY')) ){
-          debug("solo rango")
+          debug("CASO: solo rango")
           pool.any(queries.getSpeciesNiche.getSpeciesR, {
                 spid: spid,
                 lim_inf: fecha_incio.format('YYYY'),
@@ -1087,7 +1088,7 @@ exports.getSpeciesNiche = function (req, res, next) {
           })
       }
       else{
-          debug("sin filtros")
+          debug("CASO: sin filtros")
           pool.any(queries.getSpeciesNiche.getSpecies, {
                 spid: spid,
                 res_celda: res_celda,
@@ -1134,28 +1135,27 @@ exports.getEntListNiche = function (req, res, next) {
       debug("getEntListNiche")
 
       var str       = getParam(req, 'searchStr')
-      var limite    = parseInt(getParam(req, 'limit', -1))
+      var has_limit = parseInt(getParam(req, 'limit', false))
       var source    = parseInt(getParam(req, 'source'))
-      var nivel     = getParam(req, 'nivel')
+      var nivel     = getParam(req, 'nivel', min_taxon_name)
       var columnas  = verb_utils.getColumns(source, nivel)
-      
-      var res_celda_sp = verb_utils.getParam(req, 'res_celda_sp', 'cells_16km')
-      var res_celda_snib = verb_utils.getParam(req, 'res_celda_snib', 'gridid_16km')
-      var res_celda_snib_tb = verb_utils.getParam(req, 'res_celda_snib_tb', 'grid_16km_aoi')
+
+      var grid_resolution = getParam(req, 'grid_res',16)
+      var res_celda_sp =  "cells_"+grid_resolution+"km"   
+      var res_celda_snib =  "gridid_"+grid_resolution+"km" 
+      var res_celda_snib_tb = "grid_"+grid_resolution+"km_aoi" 
 
       res_celda_sp = (source == 1) ? res_celda_sp : "array[]::int[]";
       var val_tree = (source == 1) ? " and icount("+res_celda_sp+") > 0 " : "";
 
+      var txt_limite = has_limit === false ? "" : "limit " + limite
+      
       // debug(nivel)
       // debug(str)
-      // debug(columnas)
       // debug(limite)
-      limite = limite == -1 ? "" : "limit " + limite
-      debug(limite)
-
-      debug("columnas: " + columnas)
-      debug("res_celda_sp: " + res_celda_sp)
-      debug("val_tree: " + val_tree)
+      // debug("columnas: " + columnas)
+      // debug("res_celda_sp: " + res_celda_sp)
+      // debug("val_tree: " + val_tree)
 
       pool.any(queries.getEntListNiche.getEntList, {
             str: str,
@@ -1165,7 +1165,7 @@ exports.getEntListNiche = function (req, res, next) {
             res_celda_snib: res_celda_snib,
             res_celda_snib_tb: res_celda_snib_tb, 
             val_tree: val_tree,
-            limite: limite
+            limite: txt_limite
       })
           .then(function (data) {
             // debug(data)

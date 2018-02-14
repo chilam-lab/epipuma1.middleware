@@ -30,28 +30,27 @@ var alpha = verb_utils.alpha
  * @param {function} next - Express next middleware function
  */
 function getFreqNiche(req, res, next) {
+  
   debug('getFreqNiche')
+
+  var filter_time = false;
+
   var spid        = parseInt(verb_utils.getParam(req, 'id'))
   var tfilters    = verb_utils.getParam(req, 'tfilters')
 
-  var res_celda_sp = verb_utils.getParam(req, 'res_celda_sp', 'cells_16km')
-  var res_celda_snib = verb_utils.getParam(req, 'res_celda_snib', 'gridid_16km')
-  var res_celda_snib_tb = verb_utils.getParam(req, 'res_celda_snib_tb', 'grid_16km_aoi')
-
+  var grid_resolution = verb_utils.getParam(req, 'grid_res',16)
+  var res_celda_sp =  "cells_"+grid_resolution+"km"   
+  var res_celda_snib =  "gridid_"+grid_resolution+"km" 
+  var res_celda_snib_tb = "grid_"+grid_resolution+"km_aoi" 
 
   //Parametros posibes: full | species_coverage
   var n_grid_coverage = verb_utils.getParam(req, 'n_grid_coverage', "full")
-  debug("n_grid_coverage: " + n_grid_coverage)
   
-
   // Siempre incluidos en query, nj >= 0
   var min_occ       = verb_utils.getParam(req, 'min_occ', 1)
-
   var sfosil        = verb_utils.getParam(req, 'fossil', false)
-  // debug(sfosil)
   var lb_fosil = sfosil === "false" || sfosil === false ? " and (ejemplarfosil <> 'SI' or ejemplarfosil is null) " : "";
-  // debug(lb_fosil)
-
+  
   // variables configurables
   var hasBios         = verb_utils.getParam(req, 'hasBios')
   var hasRaster       = verb_utils.getParam(req, 'hasRaster')
@@ -60,19 +59,19 @@ function getFreqNiche(req, res, next) {
   var sfecha            = verb_utils.getParam(req, 'sfecha', false)
   var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
   var fecha_fin         = moment(verb_utils.getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
-  
-  filter_time = false;
 
   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
 
-  debug("val_ process: " + verb_utils.getParam(req, 'val_process', false))
   var iter = verb_utils.getParam(req, 'val_process', false) === "true" ? iterations : 1
-  debug("iterations: " + iter)
-
+  
   var idtabla = verb_utils.getParam(req, 'idtabla')
   idtabla = iter > 1 ? idtabla : ""
 
-  debug("idtabla: " + idtabla)
+  // debug("n_grid_coverage: " + n_grid_coverage)
+  // debug(sfosil)
+  // debug(lb_fosil)
+  // debug("iterations: " + iter)
+  // debug("idtabla: " + idtabla)
 
 
   if (hasBios === 'true' && hasRaster === 'true' ) {
