@@ -21,12 +21,14 @@ verb_utils.pool = pgp(config.db)
 /**
  * Definición del número de celdas en la malla
  */
-verb_utils.N = 0 // Se obtiene la cuenta del store en tiempo de ejecución dependiendo de la resolución enviada
-// verb_utils.N = 378176
-// verb_utils.N = 19968 // MX a 16km
-verb_utils.iterations = 5
-verb_utils.alpha = 1/10000
-verb_utils.maxscore = 700
+verb_utils.N = 0 // Deprecated: Ahora se obtiene la cuenta del store en tiempo de ejecución dependiendo de la resolución enviada
+verb_utils.iterations = 5 // Iteraciones realizadas en proceso de validación
+verb_utils.alpha = 1/10000 // Deprecated: Ahora se obtiene el valor dentro del store en tiempo de ejecución dependiendo de la resolución enviada
+verb_utils.maxscore = 700 // Valor para realizar el calculo de probabilidad de epsilon
+verb_utils.limite = 15 // numero de elemntos mostrados en autocomplete de especie
+verb_utils.min_taxon_name = 'especievalidabusqueda' // nombre de columna del valor minimo taxonomico en base de datos
+verb_utils.max_taxon_name = 'reinovalido' // nombre de columna del valor maximo taxonomico en base de datos
+
 
 
 /**
