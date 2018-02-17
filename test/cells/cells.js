@@ -2,7 +2,7 @@
 * @Author: Raul Sierra
 * @Date:   2017-10-26 15:48:28
 * @Last Modified by:   Raul Sierra
-* @Last Modified time: 2018-01-31 11:21:27
+* @Last Modified time: 2018-02-17 07:06:11
 */
 var supertest = require("supertest");
 var expect = require('chai').expect;
@@ -303,5 +303,29 @@ describe("Test cells endpoint",function(){
 
 	});
 
+	it("Should get the species present in a cell", function(done){
+		grid_res = 16
+		supertest(server).post("/niche/cells")
+		.send({
+			grid_res: grid_res,
+			cell_id: cell_id,
+			tax_group_level: tax_group_level,
+			tax_group_name: tax_group_name
+		})
+		.end(function(err, res){
+			expect(res.body).to.have.property("source_table")
+			expect(res.source_table).to.equal("grid_" + grid_res + "km_aoi")			
+			expect(res.body).to.have.property("grid")
+			expect(res.body.grid).to.equal("gridid_" + grid_res + "km")
+			expect(res.body).to.have.property("cell_id")
+			expect(res.body.grid).to.equal(cell_id)
+			expect(res.body).to.have.property("data")
+			expect(res.body.data).to.not.equal(null)
+			expect(res.body.data).to.be.an("array")
+			expect(res.body.data).all.have.property("var_id")
+			expect(res.body.data).all.have.property("var_name")
+			done();
+		})
+	})
 
 });
