@@ -1,11 +1,14 @@
 var supertest = require("supertest");
 var should = require("should");
 var expect = require('chai').expect;
+var moment = require('moment')
+
+var chai = require("chai");
+// chai.should();
+chai.use(require('chai-things'));
+
 
 // var server = supertest.agent("http://localhost:8080");
-
-
-
 console.info("************************************\n")
 console.info("VALORES DEFAULT:\nEspecie: 'Lynx Rufus' \nBioticos: 'Mammalia' \nAbioticos: 'Bioclim' \nRango fechas: 2000-2017 \nResolucion Malla: 16km \nMin Occ: 10 \nRes: Resolución");
 console.info("\n************************************")
@@ -38,7 +41,7 @@ describe("Prueba de acceso al Middleware",function(){
 
 
 
-describe("Prueba petición variables abioticas",function(){
+describe("Prueba petición variables abioticas, su contenido y su tamaño",function(){
 
 	it("Árbol variables abioticas - DISPONIBLE", function(done){
 
@@ -48,7 +51,11 @@ describe("Prueba petición variables abioticas",function(){
 		.expect(200)
 		.end(function(err, response){
 			response.statusCode.should.equal(200)
-			// response.res.text.includes('FeatureCollection').should.equal(true)
+			expect(response.body.data).to.not.equal(null)
+			expect(response.body.data).all.have.property("layer")
+			expect(response.body.data).all.have.property("label")
+			expect(response.body.data).all.have.property("type")
+			expect(response.body.data).to.have.length(19)
 			done();
 		})
 
@@ -56,7 +63,9 @@ describe("Prueba petición variables abioticas",function(){
 
 });
 
-describe("Prueba busqueda de especies",function(){
+
+
+describe("Prueba búsqueda de especies, su contenido y tipo de valor",function(){
 
 	it("Buscador de especies - DISPONIBLE", function(done){
 
@@ -66,7 +75,24 @@ describe("Prueba busqueda de especies",function(){
 		.expect(200)
 		.end(function(err, response){
 			response.statusCode.should.equal(200)
-			// response.res.text.includes('FeatureCollection').should.equal(true)
+			expect(response.body.data).all.have.property("spid")
+			expect(response.body.data).all.have.property("reinovalido")
+			expect(response.body.data).all.have.property("phylumdivisionvalido")
+			expect(response.body.data).all.have.property("clasevalida")
+			expect(response.body.data).all.have.property("ordenvalido")
+			expect(response.body.data).all.have.property("familiavalida")
+			expect(response.body.data).all.have.property("generovalido")
+			expect(response.body.data).all.have.property("especievalidabusqueda")
+			expect(response.body.data).all.have.property("occ")
+			expect(response.body.data[0].spid).to.be.a("number")
+			expect(response.body.data[0].occ).to.be.a("number")
+			expect(response.body.data[0].reinovalido).to.be.a("string")
+			expect(response.body.data[0].phylumdivisionvalido).to.be.a("string")
+			expect(response.body.data[0].clasevalida).to.be.a("string")
+			expect(response.body.data[0].ordenvalido).to.be.a("string")
+			expect(response.body.data[0].familiavalida).to.be.a("string")
+			expect(response.body.data[0].generovalido).to.be.a("string")
+			expect(response.body.data[0].especievalidabusqueda).to.be.a("string")
 			done();
 		})
 
@@ -75,948 +101,198 @@ describe("Prueba busqueda de especies",function(){
 });
 
 
+[["false", "false", "false"], ["false", "false", "true"], ["true", "true", "true"], ["true", "true", "false"], ["false", "true", "false"], ["false", "true", "true"], ["true", "false", "true"], ["true", "false", "false"]].forEach(pair => {
 
-describe("Prueba recuperación de ocurrencias de especies",function(){
+	describe("Prueba obtención de ocurrencias de especie objetivo con (sfecha, rango, sfosil) => " + pair, function(done){
 
-	this.timeout(1000 * 60 * 2); // 3 minutos maximo
-	var spid = 28923;
+		this.timeout(1000 * 60 * 2); // 3 minutos maximo
+		var spid = 27332;
+		var lim_inf = 1500
+		var lim_sup = parseInt(moment().format('YYYY'));
 
-	describe("\nOcurrencias de especies | SF ",function(){
+		if(pair[1] === "false"){
+			lim_inf = 2000
+			lim_sup = 2020
+		}
 
-		it("Ocurrencias de especies SF - DISPONIBLE", function(done){
+		describe("\nOcurrencias de especies ",function(){
 
-			supertest(server).post("/niche/especie")
-			.send({
-				id : spid, 
-				idtime: "1506398422062", 
-				qtype: "getSpecies", 
-				sfecha: "true", 
-				sfosil: "true"
-			})
-			.expect("Content-type",/json/)
-			.expect(200)
-			.end(function(err, response){
-				response.statusCode.should.equal(200)
-				// response.res.text.includes('FeatureCollection').should.equal(true)
-				done();
-			})
+			it("Ocurrencias de especies - DISPONIBLE", function(done){
 
-		});
+				supertest(server).post("/niche/especie")
+				.send({
+					id : spid, 
+					qtype: "getSpecies", 
+					sfecha: pair[0], 
+					sfosil: pair[2],
+					lim_inf: lim_inf,
+					lim_sup: lim_sup
+				})
+				.expect("Content-type",/json/)
+				.expect(200)
+				.end(function(err, response){
+					response.statusCode.should.equal(200)
+					expect(response.body.data).all.have.property("json_geom")
+					expect(response.body.data).all.have.property("gridid")
+					expect(response.body.data).all.have.property("urlejemplar")
+					expect(response.body.data).all.have.property("fechacolecta")
+					expect(response.body.data[0].gridid).to.be.a("number")
+					expect(response.body.data[0].json_geom).to.be.a("string")
+					expect(response.body.data[0].json_geom).to.have.string("coordinates")
+					expect(response.body.data[0].json_geom).to.have.string("type")
+					done();
+				})
 
-
-	})
-
-
-	describe("\nOcurrencias de especies | F: Reg sin Fecha ",function(){
-
-		it("Ocurrencias de especies | F: Reg sin Fecha - DISPONIBLE", function(done){
-
-			supertest(server).post("/niche/especie")
-			.send({
-				id : spid, 
-				idtime: "1506398422062", 
-				qtype: "getSpecies", 
-				sfecha: "false", 
-				sfosil: "true"
-			})
-			.expect("Content-type",/json/)
-			.expect(200)
-			.end(function(err, response){
-				response.statusCode.should.equal(200)
-				// response.res.text.includes('FeatureCollection').should.equal(true)
-				done();
-			})
-
-		});
-
-	})
+			});
 
 
-	describe("\nOcurrencias de especies | F: Sin Fosiles ",function(){
+		})
 
-		it("Ocurrencias de especies | F: Sin Fosiles - DISPONIBLE", function(done){
+	});
 
-			supertest(server).post("/niche/especie")
-			.send({
-				id : spid, 
-				idtime: "1506398422062", 
-				qtype: "getSpecies", 
-				sfecha: "true", 
-				sfosil: "false"
-			})
-			.expect("Content-type",/json/)
-			.expect(200)
-			.end(function(err, response){
-				response.statusCode.should.equal(200)
-				// response.res.text.includes('FeatureCollection').should.equal(true)
-				done();
-			})
-
-		});
-
-	})
-
-
-	describe("\nOcurrencias de especies | F: Con Rango de fechas ",function(){
-
-		it("Ocurrencias de especies | F: Con Rango de fechas - DISPONIBLE", function(done){
-
-			supertest(server).post("/niche/especie")
-			.send({
-				id : spid, 
-				idtime: "1506398422062", 
-				qtype: "getSpecies", 
-				sfecha: "true", 
-				sfosil: "true",
-				lim_inf: 2000,
-				lim_sup: 2020
-			})
-			.expect("Content-type",/json/)
-			.expect(200)
-			.end(function(err, response){
-				response.statusCode.should.equal(200)
-				// response.res.text.includes('FeatureCollection').should.equal(true)
-				done();
-			})
-
-		});
-
-	})
 
 });
 
 
 
 
-describe("Prueba de petición de mallas.",function(){
-
-	describe("\nPetición de la malla de 8km:",function(){
-
-		it("Malla de 8km - DISPONIBLE", function(done){
-
-			supertest(server).post("/niche/especie")
-			.send({grid_res : 8, qtype : "getGridGeoJsonMX"})
-			.expect("Content-type",/json/)
-			.expect(200)
-			.end(function(err, response){
-				response.statusCode.should.equal(200)
-				response.res.text.includes('FeatureCollection').should.equal(true)
-				done();
-			})
-
-
-		});
-
-	});
-
-
-	describe("\nPetición de la malla de 16km:",function(){
-
-		it("Malla de 16km - DISPONIBLE", function(done){
-
-			supertest(server).post("/niche/especie")
-			.send({grid_res : 16, qtype : "getGridGeoJsonMX"})
-			.expect("Content-type",/json/)
-			.expect(200)
-			.end(function(err, response){
-				response.statusCode.should.equal(200)
-				response.res.text.includes('FeatureCollection').should.equal(true)
-				done();
-			})
-
-
-		});
-
-	});
-
-	describe("\nPetición de la malla de 32km:",function(){
-
-		it("Malla de 32km - DISPONIBLE", function(done){
-
-			supertest(server).post("/niche/especie")
-			.send({grid_res : 32, qtype : "getGridGeoJsonMX"})
-			.expect("Content-type",/json/)
-			.expect(200)
-			.end(function(err, response){
-				response.statusCode.should.equal(200)
-				response.res.text.includes('FeatureCollection').should.equal(true)
-				done();
-			})
-
-
-		});
-
-	});
-
-	describe("\nPetición de la malla de 64km:",function(){
-
-		it("Malla de 64km  - DISPONIBLE", function(done){
-
-			supertest(server).post("/niche/especie")
-			.send({grid_res : 64, qtype : "getGridGeoJsonMX"})
-			.expect("Content-type",/json/)
-			.expect(200)
-			.end(function(err, response){
-				response.statusCode.should.equal(200)
-				response.res.text.includes('FeatureCollection').should.equal(true)
-				done();
-			})
-
-
-		});
-
-	});
-
-	
-});
-
-
-describe("Prueba de verbo getGeoRel",function(){
+describe("Petición de mallas a diferentes resoluciones",function(){
 
 	this.timeout(1000 * 60 * 2); // 3 minutos maximo
 
-	
-	
-	describe("\nVerbo getGeoRel | NP | NF | B ",function(){
+	[8, 16, 32, 64].forEach(cell_res => {
 
-		it("Verbo: getGeoRel | NP | NF | B  - DISPONIBLE", function(done){
+		it("\nPetición de la malla de " + cell_res, function(done){
 
-			var spid = 28923;
-
-			supertest(server).post("/niche/getGeoRel")
-			.send({
-				qtype:"getGeoRel", 
-				id: spid,
-				idreg:"Estados",
-				idtime:"1506389557454",
-				fossil:"true",
-				sfecha:"true",
-				discardedDateFilterids:"false",
-				val_process:"false",
-				idtabla:"no_table",
-				res_celda_sp:"cells_16km",
-				res_celda_snib:"gridid_16km",
-				res_celda_snib_tb:"grid_16km_aoi",
-				tfilters: [{
-					field:"clasevalida", 
-					value:"Mammalia", 
-					type:"4"
-				}],
-				hasBios:"true",
-				hasRaster:"false"
-			})
+			supertest(server).post("/niche/especie")
+			.send({grid_res : ""+cell_res, qtype : "getGridGeoJsonMX", api: "local"})
 			.expect("Content-type",/json/)
 			.expect(200)
 			.end(function(err, response){
 				response.statusCode.should.equal(200)
-				// response.res.text.includes('FeatureCollection').should.equal(true)
-				done();
-			})
-
-		});
-
-	})
-
-
-	describe("\nVerbo getGeoRel | NP | F: Sin Reg Fosiles | B ",function(){
-
-		it("Verbo: getGeoRel | NP | F: Sin Reg Fosiles | B - DISPONIBLE", function(done){
-
-			var spid = 28923;
-
-			supertest(server).post("/niche/getGeoRel")
-			.send({
-				qtype:"getGeoRel", 
-				id: spid,
-				idreg:"Estados",
-				idtime:"1506389557454",
-				fossil:"false",
-				sfecha:"true",
-				discardedDateFilterids:"false",
-				val_process:"false",
-				idtabla:"no_table",
-				res_celda_sp:"cells_16km",
-				res_celda_snib:"gridid_16km",
-				res_celda_snib_tb:"grid_16km_aoi",
-				tfilters: [{
-					field:"clasevalida", 
-					value:"Mammalia", 
-					type:"4"
-				}],
-				hasBios:"true",
-				hasRaster:"false"
-			})
-			.expect("Content-type",/json/)
-			.expect(200)
-			.end(function(err, response){
-				response.statusCode.should.equal(200)
-				// response.res.text.includes('FeatureCollection').should.equal(true)
-				done();
-			})
-
-		});
-
-	})
-
-
-	describe("\nVerbo getGeoRel | NP | F: Sin Reg sin Fecha | B ",function(){
-
-		it("Verbo: getGeoRel | NP | F: Sin Reg sin Fecha | B - DISPONIBLE", function(done){
-
-			var spid = 28923;
-
-			supertest(server).post("/niche/getGeoRel")
-			.send({
-				qtype:"getGeoRel", 
-				id: spid,
-				idreg:"Estados",
-				idtime:"1506389557454",
-				fossil:"true",
-				sfecha:"false",
-				discardedDateFilterids:"false",
-				val_process:"false",
-				idtabla:"no_table",
-				res_celda_sp:"cells_16km",
-				res_celda_snib:"gridid_16km",
-				res_celda_snib_tb:"grid_16km_aoi",
-				tfilters: [{
-					field:"clasevalida", 
-					value:"Mammalia", 
-					type:"4"
-				}],
-				hasBios:"true",
-				hasRaster:"false"
-			})
-			.expect("Content-type",/json/)
-			.expect(200)
-			.end(function(err, response){
-				response.statusCode.should.equal(200)
-				// response.res.text.includes('FeatureCollection').should.equal(true)
-				done();
-			})
-
-		});
-
-	})
-
-
-	describe("\nVerbo getGeoRel | NP | F: Con Rango de fechas | B ",function(){
-
-		it("Verbo: getGeoRel | NP | F: Con Rango de fechas | B - DISPONIBLE", function(done){
-
-			var spid = 28923;
-
-			supertest(server).post("/niche/getGeoRel")
-			.send({
-				qtype:"getGeoRel", 
-				id: spid,
-				idreg:"Estados",
-				idtime:"1506389557454",
-				fossil:"true",
-				sfecha:"true",
-				lim_inf: 2000,
-				lim_sup: 2020,
-				discardedDateFilterids:"false",
-				val_process:"false",
-				idtabla:"no_table",
-				res_celda_sp:"cells_16km",
-				res_celda_snib:"gridid_16km",
-				res_celda_snib_tb:"grid_16km_aoi",
-				tfilters: [{
-					field:"clasevalida", 
-					value:"Mammalia", 
-					type:"4"
-				}],
-				hasBios:"true",
-				hasRaster:"false"
-			})
-			.expect("Content-type",/json/)
-			.expect(200)
-			.end(function(err, response){
-				response.statusCode.should.equal(200)
-				// response.res.text.includes('FeatureCollection').should.equal(true)
-				done();
-			})
-
-		});
-
-	})
-
-
-	describe("\nVerbo getGeoRel | NP | F: Sin Reg Fosiles & Sin Reg sin Fecha | B ",function(){
-
-		it("Verbo: getGeoRel | NP | F: Sin Reg Fosiles & Sin Reg sin Fecha | B - DISPONIBLE", function(done){
-
-			var spid = 28923;
-
-			supertest(server).post("/niche/getGeoRel")
-			.send({
-				qtype:"getGeoRel", 
-				id: spid,
-				idreg:"Estados",
-				idtime:"1506389557454",
-				fossil:"false",
-				sfecha:"false",
-				discardedDateFilterids:"false",
-				val_process:"false",
-				idtabla:"no_table",
-				res_celda_sp:"cells_16km",
-				res_celda_snib:"gridid_16km",
-				res_celda_snib_tb:"grid_16km_aoi",
-				tfilters: [{
-					field:"clasevalida", 
-					value:"Mammalia", 
-					type:"4"
-				}],
-				hasBios:"true",
-				hasRaster:"false"
-			})
-			.expect("Content-type",/json/)
-			.expect(200)
-			.end(function(err, response){
-				response.statusCode.should.equal(200)
-				// response.res.text.includes('FeatureCollection').should.equal(true)
-				done();
-			})
-
-		});
-
-	})
-
-
-	describe("\nVerbo getGeoRel | NP | F: Sin Reg Fosiles & Con Rango de fechas | B ",function(){
-
-		it("Verbo: getGeoRel | NP | F: Sin Reg Fosiles & Con Rango de fechas | B - DISPONIBLE", function(done){
-
-			var spid = 28923;
-
-			supertest(server).post("/niche/getGeoRel")
-			.send({
-				qtype:"getGeoRel", 
-				id: spid,
-				idreg:"Estados",
-				idtime:"1506389557454",
-				fossil:"false",
-				sfecha:"true",
-				lim_inf: 2000,
-				lim_sup: 2020,
-				discardedDateFilterids:"false",
-				val_process:"false",
-				idtabla:"no_table",
-				res_celda_sp:"cells_16km",
-				res_celda_snib:"gridid_16km",
-				res_celda_snib_tb:"grid_16km_aoi",
-				tfilters: [{
-					field:"clasevalida", 
-					value:"Mammalia", 
-					type:"4"
-				}],
-				hasBios:"true",
-				hasRaster:"false"
-			})
-			.expect("Content-type",/json/)
-			.expect(200)
-			.end(function(err, response){
-				response.statusCode.should.equal(200)
-				// response.res.text.includes('FeatureCollection').should.equal(true)
-				done();
-			})
-
-		});
-
-	})
-
-
-	describe("\nVerbo getGeoRel | NP | F: Sin Reg sin Fecha & Con Rango de fechas | B ",function(){
-
-		it("Verbo: getGeoRel | NP | F: Sin Reg sin Fecha & Con Rango de fechas | B - DISPONIBLE", function(done){
-
-			var spid = 28923;
-
-			supertest(server).post("/niche/getGeoRel")
-			.send({
-				qtype:"getGeoRel", 
-				id: spid,
-				idreg:"Estados",
-				idtime:"1506389557454",
-				fossil:"true",
-				sfecha:"false",
-				lim_inf: 2000,
-				lim_sup: 2020,
-				discardedDateFilterids:"false",
-				val_process:"false",
-				idtabla:"no_table",
-				res_celda_sp:"cells_16km",
-				res_celda_snib:"gridid_16km",
-				res_celda_snib_tb:"grid_16km_aoi",
-				tfilters: [{
-					field:"clasevalida", 
-					value:"Mammalia", 
-					type:"4"
-				}],
-				hasBios:"true",
-				hasRaster:"false"
-			})
-			.expect("Content-type",/json/)
-			.expect(200)
-			.end(function(err, response){
-				response.statusCode.should.equal(200)
-				// response.res.text.includes('FeatureCollection').should.equal(true)
-				done();
-			})
-
-		});
-
-	})
-
-	describe("\nVerbo getGeoRel | NP | F: Sin Reg Fosiles & Sin Reg sin Fecha & Con Rango de fechas | B ",function(){
-
-		it("Verbo: getGeoRel | NP | F: Sin Reg Fosiles & Sin Reg sin Fecha & Con Rango de fechas | B - DISPONIBLE", function(done){
-
-			var spid = 28923;
-
-			supertest(server).post("/niche/getGeoRel")
-			.send({
-				qtype:"getGeoRel", 
-				id: spid,
-				idreg:"Estados",
-				idtime:"1506389557454",
-				fossil:"true",
-				sfecha:"true",
-				lim_inf: 2000,
-				lim_sup: 2020,
-				discardedDateFilterids:"false",
-				val_process:"false",
-				idtabla:"no_table",
-				res_celda_sp:"cells_16km",
-				res_celda_snib:"gridid_16km",
-				res_celda_snib_tb:"grid_16km_aoi",
-				tfilters: [{
-					field:"clasevalida", 
-					value:"Mammalia", 
-					type:"4"
-				}],
-				hasBios:"true",
-				hasRaster:"false"
-			})
-			.expect("Content-type",/json/)
-			.expect(200)
-			.end(function(err, response){
-				response.statusCode.should.equal(200)
-				// response.res.text.includes('FeatureCollection').should.equal(true)
-				done();
-			})
-
-		});
-
-	})
-
-
-	describe("\nVerbo getGeoRel | P: Con Validacion | NF | B ",function(){
-
-		it("Verbo: getGeoRel | P: Con Validacion | NF | B - DISPONIBLE", function(done){
-
-			var spid = 28923;
-
-			supertest(server).post("/niche/getGeoRel")
-			.send({
-				qtype:"getGeoRel", 
-				id: spid,
-				idreg:"Estados",
-				idtime:"1506389557454",
-				fossil:"true",
-				sfecha:"true",
-				discardedDateFilterids:"false",
-				val_process:"true",
-				idtabla: "temp_01",
-				res_celda_sp:"cells_16km",
-				res_celda_snib:"gridid_16km",
-				res_celda_snib_tb:"grid_16km_aoi",
-				tfilters: [{
-					field:"clasevalida", 
-					value:"Mammalia", 
-					type:"4"
-				}],
-				hasBios:"true",
-				hasRaster:"false"
-			})
-			.expect("Content-type",/json/)
-			.expect(200)
-			.end(function(err, response){
-				response.statusCode.should.equal(200)
-				// response.res.text.includes('FeatureCollection').should.equal(true)
-				done();
-			})
-
-		});
-
-	})
-
-
-	describe("\nVerbo getGeoRel | P: Min Occ | NF | B ",function(){
-
-		it("Verbo: getGeoRel | P: Min Occ | NF | B - DISPONIBLE", function(done){
-
-			var spid = 28923;
-
-			supertest(server).post("/niche/getGeoRel")
-			.send({
-				qtype:"getGeoRel", 
-				id: spid,
-				idreg:"Estados",
-				idtime:"1506389557454",
-				fossil:"true",
-				sfecha:"true",
-				discardedDateFilterids:"false",
-				val_process:"false",
-				idtabla: "no_table",
-				res_celda_sp:"cells_16km",
-				res_celda_snib:"gridid_16km",
-				res_celda_snib_tb:"grid_16km_aoi",
-				tfilters: [{
-					field:"clasevalida", 
-					value:"Mammalia", 
-					type:"4"
-				}],
-				hasBios:"true",
-				hasRaster:"false",
-				min_occ: 10
-			})
-			.expect("Content-type",/json/)
-			.expect(200)
-			.end(function(err, response){
-				response.statusCode.should.equal(200)
-				// response.res.text.includes('FeatureCollection').should.equal(true)
-				done();
-			})
-
-		});
-
-	})
-
-
-	describe("\nVerbo getGeoRel | P: Con Apriori | NF | B ",function(){
-
-		it("Verbo: getGeoRel | P: Con Apriori | NF | B - DISPONIBLE", function(done){
-
-			var spid = 28923;
-
-			supertest(server).post("/niche/getGeoRel")
-			.send({
-				qtype:"getGeoRel", 
-				id: spid,
-				idreg:"Estados",
-				idtime:"1506389557454",
-				fossil:"true",
-				sfecha:"true",
-				discardedDateFilterids:"false",
-				val_process:"false",
-				idtabla: "no_table",
-				res_celda_sp:"cells_16km",
-				res_celda_snib:"gridid_16km",
-				res_celda_snib_tb:"grid_16km_aoi",
-				tfilters: [{
-					field:"clasevalida", 
-					value:"Mammalia", 
-					type:"4"
-				}],
-				hasBios:"true",
-				hasRaster:"false",
-				apriori: "apriori"
-			})
-			.expect("Content-type",/json/)
-			.expect(200)
-			.end(function(err, response){
-				response.statusCode.should.equal(200)
-				// response.res.text.includes('FeatureCollection').should.equal(true)
-				done();
-			})
-
-		});
-
-	})
-
-
-	describe("\nVerbo getGeoRel | P: Con Mapa Prob | NF | B ",function(){
-
-		it("Verbo: getGeoRel | P: Con Mapa Prob | NF | B - DISPONIBLE", function(done){
-
-			var spid = 28923;
-
-			supertest(server).post("/niche/getGeoRel")
-			.send({
-				qtype:"getGeoRel", 
-				id: spid,
-				idreg:"Estados",
-				idtime:"1506389557454",
-				fossil:"true",
-				sfecha:"true",
-				discardedDateFilterids:"false",
-				val_process:"false",
-				idtabla: "no_table",
-				res_celda_sp:"cells_16km",
-				res_celda_snib:"gridid_16km",
-				res_celda_snib_tb:"grid_16km_aoi",
-				tfilters: [{
-					field:"clasevalida", 
-					value:"Mammalia", 
-					type:"4"
-				}],
-				hasBios:"true",
-				hasRaster:"false",
-				mapa_prob: "mapa_prob"
-			})
-			.expect("Content-type",/json/)
-			.expect(200)
-			.end(function(err, response){
-				response.statusCode.should.equal(200)
-				// response.res.text.includes('FeatureCollection').should.equal(true)
-				done();
-			})
-
-		});
-
-	})
-	
-
-
-	describe("\nVerbo getGeoRel | P: Res 8km | NF | B ",function(){
-
-		it("Verbo: getGeoRel | P: Res 8km | NF | B - DISPONIBLE", function(done){
-
-			var spid = 28923;
-
-			supertest(server).post("/niche/getGeoRel")
-			.send({
-				qtype:"getGeoRel", 
-				id: spid,
-				idreg:"Estados",
-				idtime:"1506389557454",
-				fossil:"true",
-				sfecha:"true",
-				discardedDateFilterids:"false",
-				val_process:"false",
-				idtabla: "no_table",
-				res_celda_sp:"cells_8km",
-				res_celda_snib:"gridid_8km",
-				res_celda_snib_tb:"grid_8km_aoi",
-				tfilters: [{
-					field:"clasevalida", 
-					value:"Mammalia", 
-					type:"4"
-				}],
-				hasBios:"true",
-				hasRaster:"false"
-			})
-			.expect("Content-type",/json/)
-			.expect(200)
-			.end(function(err, response){
-				response.statusCode.should.equal(200)
-				// response.res.text.includes('FeatureCollection').should.equal(true)
-				done();
-			})
-
-		});
-
-	})
-
-	describe("\nVerbo getGeoRel | P: Res 32km | NF | B ",function(){
-
-		it("Verbo: getGeoRel | P: Res 32km | NF | B - DISPONIBLE", function(done){
-
-			var spid = 28923;
-
-			supertest(server).post("/niche/getGeoRel")
-			.send({
-				qtype:"getGeoRel", 
-				id: spid,
-				idreg:"Estados",
-				idtime:"1506389557454",
-				fossil:"true",
-				sfecha:"true",
-				discardedDateFilterids:"false",
-				val_process:"false",
-				idtabla: "no_table",
-				res_celda_sp:"cells_32km",
-				res_celda_snib:"gridid_32km",
-				res_celda_snib_tb:"grid_32km_aoi",
-				tfilters: [{
-					field:"clasevalida", 
-					value:"Mammalia", 
-					type:"4"
-				}],
-				hasBios:"true",
-				hasRaster:"false"
-			})
-			.expect("Content-type",/json/)
-			.expect(200)
-			.end(function(err, response){
-				response.statusCode.should.equal(200)
-				// response.res.text.includes('FeatureCollection').should.equal(true)
-				done();
-			})
-
-		});
-
-	})
-
-
-	describe("\nVerbo getGeoRel | P: Res 64km | NF | B ",function(){
-
-		it("Verbo: getGeoRel | P: Res 64km | NF | B - DISPONIBLE", function(done){
-
-			var spid = 28923;
-
-			supertest(server).post("/niche/getGeoRel")
-			.send({
-				qtype:"getGeoRel", 
-				id: spid,
-				idreg:"Estados",
-				idtime:"1506389557454",
-				fossil:"true",
-				sfecha:"true",
-				discardedDateFilterids:"false",
-				val_process:"false",
-				idtabla: "no_table",
-				res_celda_sp:"cells_64km",
-				res_celda_snib:"gridid_64km",
-				res_celda_snib_tb:"grid_64km_aoi",
-				tfilters: [{
-					field:"clasevalida", 
-					value:"Mammalia", 
-					type:"4"
-				}],
-				hasBios:"true",
-				hasRaster:"false"
-			})
-			.expect("Content-type",/json/)
-			.expect(200)
-			.end(function(err, response){
-				response.statusCode.should.equal(200)
-				// response.res.text.includes('FeatureCollection').should.equal(true)
-				done();
-			})
-
-		});
-
-	})
-	
-	
-	// TODO: Faltan agregar prueba de combinaciones en parametros y parametros con filtros
-	
-});
-
-describe("Test cells endpoint",function(){
-	var last_cells_size = 0;
-
-	it("Should return a 200 response", function(done){
-
-		supertest(server).post("/niche/cells")
-		.send({})
-		.expect("Content-type",/json/)
-		.expect(200, done);
-	});
-
-	it("Should respond with a listening message", function(done){
-
-		supertest(server).post("/niche/cells")
-		.send({})
-		.expect("Content-type",/json/)
-		.expect(200)
-		.end(function(err, res) {
-			expect(res.body).to.have.property("msg");
-			expect(res.body.msg).to.equal("cells endpoint listening")
-			done();
-		})
-	});
-
-	it("Should get resolution of 16km as default", function(done){
-		var spid = 28923;
-
-		supertest(server).post("/niche/cells")
-		.send({
-			sp_id : spid
-		})
-		.expect("Content-type",/json/)
-		.expect(200)
-		.end(function(err, res){
-			expect(res.body).to.have.property("cells_col")
-			expect(res.body.cells_col).to.equal("cells_16km")
-			done();
-		})
-
-	});
-
-	it("Should get the cells containing a given species at default resolution", function(done){
-		var spid = 28923;
-
-		supertest(server).post("/niche/cells")
-		.send({
-			sp_id : spid
-		})
-		.expect("Content-type",/json/)
-		.expect(200)
-		.end(function(err, res){
-			expect(res.body).to.have.property("data")
-			expect(res.body.data).to.not.equal(null)
-			expect(res.body).to.have.property("cells_col")
-			expect(res.body.cells_col).to.equal("cells_16km")
-			expect(res.body.data).to.have.property("cell_ids")
-			expect(res.body.data.cell_ids).to.be.an("array")
-			expect(res.body.data.cell_ids).to.have.length.above(0)
-			done();
-		})
-
-	});
-
-	[8, 16, 32, 64].forEach(value => {
-		it("Should get the cells containing a given species at res " + value + " km", function(done){
-			var spid = 28923;
-
-			supertest(server).post("/niche/cells")
-			.send({
-				sp_id: spid,
-				cells_res: value
-			})
-			.expect("Content-type",/json/)
-			.expect(200)
-			.end(function(err, res){
-				expect(res.body).to.have.property("data")
-				expect(res.body.data).to.not.equal(null)
-				expect(res.body.data).to.be.an("array")
-				expect(res.body.data).to.have.length.equal(1)
-				expect(res.body).to.have.property("cells_col")
-				expect(res.body.cells_col).to.equal("cells_" + value + "km")
-				expect(res.body.data).to.have.property("cell_ids")
-				expect(res.body.data.cell_ids).to.be.an("array")
-				expect(res.body.data.cell_ids).to.have.length.above(0)
+				response.res.text.includes('FeatureCollection').should.equal(true)
+				response.res.text.includes('features').should.equal(true)
 				done();
 			})
 		});
-	});
 
-	var niveles_tax = [ 
-		["generovalido", "Panthera"]];
-
-	niveles_tax.forEach(pair => {
-		it("Should get the cells for " + pair, function(done){
-
-			supertest(server).post("/niche/cells")
-			.send({
-				tax_level: pair[0],
-				tax_name: pair[1]
-			})
-			.expect("Content-type",/json/)
-			.expect(200)
-			.end(function(err, res){
-				expect(res.body).to.have.property("cells_col")
-				expect(res.body.cells_col).to.equal("cells_16km")
-				expect(res.body).to.have.property("data")
-				expect(res.body.data).to.have.property("cell_ids")
-				expect(res.body.data.cell_ids).to.be.an("array")
-				expect(res.body.data.cell_ids).to.have.length.above(0)
-				done();
-			})
-		});
 	});
 });
+
+
+
+
+// describe("Test cells endpoint",function(){
+// 	var last_cells_size = 0;
+
+// 	it("Should return a 200 response", function(done){
+
+// 		supertest(server).post("/niche/cells")
+// 		.send({})
+// 		.expect("Content-type",/json/)
+// 		.expect(200, done);
+// 	});
+
+// 	it("Should respond with a listening message", function(done){
+
+// 		supertest(server).post("/niche/cells")
+// 		.send({})
+// 		.expect("Content-type",/json/)
+// 		.expect(200)
+// 		.end(function(err, res) {
+// 			expect(res.body).to.have.property("msg");
+// 			expect(res.body.msg).to.equal("cells endpoint listening")
+// 			done();
+// 		})
+// 	});
+
+// 	it("Should get resolution of 16km as default", function(done){
+// 		var spid = 28923;
+
+// 		supertest(server).post("/niche/cells")
+// 		.send({
+// 			sp_id : spid
+// 		})
+// 		.expect("Content-type",/json/)
+// 		.expect(200)
+// 		.end(function(err, res){
+// 			expect(res.body).to.have.property("cells_col")
+// 			expect(res.body.cells_col).to.equal("cells_16km")
+// 			done();
+// 		})
+
+// 	});
+
+// 	it("Should get the cells containing a given species at default resolution", function(done){
+// 		var spid = 28923;
+
+// 		supertest(server).post("/niche/cells")
+// 		.send({
+// 			sp_id : spid
+// 		})
+// 		.expect("Content-type",/json/)
+// 		.expect(200)
+// 		.end(function(err, res){
+// 			expect(res.body).to.have.property("data")
+// 			expect(res.body.data).to.not.equal(null)
+// 			expect(res.body).to.have.property("cells_col")
+// 			expect(res.body.cells_col).to.equal("cells_16km")
+// 			expect(res.body.data).to.have.property("cell_ids")
+// 			expect(res.body.data.cell_ids).to.be.an("array")
+// 			expect(res.body.data.cell_ids).to.have.length.above(0)
+// 			done();
+// 		})
+
+// 	});
+
+// 	[8, 16, 32, 64].forEach(value => {
+// 		it("Should get the cells containing a given species at res " + value + " km", function(done){
+// 			var spid = 28923;
+
+// 			supertest(server).post("/niche/cells")
+// 			.send({
+// 				sp_id: spid,
+// 				cells_res: value
+// 			})
+// 			.expect("Content-type",/json/)
+// 			.expect(200)
+// 			.end(function(err, res){
+// 				expect(res.body).to.have.property("data")
+// 				expect(res.body.data).to.not.equal(null)
+// 				expect(res.body.data).to.be.an("array")
+// 				expect(res.body.data).to.have.length.equal(1)
+// 				expect(res.body).to.have.property("cells_col")
+// 				expect(res.body.cells_col).to.equal("cells_" + value + "km")
+// 				expect(res.body.data).to.have.property("cell_ids")
+// 				expect(res.body.data.cell_ids).to.be.an("array")
+// 				expect(res.body.data.cell_ids).to.have.length.above(0)
+// 				done();
+// 			})
+// 		});
+// 	});
+
+// 	var niveles_tax = [ 
+// 		["generovalido", "Panthera"]];
+
+// 	niveles_tax.forEach(pair => {
+// 		it("Should get the cells for " + pair, function(done){
+
+// 			supertest(server).post("/niche/cells")
+// 			.send({
+// 				tax_level: pair[0],
+// 				tax_name: pair[1]
+// 			})
+// 			.expect("Content-type",/json/)
+// 			.expect(200)
+// 			.end(function(err, res){
+// 				expect(res.body).to.have.property("cells_col")
+// 				expect(res.body.cells_col).to.equal("cells_16km")
+// 				expect(res.body).to.have.property("data")
+// 				expect(res.body.data).to.have.property("cell_ids")
+// 				expect(res.body.data.cell_ids).to.be.an("array")
+// 				expect(res.body.data.cell_ids).to.have.length.above(0)
+// 				done();
+// 			})
+// 		});
+// 	});
+// });
