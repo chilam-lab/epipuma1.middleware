@@ -32,18 +32,22 @@ var maxscore = verb_utils.maxscore
  * @param {function} next - Express next middleware function
  */
 function getFreqMapNiche_M(req, res, next) {
+  
   debug('getFreqMapNiche_M')
+
+  var filter_time = false;
+
   var spid        = parseInt(verb_utils.getParam(req, 'id'))
   var tfilters    = verb_utils.getParam(req, 'tfilters')
 
-  var res_celda_sp = verb_utils.getParam(req, 'res_celda_sp', 'cells_16km')
-  var res_celda_snib = verb_utils.getParam(req, 'res_celda_snib', 'gridid_16km')
-  var res_celda_snib_tb = verb_utils.getParam(req, 'res_celda_snib_tb', 'grid_16km_aoi')
+  var grid_resolution = verb_utils.getParam(req, 'grid_res',16)
+  var res_celda_sp =  "cells_"+grid_resolution+"km"   
+  var res_celda_snib =  "gridid_"+grid_resolution+"km" 
+  var res_celda_snib_tb = "grid_"+grid_resolution+"km_aoi" 
 
   //Parametros posibes: full | species_coverage
   var n_grid_coverage = verb_utils.getParam(req, 'n_grid_coverage', "full")
-  debug("n_grid_coverage: " + n_grid_coverage)
-
+  
   // Siempre incluidos en query, nj >= 0
   var min_occ       = verb_utils.getParam(req, 'min_occ', 1)
 
@@ -51,28 +55,24 @@ function getFreqMapNiche_M(req, res, next) {
   var hasBios         = verb_utils.getParam(req, 'hasBios')
   var hasRaster       = verb_utils.getParam(req, 'hasRaster')
   var mapa_prob       = verb_utils.getParam(req, 'mapa_prob')
-
   var sfosil        = verb_utils.getParam(req, 'fossil', false)
   var lb_fosil      = sfosil === "false" || sfosil === false ? " and (ejemplarfosil <> 'SI' or ejemplarfosil is null) " : "";
-  // debug(lb_fosil)
-
+  
   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
-
-  debug("val_ process: " + verb_utils.getParam(req, 'val_process', false))
   var iter = verb_utils.getParam(req, 'val_process', false) === "true" ? iterations : 1
-  debug("iterations: " + iter)
-
   var idtabla = verb_utils.getParam(req, 'idtabla')
   idtabla = iter > 1 ? idtabla : ""
-
-  debug("idtabla: " + idtabla)
-
+  
    // filtros por tiempo
   var sfecha            = verb_utils.getParam(req, 'sfecha', false)
   var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
   var fecha_fin         = moment(verb_utils.getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
-  
-  filter_time = false;
+
+  // debug("n_grid_coverage: " + n_grid_coverage)
+  // debug("idtabla: " + idtabla)
+  // debug("iterations: " + iter)
+  // debug("val_ process: " + verb_utils.getParam(req, 'val_process', false))
+  // debug(lb_fosil)
     
   if (hasBios === 'true' && hasRaster === 'true' && mapa_prob === 'mapa_prob' ){
     debug('TM')
@@ -204,24 +204,24 @@ function getFreqMapNiche_M(req, res, next) {
 function getFreqMapNiche_A(req, res, next) {
 
   debug('getFreqMapNiche_A')
+
+  var filter_time = false;
+
   var spid        = parseInt(verb_utils.getParam(req, 'id'))
   var tfilters    = verb_utils.getParam(req, 'tfilters')
   
-  var res_celda_sp = verb_utils.getParam(req, 'res_celda_sp', 'cells_16km')
-  var res_celda_snib = verb_utils.getParam(req, 'res_celda_snib', 'gridid_16km')
-  var res_celda_snib_tb = verb_utils.getParam(req, 'res_celda_snib_tb', 'grid_16km_aoi')
+  var grid_resolution = verb_utils.getParam(req, 'grid_res',16)
+  var res_celda_sp =  "cells_"+grid_resolution+"km"   
+  var res_celda_snib =  "gridid_"+grid_resolution+"km" 
+  var res_celda_snib_tb = "grid_"+grid_resolution+"km_aoi" 
 
   //Parametros posibes: full | species_coverage
   var n_grid_coverage = verb_utils.getParam(req, 'n_grid_coverage', "full")
-  debug("n_grid_coverage: " + n_grid_coverage)
-
+  
   // Siempre incluidos en query, nj >= 0
   var min_occ       = verb_utils.getParam(req, 'min_occ', 1)
-
   var sfosil        = verb_utils.getParam(req, 'fossil', false)
-  // debug(sfosil)
   var lb_fosil      = sfosil === "false" || sfosil === false ? " and (ejemplarfosil <> 'SI' or ejemplarfosil is null) " : "";
-  // debug(lb_fosil)
 
   // variables configurables
   var hasBios         = verb_utils.getParam(req, 'hasBios')
@@ -230,22 +230,20 @@ function getFreqMapNiche_A(req, res, next) {
 
   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
   
-  debug("val_ process: " + verb_utils.getParam(req, 'val_process', false))
   var iter = verb_utils.getParam(req, 'val_process', false) === "true" ? iterations : 1
-  debug("iterations: " + iter)
-
   var idtabla = verb_utils.getParam(req, 'idtabla')
   idtabla = iter > 1 ? idtabla : ""
-
-  debug("idtabla: " + idtabla)
 
    // filtros por tiempo
   var sfecha            = verb_utils.getParam(req, 'sfecha', false)
   var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
   var fecha_fin         = moment(verb_utils.getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
   
-  filter_time = false;
-
+  // debug("n_grid_coverage: " + n_grid_coverage)
+  // debug("iterations: " + iter)
+  // debug("idtabla: " + idtabla)
+  // debug(lb_fosil)
+  // debug(sfosil)
     
   if (hasBios === 'true' && hasRaster === 'true' && apriori === 'apriori' ) {
     debug('TA')
@@ -372,51 +370,50 @@ function getFreqMapNiche_A(req, res, next) {
  * @param {function} next - Express next middleware function
  */
 function getFreqMapNiche(req, res, next) {
+  
   debug('getFreqMapNiche')
+
+  var filter_time = false;
+
   var spid        = parseInt(verb_utils.getParam(req, 'id'))
   var tfilters    = verb_utils.getParam(req, 'tfilters')
   
-  var res_celda_sp = verb_utils.getParam(req, 'res_celda_sp', 'cells_16km')
-  var res_celda_snib = verb_utils.getParam(req, 'res_celda_snib', 'gridid_16km')
-  var res_celda_snib_tb = verb_utils.getParam(req, 'res_celda_snib_tb', 'grid_16km_aoi')
+  var grid_resolution = verb_utils.getParam(req, 'grid_res',16)
+  var res_celda_sp =  "cells_"+grid_resolution+"km"   
+  var res_celda_snib =  "gridid_"+grid_resolution+"km" 
+  var res_celda_snib_tb = "grid_"+grid_resolution+"km_aoi" 
 
   //Parametros posibes: full | species_coverage
   var n_grid_coverage = verb_utils.getParam(req, 'n_grid_coverage', "full")
-  debug("n_grid_coverage: " + n_grid_coverage)
-
-  debug("res_celda_sp: " + res_celda_sp)
-
-
+  
   // Siempre incluidos en query, nj >= 0
   var min_occ       = verb_utils.getParam(req, 'min_occ', 1)
-
   var sfosil        = verb_utils.getParam(req, 'fossil', false)
-  // debug(sfosil)
   var lb_fosil      = sfosil === "false" || sfosil === false ? " and (ejemplarfosil <> 'SI' or ejemplarfosil is null) " : "";
-  // debug(lb_fosil)
 
   // variables configurables
   var hasBios         = verb_utils.getParam(req, 'hasBios')
   var hasRaster       = verb_utils.getParam(req, 'hasRaster')
-
   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
-  // console.log(discardedDeleted);
-
-  debug("val_ process: " + verb_utils.getParam(req, 'val_process', false))
   var iter = verb_utils.getParam(req, 'val_process', false) === "true" ? iterations : 1
-  debug("iterations: " + iter)
 
    // filtros por tiempo
   var sfecha            = verb_utils.getParam(req, 'sfecha', false)
   var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
   var fecha_fin         = moment(verb_utils.getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
   
-  filter_time = false;
-
+  
   var idtabla = verb_utils.getParam(req, 'idtabla')
   idtabla = iter > 1 ? idtabla : ""
 
-  debug("idtabla: " + idtabla)
+  
+  // debug("idtabla: " + idtabla)
+  // debug("iterations: " + iter)
+  // debug("n_grid_coverage: " + n_grid_coverage)
+  // debug("res_celda_sp: " + res_celda_sp)
+  // debug(sfosil)
+  // debug(lb_fosil)
+  // console.log(discardedDeleted);
 
 
   // var download       = verb_utils.getParam(req, 'download', false)
