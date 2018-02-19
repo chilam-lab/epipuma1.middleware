@@ -2,7 +2,7 @@
 * @Author: Raul Sierra
 * @Date:   2018-02-19 15:30:35
 * @Last Modified by:   Raul Sierra
-* @Last Modified time: 2018-02-19 16:05:32
+* @Last Modified time: 2018-02-19 16:27:25
 */
 var supertest = require("supertest");
 var expect = require('chai').expect;
@@ -48,7 +48,7 @@ describe("Test get cell score info (getGridSpecies) endpoint",function(){
 	it("Should get score info for a one cell by coordinates", function(done){
 		supertest(server).post("/niche/getGridSpecies")
 		.send({
-			qtype: getGridSpecies,
+			qtype: "getGridSpecies",
 			id: 27336,
 			idreg: "Estados",
 			idtime: 1519077493248,
