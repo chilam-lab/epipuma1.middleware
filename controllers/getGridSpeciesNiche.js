@@ -574,25 +574,54 @@ function getGridSpeciesNiche(req, res, next) {
         next(error)
       })
   } else {
-    next()
+
+    debug('getGridSpecies endpoint listening')
+
+    res.json(
+      { 
+        message: 'getGridSpecies endpoint listening, please add the minimum parameters to get a response. See the example parameter',
+        example: {
+          id: 27332,
+          idtime: "1519077493248",
+          apriori: "",
+          min_occ: 1,
+          fossil: "true",
+          sfecha: "true",
+          val_process: "false",
+          idtabla: "no_table",
+          grid_res: "16",
+          tfilters: [{
+            field: "clasevalida",
+            value: "Mammalia",
+            type: 4
+          }],
+          hasBios: "true",
+          hasRaster: "false",
+          mapa_prob: "",
+          lat: 19.74292208009275,
+          long: -97.20703125,
+          lim_inf: 1500,
+          lim_sup: 2020
+        }
+      }
+    )
+
   }
 }
 
 
 /**
- * EstÃ¡ variable es un arreglo donde se define el flujo que debe de tener una 
+ * Esta variable es un arreglo donde se define el flujo que debe de tener una 
  * peticiÃ³n al verbo getGridSpeciesNiche. Actualmente el flujo es 
  * getGridSpeciesNiche_M, getGridSpeciesNiche_A, getGridSpeciesNiche_T y
  * getGridSpeciesNiche.
  *
  * @see controllers/getGridSpeciesNiche~getGridSpeciesNiche_VT
  * @see controllers/getGridSpeciesNiche~getGridSpeciesNiche_V
- * @see controllers/getGridSpeciesNiche~getGridSpeciesNiche_T
  * @see controllers/getGridSpeciesNiche~getGridSpeciesNiche
  */
 exports.pipe = [
   getGridSpeciesNiche_M,
   getGridSpeciesNiche_A,
-  // getGridSpeciesNiche_T,
-  getGridSpeciesNiche        
+  getGridSpeciesNiche  
 ]
