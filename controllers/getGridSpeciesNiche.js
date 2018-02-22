@@ -67,7 +67,7 @@ function getGridSpeciesNiche_M(req, res, next) {
   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
 
 
-  // debug(sfosil)
+  // debug("lb_fosil: " + lb_fosil)
   // debug("val_ process: " + verb_utils.getParam(req, 'val_process', false))
   // debug("iterations: " + iter)
   // debug("idtabla: " + idtabla)
@@ -81,7 +81,7 @@ function getGridSpeciesNiche_M(req, res, next) {
     debug('caso: ' + caso)
 
     filter_time = caso !== -1 ? true : filter_time
-    debug('filter_time: ' + filter_time)
+    // debug('filter_time: ' + filter_time)
 
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
     var whereVarRaster = verb_utils.processRasterFilters(tfilters, spid)
@@ -435,6 +435,9 @@ function getGridSpeciesNiche(req, res, next) {
   // debug("val_ process: " + verb_utils.getParam(req, 'val_process', false))
   // debug("iterations: " + iter)
   // debug("idtabla: " + idtabla)
+  // debug("grid_resolution: " + grid_resolution)
+  // debug("lat: " + lat)
+  // debug("long: " + long)
 
 
   if (hasBios === 'true' && hasRaster === 'true') {
@@ -485,7 +488,8 @@ function getGridSpeciesNiche(req, res, next) {
         debug(error)
         next(error)
       })
-  } else if (hasBios === 'true') {
+  } 
+  else if (hasBios === 'true') {
     debug('B')
 
     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
@@ -570,25 +574,54 @@ function getGridSpeciesNiche(req, res, next) {
         next(error)
       })
   } else {
-    next()
+
+    debug('getGridSpecies endpoint listening')
+
+    res.json(
+      { 
+        message: 'getGridSpecies endpoint listening, please add the minimum parameters to get a response. See the example parameter',
+        example: {
+          id: 27332,
+          idtime: "1519077493248",
+          apriori: "",
+          min_occ: 1,
+          fossil: "true",
+          sfecha: "true",
+          val_process: "false",
+          idtabla: "no_table",
+          grid_res: "16",
+          tfilters: [{
+            field: "clasevalida",
+            value: "Mammalia",
+            type: 4
+          }],
+          hasBios: "true",
+          hasRaster: "false",
+          mapa_prob: "",
+          lat: 19.74292208009275,
+          long: -97.20703125,
+          lim_inf: 1500,
+          lim_sup: 2020
+        }
+      }
+    )
+
   }
 }
 
 
 /**
- * EstÃ¡ variable es un arreglo donde se define el flujo que debe de tener una 
+ * Esta variable es un arreglo donde se define el flujo que debe de tener una 
  * peticiÃ³n al verbo getGridSpeciesNiche. Actualmente el flujo es 
  * getGridSpeciesNiche_M, getGridSpeciesNiche_A, getGridSpeciesNiche_T y
  * getGridSpeciesNiche.
  *
  * @see controllers/getGridSpeciesNiche~getGridSpeciesNiche_VT
  * @see controllers/getGridSpeciesNiche~getGridSpeciesNiche_V
- * @see controllers/getGridSpeciesNiche~getGridSpeciesNiche_T
  * @see controllers/getGridSpeciesNiche~getGridSpeciesNiche
  */
 exports.pipe = [
   getGridSpeciesNiche_M,
   getGridSpeciesNiche_A,
-  // getGridSpeciesNiche_T,
-  getGridSpeciesNiche        
+  getGridSpeciesNiche  
 ]
