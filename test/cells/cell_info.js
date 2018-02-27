@@ -70,7 +70,7 @@ var possible_cases = [
 
 
 
-describe("\n========= Test get cell score info (getFreqCelda) endpoint =========",function(){
+describe("\n========= Test for getFreqCelda functionality endpoint =========",function(){
 
 	it("Should return a 200 response - getFreqCelda", function(done){
 
@@ -201,7 +201,7 @@ describe("\n========= Test get cell score info (getFreqCelda) endpoint =========
 })
 
 
-describe("\n========= Test get cell score info (getScoreDecil) endpoint =========",function(){
+describe("\n========= Test for getScoreDecil functionality endpoint =========",function(){
 
 	it("Should return a 200 response - getScoreDecil", function(done){
 
@@ -336,7 +336,7 @@ describe("\n========= Test get cell score info (getScoreDecil) endpoint ========
 
 
 
-describe("\n========= Test get cell score info (getGridSpecies) endpoint =========",function(){
+describe("\n========= Test for getGridSpecies functionality endpoint =========",function(){
 
 	it("Should return a 200 response - getGridSpecies", function(done){
 
