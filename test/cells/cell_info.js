@@ -27,9 +27,11 @@ afterEach(function (done) {
 
 
 var possible_cases = [
-						["true", "true","","","true","true", "true"]
-						// uncomment to test all possible biotic cases
-						// , ["true", "false","","","true","true", "true"], ["false", "true","","","true","true", "true"], // biotico - abiotico - sin apriori - con fosiles - con reg sin fecha - con rango
+						// quick test
+						["true", "true","","","true","false", "true"], ["true", "true","apriori","","true","false", "true"], ["true", "true","","mapa_prob","true","false", "true"]
+
+						// uncomment to test all possible cases
+						// ["true", "true","","","true","true", "true"], ["true", "false","","","true","true", "true"], ["false", "true","","","true","true", "true"], // biotico - abiotico - sin apriori - con fosiles - con reg sin fecha - con rango
 						// ["true", "true","","","true","true", "false"], ["true", "false","","","true","true", "false"], ["false", "true","","","true","true", "false"], // biotico - abiotico - sin apriori - con fosiles - con reg sin fecha - sin rango
 						// ["true", "true","","","true","false", "true"], ["true", "false","","","true","false", "true"], ["false", "true","","","true","false", "true"], // biotico - abiotico - sin apriori - con fosiles - sin reg sin fecha - con rango
 						// ["true", "true","","","true","false", "false"], ["true", "false","","","true","false", "false"], ["false", "true","","","true","false", "false"], // biotico - abiotico - sin apriori - con fosiles - sin reg sin fecha - sin rango
@@ -67,59 +69,60 @@ var possible_cases = [
 					];
 
 
-it("Should return a 200 response - getFreqCelda", function(done){
 
-	supertest(server).post("/niche/getFreqCelda")
-	.send({})
-	.expect("Content-type",/json/)
-	.expect(200, done);
-});
+describe("\n========= Test get cell score info (getFreqCelda) endpoint =========",function(){
 
+	it("Should return a 200 response - getFreqCelda", function(done){
 
-it("Should respond with a listening message - getFreqCelda", function(done){
-
-	supertest(server).post("/niche/getFreqCelda")
-	.send({})
-	.expect("Content-type",/json/)
-	.expect(200)
-	.end(function(err, res) {
-		expect(res.body).to.have.property("message")
-		expect(res.body).to.have.property("example")
-		expect(res.body.message).to.equal("getFreqCelda endpoint listening, please add the minimum parameters to get a response. See the example parameter")
-		done();
-	})
-});
-
-it("Should respond with a example with the minimum parameters required - getFreqCelda", function(done){
-
-	supertest(server).post("/niche/getFreqCelda")
-	.send({})
-	.expect("Content-type",/json/)
-	.expect(200)
-	.end(function(err, res) {
-		expect(res.body.example).to.have.property("id")
-		expect(res.body.example).to.have.property("apriori")
-		expect(res.body.example).to.have.property("min_occ")
-		expect(res.body.example).to.have.property("fossil")
-		expect(res.body.example).to.have.property("sfecha")
-		expect(res.body.example).to.have.property("val_process")
-		expect(res.body.example).to.have.property("idtabla")
-		expect(res.body.example).to.have.property("grid_res")
-		expect(res.body.example).to.have.property("tfilters")
-		expect(res.body.example).to.have.property("hasBios")
-		expect(res.body.example).to.have.property("hasRaster")
-		expect(res.body.example).to.have.property("mapa_prob")
-		expect(res.body.example).to.have.property("lim_inf")
-		expect(res.body.example).to.have.property("lim_sup")
-		done();
-	})
-});
+		supertest(server).post("/niche/getFreqCelda")
+		.send({})
+		.expect("Content-type",/json/)
+		.expect(200, done);
+	});
 
 
-possible_cases.forEach(params => {
+	it("Should respond with a listening message - getFreqCelda", function(done){
 
-	describe("Test get cell score info (getFreqCelda) endpoint - params(hasBio, hasRaster, apriori, mapa_prob, fosil, sfecha, rango) => (" + params[0] + ", " + params[1] + ", " + params[2] + ", " + params[3] + ", " + params[4] + ", " + params[5] + ", " + params[6] + ")",function(){
+		supertest(server).post("/niche/getFreqCelda")
+		.send({})
+		.expect("Content-type",/json/)
+		.expect(200)
+		.end(function(err, res) {
+			expect(res.body).to.have.property("message")
+			expect(res.body).to.have.property("example")
+			expect(res.body.message).to.equal("getFreqCelda endpoint listening, please add the minimum parameters to get a response. See the example parameter")
+			done();
+		})
+	});
 
+	it("Should respond with a example with the minimum parameters required - getFreqCelda", function(done){
+
+		supertest(server).post("/niche/getFreqCelda")
+		.send({})
+		.expect("Content-type",/json/)
+		.expect(200)
+		.end(function(err, res) {
+			expect(res.body.example).to.have.property("id")
+			expect(res.body.example).to.have.property("apriori")
+			expect(res.body.example).to.have.property("min_occ")
+			expect(res.body.example).to.have.property("fossil")
+			expect(res.body.example).to.have.property("sfecha")
+			expect(res.body.example).to.have.property("val_process")
+			expect(res.body.example).to.have.property("idtabla")
+			expect(res.body.example).to.have.property("grid_res")
+			expect(res.body.example).to.have.property("tfilters")
+			expect(res.body.example).to.have.property("hasBios")
+			expect(res.body.example).to.have.property("hasRaster")
+			expect(res.body.example).to.have.property("mapa_prob")
+			expect(res.body.example).to.have.property("lim_inf")
+			expect(res.body.example).to.have.property("lim_sup")
+			done();
+		})
+	});
+
+	possible_cases.forEach(params => {
+
+		
 		this.timeout(1000 * 60 * 3); // 3 minutos maximo
 		var tfilters = [];
 		var lim_inf = 1500
@@ -151,7 +154,7 @@ possible_cases.forEach(params => {
 			lim_inf = 2000
 		}
 		
-		it("Should get information about the result of a niche analysis grouped by cell.", function(done){
+		it("Should get information about the result of a niche analysis grouped by cell. Params(hasBio, hasRaster, apriori, mapa_prob, fosil, sfecha, rango) => (" + params[0] + ", " + params[1] + ", " + params[2] + ", " + params[3] + ", " + params[4] + ", " + params[5] + ", " + params[6] + ")", function(done){
 			supertest(server).post("/niche/getFreqCelda")
 			.send({
 				id: 27332,
@@ -191,70 +194,64 @@ possible_cases.forEach(params => {
 
 		})
 
-	})
 
-});
+	});
 
-
-
-
+	
+})
 
 
-it("Should return a 200 response - getScoreDecil", function(done){
+describe("\n========= Test get cell score info (getScoreDecil) endpoint =========",function(){
 
-	supertest(server).post("/niche/getScoreDecil")
-	.send({})
-	.expect("Content-type",/json/)
-	.expect(200, done);
-});
+	it("Should return a 200 response - getScoreDecil", function(done){
 
-
-it("Should respond with a listening message - getScoreDecil", function(done){
-
-	supertest(server).post("/niche/getScoreDecil")
-	.send({})
-	.expect("Content-type",/json/)
-	.expect(200)
-	.end(function(err, res) {
-		expect(res.body).to.have.property("message")
-		expect(res.body).to.have.property("example")
-		expect(res.body.message).to.equal("getScoreDecil endpoint listening, please add the minimum parameters to get a response. See the example parameter")
-		done();
-	})
-});
+		supertest(server).post("/niche/getScoreDecil")
+		.send({})
+		.expect("Content-type",/json/)
+		.expect(200, done);
+	});
 
 
+	it("Should respond with a listening message - getScoreDecil", function(done){
 
-it("Should respond with a example with the minimum parameters required - getScoreDecil", function(done){
+		supertest(server).post("/niche/getScoreDecil")
+		.send({})
+		.expect("Content-type",/json/)
+		.expect(200)
+		.end(function(err, res) {
+			expect(res.body).to.have.property("message")
+			expect(res.body).to.have.property("example")
+			expect(res.body.message).to.equal("getScoreDecil endpoint listening, please add the minimum parameters to get a response. See the example parameter")
+			done();
+		})
+	});
 
-	supertest(server).post("/niche/getScoreDecil")
-	.send({})
-	.expect("Content-type",/json/)
-	.expect(200)
-	.end(function(err, res) {
-		expect(res.body.example).to.have.property("id")
-		expect(res.body.example).to.have.property("apriori")
-		expect(res.body.example).to.have.property("min_occ")
-		expect(res.body.example).to.have.property("fossil")
-		expect(res.body.example).to.have.property("sfecha")
-		expect(res.body.example).to.have.property("val_process")
-		expect(res.body.example).to.have.property("idtabla")
-		expect(res.body.example).to.have.property("grid_res")
-		expect(res.body.example).to.have.property("tfilters")
-		expect(res.body.example).to.have.property("hasBios")
-		expect(res.body.example).to.have.property("hasRaster")
-		expect(res.body.example).to.have.property("mapa_prob")
-		expect(res.body.example).to.have.property("lim_inf")
-		expect(res.body.example).to.have.property("lim_sup")
-		done();
-	})
-});
+	it("Should respond with a example with the minimum parameters required - getScoreDecil", function(done){
 
+		supertest(server).post("/niche/getScoreDecil")
+		.send({})
+		.expect("Content-type",/json/)
+		.expect(200)
+		.end(function(err, res) {
+			expect(res.body.example).to.have.property("id")
+			expect(res.body.example).to.have.property("apriori")
+			expect(res.body.example).to.have.property("min_occ")
+			expect(res.body.example).to.have.property("fossil")
+			expect(res.body.example).to.have.property("sfecha")
+			expect(res.body.example).to.have.property("val_process")
+			expect(res.body.example).to.have.property("idtabla")
+			expect(res.body.example).to.have.property("grid_res")
+			expect(res.body.example).to.have.property("tfilters")
+			expect(res.body.example).to.have.property("hasBios")
+			expect(res.body.example).to.have.property("hasRaster")
+			expect(res.body.example).to.have.property("mapa_prob")
+			expect(res.body.example).to.have.property("lim_inf")
+			expect(res.body.example).to.have.property("lim_sup")
+			done();
+		})
+	});
 
-
-possible_cases.forEach(params => {
-
-	describe("Test get cell score info (getScoreDecil) endpoint - params(hasBio, hasRaster, apriori, mapa_prob, fosil, sfecha, rango) => (" + params[0] + ", " + params[1] + ", " + params[2] + ", " + params[3] + ", " + params[4] + ", " + params[5] + ", " + params[6] + ")",function(){
+	possible_cases.forEach(params => {
 
 		this.timeout(1000 * 60 * 3); // 3 minutos maximo
 		var tfilters = [];
@@ -287,7 +284,7 @@ possible_cases.forEach(params => {
 			lim_inf = 2000
 		}
 		
-		it("Should get information about the result of a niche analysis grouped by decil.", function(done){
+		it("Should get information about the result of a niche analysis grouped by decil. Params(hasBio, hasRaster, apriori, mapa_prob, fosil, sfecha, rango) => (" + params[0] + ", " + params[1] + ", " + params[2] + ", " + params[3] + ", " + params[4] + ", " + params[5] + ", " + params[6] + ")", function(done){
 			supertest(server).post("/niche/getScoreDecil")
 			.send({
 				id: 27332,
@@ -329,71 +326,72 @@ possible_cases.forEach(params => {
 
 		})
 
-	})
 
-});
-
+	});
 
 
+})
 
 
 
-it("Should return a 200 response - getGridSpecies", function(done){
-
-	supertest(server).post("/niche/getGridSpecies")
-	.send({})
-	.expect("Content-type",/json/)
-	.expect(200, done);
-});
 
 
-it("Should respond with a listening message - getGridSpecies", function(done){
+describe("\n========= Test get cell score info (getGridSpecies) endpoint =========",function(){
 
-	supertest(server).post("/niche/getGridSpecies")
-	.send({})
-	.expect("Content-type",/json/)
-	.expect(200)
-	.end(function(err, res) {
-		expect(res.body).to.have.property("message")
-		expect(res.body).to.have.property("example")
-		expect(res.body.message).to.equal("getGridSpecies endpoint listening, please add the minimum parameters to get a response. See the example parameter")
-		done();
-	})
-});
+	it("Should return a 200 response - getGridSpecies", function(done){
 
-it("Should respond with a example with the minimum parameters required - getGridSpecies", function(done){
+		supertest(server).post("/niche/getGridSpecies")
+		.send({})
+		.expect("Content-type",/json/)
+		.expect(200, done);
+	});
 
-	supertest(server).post("/niche/getGridSpecies")
-	.send({})
-	.expect("Content-type",/json/)
-	.expect(200)
-	.end(function(err, res) {
-		expect(res.body.example).to.have.property("id")
-		expect(res.body.example).to.have.property("idtime")
-		expect(res.body.example).to.have.property("apriori")
-		expect(res.body.example).to.have.property("min_occ")
-		expect(res.body.example).to.have.property("fossil")
-		expect(res.body.example).to.have.property("sfecha")
-		expect(res.body.example).to.have.property("val_process")
-		expect(res.body.example).to.have.property("idtabla")
-		expect(res.body.example).to.have.property("grid_res")
-		expect(res.body.example).to.have.property("tfilters")
-		expect(res.body.example).to.have.property("hasBios")
-		expect(res.body.example).to.have.property("hasRaster")
-		expect(res.body.example).to.have.property("mapa_prob")
-		expect(res.body.example).to.have.property("lat")
-		expect(res.body.example).to.have.property("long")
-		expect(res.body.example).to.have.property("lim_inf")
-		expect(res.body.example).to.have.property("lim_sup")
-		done();
-	})
-});
+	it("Should respond with a listening message - getGridSpecies", function(done){
+
+		supertest(server).post("/niche/getGridSpecies")
+		.send({})
+		.expect("Content-type",/json/)
+		.expect(200)
+		.end(function(err, res) {
+			expect(res.body).to.have.property("message")
+			expect(res.body).to.have.property("example")
+			expect(res.body.message).to.equal("getGridSpecies endpoint listening, please add the minimum parameters to get a response. See the example parameter")
+			done();
+		})
+	});
+
+	it("Should respond with a example with the minimum parameters required - getGridSpecies", function(done){
+
+		supertest(server).post("/niche/getGridSpecies")
+		.send({})
+		.expect("Content-type",/json/)
+		.expect(200)
+		.end(function(err, res) {
+			expect(res.body.example).to.have.property("id")
+			expect(res.body.example).to.have.property("idtime")
+			expect(res.body.example).to.have.property("apriori")
+			expect(res.body.example).to.have.property("min_occ")
+			expect(res.body.example).to.have.property("fossil")
+			expect(res.body.example).to.have.property("sfecha")
+			expect(res.body.example).to.have.property("val_process")
+			expect(res.body.example).to.have.property("idtabla")
+			expect(res.body.example).to.have.property("grid_res")
+			expect(res.body.example).to.have.property("tfilters")
+			expect(res.body.example).to.have.property("hasBios")
+			expect(res.body.example).to.have.property("hasRaster")
+			expect(res.body.example).to.have.property("mapa_prob")
+			expect(res.body.example).to.have.property("lat")
+			expect(res.body.example).to.have.property("long")
+			expect(res.body.example).to.have.property("lim_inf")
+			expect(res.body.example).to.have.property("lim_sup")
+			done();
+		})
+	});
 
 
-possible_cases.forEach(params => {
+	possible_cases.forEach(params => {
 
-	describe("Test get cell score info (getGridSpecies) endpoint - params(hasBio, hasRaster, apriori, mapa_prob, fosil, sfecha, rango) => (" + params[0] + ", " + params[1] + ", " + params[2] + ", " + params[3] + ", " + params[4] + ", " + params[5] + ", " + params[6] + ")",function(){
-
+		
 		this.timeout(1000 * 60 * 3); // 3 minutos maximo
 		var tfilters = [];
 		var lim_inf = 1500
@@ -425,7 +423,7 @@ possible_cases.forEach(params => {
 			lim_inf = 2000
 		}
 		
-		it("Should get score info for a one cell by coordinates ", function(done){
+		it("Should get score info for a one cell by coordinates. Params(hasBio, hasRaster, apriori, mapa_prob, fosil, sfecha, rango) => (" + params[0] + ", " + params[1] + ", " + params[2] + ", " + params[3] + ", " + params[4] + ", " + params[5] + ", " + params[6] + ")", function(done){
 			supertest(server).post("/niche/getGridSpecies")
 			.send({
 				id: 27332,
@@ -464,9 +462,22 @@ possible_cases.forEach(params => {
 
 		})
 
-	})
 
-});
+	});
+
+
+})
+
+
+
+
+
+
+
+
+
+
+
 
 
 
