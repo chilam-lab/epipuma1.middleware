@@ -30,68 +30,74 @@ afterEach(function (done) {
 
 var possible_cases = [
 						
-						["true", "false","true","true", "true"]
+						// quick test
+						["true", "true","true","true", "true"], ["true", "true","true","false", "true"]
+
 						// uncomment to test all possible biotic cases
-						// ,["true", "true","true","true", "true"], // bioticos - abioticos - con fosiles - con reg sin fecha - con rango
-						// ["true", "true","true","true", "false"], ["true", "false","true","true", "false"], // bioticos - abioticos - con fosiles - con reg sin fecha - sin rango
-						// ["true", "true","true","false", "true"], ["true", "false","true","false", "true"], // bioticos - abioticos - con fosiles - sin reg sin fecha - con rango
-						// ["true", "true","true","false", "false"], ["true", "false","true","false", "false"], // bioticos - abioticos - con fosiles - sin reg sin fecha - sin rango
+						// ["true", "true","true","true", "true"], ["true", "false","true","true", "true"], ["false", "true","true","true", "true"], // bioticos - abioticos - con fosiles - con reg sin fecha - con rango
+						// ["true", "true","true","true", "false"], ["true", "false","true","true", "false"], ["false", "true","true","true", "false"], // bioticos - abioticos - con fosiles - con reg sin fecha - sin rango
+						// ["true", "true","true","false", "true"], ["true", "false","true","false", "true"], ["false", "true","true","false", "true"], // bioticos - abioticos - con fosiles - sin reg sin fecha - con rango
+						// ["true", "true","true","false", "false"], ["true", "false","true","false", "false"], ["false", "true","true","false", "false"], // bioticos - abioticos - con fosiles - sin reg sin fecha - sin rango
 
 
-						// ["true", "true","false","true", "true"], ["true", "false","false","true", "true"], // bioticos - abioticos - sin fosiles - con reg sin fecha - con rango
-						// ["true", "true","false","true", "false"], ["true", "false","false","true", "false"], // bioticos - abioticos - sin fosiles - con reg sin fecha - sin rango
-						// ["true", "true","false","false", "true"], ["true", "false","false","false", "true"], // bioticos - abioticos - sin fosiles - sin reg sin fecha - con rango
-						// ["true", "true","false","false", "false"], ["true", "false","false","false", "false"], // bioticos - abioticos - sin fosiles - sin reg sin fecha - sin rango
+						// ["true", "true","false","true", "true"], ["true", "false","false","true", "true"], ["false", "true","false","true", "true"], // bioticos - abioticos - sin fosiles - con reg sin fecha - con rango
+						// ["true", "true","false","true", "false"], ["true", "false","false","true", "false"], ["false", "true","false","true", "false"], // bioticos - abioticos - sin fosiles - con reg sin fecha - sin rango
+						// ["true", "true","false","false", "true"], ["true", "false","false","false", "true"], ["false", "true","false","false", "true"], // bioticos - abioticos - sin fosiles - sin reg sin fecha - con rango
+						// ["true", "true","false","false", "false"], ["true", "false","false","false", "false"], ["false", "true","false","false", "false"] // bioticos - abioticos - sin fosiles - sin reg sin fecha - sin rango
 
 					];
 
 
-it("Should return a 200 response", function(done){
-
-	supertest(server).post("/niche/getGeoRel")
-	.send({})
-	.expect("Content-type",/json/)
-	.expect(200, done);
-});
 
 
-it("Should respond with a listening message", function(done){
+describe("\n========= Test get niche analysis (getGeoRel) endpoint =========",function(){
 
-	supertest(server).post("/niche/getGeoRel")
-	.send({})
-	.expect("Content-type",/json/)
-	.expect(200)
-	.end(function(err, res) {
-		expect(res.body).to.have.property("message")
-		expect(res.body).to.have.property("example")
-		expect(res.body.message).to.equal("getGeoRel endpoint listening, please add the minimum parameters to get a response. See the example parameter")
-		done();
-	})
-});
 
-it("Should respond with a example with the minimum parameters required - getGeoRel", function(done){
+	it("Should return a 200 response", function(done){
 
-	supertest(server).post("/niche/getGeoRel")
-	.send({})
-	.expect("Content-type",/json/)
-	.expect(200)
-	.end(function(err, res) {
-		expect(res.body.example).to.have.property("id")
-		expect(res.body.example).to.have.property("fossil")
-		expect(res.body.example).to.have.property("sfecha")
-		expect(res.body.example).to.have.property("val_process")
-		expect(res.body.example).to.have.property("idtabla")
-		expect(res.body.example).to.have.property("grid_res")
-		expect(res.body.example).to.have.property("tfilters")
-		expect(res.body.example).to.have.property("hasBios")
-		expect(res.body.example).to.have.property("hasRaster")
-		done();
-	})
-});
+		supertest(server).post("/niche/getGeoRel")
+		.send({})
+		.expect("Content-type",/json/)
+		.expect(200, done);
+	});
 
-possible_cases.forEach(params => {
 
-	describe("Test get niche analysis (getGeoRel) endpoint - params(hasBio, hasRaster, fosil, sfecha, rango) => (" + params[0] + ", " + params[1] + ", " + params[2] + ", " + params[3] + ", " + params[4] + ")",function(){
+	it("Should respond with a listening message", function(done){
+
+		supertest(server).post("/niche/getGeoRel")
+		.send({})
+		.expect("Content-type",/json/)
+		.expect(200)
+		.end(function(err, res) {
+			expect(res.body).to.have.property("message")
+			expect(res.body).to.have.property("example")
+			expect(res.body.message).to.equal("getGeoRel endpoint listening, please add the minimum parameters to get a response. See the example parameter")
+			done();
+		})
+	});
+
+	it("Should respond with a example with the minimum parameters required - getGeoRel", function(done){
+
+		supertest(server).post("/niche/getGeoRel")
+		.send({})
+		.expect("Content-type",/json/)
+		.expect(200)
+		.end(function(err, res) {
+			expect(res.body.example).to.have.property("id")
+			expect(res.body.example).to.have.property("fossil")
+			expect(res.body.example).to.have.property("sfecha")
+			expect(res.body.example).to.have.property("val_process")
+			expect(res.body.example).to.have.property("idtabla")
+			expect(res.body.example).to.have.property("grid_res")
+			expect(res.body.example).to.have.property("tfilters")
+			expect(res.body.example).to.have.property("hasBios")
+			expect(res.body.example).to.have.property("hasRaster")
+			done();
+		})
+	});
+
+
+	possible_cases.forEach(params => {
 
 		this.timeout(1000 * 60 * 3); // bioticos - abioticos - 3 minutos maximo
 		var tfilters = [];
@@ -124,7 +130,7 @@ possible_cases.forEach(params => {
 			lim_inf = 2000
 		}
 		
-		it("Should get information about the result of a niche analysis such as ni, nj, nij, n, epsilon, score and so on.", function(done){
+		it("Should get information about the result of a niche analysis such as ni, nj, nij, n, epsilon, score and so on. Params(hasBio, hasRaster, fosil, sfecha, rango) => (" + params[0] + ", " + params[1] + ", " + params[2] + ", " + params[3] + ", " + params[4] + ")", function(done){
 			supertest(server).post("/niche/getGeoRel")
 			.send({
 				id: 27332,
@@ -180,59 +186,62 @@ possible_cases.forEach(params => {
 
 		})
 
-	})
-
-});
+	});
 
 
-
-it("Should return a 200 response", function(done){
-
-	supertest(server).post("/niche/getFreq")
-	.send({})
-	.expect("Content-type",/json/)
-	.expect(200, done);
-});
+})
 
 
-it("Should respond with a listening message", function(done){
 
-	supertest(server).post("/niche/getFreq")
-	.send({})
-	.expect("Content-type",/json/)
-	.expect(200)
-	.end(function(err, res) {
-		expect(res.body).to.have.property("message")
-		expect(res.body).to.have.property("example")
-		expect(res.body.message).to.equal("getFreq endpoint listening, please add the minimum parameters to get a response. See the example parameter")
-		done();
-	})
-});
+describe("\n========= Test get niche analysis (getFreq) endpoint =========",function(){
 
-it("Should respond with a example with the minimum parameters required - getFreq", function(done){
+	it("Should return a 200 response", function(done){
 
-	supertest(server).post("/niche/getFreq")
-	.send({})
-	.expect("Content-type",/json/)
-	.expect(200)
-	.end(function(err, res) {
-		expect(res.body.example).to.have.property("id")
-		expect(res.body.example).to.have.property("fossil")
-		expect(res.body.example).to.have.property("sfecha")
-		expect(res.body.example).to.have.property("val_process")
-		expect(res.body.example).to.have.property("idtabla")
-		expect(res.body.example).to.have.property("grid_res")
-		expect(res.body.example).to.have.property("tfilters")
-		expect(res.body.example).to.have.property("hasBios")
-		expect(res.body.example).to.have.property("hasRaster")
-		done();
-	})
-});
+		supertest(server).post("/niche/getFreq")
+		.send({})
+		.expect("Content-type",/json/)
+		.expect(200, done);
+	});
 
-possible_cases.forEach(params => {
 
-	describe("Test get niche analysis (getFreq) endpoint - params(hasBio, hasRaster, fosil, sfecha, rango) => (" + params[0] + ", " + params[1] + ", " + params[2] + ", " + params[3] + ", " + params[4] + ")",function(){
+	it("Should respond with a listening message", function(done){
 
+		supertest(server).post("/niche/getFreq")
+		.send({})
+		.expect("Content-type",/json/)
+		.expect(200)
+		.end(function(err, res) {
+			expect(res.body).to.have.property("message")
+			expect(res.body).to.have.property("example")
+			expect(res.body.message).to.equal("getFreq endpoint listening, please add the minimum parameters to get a response. See the example parameter")
+			done();
+		})
+	});
+
+	it("Should respond with a example with the minimum parameters required - getFreq", function(done){
+
+		supertest(server).post("/niche/getFreq")
+		.send({})
+		.expect("Content-type",/json/)
+		.expect(200)
+		.end(function(err, res) {
+			expect(res.body.example).to.have.property("id")
+			expect(res.body.example).to.have.property("fossil")
+			expect(res.body.example).to.have.property("sfecha")
+			expect(res.body.example).to.have.property("val_process")
+			expect(res.body.example).to.have.property("idtabla")
+			expect(res.body.example).to.have.property("grid_res")
+			expect(res.body.example).to.have.property("tfilters")
+			expect(res.body.example).to.have.property("hasBios")
+			expect(res.body.example).to.have.property("hasRaster")
+			done();
+		})
+	});
+
+
+	possible_cases.forEach(params => {
+
+		
 		this.timeout(1000 * 60 * 3); // bioticos - abioticos - 3 minutos maximo
 		var tfilters = [];
 		var lim_inf = 1500
@@ -264,7 +273,7 @@ possible_cases.forEach(params => {
 			lim_inf = 2000
 		}
 		
-		it("Should get information about the result of a niche analysis grouped by specie frequency.", function(done){
+		it("Should get information about the result of a niche analysis grouped by specie frequency. Params(hasBio, hasRaster, fosil, sfecha, rango) => (" + params[0] + ", " + params[1] + ", " + params[2] + ", " + params[3] + ", " + params[4] + ")", function(done){
 			supertest(server).post("/niche/getFreq")
 			.send({
 				id: 27332,
@@ -311,9 +320,14 @@ possible_cases.forEach(params => {
 
 		})
 
-	})
 
-});
+	});
+	
+
+})
+
+
+
 
 
 
