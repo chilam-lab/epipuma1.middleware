@@ -9,7 +9,7 @@ var expect = require('chai').expect;
 var moment = require('moment')
 
 var chai = require("chai");
-chai.should();
+// chai.should();
 chai.use(require('chai-things'));
 // var server = supertest.agent("http://localhost:8080");
 
