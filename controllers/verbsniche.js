@@ -680,68 +680,64 @@ exports.deleteValidationTables = function (req, res, next) {
  *
  */
 exports.getGridGeoJsonNiche = function (req, res, next) {
+  if(getParam(req, 'qtype') === 'getGridGeoJsonMX'){
+    debug('getGridGeoJsonNiche')
+    debug(getParam(req, 'qtype'))
+    
+    var grid_res = getParam(req, 'grid_res')
+    // var api = getParam(req, 'api')
+    // var api_file = (api === 'pro' || api === 'rc' || api === 'local' || api === 'dev') ? 'mx_' : ''
+    
+    debug('grid_res: ' + grid_res)
+    // debug(api)
+    // debug(api_file)
 
-  if(getParam(req, 'qtype') === "getGridGeoJsonMX"){
-
-      debug("getGridGeoJsonNiche")
-      debug(getParam(req, 'qtype'))
-
-      var grid_res = getParam(req, 'grid_res')
-      var api = getParam(req, 'api')
-      var  api_file = (api === "pro" || api === "rc" || api === "local" || api === "dev") ? "mx_" : "";
-
-      // debug("grid_res: " + grid_res)
-      // debug(api)
-      // debug(api_file)
-      
-
-      try {
-
-          if(grid_res === "8"){
-            debug("grid_res: 8")
-            var filePath = path.join(__dirname, "../geofiles/niche/"+api_file+"grid_8km.json");
-          }
-          else if(grid_res === "16"){
-            debug("grid_res: 16")
-            var filePath = path.join(__dirname, "../geofiles/niche/"+api_file+"grid_16km.json");
-          }
-          else if(grid_res === "32"){
-            debug("grid_res: 32")
-            var filePath = path.join(__dirname, "../geofiles/niche/"+api_file+"grid_32km.json"); 
-          }
-          else{
-            debug("grid_res: 64")
-            var filePath = path.join(__dirname, "../geofiles/niche/"+api_file+"grid_64km.json");
-          }
-          
-
-          // debug(filePath);
-
-          var stat = fs.statSync(filePath);
-          // debug(stat.size);
-
-      }
-      catch (e) {
-          debug(e)
+    switch(grid_res) {
+    case 8:
+      pool.any(queries.grid.grid8km)
+        .then(function(data){
+          res.send(data.json)
+        })
+        .catch(function(error) {
+          debug(error)
           next(error)
-      }
-      
-
-      res.writeHead(200, {
-          'Content-Type': 'text/plain',
-          'Content-Length': stat.size
-      });
-
-      var readStream = fs.createReadStream(filePath);
-      // We replaced all the event handlers with a simple call to readStream.pipe()
-      readStream.pipe(res);
-
-
+        })
+      break
+    case 16:
+      pool.any(queries.grid.grid16km)
+        .then(function(data){
+          res.send(data.json)
+        })
+        .catch(function(error) {
+          debug(error)
+          next(error)
+        })
+      break
+    case 32:
+      pool.any(queries.grid.grid32km)
+        .then(function(data){
+          res.send(data.json)
+        })
+        .catch(function(error) {
+          debug(error)
+          next(error)
+        })
+      break
+    case 64:
+      pool.one(queries.grid.grid64km)
+        .then(function(data){
+          res.send(data.json)
+        })
+        .catch(function(error) {
+          debug(error)
+          next(error)
+        })
+      break
+    }
   }
   else{
-      next()
+    next()
   }
-
 }
 
 
