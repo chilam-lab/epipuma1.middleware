@@ -3,12 +3,16 @@ SELECT DISTINCT st_asgeojson(the_geom) as json_geom,
 				-- gridid_16km as gridid,
 				urlejemplar,
 				fechacolecta,
-				aniocolecta
+				aniocolecta,
+				--icount(sp_snib.cells_32km) as occ
+				icount($<res_celda_sp:raw>) as occ
 FROM snib 
+join sp_snib
+on snib.spid = sp_snib.spid
 WHERE 	
-		spid = $<spid> AND
+		snib.spid = $<spid> AND
 		-- spid = 28923 AND
-		especievalidabusqueda <> ''
+		snib.especievalidabusqueda <> ''
 		-- and aniocolecta is not null
 		and fechacolecta <> ''
 		and $<res_celda:raw> is not null
