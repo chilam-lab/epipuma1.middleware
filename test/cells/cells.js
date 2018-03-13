@@ -2,7 +2,7 @@
 * @Author: Raul Sierra
 * @Date:   2017-10-26 15:48:28
 * @Last Modified by:   Raul Sierra
-* @Last Modified time: 2018-01-31 11:21:27
+* @Last Modified time: 2018-02-17 08:16:58
 */
 var supertest = require("supertest");
 var expect = require('chai').expect;
@@ -303,5 +303,37 @@ describe("Test cells endpoint",function(){
 
 	});
 
+	it("Should get the species present in a cell", function(done){
+		grid_res = 16
+		cell_id = 18284
+		tax_group_level = "ordenvalido"
+		tax_group_name = "Accipitriformes"
+
+		supertest(server).post("/niche/cells")
+		.send({
+			grid_res: grid_res,
+			cell_id: cell_id,
+			tax_group_level: tax_group_level,
+			tax_group_name: tax_group_name
+		})
+		.expect("Content-type",/json/)
+		.expect(200)
+		.end(function(err, res){
+			expect(res.body).to.have.property("source_table")
+			expect(res.body.source_table).to.equal("grid_" + grid_res + "km_aoi")			
+			expect(res.body).to.have.property("cell_id")
+			expect(res.body.cell_id).to.equal(cell_id)
+			expect(res.body).to.have.property("tax_group_level")
+			expect(res.body.tax_group_level).to.equal(tax_group_name)
+			expect(res.body).to.have.property("data")
+			expect(res.body.data).to.not.equal(null)
+			expect(res.body.data).to.be.an("array")
+			expect(res.body.data).all.have.property("var_id")
+			expect(res.body.data).all.have.property("var_name")
+			expect(res.body.data).contain.an.item.with.property("var_id", 25749)
+			expect(res.body.data).to.have.length(8)
+			done();
+		})
+	})
 
 });

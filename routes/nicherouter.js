@@ -16,7 +16,9 @@ var getFreqNiche = require('../controllers/getFreqNiche')
 var getCellScore = require('../controllers/getCellScoreNiche') 
 var getFreqCeldaNiche = require('../controllers/getFreqCeldaNiche') 
 var getScoreDecilNiche = require('../controllers/getScoreDecilNiche') 
-var getGridSpeciesNiche = require('../controllers/getGridSpeciesNiche') 
+var getGridSpeciesNiche = require('../controllers/getGridSpeciesNiche')
+var gridScores = require('../controllers/getGridScores') 
+var bioScores = require('../controllers/getBioScores') 
 
 
 /**
@@ -121,5 +123,30 @@ router.route('/getGridSpecies')
   .get(getGridSpeciesNiche.pipe)
   .post(getGridSpeciesNiche.pipe)
 
+/**
+ * Ruta que obtiene el score por celda con metodos para definir que celdas del grid se usan en el analisis
+ * @name get/cells_score
+ * @function
+ * @memberof module:routes/nicherouter~nicheRouter
+ * @inner
+ * @param {string} path - Express path
+ * @param {callback} middleware - Express middleware.
+ */
+router.route('/grid_scores')
+  .get(gridScores.pipe)
+  .post(gridScores.pipe)
+
+/**
+ * Ruta que obtiene el score de una especie VS un grupo de especies con metodos para definir que celdas del grid se usan en el analisis
+ * @name get/bio_scores
+ * @function
+ * @memberof module:routes/nicherouter~nicheRouter
+ * @inner
+ * @param {string} path - Express path
+ * @param {callback} middleware - Express middleware.
+ */
+router.route('/bio_scores')
+  .get(bioScores.pipe)
+  .post(bioScores.pipe)
 
 module.exports = router

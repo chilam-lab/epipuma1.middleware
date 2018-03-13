@@ -352,7 +352,34 @@ function getFreqCeldaNiche(req, res, next) {
       })
   } 
   else{
-    next()
+    debug('getFreqCelda endpoint listening')
+
+    res.json(
+      { 
+        message: 'getFreqCelda endpoint listening, please add the minimum parameters to get a response. See the example parameter',
+        example: {
+          id: 27332,
+          idtime: "1519077493248",
+          apriori: "",
+          min_occ: 1,
+          fossil: "true",
+          sfecha: "true",
+          val_process: "false",
+          idtabla: "no_table",
+          grid_res: "16",
+          tfilters: [{
+            field: "clasevalida",
+            value: "Mammalia",
+            type: 4
+          }],
+          hasBios: "true",
+          hasRaster: "false",
+          mapa_prob: "",
+          lim_inf: 1500,
+          lim_sup: 2020
+        }
+      }
+    )
   }
 }
 

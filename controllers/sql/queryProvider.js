@@ -18,7 +18,11 @@ function sqlPath (file) {
  */
 var queryProvider = {
   grid: {
-    getIds: sqlPath('grid/get_ids.sql')
+    getIds: sqlPath('grid/get_ids.sql'),
+    grid64km: sqlPath('grids/grid_64km.sql'),
+    grid32km: sqlPath('grids/grid_32km.sql'),
+    grid16km: sqlPath('grids/grid_16km.sql'),
+    grid8km: sqlPath('grids/grid_8km.sql')
   },
   layers: {
     getStatesMX: sqlPath('layers/get_states.sql')
@@ -126,9 +130,8 @@ var queryProvider = {
   getGeoRelNiche: {
     getGeoRel: sqlPath('getGeoRel/get_geo_rel.sql'),
     getGeoRelBio: sqlPath('getGeoRel/get_geo_rel_bio.sql'),
-    getGeoRelRaster: sqlPath('getGeoRel/get_geo_rel_raster.sql')
-    
-    
+    getGeoRelRaster: sqlPath('getGeoRel/get_geo_rel_raster.sql'),
+    getBioScores: sqlPath('getGeoRel/get_bio_scores.sql')
   },
   getFreqNiche: {
     getFreqBio: sqlPath('getFreq/get_freq_bio.sql'),
@@ -213,13 +216,22 @@ var queryProvider = {
     forTaxon: sqlPath('getCells/get_taxon_cells.sql')
   },
 
+  getSpecies: {
+    forCell: sqlPath('getSpecies/get_cell_species.sql')
+  },
+  
 /************************************************************* VERBOS PARA OBTENER INFO DE TAXA ******************************/
   getChildren: {
     ofTaxon: sqlPath('taxa/get_taxon_children.sql')
   },
   getTaxon: {
     getData: sqlPath('taxa/get_taxon_data.sql')
-  } 
+  }, 
+
+/************************************************************* VERBOS PARA OBTENER INFO DE TAXA ******************************/
+  getGridScores: {
+    forSpecies: sqlPath('getGridScores/get_grid_scores.sql')
+  }
 }
 
 module.exports = queryProvider

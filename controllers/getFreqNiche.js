@@ -184,7 +184,29 @@ function getFreqNiche(req, res, next) {
       })
   } 
   else{
-    next()
+    debug('getFreqNiche endpoint listening')
+
+    res.json(
+      { 
+        message: 'getFreq endpoint listening, please add the minimum parameters to get a response. See the example parameter',
+        example: {
+          id: 27332,
+          fossil:"true",
+          sfecha:"true",
+          val_process:"false",
+          idtabla: "no_table",
+          grid_res: "16",
+          tfilters: [{
+            field:"clasevalida", 
+            value:"Mammalia", 
+            type:"4"
+          }],
+          hasBios:"true",
+          hasRaster:"false"
+        }
+      }
+    )
+
   }
 }
 

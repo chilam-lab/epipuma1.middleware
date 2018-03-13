@@ -681,67 +681,87 @@ exports.deleteValidationTables = function (req, res, next) {
  */
 exports.getGridGeoJsonNiche = function (req, res, next) {
 
-  if(getParam(req, 'qtype') === "getGridGeoJsonMX"){
+  if(getParam(req, 'qtype') === 'getGridGeoJsonMX'){
+    debug('getGridGeoJsonNiche')
+    debug(getParam(req, 'qtype'))
+    
+    var grid_res = getParam(req, 'grid_res',16)
+    // var api = getParam(req, 'api')
+    // var api_file = (api === 'pro' || api === 'rc' || api === 'local' || api === 'dev') ? 'mx_' : ''
+    
+    debug('grid_res: ' + grid_res)
+    // debug(api)
+    // debug(api_file)
 
-      debug("getGridGeoJsonNiche")
-      debug(getParam(req, 'qtype'))
+    var json_grid = {
+                  "type": "FeatureCollection",
+                  "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } }
+                  // "features": data[0].json
+                }
 
-      var grid_res = getParam(req, 'grid_res')
-      var api = getParam(req, 'api')
-      var  api_file = (api === "pro" || api === "rc" || api === "local" || api === "dev") ? "mx_" : "";
-
-      // debug("grid_res: " + grid_res)
-      // debug(api)
-      // debug(api_file)
-      
-
-      try {
-
-          if(grid_res === "8"){
-            debug("grid_res: 8")
-            var filePath = path.join(__dirname, "../geofiles/niche/"+api_file+"grid_8km.json");
-          }
-          else if(grid_res === "16"){
-            debug("grid_res: 16")
-            var filePath = path.join(__dirname, "../geofiles/niche/"+api_file+"grid_16km.json");
-          }
-          else if(grid_res === "32"){
-            debug("grid_res: 32")
-            var filePath = path.join(__dirname, "../geofiles/niche/"+api_file+"grid_32km.json"); 
-          }
-          else{
-            debug("grid_res: 64")
-            var filePath = path.join(__dirname, "../geofiles/niche/"+api_file+"grid_64km.json");
-          }
-          
-
-          // debug(filePath);
-
-          var stat = fs.statSync(filePath);
-          // debug(stat.size);
-
+    switch(parseInt(grid_res)) {
+      case 8:
+        debug("caso 8")
+        pool.any(queries.grid.grid8km)
+          .then(function(data){
+            res.send(data[0].json)
+          })
+          .catch(function(error) {
+            debug(error)
+            next(error)
+          })
+        break
+      case 16:
+        debug("caso 16")
+        pool.any(queries.grid.grid16km)
+          .then(function(data){
+            res.send(data[0].json)
+          })
+          .catch(function(error) {
+            debug(error)
+            next(error)
+          })
+        break
+      case 32:
+        debug("caso 32")
+        pool.any(queries.grid.grid32km)
+          .then(function(data){
+            // json_grid["features"] = data[0].json
+            // res.send(json_grid)
+            res.send(data[0].json)
+          })
+          .catch(function(error) {
+            debug(error)
+            next(error)
+          })
+        break
+      case 64:
+        debug("caso 64")
+        pool.one(queries.grid.grid64km)
+          .then(function(data){
+            res.send(data.json)
+          })
+          .catch(function(error) {
+            debug(error)
+            next(error)
+          })
+        break
+        default:
+        debug("default 16")
+        pool.any(queries.grid.grid16km)
+          .then(function(data){
+            res.send(data[0].json)
+          })
+          .catch(function(error) {
+            debug(error)
+            next(error)
+          })
+        break
       }
-      catch (e) {
-          debug(e)
-          next(error)
-      }
-      
-
-      res.writeHead(200, {
-          'Content-Type': 'text/plain',
-          'Content-Length': stat.size
-      });
-
-      var readStream = fs.createReadStream(filePath);
-      // We replaced all the event handlers with a simple call to readStream.pipe()
-      readStream.pipe(res);
-
-
   }
   else{
-      next()
+    next()
   }
-
 }
 
 
@@ -1031,6 +1051,11 @@ exports.getSpeciesNiche = function (req, res, next) {
       var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
       var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
       var res_celda = getParam(req, 'res_celda', "gridid_16km")
+
+      var grid_resolution = getParam(req, 'grid_res',16)
+      var res_celda_sp =  "cells_"+grid_resolution+"km"   
+      var res_celda_snib =  "gridid_"+grid_resolution+"km" 
+      var res_celda_snib_tb = "grid_"+grid_resolution+"km_aoi" 
       
       
       // debug(spid)
@@ -1048,6 +1073,9 @@ exports.getSpeciesNiche = function (req, res, next) {
                 lim_inf: fecha_incio.format('YYYY'),
                 lim_sup: fecha_fin.format('YYYY'),
                 res_celda: res_celda,
+                res_celda_sp: res_celda_sp,
+                res_celda_snib: res_celda_snib,
+                res_celda_snib_tb: res_celda_snib_tb, 
                 sfosil: lb_fosil
           })
           .then(function (data) {
@@ -1064,6 +1092,9 @@ exports.getSpeciesNiche = function (req, res, next) {
           pool.any(queries.getSpeciesNiche.getSpeciesSD, {
                 spid: spid,
                 res_celda: res_celda,
+                res_celda_sp: res_celda_sp,
+                res_celda_snib: res_celda_snib,
+                res_celda_snib_tb: res_celda_snib_tb, 
                 sfosil: lb_fosil
           })
           .then(function (data) {
@@ -1082,6 +1113,9 @@ exports.getSpeciesNiche = function (req, res, next) {
                 lim_inf: fecha_incio.format('YYYY'),
                 lim_sup: fecha_fin.format('YYYY'),
                 res_celda: res_celda,
+                res_celda_sp: res_celda_sp,
+                res_celda_snib: res_celda_snib,
+                res_celda_snib_tb: res_celda_snib_tb, 
                 sfosil: lb_fosil
           })
           .then(function (data) {
@@ -1098,6 +1132,9 @@ exports.getSpeciesNiche = function (req, res, next) {
           pool.any(queries.getSpeciesNiche.getSpecies, {
                 spid: spid,
                 res_celda: res_celda,
+                res_celda_sp: res_celda_sp,
+                res_celda_snib: res_celda_snib,
+                res_celda_snib_tb: res_celda_snib_tb, 
                 sfosil: lb_fosil
           })
           .then(function (data) {

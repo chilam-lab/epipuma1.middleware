@@ -2,7 +2,7 @@
 * @Author: Raul Sierra
 * @Date:   2017-10-25 18:02:27
 * @Last Modified by:   Raul Sierra
-* @Last Modified time: 2018-01-31 10:24:35
+* @Last Modified time: 2018-02-17 08:27:18
 */
 /**
 * Este verbo regresa la frecuencia del score por celda para poder desplegar el
@@ -87,6 +87,44 @@ function getSpeciesCells(req, res, next) {
 	}
 }
 
+function getCellSpecies(req, res, next) {
+	const cell_id = verb_utils.getParam(req, 'cell_id')
+	const grid_res = verb_utils.getParam(req, 'grid_res', 16)
+
+
+	const tax_group_level = verb_utils.getParam(req, 'tax_group_level')
+	const tax_group_name = verb_utils.getParam(req, 'tax_group_name')
+
+	const source_table = "grid_" + grid_res + "km_aoi"
+	const id_col = "gridid_" + grid_res + "km"
+	try {
+		if(cell_id) {
+			debug("cell_id: " + cell_id)
+			pool.any(queries.getSpecies.forCell, {
+					"id": cell_id,
+					"source_table": source_table,
+					"id_col": id_col,
+					"tax_group_level": tax_group_level,
+					"tax_group_name": tax_group_name
+	    		})
+				.then(function (data) {
+					debug('source_table: ' + source_table)
+					res.json({'data': data, 'cell_id': cell_id, 'source_table': source_table, tax_group_level: tax_group_name})
+				})
+				.catch(function (error) {
+					debug(error)
+					next(error)
+				})
+		}
+		else {
+			next()
+		}
+	}
+	catch(error) {
+		debug(error)
+	}
+}
+
 function getHelloMessage(req, res, next) {
 	res.json({'msg': 'cells endpoint listening'})
 }
@@ -103,6 +141,7 @@ function getHelloMessage(req, res, next) {
  * @see controllers/getScoreDecilNiche~getScoreDecilNiche
  */
 exports.pipe = [
+	getCellSpecies,
 	getTaxonCells,
 	getSpeciesCells,
   	getHelloMessage 

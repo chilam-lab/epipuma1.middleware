@@ -6,6 +6,7 @@ var cors = require('cors')
 var bodyParser = require('body-parser')
 var debug = require('debug')
 var timeout = require('connect-timeout')
+var config = require('./config')
 
 var log = debug('snib-middleware:log')
 var error = debug('snib-middleware:error')
@@ -28,8 +29,7 @@ app.use(bodyParser.urlencoded({limit: '50mb', extended: true, parameterLimit:500
 
 
 
-
-var port = process.env.PORT || 8080        // set our port
+var port = config.port   // set our port
 
 // console.log("port: " + port)
 
