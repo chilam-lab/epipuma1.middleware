@@ -36,20 +36,24 @@ function getEdgesNiche(req, res, next) {
   // var alpha       = 0.01
     // var N           = 14707
   var min_occ       = verb_utils.getParam(req, 'min_occ', 1)
-  var res_celda_sp = verb_utils.getParam(req, 'res_celda_sp', 'cells_16km')
-  var res_celda_snib = verb_utils.getParam(req, 'res_celda_snib', 'gridid_16km')
-  var res_celda_snib_tb = verb_utils.getParam(req, 'res_celda_snib_tb', 'grid_16km_aoi')
+  // var res_celda_sp = verb_utils.getParam(req, 'res_celda_sp', 'cells_16km')
+  // var res_celda_snib = verb_utils.getParam(req, 'res_celda_snib', 'gridid_16km')
+  // var res_celda_snib_tb = verb_utils.getParam(req, 'res_celda_snib_tb', 'grid_16km_aoi')
+
+
+  var grid_resolution = verb_utils.getParam(req, 'grid_res',16)
+  var res_celda_sp =  "cells_"+grid_resolution+"km"   
+  var res_celda_snib =  "gridid_"+grid_resolution+"km" 
+  var res_celda_snib_tb = "grid_"+grid_resolution+"km_aoi" 
+
 
   //Parametros posibes: full | species_coverage
   var n_grid_coverage = verb_utils.getParam(req, 'n_grid_coverage', "full")
   debug("n_grid_coverage: " + n_grid_coverage)
 
-  console.log(res_celda_sp);
-  console.log(res_celda_snib);
-  console.log(res_celda_snib_tb);
-
-
-
+  // console.log(res_celda_sp);
+  // console.log(res_celda_snib);
+  // console.log(res_celda_snib_tb);
   // var min_ep = 0.0
   // var max_edges = 1000
 
