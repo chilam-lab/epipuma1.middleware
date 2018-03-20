@@ -34,7 +34,15 @@ function getNodesNiche(req, res, next) {
   var tfilters    = verb_utils.getParam(req, 't_tfilters')
   // debug(tfilters)
   var min_occ     = verb_utils.getParam(req, 'min_occ', 1)
-  var res_celda = verb_utils.getParam(req, 'res_celda', 'cells_16km')
+  // debug(min_occ)
+  
+  var grid_resolution = verb_utils.getParam(req, 'grid_res',16)
+  var res_celda =  "cells_"+grid_resolution+"km"   
+  var res_celda_snib =  "gridid_"+grid_resolution+"km" 
+  var res_celda_snib_tb = "grid_"+grid_resolution+"km_aoi" 
+  debug("grid_resolution: " + grid_resolution)
+
+
 
   //Parametros posibes: full | species_coverage
   var n_grid_coverage = verb_utils.getParam(req, 'n_grid_coverage', "full")
