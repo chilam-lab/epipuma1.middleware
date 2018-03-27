@@ -391,15 +391,32 @@ exports.getStates = function (req, res, next) {
  */
 exports.getUserReg = function (req, res, next) {
 
-  var user_email = getParam(req, 'email')
+  // if(getParam(req, 'qtype') === "getUserReg"){
 
-  pool.any(queries.users.getUser, {email: user_email})
-    .then(function (data) {
-      res.json({'data': data})
-    })
-    .catch(function (error) {
-      next(error)
-    })
+      var user_email = getParam(req, 'email')
+      debug("user_email: " + user_email)
+
+      pool.any(queries.users.getUser, {email: user_email})
+        .then(function (data) {
+          res.json({
+            'data': data,
+            ok: true
+          })
+        })
+        .catch(function (error) {
+          return res.json({
+            err: error,
+            ok: false,
+            message: "Error al procesar la query"
+          })
+          next(error)
+        })
+  // }
+  // else{
+  //   next()
+  // }
+
+  
 }
 
 
@@ -412,18 +429,36 @@ exports.getUserReg = function (req, res, next) {
  * @param {express.Response} res
  *
  */
-exports.getUserReg = function (req, res, next) {
+exports.setUserReg = function (req, res, next) {
 
-  var user_email = getParam(req, 'email')
-  var user = getParam(req, 'usuario')
+  // if(getParam(req, 'qtype') === "setUserReg"){
 
-  pool.any(queries.users.setUserReg, {email: user_email, user: user })
-    .then(function (data) {
-      res.json({'data': data})
-    })
-    .catch(function (error) {
-      next(error)
-    })
+    var user_email = getParam(req, 'email')
+    var user_name = getParam(req, 'usuario')
+
+    pool.any(queries.users.setUserReg, {email: user_email, name: user_name })
+      .then(function (data) {
+        res.json({
+          "data": data,
+          "ok": true
+        })
+      })
+      .catch(function (error) {
+        
+        return  res.json({
+          err: error,
+          ok: false,
+          message: "Error al procesar la query"
+        })
+
+      })
+
+  // }
+  // else{
+  //   next()
+  // }
+
+  
 }
 
 
@@ -441,9 +476,9 @@ exports.getUserReg = function (req, res, next) {
 
 exports.getValuesFromToken = function (req, res, next) {
 
-  if(getParam(req, 'qtype') === "getValuesFromToken"){
+  // if(getParam(req, 'qtype') === "getValuesFromToken"){
 
-      debug(getParam(req, 'qtype'))
+      // debug(getParam(req, 'qtype'))
       debug("getValuesFromToken")
 
       var tipo = getParam(req, 'tipo')
@@ -458,7 +493,7 @@ exports.getValuesFromToken = function (req, res, next) {
           token: token
       })
           .then(function (data) {
-            debug(data)
+            // debug(data)
             res.json({'data': data})
       })
           .catch(function (error) {
@@ -467,10 +502,10 @@ exports.getValuesFromToken = function (req, res, next) {
       })
 
 
-  }
-  else{
-      next()
-  }
+  // }
+  // else{
+  //     next()
+  // }
 
 }
 
@@ -489,9 +524,9 @@ exports.getValuesFromToken = function (req, res, next) {
 
 exports.getToken = function (req, res, next) {
 
-  if(getParam(req, 'qtype') === "getToken"){
+  // if(getParam(req, 'qtype') === "getToken"){
 
-      debug(getParam(req, 'qtype'))
+      // debug(getParam(req, 'qtype'))
       debug("getToken")
 
       var tipo = getParam(req, 'tipo')
@@ -511,10 +546,10 @@ exports.getToken = function (req, res, next) {
       })
 
 
-  }
-  else{
-      next()
-  }
+  // }
+  // else{
+  //     next()
+  // }
 
 }
 
@@ -681,9 +716,9 @@ exports.deleteValidationTables = function (req, res, next) {
  */
 exports.getGridGeoJsonNiche = function (req, res, next) {
 
-  if(getParam(req, 'qtype') === 'getGridGeoJsonMX'){
+  // if(getParam(req, 'qtype') === 'getGridGeoJsonMX'){
     debug('getGridGeoJsonNiche')
-    debug(getParam(req, 'qtype'))
+    // debug(getParam(req, 'qtype'))
     
     var grid_res = getParam(req, 'grid_res',16)
     // var api = getParam(req, 'api')
@@ -758,10 +793,10 @@ exports.getGridGeoJsonNiche = function (req, res, next) {
           })
         break
       }
-  }
-  else{
-    next()
-  }
+  // }
+  // else{
+  //   next()
+  // }
 }
 
 
@@ -1172,9 +1207,9 @@ exports.getSpeciesNiche = function (req, res, next) {
 
 exports.getEntListNiche = function (req, res, next) {
   
-  if(getParam(req, 'qtype') === "getEntList"){
+  // if(getParam(req, 'qtype') === "getEntList"){
 
-      debug(getParam(req, 'qtype'))
+      // debug(getParam(req, 'qtype'))
       debug("getEntListNiche")
 
       var str       = getParam(req, 'searchStr')
@@ -1219,10 +1254,10 @@ exports.getEntListNiche = function (req, res, next) {
             next(error)
       })
 
-  }
-  else{
-      next()
-  }
+  // }
+  // else{
+  //     next()
+  // }
 
 }
 
