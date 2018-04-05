@@ -391,7 +391,7 @@ exports.getStates = function (req, res, next) {
  */
 exports.getUserReg = function (req, res, next) {
 
-  // if(getParam(req, 'qtype') === "getUserReg"){
+      debug("getUserReg")
 
       var user_email = getParam(req, 'email')
       debug("user_email: " + user_email)
@@ -411,10 +411,6 @@ exports.getUserReg = function (req, res, next) {
           })
           next(error)
         })
-  // }
-  // else{
-  //   next()
-  // }
 
   
 }
@@ -431,7 +427,7 @@ exports.getUserReg = function (req, res, next) {
  */
 exports.setUserReg = function (req, res, next) {
 
-  // if(getParam(req, 'qtype') === "setUserReg"){
+    debug("setUserReg")
 
     var user_email = getParam(req, 'email')
     var user_name = getParam(req, 'usuario')
@@ -453,12 +449,6 @@ exports.setUserReg = function (req, res, next) {
 
       })
 
-  // }
-  // else{
-  //   next()
-  // }
-
-  
 }
 
 
@@ -476,9 +466,6 @@ exports.setUserReg = function (req, res, next) {
 
 exports.getValuesFromToken = function (req, res, next) {
 
-  // if(getParam(req, 'qtype') === "getValuesFromToken"){
-
-      // debug(getParam(req, 'qtype'))
       debug("getValuesFromToken")
 
       var tipo = getParam(req, 'tipo')
@@ -501,12 +488,6 @@ exports.getValuesFromToken = function (req, res, next) {
             next(error)
       })
 
-
-  // }
-  // else{
-  //     next()
-  // }
-
 }
 
 
@@ -524,9 +505,6 @@ exports.getValuesFromToken = function (req, res, next) {
 
 exports.getToken = function (req, res, next) {
 
-  // if(getParam(req, 'qtype') === "getToken"){
-
-      // debug(getParam(req, 'qtype'))
       debug("getToken")
 
       var tipo = getParam(req, 'tipo')
@@ -545,12 +523,6 @@ exports.getToken = function (req, res, next) {
             next(error)
       })
 
-
-  // }
-  // else{
-  //     next()
-  // }
-
 }
 
 
@@ -566,9 +538,6 @@ exports.getToken = function (req, res, next) {
  */
 exports.getValidationTables = function (req, res, next) {
 
-  if(getParam(req, 'qtype') === "getValidationTables"){
-
-      debug(getParam(req, 'qtype'))
       debug("getValidationTables")
 
       var spid = getParam(req, 'spid')
@@ -608,12 +577,6 @@ exports.getValidationTables = function (req, res, next) {
             next(error)
       })
 
-
-  }
-  else{
-      next()
-  }
-
 }
 
 
@@ -629,9 +592,6 @@ exports.getValidationTables = function (req, res, next) {
  */
 exports.processValidationTables = function (req, res, next) {
 
-  if(getParam(req, 'qtype') === "processValidationTables"){
-
-      debug(getParam(req, 'qtype'))
       debug("processValidationTables")
 
       var idtbl = getParam(req, 'idtable')
@@ -649,12 +609,6 @@ exports.processValidationTables = function (req, res, next) {
             next(error)
       })
 
-
-  }
-  else{
-      next()
-  }
-
 }
 
 
@@ -671,12 +625,8 @@ exports.processValidationTables = function (req, res, next) {
  */
 exports.deleteValidationTables = function (req, res, next) {
 
-  if(getParam(req, 'qtype') === "deleteValidationTables"){
-
       debug("deleteValidationTables")
-      debug("qtype: " + getParam(req, 'qtype'))
-      
-
+  
       var idtbl = getParam(req, 'idtable','no_table')
       debug("delete idtable: " + idtbl)
 
@@ -692,12 +642,6 @@ exports.deleteValidationTables = function (req, res, next) {
             debug(error)
             next(error)
       })
-
-
-  }
-  else{
-      next()
-  }
 
 }
 
@@ -716,13 +660,9 @@ exports.deleteValidationTables = function (req, res, next) {
  */
 exports.getGridGeoJsonNiche = function (req, res, next) {
 
-  // if(getParam(req, 'qtype') === 'getGridGeoJsonMX'){
     debug('getGridGeoJsonNiche')
-    // debug(getParam(req, 'qtype'))
     
     var grid_res = getParam(req, 'grid_res',16)
-    // var api = getParam(req, 'api')
-    // var api_file = (api === 'pro' || api === 'rc' || api === 'local' || api === 'dev') ? 'mx_' : ''
     
     debug('grid_res: ' + grid_res)
     // debug(api)
@@ -793,10 +733,6 @@ exports.getGridGeoJsonNiche = function (req, res, next) {
           })
         break
       }
-  // }
-  // else{
-  //   next()
-  // }
 }
 
 
@@ -814,12 +750,8 @@ exports.getGridGeoJsonNiche = function (req, res, next) {
 
 
 exports.getVariablesNiche = function (req, res, next) {
-
-  if(getParam(req, 'qtype') === "getVariables"){
-
-      debug(getParam(req, 'qtype'))
+      
       debug("getVariablesNiche")
-
       
       var field = getParam(req, 'field',"")
       var parentfield = getParam(req, 'parentfield',"")
@@ -863,15 +795,6 @@ exports.getVariablesNiche = function (req, res, next) {
       
 
       }
-
-      
-      
-
-  }
-  else{
-      next()
-  }
-
   
 
 }
@@ -894,12 +817,8 @@ exports.getVariablesNiche = function (req, res, next) {
 
 exports.getRasterNiche = function (req, res, next) {
 
-  if(getParam(req, 'qtype') === "getRasterVariables"){
-
-      debug(getParam(req, 'qtype'))
       debug("getRasterNiche")
 
-      
       var field = getParam(req, 'field')
       var level = parseInt(getParam(req, 'level', 0))
       var type = parseInt(getParam(req, 'type'))
@@ -938,15 +857,6 @@ exports.getRasterNiche = function (req, res, next) {
       
 
       }
-
-      
-      
-
-  }
-  else{
-      next()
-  }
-
   
 
 }
@@ -967,9 +877,6 @@ exports.getRasterNiche = function (req, res, next) {
 
 exports.getCountGridid = function (req, res, next) {
 
-  if(getParam(req, 'qtype') === "getCountGridid"){
-
-      debug(getParam(req, 'qtype'))
       debug("getCountGridid")
 
       var spids = getParam(req, 'spids')
@@ -1004,13 +911,6 @@ exports.getCountGridid = function (req, res, next) {
             next(error)
       })
 
-  }
-  else{
-      next()
-  }
-
-  
-
 }
 
 
@@ -1031,9 +931,6 @@ exports.getCountGridid = function (req, res, next) {
 
 exports.getGrididsNiche = function (req, res, next) {
 
-
-  if(getParam(req, 'qtype') === "getGridids"){
-
       debug(getParam(req, 'qtype'))
       debug("getGrididsNiche")
       var res_celda = getParam(req, 'res_celda', "gridid_16km")
@@ -1049,13 +946,6 @@ exports.getGrididsNiche = function (req, res, next) {
             debug(error)
             next(error)
       })
-
-  }
-  else{
-      next()
-  }
-
-  
 
 }
 
@@ -1074,9 +964,6 @@ exports.getGrididsNiche = function (req, res, next) {
 
 exports.getSpeciesNiche = function (req, res, next) {
 
-  if(getParam(req, 'qtype') === "getSpecies"){
-
-      debug(getParam(req, 'qtype'))
       debug("getSpeciesNiche")
 
       var spid              = parseInt(getParam(req, 'id'))
@@ -1182,14 +1069,6 @@ exports.getSpeciesNiche = function (req, res, next) {
           })
       }
       
-
-  }
-  else{
-
-    next()
-
-  }
-      
 }
 
 
@@ -1207,9 +1086,6 @@ exports.getSpeciesNiche = function (req, res, next) {
 
 exports.getEntListNiche = function (req, res, next) {
   
-  // if(getParam(req, 'qtype') === "getEntList"){
-
-      // debug(getParam(req, 'qtype'))
       debug("getEntListNiche")
 
       var str       = getParam(req, 'searchStr')
@@ -1253,11 +1129,6 @@ exports.getEntListNiche = function (req, res, next) {
             debug(error)
             next(error)
       })
-
-  // }
-  // else{
-  //     next()
-  // }
 
 }
 
