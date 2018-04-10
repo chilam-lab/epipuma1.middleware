@@ -29,6 +29,10 @@ router.route('/especie/getUserReg')
   .get(verbsCtrl.getUserReg)
   .post(verbsCtrl.getUserReg)
 
+router.route('/especie/getUserToken')
+  .get(verbsCtrl.getUserToken)
+  .post(verbsCtrl.getUserToken)
+
 router.route('/especie/setUserReg')
   .post(verbsCtrl.setUserReg)
 
@@ -77,9 +81,9 @@ router.route('/especie/getRasterVariables')
   .post(verbsCtrl.getRasterNiche)
 
 
-router.route('/especie/getRasterVariables')
-  .get(verbsCtrl.getRasterNiche)
-  .post(verbsCtrl.getRasterNiche)
+// router.route('/especie/getRasterVariables')
+//   .get(verbsCtrl.getRasterNiche)
+//   .post(verbsCtrl.getRasterNiche)
 
 
 router.route('/especie/getGridids')

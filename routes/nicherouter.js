@@ -16,9 +16,11 @@ var getFreqNiche = require('../controllers/getFreqNiche')
 var getCellScore = require('../controllers/getCellScoreNiche') 
 var getFreqCeldaNiche = require('../controllers/getFreqCeldaNiche') 
 var getScoreDecilNiche = require('../controllers/getScoreDecilNiche') 
+var getScoreDecilMd = require('../controllers/getScoreDecilMd') 
 var getGridSpeciesNiche = require('../controllers/getGridSpeciesNiche')
 var gridScores = require('../controllers/getGridScores') 
 var bioScores = require('../controllers/getBioScores') 
+var mdAtenticacion = require("../md-auth/autenticacion.js");
 
 
 /**
@@ -108,6 +110,23 @@ router.route('/getFreqCelda')
 router.route('/getScoreDecil')
   .get(getScoreDecilNiche.pipe)
   .post(getScoreDecilNiche.pipe)
+
+
+
+/**
+ * Ruta que obtiene los deciles del score 
+ * @name get/getScoreDecilMd
+ * @function
+ * @memberof module:routes/nicherouter~nicheRouter
+ * @inner
+ * @param {string} path - Express path
+ * @param {callback} middleware - Express middleware.
+ */
+router.route('/getScoreDecilMd')
+  .get(mdAtenticacion.validaToken, getScoreDecilMd.getScoreDecil)
+  .post(mdAtenticacion.validaToken, getScoreDecilMd.getScoreDecil)
+
+
 
 
 /**
