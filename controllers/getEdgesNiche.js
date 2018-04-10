@@ -38,13 +38,13 @@ function getEdgesNiche(req, res, next) {
   var min_occ       = verb_utils.getParam(req, 'min_occ', 1)
   // var res_celda_sp = verb_utils.getParam(req, 'res_celda_sp', 'cells_16km')
   // var res_celda_snib = verb_utils.getParam(req, 'res_celda_snib', 'gridid_16km')
-  // var res_celda_snib_tb = verb_utils.getParam(req, 'res_celda_snib_tb', 'grid_16km_aoi')
+  // var res_celda_snib_tb = verb_utils.getParam(req, 'res_celda_snib_tb', 'grid_16km_aoi_contour')
 
 
   var grid_resolution = verb_utils.getParam(req, 'grid_res',16)
   var res_celda_sp =  "cells_"+grid_resolution+"km"   
   var res_celda_snib =  "gridid_"+grid_resolution+"km" 
-  var res_celda_snib_tb = "grid_"+grid_resolution+"km_aoi" 
+  var res_celda_snib_tb = "grid_"+grid_resolution+"km_aoi_contour" 
 
 
   //Parametros posibes: full | species_coverage
