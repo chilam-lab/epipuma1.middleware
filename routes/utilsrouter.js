@@ -23,37 +23,77 @@ var verbsCtrl = require('../controllers/verbsniche')
  * @param {string} path - Express path
  * @param {callback} middleware - Express middleware.
  */
-router.route('/especie')
-  .get(
-    // verbsCtrl.getUserReg,
-    // verbsCtrl.setUserReg,
-    verbsCtrl.getValuesFromToken,
-    verbsCtrl.getToken,
-    verbsCtrl.getValidationTables,
-    verbsCtrl.processValidationTables,
-    verbsCtrl.deleteValidationTables,
-    verbsCtrl.getGridGeoJsonNiche,
-    verbsCtrl.getVariablesNiche,
-    verbsCtrl.getRasterNiche,
-    verbsCtrl.getCountGridid,  
-    verbsCtrl.getGrididsNiche,  
-    verbsCtrl.getSpeciesNiche,
-    verbsCtrl.getEntListNiche
-  )
-  .post(
-    // verbsCtrl.getUserReg,
-    verbsCtrl.getValuesFromToken,
-    verbsCtrl.getToken,
-    verbsCtrl.getValidationTables,
-    verbsCtrl.processValidationTables,
-    verbsCtrl.deleteValidationTables,
-    verbsCtrl.getGridGeoJsonNiche,
-    verbsCtrl.getVariablesNiche,
-    verbsCtrl.getRasterNiche,
-    verbsCtrl.getCountGridid,  
-    verbsCtrl.getGrididsNiche,  
-    verbsCtrl.getSpeciesNiche,
-    verbsCtrl.getEntListNiche
-  )
+
+
+router.route('/especie/getUserReg')
+  .get(verbsCtrl.getUserReg)
+  .post(verbsCtrl.getUserReg)
+
+router.route('/especie/getUserToken')
+  .get(verbsCtrl.getUserToken)
+  .post(verbsCtrl.getUserToken)
+
+router.route('/especie/setUserReg')
+  .post(verbsCtrl.setUserReg)
+
+router.route('/especie/getEntList')
+  .get(verbsCtrl.getEntListNiche)
+  .post(verbsCtrl.getEntListNiche)
+
+router.route('/especie/getToken')
+  .get(verbsCtrl.getToken)
+  .post(verbsCtrl.getToken)
+
+router.route('/especie/getValuesFromToken')
+  .get(verbsCtrl.getValuesFromToken)
+  .post(verbsCtrl.getValuesFromToken)
+
+router.route('/especie/getGridGeoJson')
+  .get(verbsCtrl.getGridGeoJsonNiche)
+  .post(verbsCtrl.getGridGeoJsonNiche)
+
+router.route('/especie/getValidationTables')
+  .get(verbsCtrl.getValidationTables)
+  .post(verbsCtrl.getValidationTables)
+
+router.route('/especie/processValidationTables')
+  .get(verbsCtrl.processValidationTables)
+  .post(verbsCtrl.processValidationTables)
+
+router.route('/especie/deleteValidationTables')
+  .get(verbsCtrl.deleteValidationTables)
+  .post(verbsCtrl.deleteValidationTables)
+
+router.route('/especie/getCountGridid')
+  .get(verbsCtrl.getCountGridid)
+  .post(verbsCtrl.getCountGridid)
+
+
+
+
+router.route('/especie/getVariables')
+  .get(verbsCtrl.getVariablesNiche)
+  .post(verbsCtrl.getVariablesNiche)
+
+
+router.route('/especie/getRasterVariables')
+  .get(verbsCtrl.getRasterNiche)
+  .post(verbsCtrl.getRasterNiche)
+
+
+// router.route('/especie/getRasterVariables')
+//   .get(verbsCtrl.getRasterNiche)
+//   .post(verbsCtrl.getRasterNiche)
+
+
+router.route('/especie/getGridids')
+  .get(verbsCtrl.getGrididsNiche)
+  .post(verbsCtrl.getGrididsNiche)
+
+
+router.route('/especie/getSpecies')
+  .get(verbsCtrl.getSpeciesNiche)
+  .post(verbsCtrl.getSpeciesNiche)
+
 
 module.exports = router

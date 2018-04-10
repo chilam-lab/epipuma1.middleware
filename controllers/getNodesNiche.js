@@ -34,7 +34,15 @@ function getNodesNiche(req, res, next) {
   var tfilters    = verb_utils.getParam(req, 't_tfilters')
   // debug(tfilters)
   var min_occ     = verb_utils.getParam(req, 'min_occ', 1)
-  var res_celda = verb_utils.getParam(req, 'res_celda', 'cells_16km')
+  // debug(min_occ)
+  
+  var grid_resolution = verb_utils.getParam(req, 'grid_res',16)
+  var res_celda =  "cells_"+grid_resolution+"km"   
+  var res_celda_snib =  "gridid_"+grid_resolution+"km" 
+  var res_celda_snib_tb = "grid_"+grid_resolution+"km_aoi" 
+  debug("grid_resolution: " + grid_resolution)
+
+
 
   //Parametros posibes: full | species_coverage
   var n_grid_coverage = verb_utils.getParam(req, 'n_grid_coverage', "full")
@@ -56,6 +64,7 @@ function getNodesNiche(req, res, next) {
   // debug(hasRasterTarget)
  
   // debug("validaciones")
+  
   // debug(hasBiosSource === true)
   // debug(hasBiosTarget === true)
   // debug(hasRasterSource === true)
@@ -63,6 +72,7 @@ function getNodesNiche(req, res, next) {
 
   if ( hasBiosSource === true && hasBiosTarget === true && 
        hasRasterSource === true && hasRasterTarget === true ) {
+
     debug('hasBiosSource - hasBiosTarget - hasRasterSource - hasRasterTarget')
     var whereVarSource = verb_utils.processBioFilters(sfilters)
     var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters)
@@ -192,6 +202,7 @@ function getNodesNiche(req, res, next) {
         next(error)
       })
   } else if ( hasBiosSource === true && hasBiosTarget === true ) {
+
     debug('hasBiosSource - hasBiosTarget')
     var whereVarSource = verb_utils.processBioFilters(sfilters)
     // var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters)

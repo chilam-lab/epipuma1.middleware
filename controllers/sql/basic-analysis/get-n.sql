@@ -1,0 +1,1 @@
+select count(*) as n from ${res_celda_snib_tb:raw};
