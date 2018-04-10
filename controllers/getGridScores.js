@@ -46,7 +46,7 @@ function getGridScores(req, res, next) {
 			var cell_res = verb_utils.getParam(req, 'cells_res', 16)
 			var res_celda_sp = 'cells_' + cell_res + 'km'
 			var res_celda_snib = 'gridid_' + cell_res + 'km'
-			var res_celda_snib_tb = 'grid_' + cell_res + 'km_aoi_contour'
+			var res_celda_snib_tb = 'grid_' + cell_res + 'km_aoi'
 			var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
 
 			// filtros por tiempo
