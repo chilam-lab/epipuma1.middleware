@@ -39,7 +39,7 @@ function getGridSpeciesNiche_M(req, res, next) {
   var grid_resolution = verb_utils.getParam(req, 'grid_res',16)
   var res_celda_sp =  "cells_"+grid_resolution+"km"   
   var res_celda_snib =  "gridid_"+grid_resolution+"km" 
-  var res_celda_snib_tb = "grid_"+grid_resolution+"km_aoi_contour" 
+  var res_celda_snib_tb = "grid_"+grid_resolution+"km_aoi" 
 
   //Parametros posibes: full | species_coverage
   var n_grid_coverage = verb_utils.getParam(req, 'n_grid_coverage', "full")
@@ -221,7 +221,7 @@ function getGridSpeciesNiche_A(req, res, next) {
   var grid_resolution = verb_utils.getParam(req, 'grid_res',16)
   var res_celda_sp =  "cells_"+grid_resolution+"km"   
   var res_celda_snib =  "gridid_"+grid_resolution+"km" 
-  var res_celda_snib_tb = "grid_"+grid_resolution+"km_aoi_contour" 
+  var res_celda_snib_tb = "grid_"+grid_resolution+"km_aoi" 
 
   //Parametros posibes: full | species_coverage
   var n_grid_coverage = verb_utils.getParam(req, 'n_grid_coverage', "full")
@@ -404,7 +404,7 @@ function getGridSpeciesNiche(req, res, next) {
   var grid_resolution = verb_utils.getParam(req, 'grid_res',16)
   var res_celda_sp =  "cells_"+grid_resolution+"km"   
   var res_celda_snib =  "gridid_"+grid_resolution+"km" 
-  var res_celda_snib_tb = "grid_"+grid_resolution+"km_aoi_contour" 
+  var res_celda_snib_tb = "grid_"+grid_resolution+"km_aoi" 
 
   //Parametros posibes: full | species_coverage
   var n_grid_coverage = verb_utils.getParam(req, 'n_grid_coverage', "full")
