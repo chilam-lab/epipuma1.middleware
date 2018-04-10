@@ -10,6 +10,10 @@ var queries = require('./sql/queryProvider.js')
 
 var path = require('path')
 var fs = require("fs")
+var jwt = require("jsonwebtoken")
+
+var SEED = require("../config").SEED;
+var TIME_TOKEN = require("../config").TIME_TOKEN;
 
 var pool = verb_utils.pool 
 var N = verb_utils.N 
@@ -402,6 +406,48 @@ exports.getUserReg = function (req, res, next) {
             'data': data,
             ok: true
           })
+        })
+        .catch(function (error) {
+          return res.json({
+            err: error,
+            ok: false,
+            message: "Error al procesar la query"
+          })
+          next(error)
+        })
+
+  
+}
+
+
+/**
+ * getUserReg de SNIB DB
+ *
+ * Verifica si existe el usuario por medio de su email
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ *
+ */
+exports.getUserToken = function (req, res, next) {
+
+      debug("getUserToken")
+      var user_email = getParam(req, 'email')
+      
+      pool.any(queries.users.getUser, {email: user_email})
+        .then(function (data) {
+
+            var usuario = {
+              user: user_email
+            }
+
+            var token = jwt.sign({ usuario: usuario }, SEED, { expiresIn: TIME_TOKEN }); // 4 horas
+      
+            res.json({
+              data: data,
+              token: token,
+              ok: true
+            })
         })
         .catch(function (error) {
           return res.json({

@@ -178,6 +178,13 @@ var queryProvider = {
   
   },
 
+  basicAnalysis:{
+    getN: sqlPath("basic-analysis/get-n.sql"),
+    getSource: sqlPath("basic-analysis/get-source.sql"),
+    getSourceTime: sqlPath("basic-analysis/get-source-time.sql"),
+    getTarget: sqlPath("basic-analysis/get-target.sql"),
+  },
+
 /************************************************************* VERBOS PARA REDES ******************************/
 
   getEdgesNiche: {
