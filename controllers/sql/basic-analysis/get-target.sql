@@ -6,13 +6,13 @@ SELECT  spid,
 		familiavalida, 
 		generovalido, 
 		especievalidabusqueda, 
-		(%s) as cells, 
-		icount(%s) as nj 
-FROM sp_snib %s
+		${res_celda_sp:raw} as cells, 
+		icount(${res_celda_sp:raw}) as nj 
+FROM sp_snib ${whereVar:raw}
 	and especievalidabusqueda <> ''
 	and reinovalido <> ''
 	and phylumdivisionvalido <> ''
 	and clasevalida <> ''
 	and ordenvalido <> ''
 	and familiavalida <> ''
-	and generovalido <> '', in_cells, in_cells, where_target_bio)
+	and generovalido <> ''

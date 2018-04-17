@@ -180,9 +180,18 @@ var queryProvider = {
 
   basicAnalysis:{
     getN: sqlPath("basic-analysis/get-n.sql"),
+    getCounts: sqlPath("basic-analysis/get-counts.sql"),
+    getCountsFossil: sqlPath("basic-analysis/get-counts-fossil.sql"),
+    getCountsTime: sqlPath("basic-analysis/get-counts-time.sql"),
     getSource: sqlPath("basic-analysis/get-source.sql"),
+    getSourceFossil: sqlPath("basic-analysis/get-source-fossil.sql"),
     getSourceTime: sqlPath("basic-analysis/get-source-time.sql"),
     getTarget: sqlPath("basic-analysis/get-target.sql"),
+    getTargetFossil: sqlPath("basic-analysis/get-target-fossil.sql"),
+    getTargetTime: sqlPath("basic-analysis/get-target-time.sql"),
+    getTarget: sqlPath("basic-analysis/get-target-ba.sql"),
+    getTargetFossil: sqlPath("basic-analysis/get-target-fossil-ba.sql"),
+    getTargetTime: sqlPath("basic-analysis/get-target-time-ba.sql")
   },
 
 /************************************************************* VERBOS PARA REDES ******************************/
