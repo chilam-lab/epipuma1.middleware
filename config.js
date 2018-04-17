@@ -1,6 +1,7 @@
 // Configuration file for middleware
 var config = {}
 
+
 config.db = {}
 config.db.database = process.env.DBNAME
 config.db.user = process.env.DBUSER
@@ -13,7 +14,7 @@ config.db.application_name = 'expressMiddleware'
 config.db.poolSize = 10
 
 //Configure API port
-config.port = process.env.PORT || 8080 
+config.port = process.env.PORT || 8080
 
 config.SEED = "@hardseedconabio2018";
 config.TIME_TOKEN = 14400;
