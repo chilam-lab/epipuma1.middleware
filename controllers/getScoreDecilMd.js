@@ -92,6 +92,7 @@ exports.getScoreDecil = function(req, res, next) {
 
 
     var whereVar = verb_utils.processBioFilters(tfilters, spid)
+    debug('whereVar: ' + whereVar)
     
 
     var g_source, g_target;
@@ -107,51 +108,40 @@ exports.getScoreDecil = function(req, res, next) {
 
             debug("N:" + resp.n)
 
-            if(caso_filtro_temporal === -1){
-              query = queries.basicAnalysis.getSource  
-            }          
+            // seleccion de caso para obtener datos de especie ibjetivo
+            if(caso_filtro_temporal === -1 && lb_fosil.length == 0){
+              debug("counts case 1: basico")
+              // query_source = queries.basicAnalysis.getSource  
+              query = queries.basicAnalysis.getCounts
+            }
+            else if(caso_filtro_temporal === -1 && lb_fosil.length > 1){
+              debug("counts case 2: sin fosil")
+              // query = queries.basicAnalysis.getSourceFossil
+              query = queries.basicAnalysis.getCountsFossil
+            }
             else{
-              query = queries.basicAnalysis.getSourceTime  
+              debug("counts case 3: tiempo y posible fosil")
+              // query = queries.basicAnalysis.getSourceTime  
+              query = queries.basicAnalysis.getCountsTime
             }
 
-
-            //*** TODO: CORREGIR - FOSILES SON DE LA TABLA SNIB Y SIN FOSIL DE LA TABLA SP_SNIB, CORREGIR QUERIES DE BASICS
             return t.any(query, {
               spid: spid,
+              res_celda_sp: res_celda_sp,
               res_celda_snib: res_celda_snib,
+              min_occ: min_occ,
               N: resp.n,
+              alpha: alpha,
               caso: caso_filtro_temporal,
               lim_inf: fecha_incio.format('YYYY'),
               lim_sup: fecha_fin.format('YYYY'),
-              fosil: lb_fosil
+              fosil: lb_fosil,
+              whereVar: whereVar
             })
 
-
           })
-
-            // .then(resp => {
-
-            //     g_source = resp[0].cells;
-
-            //     if(caso_filtro_temporal === -1){
-            //       query = queries.basicAnalysis.getTarget
-            //     }          
-            //     else{
-            //       query = queries.basicAnalysis.getSourceTime  
-            //     }
-
-            //     return t.any(query, {
-            //       spid: spid,
-            //       res_celda_snib: res_celda_snib,
-            //       N: resp.n,
-            //       caso: caso_filtro_temporal,
-            //       lim_inf: fecha_incio.format('YYYY'),
-            //       lim_sup: fecha_fin.format('YYYY'),
-            //       fosil: lb_fosil
-            //     })
-            //   });
-
         
+
     })
     .then(data => {
         res.json({
