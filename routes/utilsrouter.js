@@ -81,11 +81,6 @@ router.route('/especie/getRasterVariables')
   .post(verbsCtrl.getRasterNiche)
 
 
-// router.route('/especie/getRasterVariables')
-//   .get(verbsCtrl.getRasterNiche)
-//   .post(verbsCtrl.getRasterNiche)
-
-
 router.route('/especie/getGridids')
   .get(verbsCtrl.getGrididsNiche)
   .post(verbsCtrl.getGrididsNiche)
