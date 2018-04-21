@@ -10,11 +10,13 @@
 * @requires module:controllers/verb_utils
 * @requires module:controllers/sql/queryProvider
 */
-var debug = require('debug')('verbs:getScoreDecilMd')
+var debug = require('debug')('verbs:getCounts')
 var moment = require('moment')
 
 var verb_utils = require('./verb_utils')
 var queries = require('./sql/queryProvider')
+var crossfilter = require('crossfilter')
+var d3 = require('d3')
 
 var pool = verb_utils.pool 
 var N = verb_utils.N 
@@ -30,9 +32,9 @@ var alpha = verb_utils.alpha
  * @param {express.Response} res - Express response object 
  * @param {function} next - Express next middleware function
  */
-exports.getScoreDecil = function(req, res, next) {
+exports.getBasicInfo = function(req, res, next) {
   
-  debug('getScoreDecil')
+  debug('getBasicInfo')
 
   var filter_time = false;
 
@@ -95,8 +97,6 @@ exports.getScoreDecil = function(req, res, next) {
     debug('whereVar: ' + whereVar)
     
 
-    var g_source, g_target;
-
     // Inica tarea
     pool.task(t => {
 
@@ -144,11 +144,17 @@ exports.getScoreDecil = function(req, res, next) {
 
     })
     .then(data => {
+
+        var data_freq = processDataForFreqSpecie(data)
+
         res.json({
           ok: true,
+          usuarioRequest: req.usuarioRequest,
           data: data,
-          usuarioRequest: req.usuarioRequest
+          data_freq: data_freq
         });
+
+
     })
     .catch(error => {
         debug(error)
@@ -167,4 +173,142 @@ exports.getScoreDecil = function(req, res, next) {
   }
 
 }
+
+function processDataForFreqSpecie(data){
+
+  //TODO: verificar si se manda esta variable a verb_utils
+  var buckets = 20;
+
+  var min_eps = d3.min(data.map(function(d) {return parseFloat(d.epsilon);}));
+  // debug("min_eps: " + min_eps)
+  var max_eps = d3.max(data.map(function(d) {return parseFloat(d.epsilon);}));
+  // debug("max_eps: " + max_eps)
+
+  var min_scr = d3.min(data.map(function(d) {return parseFloat(d.score);}));
+  // debug("min_scr: " + min_scr)  
+  var max_scr = d3.max(data.map(function(d) {return parseFloat(d.score);}));
+  // debug("max_scr: " + max_scr)
+
+
+  var beans = d3.range(1,buckets+1,1);
+  var epsRange = d3.scaleQuantile().domain([min_eps, max_eps]).range(beans);
+  var scrRange = d3.scaleQuantile().domain([min_scr, max_scr]).range(beans);
+  // debug("epsRange: " + epsRange.invertExtent(1))
+  
+  var cross_species = crossfilter(data)
+  cross_species.groupAll();
+
+  var eps_dimension = cross_species.dimension(function(d) { return d.epsilon; });
+  var scr_dimension = cross_species.dimension(function(d) { return d.score; });
+
+  var groupByEpsilon = eps_dimension.group(function(d){
+    return epsRange(d)
+  });
+
+  var groupByScore = scr_dimension.group(function(d){
+    return scrRange(d)
+  });
+
+  var data_eps = groupByEpsilon.top(Infinity);
+  data_eps.sort(compare);
+  // debug(data_eps);
+
+  var data_scr = groupByScore.top(Infinity);
+  data_scr.sort(compare);
+  // debug(data_scr);
+
+  var data_freq = [];
+
+  data_freq = generateFreqBySpecieJSON(data_eps, epsRange, "epsilon",  data_freq, buckets);
+  data_freq = generateFreqBySpecieJSON(data_scr, scrRange, "score",  data_freq, buckets);
+
+  // debug(data_freq);
+
+  return data_freq;
+}
+
+function generateFreqBySpecieJSON(data_bucket, funcRange, paramType, data_freq, buckets ){
+
+  var index = 0;
+  var index_bucket = 0;
+  
+  while(index_bucket<buckets){
+
+      const entry = data_bucket[index];
+      
+      var bucket = entry["key"];
+      var freq = entry["value"];
+      var range = funcRange.invertExtent((index_bucket+1));
+
+      // debug("freq" + paramType+ ": " + freq);
+      // debug("bucket" + paramType+ ": " + bucket);
+      // debug("index+1" + paramType+ ": " + (index_bucket+1));
+
+      if((index_bucket+1) === bucket){
+
+        if(data_freq[index_bucket] === undefined){
+
+          data_freq.push({
+            bucket: bucket, 
+            freq_epsilon: freq, 
+            min_epsilon: parseFloat((range[0]).toFixed(3)), 
+            max_epsilon: parseFloat((range[1]).toFixed(3))
+          });
+
+        }
+        else{
+          data_freq[index_bucket]["freq_"+paramType] = freq;
+          data_freq[index_bucket]["min_"+paramType] = parseFloat(range[0].toFixed(3));
+          data_freq[index_bucket]["max_"+paramType] = parseFloat(range[1].toFixed(3));
+        }        
+
+        index++;
+      }
+      else{
+
+        if(data_freq[index_bucket] === undefined){
+
+          data_freq.push({
+            bucket: (index_bucket+1), 
+            freq_epsilon: 0, 
+            min_epsilon: parseFloat((range[0]).toFixed(3)), 
+            max_epsilon: parseFloat((range[1]).toFixed(3))
+          });
+
+        }
+        else{
+          data_freq[index_bucket]["freq_"+paramType] = 0;
+          data_freq[index_bucket]["min_"+paramType] = parseFloat(range[0].toFixed(3));
+          data_freq[index_bucket]["max_"+paramType] = parseFloat(range[1].toFixed(3));
+        }        
+
+      }
+      
+      index_bucket++;
+  }
+
+  return data_freq;
+
+
+}
+
+function compare(a,b) {
+  if (a.key < b.key)
+    return -1;
+  if (a.key > b.key)
+    return 1;
+  return 0;
+}
+
+
+function getMinY(data,value) {
+  return data.reduce((min, p) => parseFloat(p[value])  < parseFloat(min) ? parseFloat(p[value]) : parseFloat(min), parseFloat(data[0][value]));
+}
+
+function getMaxY(data,value) {
+  return data.reduce((max, p) => parseFloat(p[value]) > parseFloat(max) ? parseFloat(p[value]) : parseFloat(max), parseFloat(data[0][value]));
+}
+
+
+
 
