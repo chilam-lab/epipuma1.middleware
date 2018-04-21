@@ -39,7 +39,7 @@ SELECT 	temp_target.spid,
 		temp_target.generovalido,
 		temp_target.especievalidabusqueda,
 		temp_target.cells  as cells,
-		icount(temp_source.cells & temp_target.cells) AS niyj,
+		icount(temp_source.cells & temp_target.cells) AS nij,
 		temp_target.nj AS nj,
 		temp_source.ni AS ni,
 		${N} as n,
@@ -63,4 +63,5 @@ SELECT 	temp_target.spid,
 FROM temp_source,temp_target
 where 
 temp_target.spid <> ${spid}
-and icount(temp_target.cells) >= ${min_occ};
+and icount(temp_target.cells) >= ${min_occ}
+order by epsilon desc;

@@ -73,3 +73,4 @@ FROM temp_source,temp_target
 where 
 temp_target.spid <> ${spid}
 and icount(temp_target.cells) >= ${min_occ}
+order by epsilon desc;
