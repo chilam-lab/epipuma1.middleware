@@ -232,14 +232,17 @@ exports.getBasicInfo = function(req, res, next) {
     .then(data => {
 
         var data_freq = processDataForFreqSpecie(data)
+        var data_score_cell = processDataForScoreCell(data);
+        var data_freq_cell = processDataForFreqCell(data_score_cell);
 
         res.json({
           ok: true,
           usuarioRequest: req.usuarioRequest,
           data: data,
-          data_freq: data_freq
+          data_freq: data_freq,
+          data_score_cell: data_score_cell,
+          data_freq_cell: data_freq_cell
         });
-
 
     })
     .catch(error => {
@@ -320,14 +323,17 @@ exports.getBasicInfo = function(req, res, next) {
     .then(data => {
 
         var data_freq = processDataForFreqSpecie(data)
+        var data_score_cell = processDataForScoreCell(data);
+        var data_freq_cell = processDataForFreqCell(data_score_cell);
 
         res.json({
           ok: true,
           usuarioRequest: req.usuarioRequest,
           data: data,
-          data_freq: data_freq
+          data_freq: data_freq,
+          data_score_cell: data_score_cell,
+          data_freq_cell: data_freq_cell
         });
-
 
     })
     .catch(error => {
