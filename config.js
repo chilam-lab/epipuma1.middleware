@@ -14,8 +14,9 @@ config.db.application_name = 'expressMiddleware'
 config.db.poolSize = 10
 
 //Configure API port
-config.port = process.env.PORT || 8080
+config.port = process.env.PORT
 
+//TODO: Migrar al archivo de entorno
 config.SEED = "@hardseedconabio2018";
 config.TIME_TOKEN = 14400;
 
