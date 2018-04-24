@@ -11,14 +11,14 @@ with temp_source as (
 	group by spid
 ),
 temp_target as (
-	SELECT  generovalido, 
-			especievalidabusqueda, 
-			spid, 
+	SELECT  spid, 
 			reinovalido, 
 			phylumdivisionvalido, 
 			clasevalida, 
 			ordenvalido, 
 			familiavalida, 
+			generovalido, 
+			especievalidabusqueda, 
 			array_agg(distinct ${res_celda_snib:raw}) as cells, 
 			icount(array_agg(distinct ${res_celda_snib:raw})) as nj,
 			0 as tipo
@@ -32,35 +32,13 @@ temp_target as (
 		and generovalido <> ''
 		and ${res_celda_snib:raw} is not null
 		group by spid,
-			generovalido, 
-			especievalidabusqueda,
 			reinovalido, 
 			phylumdivisionvalido, 
 			clasevalida, 
 			ordenvalido, 
-			familiavalida
-	union
-	SELECT  
-		cast('' as text) generovalido,
-		case when type = 1 then
-			layer
-			else
-				case when strpos(label,'Precipit') = 0 then
-				(label || ' '  || round(cast(split_part(split_part(tag,':',1),'.',1) as numeric)/10,2)  ||' ºC - ' || round(cast(split_part(split_part(tag,':',2),'.',1) as numeric)/10,2) || ' ºC')
-				else
-				(label || ' '  || round(cast(split_part(split_part(tag,':',1),'.',1) as numeric),2)  ||' mm - ' || round(cast(split_part(split_part(tag,':',2),'.',1) as numeric),2) || ' mm')
-				end
-		end as especievalidabusqueda,
-		bid as spid,
-		cast('' as text) reinovalido,
-		cast('' as text) phylumdivisionvalido,
-		cast('' as text) clasevalida,
-		cast('' as text) ordenvalido,
-		cast('' as text) familiavalida,
-		${res_celda_sp:raw} as cells, 
-		icount(${res_celda_sp:raw}) as nj,
-		1 as tipo
-	FROM raster_bins ${whereVarRaster:raw}
+			familiavalida, 
+			generovalido, 
+			especievalidabusqueda
 )
 SELECT 	temp_target.spid,
 		temp_target.tipo,

@@ -28,6 +28,7 @@ verb_utils.maxscore = 700 // Valor para realizar el calculo de probabilidad de e
 verb_utils.limite = 15 // numero de elemntos mostrados en autocomplete de especie
 verb_utils.min_taxon_name = 'especievalidabusqueda' // nombre de columna del valor minimo taxonomico en base de datos
 verb_utils.max_taxon_name = 'reinovalido' // nombre de columna del valor maximo taxonomico en base de datos
+verb_utils.buckets = 20
 
 
 

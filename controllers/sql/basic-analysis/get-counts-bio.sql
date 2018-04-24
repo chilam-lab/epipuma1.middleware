@@ -1,28 +1,27 @@
 with temp_source as (
 	SELECT 
 		spid, 
-		array_agg(distinct ${res_celda_snib:raw}) as cells, 
-		icount(array_agg(distinct ${res_celda_snib:raw})) as ni
-	FROM snib
-	WHERE 
-		spid = ${spid} ${fosil:raw}
+		${res_celda_sp:raw} as cells, 
+		icount(${res_celda_sp:raw}) as ni
+		FROM sp_snib
+		WHERE 
+		spid = ${spid}
 		and especievalidabusqueda <> ''
 		and ${spid} is not null
-	group by spid
 ),
 temp_target as (
-	SELECT  generovalido, 
-			especievalidabusqueda, 
-			spid, 
+	SELECT  spid, 
 			reinovalido, 
 			phylumdivisionvalido, 
 			clasevalida, 
 			ordenvalido, 
 			familiavalida, 
-			array_agg(distinct ${res_celda_snib:raw}) as cells, 
-			icount(array_agg(distinct ${res_celda_snib:raw})) as nj,
+			generovalido, 
+			especievalidabusqueda, 
+			${res_celda_sp:raw} as cells, 
+			icount(${res_celda_sp:raw}) as nj,
 			0 as tipo
-	FROM snib ${whereVar:raw} ${fosil:raw}
+	FROM sp_snib ${whereVar:raw}
 		and especievalidabusqueda <> ''
 		and reinovalido <> ''
 		and phylumdivisionvalido <> ''
@@ -30,37 +29,6 @@ temp_target as (
 		and ordenvalido <> ''
 		and familiavalida <> ''
 		and generovalido <> ''
-		and ${res_celda_snib:raw} is not null
-		group by spid,
-			generovalido, 
-			especievalidabusqueda,
-			reinovalido, 
-			phylumdivisionvalido, 
-			clasevalida, 
-			ordenvalido, 
-			familiavalida
-	union
-	SELECT  
-		cast('' as text) generovalido,
-		case when type = 1 then
-			layer
-			else
-				case when strpos(label,'Precipit') = 0 then
-				(label || ' '  || round(cast(split_part(split_part(tag,':',1),'.',1) as numeric)/10,2)  ||' ºC - ' || round(cast(split_part(split_part(tag,':',2),'.',1) as numeric)/10,2) || ' ºC')
-				else
-				(label || ' '  || round(cast(split_part(split_part(tag,':',1),'.',1) as numeric),2)  ||' mm - ' || round(cast(split_part(split_part(tag,':',2),'.',1) as numeric),2) || ' mm')
-				end
-		end as especievalidabusqueda,
-		bid as spid,
-		cast('' as text) reinovalido,
-		cast('' as text) phylumdivisionvalido,
-		cast('' as text) clasevalida,
-		cast('' as text) ordenvalido,
-		cast('' as text) familiavalida,
-		${res_celda_sp:raw} as cells, 
-		icount(${res_celda_sp:raw}) as nj,
-		1 as tipo
-	FROM raster_bins ${whereVarRaster:raw}
 )
 SELECT 	temp_target.spid,
 		temp_target.tipo,
