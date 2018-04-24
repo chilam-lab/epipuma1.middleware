@@ -11,35 +11,6 @@ with temp_source as (
 	group by spid
 ),
 temp_target as (
-	SELECT  generovalido, 
-			especievalidabusqueda, 
-			spid, 
-			reinovalido, 
-			phylumdivisionvalido, 
-			clasevalida, 
-			ordenvalido, 
-			familiavalida, 
-			array_agg(distinct ${res_celda_snib:raw}) as cells, 
-			icount(array_agg(distinct ${res_celda_snib:raw})) as nj,
-			0 as tipo
-	FROM snib ${whereVar:raw} ${fosil:raw}
-		and especievalidabusqueda <> ''
-		and reinovalido <> ''
-		and phylumdivisionvalido <> ''
-		and clasevalida <> ''
-		and ordenvalido <> ''
-		and familiavalida <> ''
-		and generovalido <> ''
-		and ${res_celda_snib:raw} is not null
-		group by spid,
-			generovalido, 
-			especievalidabusqueda,
-			reinovalido, 
-			phylumdivisionvalido, 
-			clasevalida, 
-			ordenvalido, 
-			familiavalida
-	union
 	SELECT  
 		cast('' as text) generovalido,
 		case when type = 1 then
@@ -59,11 +30,10 @@ temp_target as (
 		cast('' as text) familiavalida,
 		${res_celda_sp:raw} as cells, 
 		icount(${res_celda_sp:raw}) as nj,
-		1 as tipo
-	FROM raster_bins ${whereVarRaster:raw}
+		0 as tipo
+	FROM raster_bins ${whereVar:raw}
 )
 SELECT 	temp_target.spid,
-		temp_target.tipo,
 		temp_target.reinovalido,
 		temp_target.phylumdivisionvalido,
 		temp_target.clasevalida,
