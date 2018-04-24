@@ -16,5 +16,5 @@ SELECT json_build_object(
   ) AS json
 FROM grid_8km_aoi
 LEFT JOIN america
-ON ST_Intersects(grid_8km_aoi.small_geom, america.geom)
-WHERE america.country = 'MEXICO';
+ON ST_Intersects(grid_8km_aoi.small_geom,america.geom)
+WHERE america.country = 'MEXICO' or america.country = 'UNITED STATES, THE'
