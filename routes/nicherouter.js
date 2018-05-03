@@ -21,7 +21,7 @@ var getScoreDecilMd = require('../controllers/getScoreDecilMd')
 var getGridSpeciesNiche = require('../controllers/getGridSpeciesNiche')
 var gridScores = require('../controllers/getGridScores') 
 var bioScores = require('../controllers/getBioScores') 
-var mdAtenticacion = require("../md-auth/autenticacion.js");
+var mdAtenticacion = require("../md-auth/autenticacion.js")
 
 
 /**
@@ -108,7 +108,7 @@ router.route('/getFreqCelda')
  * @param {string} path - Express path
  * @param {callback} middleware - Express middleware.
  */
-router.route('/getScoreDecil')
+router.route('/getScoreDecilOld')
   .get(getScoreDecilNiche.pipe)
   .post(getScoreDecilNiche.pipe)
 
@@ -123,9 +123,11 @@ router.route('/getScoreDecil')
  * @param {string} path - Express path
  * @param {callback} middleware - Express middleware.
  */
-router.route('/getScoreDecilMd')
-  .get(mdAtenticacion.validaToken, getScoreDecilMd.getScoreDecil)
-  .post(mdAtenticacion.validaToken, getScoreDecilMd.getScoreDecil)
+router.route('/getScoreDecil')
+  // .get(mdAtenticacion.validaToken, getScoreDecilMd.getScoreDecil)
+  // .post(mdAtenticacion.validaToken, getScoreDecilMd.getScoreDecil)
+  .get(getScoreDecilMd.getScoreDecil)
+  .post(getScoreDecilMd.getScoreDecil)
 
 
 

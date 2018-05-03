@@ -30,7 +30,7 @@ temp_target as (
 		${res_celda_sp:raw} as cells, 
 		icount(${res_celda_sp:raw}) as nj,
 		1 as tipo
-	FROM raster_bins ${whereVar:raw}
+	FROM raster_bins ${where_config_raster:raw}
 )
 SELECT 	temp_target.spid,
 		temp_target.tipo,

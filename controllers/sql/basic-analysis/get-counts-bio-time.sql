@@ -5,7 +5,7 @@ with temp_source as (
 		icount(array_agg(distinct ${res_celda_snib:raw})) as ni
 	FROM snib
 	WHERE 
-		spid = ${spid} ${fosil:raw}
+		spid = ${spid} ${fossil:raw}
 		and 
 			(case when ${caso} = 1 
 				  then 
@@ -41,7 +41,7 @@ temp_target as (
 			array_agg(distinct ${res_celda_snib:raw}) as cells, 
 			icount(array_agg(distinct ${res_celda_snib:raw})) as nj,
 			0 as tipo
-	FROM snib ${whereVar:raw} ${fosil:raw}
+	FROM snib ${where_config:raw} ${fossil:raw}
 		and 
 			(case when ${caso} = 1 
 				  then 
