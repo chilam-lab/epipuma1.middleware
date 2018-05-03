@@ -5,7 +5,7 @@ with temp_source as (
 		icount(array_agg(distinct ${res_celda_snib:raw})) as ni
 	FROM snib
 	WHERE 
-		spid = ${spid} ${fosil:raw}
+		spid = ${spid} ${fossil:raw}
 		and especievalidabusqueda <> ''
 		and ${spid} is not null
 	group by spid
@@ -31,7 +31,7 @@ temp_target as (
 		${res_celda_sp:raw} as cells, 
 		icount(${res_celda_sp:raw}) as nj,
 		0 as tipo
-	FROM raster_bins ${whereVar:raw}
+	FROM raster_bins ${where_config_raster:raw}
 )
 SELECT 	temp_target.spid,
 		temp_target.reinovalido,

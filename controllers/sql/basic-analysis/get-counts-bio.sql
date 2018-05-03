@@ -21,7 +21,7 @@ temp_target as (
 			${res_celda_sp:raw} as cells, 
 			icount(${res_celda_sp:raw}) as nj,
 			0 as tipo
-	FROM sp_snib ${whereVar:raw}
+	FROM sp_snib ${where_config:raw}
 		and especievalidabusqueda <> ''
 		and reinovalido <> ''
 		and phylumdivisionvalido <> ''
