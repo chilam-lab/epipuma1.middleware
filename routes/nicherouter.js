@@ -131,6 +131,14 @@ router.route('/getScoreDecil')
 
 
 
+router.route('/getScoreDecilTable')
+  // .get(mdAtenticacion.validaToken, getScoreDecilMd.getScoreDecil)
+  // .post(mdAtenticacion.validaToken, getScoreDecilMd.getScoreDecil)
+  .get(getScoreDecilMd.getScoreDecilTable)
+  .post(getScoreDecilMd.getScoreDecilTable)
+
+
+
 
 /**
  * Ruta que obtiene el score por celda agrupado por decil

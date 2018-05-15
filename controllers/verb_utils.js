@@ -31,6 +31,7 @@ verb_utils.limite = 15 // numero de elemntos mostrados en autocomplete de especi
 verb_utils.min_taxon_name = 'especievalidabusqueda' // nombre de columna del valor minimo taxonomico en base de datos
 verb_utils.max_taxon_name = 'reinovalido' // nombre de columna del valor maximo taxonomico en base de datos
 buckets = 20
+deciles = 10
 
 
 
@@ -524,6 +525,63 @@ verb_utils.processDataForScoreDecil = function (data_cell){
 }
 
 
+
+verb_utils.processDataForScoreDecilTable = function (data_cell, decil_selected){
+
+  var decile = deciles
+  var delta = Math.floor(data_cell.length/decile)
+
+  data_cell.reverse()
+  data_cell.forEach(function (item, index){
+      var dec = Math.floor(index/delta)+1
+      item["decile"] = dec > decile ? decile : dec
+  })
+  data_cell.reverse()
+  debug(data_cell)
+
+  // var cross_score = crossfilter(data_cell)
+  // cross_score.groupAll()
+  // var decil_dimension = cross_score.dimension(function(d) { return d.decile });
+  // decil_dimension.filter(10)
+
+  var map_spid = d3.map([]);
+
+  data_cell.forEach(function (row_item, index){
+
+    if(row_item.decile != decil_selected)
+      return;
+
+    row_item.species.forEach(function (specie, index){
+
+        if(!map_spid.has(specie.spid)){
+            var item = {};
+            item.decile = row_item.decile,
+            item.spid = specie.spid
+            item.score = specie.score
+            item.epsilon = specie.epsilon
+            item.nj = specie.nj
+            item.njd = 1
+            item.name = specie.name
+            map_spid.set(specie.spid, item)
+        }
+        else{
+            var item = map_spid.get(specie.spid);
+            item.njd = item.njd + 1
+            map_spid.set(specie.spid, item)
+        }
+
+    })
+
+  })
+
+  debug(map_spid.values());
+
+  return map_spid.values();
+
+
+}
+
+
 verb_utils.processDataForScoreCell = function (data){
 
   var cells_array = data.map(function(d) {return {cells: d.cells, score: parseFloat(d.score)}})
@@ -557,6 +615,128 @@ verb_utils.processDataForScoreCell = function (data){
   return cell_score_array
 
 }
+
+
+
+verb_utils.processDataForScoreCellTable = function (data){
+
+  var cells_array = data.map(function(d) {
+    return {
+      cells: d.cells, 
+      score: parseFloat(d.score), 
+      spid: d.spid, 
+      epsilon: parseFloat(d.epsilon), 
+      score: parseFloat(d.score), 
+      nj: d.nj,
+      name: d.especievalidabusqueda
+    }
+  })
+
+  var cells = []
+  cells_array.forEach(function (item, index){
+    item.cells.forEach(function (cell_item, index){
+          cells.push({
+            cell: cell_item, 
+            score: item.score, 
+            spid: item.spid, 
+            epsilon: item.epsilon, 
+            score: item.score, 
+            nj: item.nj,
+            name: item.name
+          })
+    })
+  })
+  // debug(cells)
+
+  var cross_cells = crossfilter(cells)
+  cross_cells.groupAll();
+
+  var cells_dimension = cross_cells.dimension(function(d) { return d.cell; });
+
+  var groupByScoreCell = cells_dimension.group().reduce(
+    function(item,add){
+      item.tscore = item.tscore + add.score
+      item.spids.push(add.spid)
+      item.epsilons.push(add.epsilon)
+      item.scores.push(add.score)
+      item.njs.push(add.nj)
+      item.names.push(add.name)
+
+      return item
+    },
+    function(item,remove){
+      item.tscore = item.tscore - remove.score
+      
+      var index = item.spids.indexOf(remove.spid);
+      if (index > -1) {item.spids.splice(index, 1);}
+
+      index = item.epsilons.indexOf(remove.epsilon);
+      if (index > -1) {item.epsilons.splice(index, 1);}
+
+      index = item.scores.indexOf(remove.score);
+      if (index > -1) {item.scores.splice(index, 1);}
+
+      index = item.njs.indexOf(remove.nj);
+      if (index > -1) {item.njs.splice(index, 1);}
+
+      index = item.names.indexOf(remove.name);
+      if (index > -1) {item.names.splice(index, 1);}
+      
+      return item
+    },
+    function(){
+      return {
+        tscore: 0,
+        spids: [],
+        epsilons: [],
+        scores: [],
+        njs: [],
+        names: []
+        
+      }
+    }
+  )
+  
+  // var groupByCell = cells_dimension.group().reduceSum(function(d) { return parseFloat(parseFloat(d.score).toFixed(3)); });
+  var map_cell = groupByScoreCell.top(Infinity);
+  // map_cell.sort(verb_utils.compare_desc);
+  // debug(map_cell)
+  // debug(map_cell[0]["value"])
+
+ var cell_score_array = [];
+ for(var i=0; i<map_cell.length; i++){
+      const entry = map_cell[i];
+      var len = entry["value"].spids.length;
+
+      var item = {};
+      item.gridid = entry["key"];
+      item.key =  parseFloat((entry["value"].tscore).toFixed(3));
+
+      var species = [];
+      for(var j=0; j<len; j++){
+        
+        var specie = {};
+        specie.spid = entry["value"].spids[j];
+        specie.epsilon = entry["value"].epsilons[j];
+        specie.score = entry["value"].scores[j];
+        specie.nj = entry["value"].njs[j];
+        specie.name = entry["value"].names[j];
+
+        species.push(specie)        
+      } 
+      item.species = species;
+      cell_score_array.push(item)     
+
+  }
+  cell_score_array.sort(verb_utils.compare_desc);
+  // debug(cell_score_array)
+  // debug(cell_score_array[0].gridid)
+  // debug(cell_score_array[0].tscore)
+  // debug(cell_score_array[0].species)
+  return cell_score_array
+
+}
+
 
 
 verb_utils.processDataForFreqCell = function (data){
