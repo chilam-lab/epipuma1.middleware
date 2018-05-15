@@ -3,6 +3,8 @@ SELECT
 	layer, 
 	type 
 FROM raster_bins
-WHERE type = 0 
+join fuentes_bioclimaticas
+on id = type
+WHERE type = 1 
 GROUP BY label, layer, type 
 ORDER BY layer
