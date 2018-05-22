@@ -374,6 +374,12 @@ verb_utils.getRequestParams = function(req, verbose){
 
   var data_request = {};
 
+  
+  data_request["with_basic_data"] = verb_utils.getParam(req, 'with_basic_data', "true");
+  data_request["with_data_freq"] = verb_utils.getParam(req, 'with_data_freq', "true");
+  data_request["with_data_score_cell"] = verb_utils.getParam(req, 'with_data_score_cell', "true");
+  data_request["with_data_freq_cell"] = verb_utils.getParam(req, 'with_data_freq_cell', "true");
+
   data_request["spid"] = parseInt(verb_utils.getParam(req, 'id'))
   var tfilters = verb_utils.getParam(req, 'tfilters')
   
@@ -441,6 +447,8 @@ verb_utils.getRequestParams = function(req, verbose){
 
 
   data_request["alpha"] = verb_utils.alpha
+
+
   
 
   if(verbose){
@@ -537,7 +545,7 @@ verb_utils.processDataForScoreDecilTable = function (data_cell, decil_selected){
       item["decile"] = dec > decile ? decile : dec
   })
   data_cell.reverse()
-  debug(data_cell)
+  // debug(data_cell)
 
   // var cross_score = crossfilter(data_cell)
   // cross_score.groupAll()
@@ -574,7 +582,7 @@ verb_utils.processDataForScoreDecilTable = function (data_cell, decil_selected){
 
   })
 
-  debug(map_spid.values());
+  // debug(map_spid.values());
 
   return map_spid.values();
 

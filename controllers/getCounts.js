@@ -78,10 +78,14 @@ exports.getBasicInfo = function(req, res, next) {
     })
     .then(data => {
 
-        var data_freq = verb_utils.processDataForFreqSpecie(data)
-        var data_score_cell = verb_utils.processDataForScoreCell(data);
-        var data_freq_cell = verb_utils.processDataForFreqCell(data_score_cell);
-        // var data_freq_decil = verb_utils.processDataForScoreDecil(data_score_cell);
+      debug("data_request.with_basic_data: " + data_request.with_basic_data)
+      debug("data_request.with_data_freq: " + data_request.with_data_freq)
+      debug("data_request.with_data_score_cell: " + data_request.with_data_score_cell)
+      debug("data_request.with_data_freq_cell: " + data_request.with_data_freq_cell)
+
+        var data_freq = data_request.with_data_freq === "true" ? verb_utils.processDataForFreqSpecie(data) : []
+        var data_score_cell = data_request.with_data_score_cell === "true" ? verb_utils.processDataForScoreCell(data) : []
+        var data_freq_cell = data_request.with_data_freq_cell === "true" ? verb_utils.processDataForFreqCell(data_score_cell) : [];
 
         res.json({
           ok: true,
@@ -140,9 +144,9 @@ exports.getBasicInfo = function(req, res, next) {
     })
     .then(data => {
 
-        var data_freq = verb_utils.processDataForFreqSpecie(data)
-        var data_score_cell = verb_utils.processDataForScoreCell(data);
-        var data_freq_cell = verb_utils.processDataForFreqCell(data_score_cell);
+        var data_freq = data_request.with_data_freq === "true" ? verb_utils.processDataForFreqSpecie(data) : []
+        var data_score_cell = data_request.with_data_score_cell === "true" ? verb_utils.processDataForScoreCell(data) : []
+        var data_freq_cell = data_request.with_data_freq_cell === "true" ? verb_utils.processDataForFreqCell(data_score_cell) : [];
 
         res.json({
           ok: true,
@@ -203,9 +207,9 @@ exports.getBasicInfo = function(req, res, next) {
     })
     .then(data => {
 
-        var data_freq = verb_utils.processDataForFreqSpecie(data)
-        var data_score_cell = verb_utils.processDataForScoreCell(data);
-        var data_freq_cell = verb_utils.processDataForFreqCell(data_score_cell);
+        var data_freq = data_request.with_data_freq === "true" ? verb_utils.processDataForFreqSpecie(data) : []
+        var data_score_cell = data_request.with_data_score_cell === "true" ? verb_utils.processDataForScoreCell(data) : []
+        var data_freq_cell = data_request.with_data_freq_cell === "true" ? verb_utils.processDataForFreqCell(data_score_cell) : [];
 
         res.json({
           ok: true,
