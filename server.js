@@ -5,7 +5,7 @@ var express = require('express')
 var cors = require('cors')
 var bodyParser = require('body-parser')
 var debug = require('debug')
-var timeout = require('connect-timeout')
+// var timeout = require('connect-timeout')
 var config = require('./config')
 
 var log = debug('snib-middleware:log')
@@ -15,7 +15,9 @@ var app = express()
 app.use(cors())
 app.use(bodyParser.json())
 app.use(bodyParser.json({limit: '50mb'}))
-app.use(bodyParser.urlencoded({limit: '50mb', extended: true, parameterLimit:50000}))
+app.use(bodyParser.urlencoded({limit: '50mb',
+  extended: true,
+  parameterLimit:50000}))
 //app.use(bodyParser.urlencoded({extended: true}))
 
 
@@ -42,8 +44,8 @@ var taxaRouter = require('./routes/taxarouter')
 
 // Register our routes
 // all of our routes will be prefixed with /snib
-app.use('/niche', 
-        nicheRouter, 
+app.use('/niche',
+        nicheRouter,
         netRouter,
         utilsRouter,
         cellsRouter)
@@ -54,7 +56,7 @@ app.use('/taxa',
 // Start the server
 var server = app.listen(port, function () {
   var port = server.address().port
-  
+
   log('Aplicación corriendo en el puerto %s', port)
 
 })
@@ -81,6 +83,6 @@ app.use(function (err, req, res, next) {
     })
 })
 
-server.setTimeout(20 * 60 * 1000);
+server.setTimeout(20 * 60 * 1000)
 
 module.exports = server
