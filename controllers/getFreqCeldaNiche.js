@@ -35,7 +35,7 @@ function getFreqCeldaNiche_A(req, res, next) {
 
   debug('getFreqCeldaNiche_A')
 
-  var filter_time = false;
+  var filter_time = false
 
   var spid        = parseInt(verb_utils.getParam(req, 'id'))
   var tfilters    = verb_utils.getParam(req, 'tfilters')
@@ -47,12 +47,12 @@ function getFreqCeldaNiche_A(req, res, next) {
   var apriori         = verb_utils.getParam(req, 'apriori')
   
   var grid_resolution = verb_utils.getParam(req, 'grid_res',16)
-  var res_celda_sp =  "cells_"+grid_resolution+"km"   
-  var res_celda_snib =  "gridid_"+grid_resolution+"km" 
-  var res_celda_snib_tb = "grid_"+grid_resolution+"km_aoi" 
+  var res_celda_sp =  'cells_'+grid_resolution+'km'   
+  var res_celda_snib =  'gridid_'+grid_resolution+'km' 
+  var res_celda_snib_tb = 'grid_'+grid_resolution+'km_aoi' 
 
   //Parametros posibes: full | species_coverage
-  var n_grid_coverage = verb_utils.getParam(req, 'n_grid_coverage', "full")
+  var n_grid_coverage = verb_utils.getParam(req, 'n_grid_coverage', 'full')
   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
 
    // filtros por tiempo
@@ -60,12 +60,12 @@ function getFreqCeldaNiche_A(req, res, next) {
   var fecha_incio       = moment(verb_utils.getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
   var fecha_fin         = moment(verb_utils.getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
   
-  var iter = verb_utils.getParam(req, 'val_process', false) === "true" ? iterations : 1
+  var iter = verb_utils.getParam(req, 'val_process', false) === 'true' ? iterations : 1
   var sfosil        = verb_utils.getParam(req, 'fossil', false)
-  var lb_fosil      = sfosil === "false" || sfosil === false ? " and (ejemplarfosil <> 'SI' or ejemplarfosil is null) " : "";
+  var lb_fosil      = sfosil === 'false' || sfosil === false ? ' and (ejemplarfosil <> \'SI\' or ejemplarfosil is null) ' : ''
   
   var idtabla = verb_utils.getParam(req, 'idtabla')
-  idtabla = iter > 1 ? idtabla : ""
+  idtabla = iter > 1 ? idtabla : ''
 
   // debug("val_ process: " + verb_utils.getParam(req, 'val_process', false))
   // debug("idtabla: " + idtabla)
@@ -202,22 +202,22 @@ function getFreqCeldaNiche(req, res, next) {
 
   debug('getFreqCeldaNiche')
 
-  var filter_time = false;
+  var filter_time = false
 
   var spid        = parseInt(verb_utils.getParam(req, 'id'))
   var tfilters    = verb_utils.getParam(req, 'tfilters')
   
   var grid_resolution = verb_utils.getParam(req, 'grid_res',16)
-  var res_celda_sp =  "cells_"+grid_resolution+"km"   
-  var res_celda_snib =  "gridid_"+grid_resolution+"km" 
-  var res_celda_snib_tb = "grid_"+grid_resolution+"km_aoi" 
+  var res_celda_sp =  'cells_'+grid_resolution+'km'   
+  var res_celda_snib =  'gridid_'+grid_resolution+'km' 
+  var res_celda_snib_tb = 'grid_'+grid_resolution+'km_aoi' 
 
   //Parametros posibes: full | species_coverage
-  var n_grid_coverage = verb_utils.getParam(req, 'n_grid_coverage', "full")
+  var n_grid_coverage = verb_utils.getParam(req, 'n_grid_coverage', 'full')
   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
-  var iter = verb_utils.getParam(req, 'val_process', false) === "true" ? iterations : 1
+  var iter = verb_utils.getParam(req, 'val_process', false) === 'true' ? iterations : 1
   var sfosil        = verb_utils.getParam(req, 'fossil', false)
-  var lb_fosil      = sfosil === "false" || sfosil === false ? " and (ejemplarfosil <> 'SI' or ejemplarfosil is null) " : "";
+  var lb_fosil      = sfosil === 'false' || sfosil === false ? ' and (ejemplarfosil <> \'SI\' or ejemplarfosil is null) ' : ''
 
   // Siempre incluidos en query, nj >= 0
   var min_occ       = verb_utils.getParam(req, 'min_occ', 1)
@@ -230,7 +230,7 @@ function getFreqCeldaNiche(req, res, next) {
   var fecha_fin         = moment(verb_utils.getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
 
   var idtabla = verb_utils.getParam(req, 'idtabla')
-  idtabla = iter > 1 ? idtabla : ""
+  idtabla = iter > 1 ? idtabla : ''
 
   // debug(lb_fosil)
   // debug("n_grid_coverage: " + n_grid_coverage)
@@ -359,22 +359,22 @@ function getFreqCeldaNiche(req, res, next) {
         message: 'getFreqCelda endpoint listening, please add the minimum parameters to get a response. See the example parameter',
         example: {
           id: 27332,
-          idtime: "1519077493248",
-          apriori: "",
+          idtime: '1519077493248',
+          apriori: '',
           min_occ: 1,
-          fossil: "true",
-          sfecha: "true",
-          val_process: "false",
-          idtabla: "no_table",
-          grid_res: "16",
+          fossil: 'true',
+          sfecha: 'true',
+          val_process: 'false',
+          idtabla: 'no_table',
+          grid_res: '16',
           tfilters: [{
-            field: "clasevalida",
-            value: "Mammalia",
+            field: 'clasevalida',
+            value: 'Mammalia',
             type: 4
           }],
-          hasBios: "true",
-          hasRaster: "false",
-          mapa_prob: "",
+          hasBios: 'true',
+          hasRaster: 'false',
+          mapa_prob: '',
           lim_inf: 1500,
           lim_sup: 2020
         }
