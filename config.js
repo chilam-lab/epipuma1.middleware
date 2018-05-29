@@ -16,7 +16,7 @@ config.db.poolSize = 10
 //Configure API port
 config.port = process.env.PORT || 8080
 
-config.SEED = "@hardseedconabio2018";
-config.TIME_TOKEN = 14400;
+config.SEED = '@hardseedconabio2018'
+config.TIME_TOKEN = 14400
 
 module.exports = config

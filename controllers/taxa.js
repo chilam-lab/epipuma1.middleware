@@ -12,54 +12,54 @@ var queries = require('./sql/queryProvider')
 var pool = verb_utils.pool 
 
 function getHelloMessage(req, res, next) {
-	res.json({'msg': 'taxa/children endpoint listening'})
+  res.json({'msg': 'taxa/children endpoint listening'})
 }
 
 exports.getTaxonData = function (req, res) {
-	var spid = req.params.id
+  var spid = req.params.id
 
-	if(spid) {
-		pool.any(queries.getTaxon.getData, {
-			"spid": spid
-		})
+  if(spid) {
+    pool.any(queries.getTaxon.getData, {
+      'spid': spid
+    })
 			.then(function (data) {
-				data[0]['tax_level'] = 'species'
-				res.json(data[0])
-			})
+  data[0]['tax_level'] = 'species'
+  res.json(data[0])
+})
 			.catch(function (error) {
-				console.log("error" + data)
-				debug(error)
-				next(error)
-			})
-	}
-	else {
-			next()
-	}
+  console.log('error' + data)
+  debug(error)
+  next(error)
+})
+  }
+  else {
+    next()
+  }
 }
 
 function getTaxonChildren(req, res, next) {
-	var root_level = verb_utils.getParam(req, 'root_level')
-	var root_name = verb_utils.getParam(req, 'root_name')
-	var child_level = verb_utils.getParam(req, 'child_level')
+  var root_level = verb_utils.getParam(req, 'root_level')
+  var root_name = verb_utils.getParam(req, 'root_name')
+  var child_level = verb_utils.getParam(req, 'child_level')
 
 
-	if(root_level) {
-		pool.any(queries.getChildren.ofTaxon, {
-				"root_level": root_level,
-				"root_name": root_name,
-				"child_level": child_level
+  if(root_level) {
+    pool.any(queries.getChildren.ofTaxon, {
+      'root_level': root_level,
+      'root_name': root_name,
+      'child_level': child_level
     		})
 			.then(function (data) {
-				res.json({'data': data, 'root_level': root_level, 'root_name': root_name})
-			})
+  res.json({'data': data, 'root_level': root_level, 'root_name': root_name})
+})
 			.catch(function (error) {
-				debug(error)
-				next(error)
-			})
-	}
-	else {
-		next()
-	}
+  debug(error)
+  next(error)
+})
+  }
+  else {
+    next()
+  }
 }
 
 /**
@@ -71,6 +71,6 @@ function getTaxonChildren(req, res, next) {
  * @see controllers/getChildrenTaxa
  */
 exports.pipe = [
-	getTaxonChildren,
-	getHelloMessage
+  getTaxonChildren,
+  getHelloMessage
 ]

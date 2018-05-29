@@ -35,18 +35,18 @@ function getFreqMapNiche_M(req, res, next) {
   
   debug('getFreqMapNiche_M')
 
-  var filter_time = false;
+  var filter_time = false
 
   var spid        = parseInt(verb_utils.getParam(req, 'id'))
   var tfilters    = verb_utils.getParam(req, 'tfilters')
 
   var grid_resolution = verb_utils.getParam(req, 'grid_res',16)
-  var res_celda_sp =  "cells_"+grid_resolution+"km"   
-  var res_celda_snib =  "gridid_"+grid_resolution+"km" 
-  var res_celda_snib_tb = "grid_"+grid_resolution+"km_aoi" 
+  var res_celda_sp =  'cells_'+grid_resolution+'km'   
+  var res_celda_snib =  'gridid_'+grid_resolution+'km' 
+  var res_celda_snib_tb = 'grid_'+grid_resolution+'km_aoi' 
 
   //Parametros posibes: full | species_coverage
-  var n_grid_coverage = verb_utils.getParam(req, 'n_grid_coverage', "full")
+  var n_grid_coverage = verb_utils.getParam(req, 'n_grid_coverage', 'full')
   
   // Siempre incluidos en query, nj >= 0
   var min_occ       = verb_utils.getParam(req, 'min_occ', 1)
@@ -56,12 +56,12 @@ function getFreqMapNiche_M(req, res, next) {
   var hasRaster       = verb_utils.getParam(req, 'hasRaster')
   var mapa_prob       = verb_utils.getParam(req, 'mapa_prob')
   var sfosil        = verb_utils.getParam(req, 'fossil', false)
-  var lb_fosil      = sfosil === "false" || sfosil === false ? " and (ejemplarfosil <> 'SI' or ejemplarfosil is null) " : "";
+  var lb_fosil      = sfosil === 'false' || sfosil === false ? ' and (ejemplarfosil <> \'SI\' or ejemplarfosil is null) ' : ''
   
   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
-  var iter = verb_utils.getParam(req, 'val_process', false) === "true" ? iterations : 1
+  var iter = verb_utils.getParam(req, 'val_process', false) === 'true' ? iterations : 1
   var idtabla = verb_utils.getParam(req, 'idtabla')
-  idtabla = iter > 1 ? idtabla : ""
+  idtabla = iter > 1 ? idtabla : ''
   
    // filtros por tiempo
   var sfecha            = verb_utils.getParam(req, 'sfecha', false)
@@ -76,7 +76,7 @@ function getFreqMapNiche_M(req, res, next) {
     
   if (hasBios === 'true' && hasRaster === 'true' && mapa_prob === 'mapa_prob' ){
     debug('TM')
-     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+    var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
     debug('caso: ' + caso)
 
     filter_time = caso !== -1 ? true : filter_time
@@ -116,7 +116,7 @@ function getFreqMapNiche_M(req, res, next) {
   }
   else if (hasBios === 'true' && mapa_prob === 'mapa_prob' ) {
     debug('BM')
-     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+    var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
     debug('caso: ' + caso)
 
     filter_time = caso !== -1 ? true : filter_time
@@ -205,23 +205,23 @@ function getFreqMapNiche_A(req, res, next) {
 
   debug('getFreqMapNiche_A')
 
-  var filter_time = false;
+  var filter_time = false
 
   var spid        = parseInt(verb_utils.getParam(req, 'id'))
   var tfilters    = verb_utils.getParam(req, 'tfilters')
   
   var grid_resolution = verb_utils.getParam(req, 'grid_res',16)
-  var res_celda_sp =  "cells_"+grid_resolution+"km"   
-  var res_celda_snib =  "gridid_"+grid_resolution+"km" 
-  var res_celda_snib_tb = "grid_"+grid_resolution+"km_aoi" 
+  var res_celda_sp =  'cells_'+grid_resolution+'km'   
+  var res_celda_snib =  'gridid_'+grid_resolution+'km' 
+  var res_celda_snib_tb = 'grid_'+grid_resolution+'km_aoi' 
 
   //Parametros posibes: full | species_coverage
-  var n_grid_coverage = verb_utils.getParam(req, 'n_grid_coverage', "full")
+  var n_grid_coverage = verb_utils.getParam(req, 'n_grid_coverage', 'full')
   
   // Siempre incluidos en query, nj >= 0
   var min_occ       = verb_utils.getParam(req, 'min_occ', 1)
   var sfosil        = verb_utils.getParam(req, 'fossil', false)
-  var lb_fosil      = sfosil === "false" || sfosil === false ? " and (ejemplarfosil <> 'SI' or ejemplarfosil is null) " : "";
+  var lb_fosil      = sfosil === 'false' || sfosil === false ? ' and (ejemplarfosil <> \'SI\' or ejemplarfosil is null) ' : ''
 
   // variables configurables
   var hasBios         = verb_utils.getParam(req, 'hasBios')
@@ -230,9 +230,9 @@ function getFreqMapNiche_A(req, res, next) {
 
   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
   
-  var iter = verb_utils.getParam(req, 'val_process', false) === "true" ? iterations : 1
+  var iter = verb_utils.getParam(req, 'val_process', false) === 'true' ? iterations : 1
   var idtabla = verb_utils.getParam(req, 'idtabla')
-  idtabla = iter > 1 ? idtabla : ""
+  idtabla = iter > 1 ? idtabla : ''
 
    // filtros por tiempo
   var sfecha            = verb_utils.getParam(req, 'sfecha', false)
@@ -247,7 +247,7 @@ function getFreqMapNiche_A(req, res, next) {
     
   if (hasBios === 'true' && hasRaster === 'true' && apriori === 'apriori' ) {
     debug('TA')
-     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+    var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
     debug('caso: ' + caso)
 
     filter_time = caso !== -1 ? true : filter_time
@@ -287,7 +287,7 @@ function getFreqMapNiche_A(req, res, next) {
   else if (hasBios === 'true' && apriori === 'apriori' ) {
     debug('BA')
 
-     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+    var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
     debug('caso: ' + caso)
 
     filter_time = caso !== -1 ? true : filter_time
@@ -373,29 +373,29 @@ function getFreqMapNiche(req, res, next) {
   
   debug('getFreqMapNiche')
 
-  var filter_time = false;
+  var filter_time = false
 
   var spid        = parseInt(verb_utils.getParam(req, 'id'))
   var tfilters    = verb_utils.getParam(req, 'tfilters')
   
   var grid_resolution = verb_utils.getParam(req, 'grid_res',16)
-  var res_celda_sp =  "cells_"+grid_resolution+"km"   
-  var res_celda_snib =  "gridid_"+grid_resolution+"km" 
-  var res_celda_snib_tb = "grid_"+grid_resolution+"km_aoi" 
+  var res_celda_sp =  'cells_'+grid_resolution+'km'   
+  var res_celda_snib =  'gridid_'+grid_resolution+'km' 
+  var res_celda_snib_tb = 'grid_'+grid_resolution+'km_aoi' 
 
   //Parametros posibes: full | species_coverage
-  var n_grid_coverage = verb_utils.getParam(req, 'n_grid_coverage', "full")
+  var n_grid_coverage = verb_utils.getParam(req, 'n_grid_coverage', 'full')
   
   // Siempre incluidos en query, nj >= 0
   var min_occ       = verb_utils.getParam(req, 'min_occ', 1)
   var sfosil        = verb_utils.getParam(req, 'fossil', false)
-  var lb_fosil      = sfosil === "false" || sfosil === false ? " and (ejemplarfosil <> 'SI' or ejemplarfosil is null) " : "";
+  var lb_fosil      = sfosil === 'false' || sfosil === false ? ' and (ejemplarfosil <> \'SI\' or ejemplarfosil is null) ' : ''
 
   // variables configurables
   var hasBios         = verb_utils.getParam(req, 'hasBios')
   var hasRaster       = verb_utils.getParam(req, 'hasRaster')
   var discardedDeleted = verb_utils.getParam(req, 'discardedFilterids',[])
-  var iter = verb_utils.getParam(req, 'val_process', false) === "true" ? iterations : 1
+  var iter = verb_utils.getParam(req, 'val_process', false) === 'true' ? iterations : 1
 
    // filtros por tiempo
   var sfecha            = verb_utils.getParam(req, 'sfecha', false)
@@ -404,7 +404,7 @@ function getFreqMapNiche(req, res, next) {
   
   
   var idtabla = verb_utils.getParam(req, 'idtabla')
-  idtabla = iter > 1 ? idtabla : ""
+  idtabla = iter > 1 ? idtabla : ''
 
   
   // debug("idtabla: " + idtabla)
@@ -502,7 +502,7 @@ function getFreqMapNiche(req, res, next) {
   else if (hasBios === 'true'){
     debug('B')
 
-     var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
+    var caso = verb_utils.getTimeCase(fecha_incio, fecha_fin, sfecha)
     debug('caso: ' + caso)
 
     filter_time = caso !== -1 ? true : filter_time
@@ -578,20 +578,20 @@ function getFreqMapNiche(req, res, next) {
         message: 'getCellScore endpoint listening, please add the minimum parameters to get a response. See the example parameter',
         example: {
           id: 27332,
-          idtime: "1519077493248",
+          idtime: '1519077493248',
           min_occ: 1,
-          fossil: "true",
-          sfecha: "true",
-          val_process: "false",
-          idtabla: "no_table",
-          grid_res: "16",
+          fossil: 'true',
+          sfecha: 'true',
+          val_process: 'false',
+          idtabla: 'no_table',
+          grid_res: '16',
           tfilters: [{
-            field: "clasevalida",
-            value: "Mammalia",
+            field: 'clasevalida',
+            value: 'Mammalia',
             type: 4
           }],
-          hasBios: "true",
-          hasRaster: "false"
+          hasBios: 'true',
+          hasRaster: 'false'
         }
       }
     )
