@@ -923,6 +923,14 @@ verb_utils.getMaxY = function (data,value) {
 }
 
 
+verb_utils.getAverageFromResults = function (data_collection) {
+
+  // Crear un d3.map sobre el spid para sacar el promedio de ni, nj, nij, n, epsilon, score, etc...
+
+
+}
+
+
 
 
 module.exports = verb_utils

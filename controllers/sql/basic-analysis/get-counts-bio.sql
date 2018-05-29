@@ -1,8 +1,8 @@
 with temp_source as (
 	SELECT 
 		spid, 
-		${res_celda_sp:raw} as cells, 
-		icount(${res_celda_sp:raw}) as ni
+		(${res_celda_sp:raw} - ${test_cells_consp}::integer[]) as cells, 
+		icount((${res_celda_sp:raw} - ${test_cells_consp}::integer[])) as ni
 		FROM sp_snib
 		WHERE 
 		spid = ${spid}
@@ -18,8 +18,8 @@ temp_target as (
 			familiavalida, 
 			generovalido, 
 			especievalidabusqueda, 
-			${res_celda_sp:raw} as cells, 
-			icount(${res_celda_sp:raw}) as nj,
+			(${res_celda_sp:raw} - ${test_cells_sinsp}::integer[]) as cells, 
+			icount((${res_celda_sp:raw} - ${test_cells_sinsp}::integer[])) as nj,
 			0 as tipo
 	FROM sp_snib ${where_config:raw}
 		and especievalidabusqueda <> ''
