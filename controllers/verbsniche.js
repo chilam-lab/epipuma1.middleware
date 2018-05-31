@@ -385,6 +385,45 @@ exports.getStates = function (req, res, next) {
 
 
 /**
+* getSubAOI 
+*
+* Trae todas las areas de interes en las que es posible hacer los analisis
+* 
+* @param {express.Request} req
+* @param {express.Response} res
+*
+*/
+exports.getSubAOI = function(req, res, next) {
+
+      debug("getSubAOI");
+
+      pool.any(queries.subaoi.getSubAOI)
+        .then(function (data) {
+          var l = []
+          var obj;
+          for(var i=0; i < data.length; i++) {
+            obj = {
+                    "footprint_region": parseInt(data[i].footprint_region), 
+                    "border": JSON.parse(data[i].border)
+                  };
+            l.push(obj)
+          }
+          res.json({
+            'data': l,
+            ok: true
+          })
+        })
+        .catch(function (error) {
+          return res.json({
+            err: error,
+            ok: false,
+            message: "Error al procesar la query"
+          })
+          next(error)
+        })
+}
+
+/**
  * getUserReg de SNIB DB
  *
  * Verifica si existe el usuario por medio de su email

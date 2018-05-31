@@ -96,4 +96,8 @@ router.route('/especie/getSpecies')
   .post(verbsCtrl.getSpeciesNiche)
 
 
+router.route('/especie/getSubAOI')
+  .post(verbsCtrl.getSubAOI)
+
+
 module.exports = router

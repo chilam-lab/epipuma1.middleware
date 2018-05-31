@@ -248,6 +248,10 @@ var queryProvider = {
 /************************************************************* VERBOS PARA OBTENER INFO DE TAXA ******************************/
   getGridScores: {
     forSpecies: sqlPath('getGridScores/get_grid_scores.sql')
+  },
+
+  subaoi: {
+    getSubAOI : sqlPath('subAOI/getSubAOI.sql') 
   }
 }
 
