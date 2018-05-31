@@ -709,76 +709,27 @@ exports.getGridGeoJsonNiche = function (req, res, next) {
     debug('getGridGeoJsonNiche')
     
     var grid_res = getParam(req, 'grid_res',16)
+    var footprint_region = parseInt(getParam(req, 'footprint_region', 1))
     
     debug('grid_res: ' + grid_res)
+    debug('footprint_region: ' + footprint_region)
     // debug(api)
     // debug(api_file)
 
-    var json_grid = {
-                  "type": "FeatureCollection",
-                  "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } }
-                  // "features": data[0].json
-                }
+    pool.any(queries.grid.gridxxkm, {
+      grid_res: grid_res,
+      region: footprint_region 
+    })
+      .then(function(data) {
+        
+        res.json(data[0].json)
+      
+      })
+      .catch(function(error) {
+        debug(error)
+        next(error)
+      })
 
-    switch(parseInt(grid_res)) {
-      case 8:
-        debug("caso 8")
-        pool.any(queries.grid.grid8km)
-          .then(function(data){
-            res.send(data[0].json)
-          })
-          .catch(function(error) {
-            debug(error)
-            next(error)
-          })
-        break
-      case 16:
-        debug("caso 16")
-        pool.any(queries.grid.grid16km)
-          .then(function(data){
-            res.send(data[0].json)
-          })
-          .catch(function(error) {
-            debug(error)
-            next(error)
-          })
-        break
-      case 32:
-        debug("caso 32")
-        pool.any(queries.grid.grid32km)
-          .then(function(data){
-            // json_grid["features"] = data[0].json
-            // res.send(json_grid)
-            res.send(data[0].json)
-          })
-          .catch(function(error) {
-            debug(error)
-            next(error)
-          })
-        break
-      case 64:
-        debug("caso 64")
-        pool.one(queries.grid.grid64km)
-          .then(function(data){
-            res.send(data.json)
-          })
-          .catch(function(error) {
-            debug(error)
-            next(error)
-          })
-        break
-        default:
-        debug("default 16")
-        pool.any(queries.grid.grid16km)
-          .then(function(data){
-            res.send(data[0].json)
-          })
-          .catch(function(error) {
-            debug(error)
-            next(error)
-          })
-        break
-      }
 }
 
 
@@ -1195,17 +1146,8 @@ exports.getSubAOI = function(req, res, next) {
 
       pool.any(queries.subaoi.getSubAOI)
         .then(function (data) {
-          var l = []
-          var obj;
-          for(var i=0; i < data.length; i++) {
-            obj = {
-                    "footprint_region": parseInt(data[i].footprint_region), 
-                    "border": JSON.parse(data[i].border)
-                  };
-            l.push(obj)
-          }
           res.json({
-            'data': l,
+            'data': data,
             ok: true
           })
         })
