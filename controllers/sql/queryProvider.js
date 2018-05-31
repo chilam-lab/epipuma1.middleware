@@ -18,11 +18,7 @@ function sqlPath (file) {
  */
 var queryProvider = {
   grid: {
-    getIds: sqlPath('grid/get_ids.sql'),
-    grid64km: sqlPath('grids/grid_64km.sql'),
-    grid32km: sqlPath('grids/grid_32km.sql'),
-    grid16km: sqlPath('grids/grid_16km.sql'),
-    grid8km: sqlPath('grids/grid_8km.sql')
+    gridxxkm: sqlPath('grids/grid_xxkm.sql') 
   },
   layers: {
     getStatesMX: sqlPath('layers/get_states.sql')
