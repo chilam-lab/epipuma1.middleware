@@ -12,16 +12,11 @@
  */
 var router = require('express').Router()
 var getGeoRel = require('../controllers/getGeoRelNiche')
-var getCounts = require('../controllers/getCounts')
 var getFreqNiche = require('../controllers/getFreqNiche')
 var getCellScore = require('../controllers/getCellScoreNiche') 
 var getFreqCeldaNiche = require('../controllers/getFreqCeldaNiche') 
 var getScoreDecilNiche = require('../controllers/getScoreDecilNiche') 
-var getScoreDecilMd = require('../controllers/getScoreDecilMd') 
-var getGridSpeciesNiche = require('../controllers/getGridSpeciesNiche')
-var gridScores = require('../controllers/getGridScores') 
-var bioScores = require('../controllers/getBioScores') 
-var mdAtenticacion = require("../md-auth/autenticacion.js")
+var getGridSpeciesNiche = require('../controllers/getGridSpeciesNiche') 
 
 
 /**
@@ -79,7 +74,6 @@ router.route('/getFreq')
  * @param {string} path - Express path
  * @param {callback} middleware - Express middleware.
  */
-// router.route('/getFreqMap')
 router.route('/getCellScore')
   .get(getCellScore.pipe)
   .post(getCellScore.pipe)
@@ -108,36 +102,9 @@ router.route('/getFreqCelda')
  * @param {string} path - Express path
  * @param {callback} middleware - Express middleware.
  */
-router.route('/getScoreDecilOld')
+router.route('/getScoreDecil')
   .get(getScoreDecilNiche.pipe)
   .post(getScoreDecilNiche.pipe)
-
-
-
-/**
- * Ruta que obtiene los deciles del score 
- * @name get/getScoreDecilMd
- * @function
- * @memberof module:routes/nicherouter~nicheRouter
- * @inner
- * @param {string} path - Express path
- * @param {callback} middleware - Express middleware.
- */
-router.route('/getScoreDecil')
-  // .get(mdAtenticacion.validaToken, getScoreDecilMd.getScoreDecil)
-  // .post(mdAtenticacion.validaToken, getScoreDecilMd.getScoreDecil)
-  .get(getScoreDecilMd.getScoreDecil)
-  .post(getScoreDecilMd.getScoreDecil)
-
-
-
-router.route('/getScoreDecilTable')
-  // .get(mdAtenticacion.validaToken, getScoreDecilMd.getScoreDecil)
-  // .post(mdAtenticacion.validaToken, getScoreDecilMd.getScoreDecil)
-  .get(getScoreDecilMd.getScoreDecilTable)
-  .post(getScoreDecilMd.getScoreDecilTable)
-
-
 
 
 /**
@@ -153,46 +120,5 @@ router.route('/getGridSpecies')
   .get(getGridSpeciesNiche.pipe)
   .post(getGridSpeciesNiche.pipe)
 
-/**
- * Ruta que obtiene el score por celda con metodos para definir que celdas del grid se usan en el analisis
- * @name get/cells_score
- * @function
- * @memberof module:routes/nicherouter~nicheRouter
- * @inner
- * @param {string} path - Express path
- * @param {callback} middleware - Express middleware.
- */
-router.route('/grid_scores')
-  .get(gridScores.pipe)
-  .post(gridScores.pipe)
-
-/**
- * Ruta que obtiene el score de una especie VS un grupo de especies con metodos para definir que celdas del grid se usan en el analisis
- * @name get/bio_scores
- * @function
- * @memberof module:routes/nicherouter~nicheRouter
- * @inner
- * @param {string} path - Express path
- * @param {callback} middleware - Express middleware.
- */
-router.route('/bio_scores')
-  .get(bioScores.pipe)
-  .post(bioScores.pipe)
-
-
-/**
- * Ruta que calcula los conteos, epsilon y score entre la especie objetivo y el grupo de variables elegidas. 
- * @name get/bio_scores
- * @function
- * @memberof module:routes/nicherouter~nicheRouter
- * @inner
- * @param {string} path - Express path
- * @param {callback} middleware - Express middleware.
- */
-router.route('/counts')
-  // .get(mdAtenticacion.validaToken, getCounts.getBasicInfo)
-  // .post(mdAtenticacion.validaToken, getCounts.getBasicInfo)
-  .get(getCounts.getBasicInfo)
-  .post(getCounts.getBasicInfo)
 
 module.exports = router

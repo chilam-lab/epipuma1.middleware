@@ -6,78 +6,11 @@ with temp_source as (
 	FROM snib
 	WHERE 
 		spid = ${spid} ${fossil:raw}
-		and 
-			(case when ${caso} = 1 
-				  then 
-						fechacolecta <> ''
-				  when ${caso} = 2 
-				  then
-						cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)>= cast( ${lim_inf}  as integer)
-						and 
-						cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)<= cast( ${lim_sup} as integer)
-				  else
-				  		(
-							(
-							cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)>= cast( ${lim_inf}  as integer)
-							and 
-							cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)<= cast( ${lim_sup}  as integer)
-							)
-							or fechacolecta = ''
-						)
-			end) = true
 		and especievalidabusqueda <> ''
 		and ${spid} is not null
 	group by spid
 ),
 temp_target as (
-	SELECT  generovalido, 
-			especievalidabusqueda, 
-			spid, 
-			reinovalido, 
-			phylumdivisionvalido, 
-			clasevalida, 
-			ordenvalido, 
-			familiavalida, 
-			array_agg(distinct ${res_celda_snib:raw}) as cells, 
-			icount(array_agg(distinct ${res_celda_snib:raw})) as nj,
-			0 as tipo
-	FROM snib ${where_config:raw} ${fossil:raw}
-		and 
-			(case when ${caso} = 1 
-				  then 
-						fechacolecta <> ''
-				  when ${caso} = 2 
-				  then
-						cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)>= cast( ${lim_inf}  as integer)
-						and 
-						cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)<= cast( ${lim_sup} as integer)
-				  else
-				  		(
-							(
-							cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)>= cast( ${lim_inf}  as integer)
-							and 
-							cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)<= cast( ${lim_sup}  as integer)
-							)
-							or fechacolecta = ''
-						)
-			end) = true
-		and especievalidabusqueda <> ''
-		and reinovalido <> ''
-		and phylumdivisionvalido <> ''
-		and clasevalida <> ''
-		and ordenvalido <> ''
-		and familiavalida <> ''
-		and generovalido <> ''
-		and ${res_celda_snib:raw} is not null
-		group by spid,
-			reinovalido, 
-			phylumdivisionvalido, 
-			clasevalida, 
-			ordenvalido, 
-			familiavalida, 
-			generovalido, 
-			especievalidabusqueda
-	union
 	SELECT  
 		cast('' as text) generovalido,
 		case when type = 1 then
@@ -97,11 +30,10 @@ temp_target as (
 		cast('' as text) familiavalida,
 		${res_celda_sp:raw} as cells, 
 		icount(${res_celda_sp:raw}) as nj,
-		1 as tipo
+		0 as tipo
 	FROM raster_bins ${where_config_raster:raw}
 )
 SELECT 	temp_target.spid,
-		temp_target.tipo,
 		temp_target.reinovalido,
 		temp_target.phylumdivisionvalido,
 		temp_target.clasevalida,
