@@ -906,6 +906,27 @@ exports.getRasterNiche = function (req, res, next) {
 }
 
 
+exports.getAvailableVariables = function (req, res, next) {
+
+  debug("getAvailableVariables")
+
+  pool.any(queries.getRasterNiche.getAvailableVariables, {})
+  .then(function (data) {
+        res.json({
+          'ok':true,
+          'data': data
+        })
+  })
+  .catch(function (error) {
+        debug(error)
+        next(error)
+  })
+
+
+}
+
+
+
 
 
 /**
