@@ -10,26 +10,6 @@ with temp_source as (
 		and ${spid} is not null
 ),
 temp_target as (
-	SELECT  generovalido,
-			especievalidabusqueda,
-			spid, 
-			reinovalido, 
-			phylumdivisionvalido, 
-			clasevalida, 
-			ordenvalido, 
-			familiavalida, 
-			${res_celda_sp:raw} as cells, 
-			icount(${res_celda_sp:raw}) as nj,
-			0 as tipo
-	FROM sp_snib ${where_config:raw}
-		and especievalidabusqueda <> ''
-		and reinovalido <> ''
-		and phylumdivisionvalido <> ''
-		and clasevalida <> ''
-		and ordenvalido <> ''
-		and familiavalida <> ''
-		and generovalido <> ''
-	union
 	SELECT  
 		cast('' as text) generovalido,
 		case when type = 1 then
