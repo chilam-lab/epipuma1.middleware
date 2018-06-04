@@ -43,7 +43,7 @@ var cellsRouter = require('./routes/cellsrouter')
 var taxaRouter = require('./routes/taxarouter')
 
 // Register our routes
-// all of our routes will be prefixed with /snib
+// all of our routes will be prefixed with /niche
 app.use('/niche',
         nicheRouter,
         netRouter,

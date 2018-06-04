@@ -34,10 +34,11 @@
     "pg-promise": "^5.3.5"
   },
   "devDependencies": {
-    "eslint": "^3.19.0",
-    "jsdoc": "^3.4.3",
+    "apidoc": "^0.17.6",
     "chai": "*",
     "chai-things": "*",
+    "eslint": "^3.19.0",
+    "jsdoc": "^3.4.3",
     "mocha": "~3.1.0",
     "nodemon": "^1.11.0",
     "pg-monitor": "^0.5.11",

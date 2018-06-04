@@ -1,0 +1,7 @@
+{
+  "name": "SPECIES API",
+  "version": "1.0",
+  "description": "API for the SPECIES interactions exploration platform",
+  "title": "SPECIES API Docs",
+  "url" : "https://species.conabio.gob.mx/api/niche"
+}

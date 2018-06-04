@@ -36,6 +36,55 @@ router.route('/especie/getUserToken')
 router.route('/especie/setUserReg')
   .post(verbsCtrl.setUserReg)
 
+/**
+ * @api {post} /niche/especie/getEntList
+ * @apiName getEntList
+ * @apiGroup Especie
+ *
+ * @apiParams {Boolean} limit Results should be limited
+ * @apiParams {String} searchStr Specie query string
+ * @apiParams {number=8,16,32,64} grid_res Grid resolution
+ * @apiParams {number=1} source Source identification
+ *
+ * @apiParamExample {json} Request-Example:
+ *    {
+ *      "limit": "true",
+ *      "searchStr": "lynx",
+ *      "source": 1,
+ *      "grid_res": 16
+ *    }
+ *
+ * @apiSuccess {Object} Data object with the matching species information
+ *
+ * @apiSuccessExample Success-Response:
+ *    HTTP/1.1 200 OK
+ *    {
+ *      "data": [
+ *        {
+ *          "spid": 82081,
+ *          "reinovalido": "Animalia",
+ *          "phylumdivisionvalido": "Chordata",
+ *          "clasevalida": "Mammalia",
+ *          "ordenvalido": "Carnivora",
+ *          "familiavalida": "Felidae",
+ *          "generovalido": "Lynx",
+ *          "especievalidabusqueda": "Lynx canadensis",
+ *          "occ": 27
+ *        },
+ *        {
+ *          "spid": 83206,
+ *          "reinovalido": "Animalia",
+ *          "phylumdivisionvalido": "Chordata",
+ *          "clasevalida": "Mammalia",
+ *          "ordenvalido": "Carnivora",
+ *          "familiavalida": "Felidae",
+ *          "generovalido": "Lynx",
+ *          "especievalidabusqueda": "Lynx proterolyncis",
+ *          "occ": 2
+ *        }
+ *      ]
+ *    }
+ */
 router.route('/especie/getEntList')
   .get(verbsCtrl.getEntListNiche)
   .post(verbsCtrl.getEntListNiche)

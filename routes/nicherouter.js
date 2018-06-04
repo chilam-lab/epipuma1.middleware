@@ -20,7 +20,7 @@ var getScoreDecilMd = require('../controllers/getScoreDecilMd')
 var getGridSpeciesNiche = require('../controllers/getGridSpeciesNiche')
 var gridScores = require('../controllers/getGridScores') 
 var bioScores = require('../controllers/getBioScores') 
-var mdAtenticacion = require("../md-auth/autenticacion.js");
+var mdAtenticacion = require('../md-auth/autenticacion.js')
 
 
 /**
@@ -31,6 +31,19 @@ var mdAtenticacion = require("../md-auth/autenticacion.js");
  * @inner
  * @param {string} path - Express path
  * @param {callback} middleware - Express middleware.
+ *
+ * @api {get} /niche/
+ * @apiName Welcome message - API root
+ *
+ * @apiSuccess {Object} data Welcome message
+ *
+ * @apiSuccessExample Success-Response:
+ *    HTTP/1.1 200 OK
+ *    {
+ *      "data": {
+ *        "message": "¡Yei! Bienvenidos al API de NICHE"
+ *        }
+ *    }
  */
 router.all('/', function(req, res) {
   res.json(
