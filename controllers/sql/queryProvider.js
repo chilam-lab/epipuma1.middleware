@@ -90,9 +90,11 @@ var queryProvider = {
     getVariables: sqlPath('especie/get_variables.sql')
   },
   getRasterNiche: {
-    getRasterBios: sqlPath('raster/raster_bios.sql'),
-    getRasterIds: sqlPath('raster/raster_ids.sql'),
+    getRasterAvailableVariables: sqlPath('raster/raster_available_variables.sql'),
+    getRasterVariableSelected: sqlPath('raster/raster_variable_selected.sql'),
+    getRasterVariableById: sqlPath('raster/raster_variable_by_id.sql'),
     getAvailableVariables: sqlPath('raster/available_variables.sql')
+    
     
   },
   getSpeciesNiche: {

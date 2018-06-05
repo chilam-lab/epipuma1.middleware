@@ -36,7 +36,7 @@ exports.getBasicInfo = function(req, res, next) {
 
   debug('getBasicInfo')
 
-  var data_request = verb_utils.getRequestParams(req, false)
+  var data_request = verb_utils.getRequestParams(req, true)
   
   if (data_request.hasBios === 'true' && data_request.hasRaster === 'false' ) {
 
