@@ -5,7 +5,7 @@
 
 
 /**
- * Express router que monta las funciones asociadas útilidades. 
+ * Express router que monta las funciones asociadas útilidades.
  * @type {object}
  * @const
  * @namespace utilsRouter
@@ -54,7 +54,7 @@ router.route('/especie/setUserReg')
  *      "grid_res": 16
  *    }
  *
- * @apiSuccess {Object} Data object with the matching species information
+ * @apiSuccess {Object[]} Data object with the matching species information
  *
  * @apiSuccessExample Success-Response:
  *    HTTP/1.1 200 OK
@@ -97,6 +97,71 @@ router.route('/especie/getValuesFromToken')
   .get(verbsCtrl.getValuesFromToken)
   .post(verbsCtrl.getValuesFromToken)
 
+/**
+ * @api {post} /niche/especie/getGridGeoJson
+ * @apiName getGridGeoJson
+ * @apiGroup Especie
+ *
+ * @apiParams {number=8,16,32,64} grid_res Grid resolution on Km
+ *
+ * @apiParamExample {json} Request-Example:
+ *    {
+ *      "grid_res": 64
+ *    }
+ *
+ * @apiSuccess {String} type geometry type supported by GeoJson spec
+ * @apiSuccess {Object} crs coordinate reference system object
+ * @apiSuccess {list} features list with geometry features coordinate reference system object
+ *
+ * @apiSuccessExample Success-Response:
+ *    HTTP/1.1 200 OK
+ *    {
+ *      "type": "FeatureCollection",
+ *      "crs": {
+ *               "type": "name",
+ *               "properties": {
+ *                               "name": "urn:ogc:def:crs:EPSG::4326"
+ *                             }
+ *             },
+ *      "features": [
+ *                    {
+ *                      "type": "Feature",
+ *                      "geometry": {
+ *                                    "type": "Polygon",
+ *                                    "coordinates": [
+ *                                                     [
+ *                                                       [
+ *                                                         -91.4844285347321,
+ *                                                         17.3362337317245
+ *                                                       ],
+ *                                                       [
+ *                                                         -91.4844285347321,
+ *                                                         17.4048214660772
+ *                                                       ],
+ *                                                       [
+ *                                                         -91.4125633120025,
+ *                                                         17.4048214660772
+ *                                                       ],
+ *                                                       [
+ *                                                         -91.4125633120025,
+ *                                                         17.3362337317245
+ *                                                       ],
+ *                                                       [
+ *                                                         -91.4844285347321,
+ *                                                         17.3362337317245
+ *                                                       ]
+ *                                                     ]
+ *                                                   ]
+ *                                  },
+ *                      "properties":
+ *                                  {
+ *                                    "gridid":
+ *                                    235196
+ *                                  }
+ *                    }, ...
+ *                  ]
+ *    }
+ */
 router.route('/especie/getGridGeoJson')
   .get(verbsCtrl.getGridGeoJsonNiche)
   .post(verbsCtrl.getGridGeoJsonNiche)
@@ -113,13 +178,78 @@ router.route('/especie/deleteValidationTables')
   .get(verbsCtrl.deleteValidationTables)
   .post(verbsCtrl.deleteValidationTables)
 
+/**
+ * @api {post} /niche/especie/getCountGridid
+ * @apiName getCountGridid
+ * @apiGroup Especie
+ *
+ * @apiParams {number[]} spids Array with spids to count over grid
+ *
+ * @apiParamExample {json} Request-Example:
+ *    {
+ *      "spids": [8920, 27333]
+ *    }
+ *
+ * @apiSuccess {Object[]} data object with gridid and species counts
+ * @apiSuccess {number} data.gridid grid id
+ * @apiSuccess {number} data.cont cell species counts
+ *
+ * @apiSuccessExample Success-Response:
+ *    HTTP/1.1 200 OK
+ *    {
+ *      "data": [
+ *        {
+ *          "gridid": 9480,
+ *          "cont": "1"
+ *        },
+ *        {
+ *          "gridid": 9484,
+ *          "cont": "1"
+ *        }
+ *      ]
+ *    }
+ */
 router.route('/especie/getCountGridid')
   .get(verbsCtrl.getCountGridid)
   .post(verbsCtrl.getCountGridid)
 
-
-
-
+/**
+ * @api {post} /niche/especie/getVariables
+ * @apiName getVariables
+ * @apiGroup Especie
+ *
+ * @apiParams {String} field Taxonomic level to query
+ * @apiParams {String} parentfield Parent taxonomic level
+ * @apiParams {String} parentitem Value of parent taconomic level
+ *
+ * @apiParamExample {json} Request-Example:
+ *    {
+ *      "field": "ordenvalido",
+ *      "parentfield": "clasevalida",
+ *      "parentitem": "Amphibia"
+ *    }
+ *
+ * @apiSuccess {Object[]} Data object with available taxa and species counts
+ *
+ * @apiSuccessExample Success-Response:
+ *    HTTP/1.1 200 OK
+ *    {
+ *      "data": [
+ *        {
+ *          "name": "Anura",
+ *          "spp": "239"
+ *        },
+ *        {
+ *          "name": "Caudata",
+ *          "spp": "140"
+ *        },
+ *        {
+ *          "Gymnophiona",
+ *          "spp": "2"
+ *        }
+ *      ]
+ *    }
+ */
 router.route('/especie/getVariables')
   .get(verbsCtrl.getVariablesNiche)
   .post(verbsCtrl.getVariablesNiche)
