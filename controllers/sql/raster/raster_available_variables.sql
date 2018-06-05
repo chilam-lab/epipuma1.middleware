@@ -1,7 +1,7 @@
 SELECT 
 	fuentes_bioclimaticas.fuente,
-	layer, 
-	label, 
+	-- layer, 
+	-- label, 
 	"type"
 FROM raster_bins 
 	LEFT JOIN fuentes_bioclimaticas 
@@ -9,10 +9,11 @@ FROM raster_bins
 WHERE 
 	$<region> = ANY(fuentes_bioclimaticas.footprint_region)
 GROUP BY 
-	"type", 
-	fuentes_bioclimaticas.fuente, 
-	layer, 
-	label,
-	fuentes_bioclimaticas.footprint_region
+	"type",
+	fuentes_bioclimaticas.fuente
+	-- layer, 
+	-- label,
+	-- fuentes_bioclimaticas.footprint_region
 ORDER BY
-	fuentes_bioclimaticas.fuente, layer;
+	"type";
+	--fuentes_bioclimaticas.fuente;

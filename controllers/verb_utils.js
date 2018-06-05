@@ -130,37 +130,64 @@ verb_utils.processRasterFilters = function(tfilters_total){
   }
 
   for (var i = 0; i < tfilters.length; i++) {
-    if(tfilters[i].level == 0) {
-      if (first_other == true) {
-        if(tfilters[i].type == 5) {
-          whereVar = whereVar + ' where type <> 0 '
-        } else {
-          whereVar = whereVar + ' where type = ' + tfilters[i].type
-        }
 
+    if(tfilters[i].level == 0) {
+
+      // if (first_other == true) {
+        // if(tfilters[i].type == 5) {
+          whereVar = whereVar + ' where type <> 0 '
+        // } 
+        // else {
+          // whereVar = whereVar + ' where type = ' + tfilters[i].type
+        // }
+
+        // first_other = false
+      // } 
+      // else {
+        // if(tfilters[i].type == 5) {
+          // whereVar = whereVar + ' or type <> 0 '
+        // } 
+        // else {
+        //   whereVar = whereVar + ' or type = ' + tfilters[i].type
+        // }
+      // }
+
+    } 
+
+    else if (tfilters[i].level == 1) {
+
+      if (first_other == true) {
+        whereVar = whereVar + ' where type =  ' + tfilters[i].type 
         first_other = false
-      } else {
-        if(tfilters[i].type == 5) {
-          whereVar = whereVar + ' or type <> 0 '
-        } else {
-          whereVar = whereVar + ' or type = ' + tfilters[i].type
-        }
+      } 
+      else {
+        whereVar = whereVar + ' or type = ' + tfilters[i].type
       }
-    } else if (tfilters[i].level == 1) {
+
+    } 
+    else if (tfilters[i].level == 2) {
+
       if (first_other == true) {
         whereVar = whereVar + ' where layer = \'' + tfilters[i].value + '\''
         first_other = false
-      } else {
+      } 
+      else {
         whereVar = whereVar + ' OR layer = \'' + tfilters[i].value + '\''
       }
-    } else {
+
+    } 
+    else {
+
       if (first_other == true){
         whereVar = whereVar + ' where bid = \'' + tfilters[i].value + '\''
         first_other = false
-      } else {
+      } 
+      else {
         whereVar = whereVar + ' OR bid = \'' + tfilters[i].value + '\''
       }
+
     }
+
   }
 
   return whereVar
