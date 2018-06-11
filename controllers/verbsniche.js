@@ -713,17 +713,14 @@ exports.getGridGeoJsonNiche = function (req, res, next) {
     
     debug('grid_res: ' + grid_res)
     debug('footprint_region: ' + footprint_region)
-    // debug(api)
-    // debug(api_file)
 
+    
     pool.any(queries.grid.gridxxkm, {
-      grid_res: grid_res,
+      grid_res: parseInt(grid_res),
       region: footprint_region 
     })
       .then(function(data) {
-        
         res.json(data[0].json)
-      
       })
       .catch(function(error) {
         debug(error)
@@ -816,18 +813,24 @@ exports.getRasterNiche = function (req, res, next) {
 
       debug("getRasterNiche")
 
-      var field = getParam(req, 'field')
+      var field = getParam(req, 'field', "")
       var level = parseInt(getParam(req, 'level', 0))
       var region = parseInt(getParam(req, 'footprint_region', 1))
-      var type = parseInt(getParam(req, 'type'))
+      var type = parseInt(getParam(req, 'type', 1))
 
-      // debug(level)
-      // Si la peticion es de nicho, se requieren los spids
-      // var coleccion = ""
+      debug("field: " + field)
+      debug("level: " + level)
+      debug("region: " + region)
+      debug("type: " + type)
 
-      if(level == 0){
 
-          pool.any(queries.getRasterNiche.getRasterBios, {})
+      if(level === 0){
+
+          debug("root request")        
+
+          pool.any(queries.getRasterNiche.getRasterAvailableVariables, {
+            region: region
+          })
           .then(function (data) {
                 // debug(data)
                 res.json({'data': data})
@@ -838,14 +841,34 @@ exports.getRasterNiche = function (req, res, next) {
           })
       
       }
-      else{
+      else if(level === 1){
 
-          pool.any(queries.getRasterNiche.getRasterIds, {
+        debug("variable selected request")        
+
+        pool.any(queries.getRasterNiche.getRasterVariableSelected, {
             layername: field,
             typename: type
           })
           .then(function (data) {
                 // debug(data)
+                res.json({'data': data})
+          })
+          .catch(function (error) {
+                debug(error)
+                next(error)
+          })
+
+      }
+      else{
+
+          debug("range selected request")        
+
+          pool.any(queries.getRasterNiche.getRasterVariableById, {
+            layername: field,
+            typename: type
+          })
+          .then(function (data) {
+                debug(data)
                 res.json({'data': data})
           })
           .catch(function (error) {
@@ -858,6 +881,27 @@ exports.getRasterNiche = function (req, res, next) {
   
 
 }
+
+
+exports.getAvailableVariables = function (req, res, next) {
+
+  debug("getAvailableVariables")
+
+  pool.any(queries.getRasterNiche.getAvailableVariables, {})
+  .then(function (data) {
+        res.json({
+          'ok':true,
+          'data': data
+        })
+  })
+  .catch(function (error) {
+        debug(error)
+        next(error)
+  })
+
+
+}
+
 
 
 

@@ -81,6 +81,12 @@ router.route('/especie/getRasterVariables')
   .post(verbsCtrl.getRasterNiche)
 
 
+
+router.route('/especie/getAvailableVariables')
+  .get(verbsCtrl.getAvailableVariables)
+  .post(verbsCtrl.getAvailableVariables)
+
+
 // router.route('/especie/getRasterVariables')
 //   .get(verbsCtrl.getRasterNiche)
 //   .post(verbsCtrl.getRasterNiche)
