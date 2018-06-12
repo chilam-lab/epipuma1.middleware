@@ -918,33 +918,25 @@ exports.getAvailableVariables = function (req, res, next) {
 
 exports.getCountGridid = function (req, res, next) {
   debug('getCountGridid')
+  var columnas = ['gridid', 'conteo']
   var spids = getParam(req, 'spids')
   var isNicho = getParam(req, 'nicho')
-  debug(spids)
-  // var res_celda = getParam(req, 'res_celda', 'cells_16km')
-  // var res_grid = getParam(req, 'res_grid', 'gridid_16km')
+
   var resolution = getParam(req, 'grid_res', 16)
 
   var res_celda = 'cells_' + resolution + 'km'
   var res_grid = 'gridid_' + resolution + 'km'
-  debug(isNicho)
 
-  // Si la peticion es de nicho, se requieren los spids
-  //  var coleccion = ''
-  //  if(isNicho === 'true'){
-  //
-  //    coleccion = '(animalia || plantae || fungi || protoctista || prokaryotae || bio01 || bio02 || bio03 || bio04 || bio05 || bio06 || bio07 || bio08 ||bio09 || bio10 || bio11 || bio12 || bio13 || bio14 || bio15 || bio16 ||bio17 || bio18 || bio19 ) as spids,'
-  //         // || elevacion || pendiente || topidx
-  //
-  //  }
-
-  // debug(spids)
+  if (isNicho === 'true') {
+    columnas.push('spids')
+    columnas.push('bioclim')
+  }
 
   pool.any(queries.getCountGridid.getCount, {
     spids: spids,
-    // coleccion: coleccion,
     res_celda: res_celda,
-    res_grid: res_grid
+    res_grid: res_grid,
+    columns: columnas
   }).then(function (data) {
     res.json({'data': data})
   }).catch(function (error) {

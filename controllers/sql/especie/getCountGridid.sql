@@ -39,11 +39,20 @@ count_species_present AS (
   ON grid_8km_aoi.$<res_grid:name> = count_spid.gridid
   -- ON grid_8km_aoi.gridid_32KM = count_spid.gridid
   -- WHERE cont_spid.gridid = 10093
+), 
+full_counts AS (
+  SELECT
+    gridid,
+    array_accum(spids) AS spids,
+    array_accum(bioclim) AS bioclim,
+    conteo
+  FROM count_species_present
+  GROUP BY gridid, conteo
 )
-SELECT
-  gridid,
-  array_accum(spids) AS spids,
-  array_accum(bioclim) AS bioclim,
-  conteo
-FROM count_species_present
-GROUP BY gridid, conteo;
+SELECT 
+  $<columns:name>
+  -- gridid,
+  -- conteo,
+  -- spids,
+  -- bioclim
+FROM full_counts;
