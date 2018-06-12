@@ -1,34 +1,49 @@
-with gridid_sp as(
-	select spid, 
-		unnest($<res_celda:raw>) as gridid
-		--unnest(cells_16km) as gridid
-	from sp_snib 
-	--where spid in(27332)
-	where spid in ($<spids:raw>)
-	union
-	select bid as spid, 
-		unnest($<res_celda:raw>) as gridid
-		--unnest(cells_16km) as gridid 
-	from raster_bins 
-	--where bid in(27332)
-	where bid in ($<spids:raw>)
+WITH gridid_specie AS (
+  -- Regresa una tabla con renglones spid y gridid
+  SELECT spid,
+         UNNEST($<res_celda:name>) AS gridid
+         --unnest(cells_32km) as gridid
+  FROM sp_snib
+  WHERE spid IN ($<spids:csv>)
+  -- WHERE spid IN (8922, 8923, 27333)
+  UNION
+  SELECT bid AS spid,
+         UNNEST($<res_celda:name>) AS gridid
+         -- unnest(cells_32km) as gridid
+  FROM raster_bins
+  WHERE bid IN ($<spids:csv>)
+  -- WHERE bid IN (8922, 8923, 27333)
 ),
-cont_spid as(
-	select 	gridid, 
-			sum(1) cont
-	from gridid_sp
-	group by gridid
-	order by cont desc
+count_spid AS (
+  -- Agrupa para cada gridid el numero de ejemplares que hay
+  SELECT  gridid,
+          sum(1) conteo
+          -- COUNT(spid) as conteo
+  FROM gridid_specie
+  GROUP BY gridid
+  -- ORDER BY cont ASC
+),
+count_species_present AS (
+  -- Regresa una tabla con las especies presentes por celda y los conteos
+  -- de las especies de interes
+  SELECT
+    DISTINCT gridid_specie.gridid,
+    (animalia || plantae || fungi || protoctista || prokaryotae) as spids,
+    (bio001 || bio002 || bio004 || bio005 || bio006) AS bioclim,
+    conteo
+  FROM gridid_specie
+  LEFT JOIN grid_8km_aoi
+  ON gridid_specie.gridid = grid_8km_aoi.$<res_grid:name>
+  -- ON gridid_specie.gridid = grid_8km_aoi.GRIDID_32KM
+  LEFT JOIN count_spid
+  ON grid_8km_aoi.$<res_grid:name> = count_spid.gridid
+  -- ON grid_8km_aoi.gridid_32KM = count_spid.gridid
+  -- WHERE cont_spid.gridid = 10093
 )
-select	distinct gridid_sp.gridid,
-		$<coleccion:raw>
-		--(animalia || plantae || fungi || protoctista || prokaryotae || bio01 || bio02 || bio03 || bio04 || bio05 || bio06 || bio07 || bio08 ||bio09 || bio10 || bio11 || bio12 || bio13 || bio14 || bio15 || bio16 ||bio17 || bio18 || bio19 ) as spids,
-		cont
-from gridid_sp
-left join grid_16km_aoi
-on gridid_sp.gridid = grid_16km_aoi.$<res_grid:raw>
---on gridid_sp.gridid = grid_16km_aoi.gridid_16km
-left join cont_spid
-on grid_16km_aoi.$<res_grid:raw> = cont_spid.gridid
---on grid_16km_aoi.gridid_16km = cont_spid.gridid
-order by cont desc
+SELECT
+  gridid,
+  array_accum(spids) AS spids,
+  array_accum(bioclim) AS bioclim,
+  conteo
+FROM count_species_present
+GROUP BY gridid, conteo;
