@@ -8,12 +8,10 @@ var verb_utils = require('./verb_utils')
 
 var queries = require('./sql/queryProvider.js')
 
-var path = require('path')
-var fs = require("fs")
-var jwt = require("jsonwebtoken")
+var jwt = require('jsonwebtoken')
 
-var SEED = require("../config").SEED;
-var TIME_TOKEN = require("../config").TIME_TOKEN;
+var SEED = require('../config').SEED
+var TIME_TOKEN = require('../config').TIME_TOKEN
 
 var pool = verb_utils.pool 
 var N = verb_utils.N 
@@ -395,12 +393,12 @@ exports.getStates = function (req, res, next) {
  */
 exports.getUserReg = function (req, res, next) {
 
-      debug("getUserReg")
+  debug('getUserReg')
 
-      var user_email = getParam(req, 'email')
-      debug("user_email: " + user_email)
+  var user_email = getParam(req, 'email')
+  debug('user_email: ' + user_email)
 
-      pool.any(queries.users.getUser, {email: user_email})
+  pool.any(queries.users.getUser, {email: user_email})
         .then(function (data) {
           res.json({
             'data': data,
@@ -411,7 +409,7 @@ exports.getUserReg = function (req, res, next) {
           return res.json({
             err: error,
             ok: false,
-            message: "Error al procesar la query"
+            message: 'Error al procesar la query'
           })
           next(error)
         })
@@ -431,29 +429,29 @@ exports.getUserReg = function (req, res, next) {
  */
 exports.getUserToken = function (req, res, next) {
 
-      debug("getUserToken")
-      var user_email = getParam(req, 'email')
+  debug('getUserToken')
+  var user_email = getParam(req, 'email')
       
-      pool.any(queries.users.getUser, {email: user_email})
+  pool.any(queries.users.getUser, {email: user_email})
         .then(function (data) {
 
-            var usuario = {
-              user: user_email
-            }
+          var usuario = {
+            user: user_email
+          }
 
-            var token = jwt.sign({ usuario: usuario }, SEED, { expiresIn: TIME_TOKEN }); // 4 horas
+          var token = jwt.sign({ usuario: usuario }, SEED, { expiresIn: TIME_TOKEN }) // 4 horas
       
-            res.json({
-              data: data,
-              token: token,
-              ok: true
-            })
+          res.json({
+            data: data,
+            token: token,
+            ok: true
+          })
         })
         .catch(function (error) {
           return res.json({
             err: error,
             ok: false,
-            message: "Error al procesar la query"
+            message: 'Error al procesar la query'
           })
           next(error)
         })
@@ -473,16 +471,16 @@ exports.getUserToken = function (req, res, next) {
  */
 exports.setUserReg = function (req, res, next) {
 
-    debug("setUserReg")
+  debug('setUserReg')
 
-    var user_email = getParam(req, 'email')
-    var user_name = getParam(req, 'usuario')
+  var user_email = getParam(req, 'email')
+  var user_name = getParam(req, 'usuario')
 
-    pool.any(queries.users.setUserReg, {email: user_email, name: user_name })
+  pool.any(queries.users.setUserReg, {email: user_email, name: user_name })
       .then(function (data) {
         res.json({
-          "data": data,
-          "ok": true
+          'data': data,
+          'ok': true
         })
       })
       .catch(function (error) {
@@ -490,7 +488,7 @@ exports.setUserReg = function (req, res, next) {
         return  res.json({
           err: error,
           ok: false,
-          message: "Error al procesar la query"
+          message: 'Error al procesar la query'
         })
 
       })
@@ -512,27 +510,27 @@ exports.setUserReg = function (req, res, next) {
 
 exports.getValuesFromToken = function (req, res, next) {
 
-      debug("getValuesFromToken")
+  debug('getValuesFromToken')
 
-      var tipo = getParam(req, 'tipo')
-      var token = getParam(req, 'token')
+  var tipo = getParam(req, 'tipo')
+  var token = getParam(req, 'token')
 
       // debug("tipo: " + tipo)
       // debug("token: " + token)
 
 
-      pool.any(queries.getValuesFromToken.getValues, {
-          tipo_analisis: tipo,
-          token: token
-      })
+  pool.any(queries.getValuesFromToken.getValues, {
+    tipo_analisis: tipo,
+    token: token
+  })
           .then(function (data) {
             // debug(data)
             res.json({'data': data})
-      })
+          })
           .catch(function (error) {
             debug(error)
             next(error)
-      })
+          })
 
 }
 
@@ -551,23 +549,23 @@ exports.getValuesFromToken = function (req, res, next) {
 
 exports.getToken = function (req, res, next) {
 
-      debug("getToken")
+  debug('getToken')
 
-      var tipo = getParam(req, 'tipo')
-      var params = getParam(req, 'confparams')
+  var tipo = getParam(req, 'tipo')
+  var params = getParam(req, 'confparams')
 
 
-      pool.any(queries.getToken.setLinkValues, {
-          tipo_analisis: tipo,
-          params: params
-      })
+  pool.any(queries.getToken.setLinkValues, {
+    tipo_analisis: tipo,
+    params: params
+  })
           .then(function (data) {
             res.json({'data': data})
-      })
+          })
           .catch(function (error) {
             debug(error)
             next(error)
-      })
+          })
 
 }
 
@@ -584,32 +582,32 @@ exports.getToken = function (req, res, next) {
  */
 exports.getValidationTables = function (req, res, next) {
 
-      debug("getValidationTables")
+  debug('getValidationTables')
 
-      var spid = getParam(req, 'spid')
-      var iter = getParam(req, 'iter')
-      var idtbl =  "tbl_" + new Date().getTime() //getParam(req, 'idtable')
-      var iter = getParam(req, 'iterations',iterations)
+  var spid = getParam(req, 'spid')
+  var iter = getParam(req, 'iter')
+  var idtbl =  'tbl_' + new Date().getTime() //getParam(req, 'idtable')
+  var iter = getParam(req, 'iterations',iterations)
 
 
-      var grid_resolution = verb_utils.getParam(req, 'grid_res',16)
-      var res_celda_sp =  "cells_"+grid_resolution+"km"   
-      var res_celda_snib =  "gridid_"+grid_resolution+"km" 
-      var res_celda_snib_tb = "grid_"+grid_resolution+"km_aoi" 
+  var grid_resolution = verb_utils.getParam(req, 'grid_res',16)
+  var res_celda_sp =  'cells_'+grid_resolution+'km'   
+  var res_celda_snib =  'gridid_'+grid_resolution+'km' 
+  var res_celda_snib_tb = 'grid_'+grid_resolution+'km_aoi' 
       
       // var res_celda_sp = verb_utils.getParam(req, 'res_celda_sp', 'cells_16km')
       // var res_celda_snib = verb_utils.getParam(req, 'res_celda_snib', 'gridid_16km')
       // var res_celda_snib_tb = verb_utils.getParam(req, 'res_celda_snib_tb', 'grid_16km_aoi')
       
 
-      pool.any(queries.getValidationTables.createTables, {
-          spid: spid,
-          iterations: iter,
-          idtbl: idtbl,
-          res_celda_sp: res_celda_sp,
-          res_celda_snib: res_celda_snib,
-          res_celda_snib_tb: res_celda_snib_tb
-      })
+  pool.any(queries.getValidationTables.createTables, {
+    spid: spid,
+    iterations: iter,
+    idtbl: idtbl,
+    res_celda_sp: res_celda_sp,
+    res_celda_snib: res_celda_snib,
+    res_celda_snib_tb: res_celda_snib_tb
+  })
           .then(function (data) {
             
             var item = data[0]
@@ -617,11 +615,11 @@ exports.getValidationTables = function (req, res, next) {
             debug(data)
             
             res.json({'data': data})
-      })
+          })
           .catch(function (error) {
             debug(error)
             next(error)
-      })
+          })
 
 }
 
@@ -638,22 +636,22 @@ exports.getValidationTables = function (req, res, next) {
  */
 exports.processValidationTables = function (req, res, next) {
 
-      debug("processValidationTables")
+  debug('processValidationTables')
 
-      var idtbl = getParam(req, 'idtable')
+  var idtbl = getParam(req, 'idtable')
 
 
-      pool.any(queries.processValidationTables.processTables, {
-          idtbl: idtbl
-      })
+  pool.any(queries.processValidationTables.processTables, {
+    idtbl: idtbl
+  })
           .then(function (data) {
             debug(data)
             res.json({'data': data})
-      })
+          })
           .catch(function (error) {
             debug(error)
             next(error)
-      })
+          })
 
 }
 
@@ -671,23 +669,23 @@ exports.processValidationTables = function (req, res, next) {
  */
 exports.deleteValidationTables = function (req, res, next) {
 
-      debug("deleteValidationTables")
+  debug('deleteValidationTables')
   
-      var idtbl = getParam(req, 'idtable','no_table')
-      debug("delete idtable: " + idtbl)
+  var idtbl = getParam(req, 'idtable','no_table')
+  debug('delete idtable: ' + idtbl)
 
 
-      pool.any(queries.deleteValidationTables.deleteTables, {
-          idtbl: idtbl
-      })
+  pool.any(queries.deleteValidationTables.deleteTables, {
+    idtbl: idtbl
+  })
           .then(function (data) {
             debug(data)
             res.json({'data': data})
-      })
+          })
           .catch(function (error) {
             debug(error)
             next(error)
-      })
+          })
 
 }
 
@@ -706,24 +704,24 @@ exports.deleteValidationTables = function (req, res, next) {
  */
 exports.getGridGeoJsonNiche = function (req, res, next) {
 
-    debug('getGridGeoJsonNiche')
+  debug('getGridGeoJsonNiche')
     
-    var grid_res = getParam(req, 'grid_res',16)
+  var grid_res = getParam(req, 'grid_res',16)
     
-    debug('grid_res: ' + grid_res)
+  debug('grid_res: ' + grid_res)
     // debug(api)
     // debug(api_file)
 
-    var json_grid = {
-                  "type": "FeatureCollection",
-                  "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } }
+  var json_grid = {
+    'type': 'FeatureCollection',
+    'crs': { 'type': 'name', 'properties': { 'name': 'urn:ogc:def:crs:OGC:1.3:CRS84' } }
                   // "features": data[0].json
-                }
+  }
 
-    switch(parseInt(grid_res)) {
-      case 8:
-        debug("caso 8")
-        pool.any(queries.grid.grid8km)
+  switch(parseInt(grid_res)) {
+  case 8:
+    debug('caso 8')
+    pool.any(queries.grid.grid8km)
           .then(function(data){
             res.send(data[0].json)
           })
@@ -731,10 +729,10 @@ exports.getGridGeoJsonNiche = function (req, res, next) {
             debug(error)
             next(error)
           })
-        break
-      case 16:
-        debug("caso 16")
-        pool.any(queries.grid.grid16km)
+    break
+  case 16:
+    debug('caso 16')
+    pool.any(queries.grid.grid16km)
           .then(function(data){
             res.send(data[0].json)
           })
@@ -742,10 +740,10 @@ exports.getGridGeoJsonNiche = function (req, res, next) {
             debug(error)
             next(error)
           })
-        break
-      case 32:
-        debug("caso 32")
-        pool.any(queries.grid.grid32km)
+    break
+  case 32:
+    debug('caso 32')
+    pool.any(queries.grid.grid32km)
           .then(function(data){
             // json_grid["features"] = data[0].json
             // res.send(json_grid)
@@ -755,10 +753,10 @@ exports.getGridGeoJsonNiche = function (req, res, next) {
             debug(error)
             next(error)
           })
-        break
-      case 64:
-        debug("caso 64")
-        pool.one(queries.grid.grid64km)
+    break
+  case 64:
+    debug('caso 64')
+    pool.one(queries.grid.grid64km)
           .then(function(data){
             res.send(data.json)
           })
@@ -766,10 +764,10 @@ exports.getGridGeoJsonNiche = function (req, res, next) {
             debug(error)
             next(error)
           })
-        break
-        default:
-        debug("default 16")
-        pool.any(queries.grid.grid16km)
+    break
+  default:
+    debug('default 16')
+    pool.any(queries.grid.grid16km)
           .then(function(data){
             res.send(data[0].json)
           })
@@ -777,8 +775,8 @@ exports.getGridGeoJsonNiche = function (req, res, next) {
             debug(error)
             next(error)
           })
-        break
-      }
+    break
+  }
 }
 
 
@@ -797,50 +795,50 @@ exports.getGridGeoJsonNiche = function (req, res, next) {
 
 exports.getVariablesNiche = function (req, res, next) {
       
-      debug("getVariablesNiche")
+  debug('getVariablesNiche')
       
-      var field = getParam(req, 'field',"")
-      var parentfield = getParam(req, 'parentfield',"")
-      var parentitem = getParam(req, 'parentitem',"")
+  var field = getParam(req, 'field','')
+  var parentfield = getParam(req, 'parentfield','')
+  var parentitem = getParam(req, 'parentitem','')
 
       // debug(field)
       // debug(parentfield)
       // debug(parentitem)
 
-      if(field === max_taxon_name){
+  if(field === max_taxon_name){
 
           // debug("entra reino")
-          pool.any(queries.getVariablesNiche.getVariablesReino, {
-            taxon: field
-          })
+    pool.any(queries.getVariablesNiche.getVariablesReino, {
+      taxon: field
+    })
           .then(function (data) {
                 // debug(data)
-                res.json({'data': data})
+            res.json({'data': data})
           })
           .catch(function (error) {
-                debug(error)
-                next(error)
+            debug(error)
+            next(error)
           })
       
-      }
-      else{
+  }
+  else{
 
-          pool.any(queries.getVariablesNiche.getVariables, {
-            taxon: field,
-            parent_taxon: parentfield,
-            parent_valor: parentitem
-          })
+    pool.any(queries.getVariablesNiche.getVariables, {
+      taxon: field,
+      parent_taxon: parentfield,
+      parent_valor: parentitem
+    })
           .then(function (data) {
                 // debug(data)
-                res.json({'data': data})
+            res.json({'data': data})
           })
           .catch(function (error) {
-                debug(error)
-                next(error)
+            debug(error)
+            next(error)
           })
       
 
-      }
+  }
   
 
 }
@@ -863,46 +861,46 @@ exports.getVariablesNiche = function (req, res, next) {
 
 exports.getRasterNiche = function (req, res, next) {
 
-      debug("getRasterNiche")
+  debug('getRasterNiche')
 
-      var field = getParam(req, 'field')
-      var level = parseInt(getParam(req, 'level', 0))
-      var type = parseInt(getParam(req, 'type'))
+  var field = getParam(req, 'field')
+  var level = parseInt(getParam(req, 'level', 0))
+  var type = parseInt(getParam(req, 'type'))
 
       // debug(level)
       // Si la peticion es de nicho, se requieren los spids
       // var coleccion = ""
 
-      if(level == 0){
+  if(level == 0){
 
-          pool.any(queries.getRasterNiche.getRasterBios, {})
+    pool.any(queries.getRasterNiche.getRasterBios, {})
           .then(function (data) {
                 // debug(data)
-                res.json({'data': data})
+            res.json({'data': data})
           })
           .catch(function (error) {
-                debug(error)
-                next(error)
+            debug(error)
+            next(error)
           })
       
-      }
-      else{
+  }
+  else{
 
-          pool.any(queries.getRasterNiche.getRasterIds, {
-            layername: field,
-            typename: type
-          })
+    pool.any(queries.getRasterNiche.getRasterIds, {
+      layername: field,
+      typename: type
+    })
           .then(function (data) {
                 // debug(data)
-                res.json({'data': data})
+            res.json({'data': data})
           })
           .catch(function (error) {
-                debug(error)
-                next(error)
+            debug(error)
+            next(error)
           })
       
 
-      }
+  }
   
 
 }
@@ -923,39 +921,39 @@ exports.getRasterNiche = function (req, res, next) {
 
 exports.getCountGridid = function (req, res, next) {
 
-      debug("getCountGridid")
+  debug('getCountGridid')
 
-      var spids = getParam(req, 'spids')
-      var isNicho = getParam(req, 'nicho')
-      var res_celda = getParam(req, 'res_celda', "cells_16km")
-      var res_grid = getParam(req, 'res_grid', "gridid_16km")
+  var spids = getParam(req, 'spids')
+  var isNicho = getParam(req, 'nicho')
+  var res_celda = getParam(req, 'res_celda', 'cells_16km')
+  var res_grid = getParam(req, 'res_grid', 'gridid_16km')
 
 
       // Si la peticion es de nicho, se requieren los spids
-      var coleccion = ""
-      if(isNicho === 'true'){
+  var coleccion = ''
+  if(isNicho === 'true'){
 
-         coleccion = "(animalia || plantae || fungi || protoctista || prokaryotae || bio01 || bio02 || bio03 || bio04 || bio05 || bio06 || bio07 || bio08 ||bio09 || bio10 || bio11 || bio12 || bio13 || bio14 || bio15 || bio16 ||bio17 || bio18 || bio19 ) as spids,";
+    coleccion = '(animalia || plantae || fungi || protoctista || prokaryotae || bio01 || bio02 || bio03 || bio04 || bio05 || bio06 || bio07 || bio08 ||bio09 || bio10 || bio11 || bio12 || bio13 || bio14 || bio15 || bio16 ||bio17 || bio18 || bio19 ) as spids,'
          // || elevacion || pendiente || topidx
 
-      }
+  }
 
       // debug(spids)
 
-      pool.any(queries.getCountGridid.getCount, {
-        spids: spids.toString(),
-        coleccion: coleccion,
-          res_celda: res_celda,
-          res_grid: res_grid
-      })
+  pool.any(queries.getCountGridid.getCount, {
+    spids: spids.toString(),
+    coleccion: coleccion,
+    res_celda: res_celda,
+    res_grid: res_grid
+  })
           .then(function (data) {
 
             res.json({'data': data})
-      })
+          })
           .catch(function (error) {
             debug(error)
             next(error)
-      })
+          })
 
 }
 
@@ -977,21 +975,21 @@ exports.getCountGridid = function (req, res, next) {
 
 exports.getGrididsNiche = function (req, res, next) {
 
-      debug(getParam(req, 'qtype'))
-      debug("getGrididsNiche")
-      var res_celda = getParam(req, 'res_celda', "gridid_16km")
+  debug(getParam(req, 'qtype'))
+  debug('getGrididsNiche')
+  var res_celda = getParam(req, 'res_celda', 'gridid_16km')
 
-      pool.any(queries.getGrididsNiche.getGridids, {
-          res_celda: res_celda
-      })
+  pool.any(queries.getGrididsNiche.getGridids, {
+    res_celda: res_celda
+  })
           .then(function (data) {
             // debug(data)
             res.json({'data': data})
-      })
+          })
           .catch(function (error) {
             debug(error)
             next(error)
-      })
+          })
 
 }
 
@@ -1010,20 +1008,20 @@ exports.getGrididsNiche = function (req, res, next) {
 
 exports.getSpeciesNiche = function (req, res, next) {
 
-      debug("getSpeciesNiche")
+  debug('getSpeciesNiche')
 
-      var spid              = parseInt(getParam(req, 'id'))
-      var sfecha            = getParam(req, 'sfecha', false)
-      var sfosil            = getParam(req, 'sfosil', false)
-      var lb_fosil = sfosil === "false" || sfosil === false ? " and (ejemplarfosil <> 'SI' or ejemplarfosil is null) " : "";
-      var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
-      var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
-      var res_celda = getParam(req, 'res_celda', "gridid_16km")
+  var spid              = parseInt(getParam(req, 'id'))
+  var sfecha            = getParam(req, 'sfecha', false)
+  var sfosil            = getParam(req, 'sfosil', false)
+  var lb_fosil = sfosil === 'false' || sfosil === false ? ' and (ejemplarfosil <> \'SI\' or ejemplarfosil is null) ' : ''
+  var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+  var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+  var res_celda = getParam(req, 'res_celda', 'gridid_16km')
 
-      var grid_resolution = getParam(req, 'grid_res',16)
-      var res_celda_sp =  "cells_"+grid_resolution+"km"   
-      var res_celda_snib =  "gridid_"+grid_resolution+"km" 
-      var res_celda_snib_tb = "grid_"+grid_resolution+"km_aoi" 
+  var grid_resolution = getParam(req, 'grid_res',16)
+  var res_celda_sp =  'cells_'+grid_resolution+'km'   
+  var res_celda_snib =  'gridid_'+grid_resolution+'km' 
+  var res_celda_snib_tb = 'grid_'+grid_resolution+'km_aoi' 
       
       
       // debug(spid)
@@ -1034,86 +1032,86 @@ exports.getSpeciesNiche = function (req, res, next) {
       // debug(moment().format('YYYY-MM-DD'))
 
 
-      if( (parseInt(fecha_incio.format('YYYY')) != 1500 || parseInt(fecha_fin.format('YYYY')) != parseInt(moment().format('YYYY')) ) && sfecha === "false"){
-        debug("CASO: rango y sin fecha")
-        pool.any(queries.getSpeciesNiche.getSpeciesSDR, {
-                spid: spid,
-                lim_inf: fecha_incio.format('YYYY'),
-                lim_sup: fecha_fin.format('YYYY'),
-                res_celda: res_celda,
-                res_celda_sp: res_celda_sp,
-                res_celda_snib: res_celda_snib,
-                res_celda_snib_tb: res_celda_snib_tb, 
-                sfosil: lb_fosil
-          })
+  if( (parseInt(fecha_incio.format('YYYY')) != 1500 || parseInt(fecha_fin.format('YYYY')) != parseInt(moment().format('YYYY')) ) && sfecha === 'false'){
+    debug('CASO: rango y sin fecha')
+    pool.any(queries.getSpeciesNiche.getSpeciesSDR, {
+      spid: spid,
+      lim_inf: fecha_incio.format('YYYY'),
+      lim_sup: fecha_fin.format('YYYY'),
+      res_celda: res_celda,
+      res_celda_sp: res_celda_sp,
+      res_celda_snib: res_celda_snib,
+      res_celda_snib_tb: res_celda_snib_tb, 
+      sfosil: lb_fosil
+    })
           .then(function (data) {
                 // debug(data)
-                res.json({'data': data})
+            res.json({'data': data})
           })
           .catch(function (error) {
-                debug(error)
-                next(error)
+            debug(error)
+            next(error)
           })
-      }
-      else if( parseInt(fecha_incio.format('YYYY')) == 1500 && parseInt(fecha_fin.format('YYYY')) == parseInt(moment().format('YYYY'))  && sfecha === "false"){
-          debug("CASO: solo sin fecha")
-          pool.any(queries.getSpeciesNiche.getSpeciesSD, {
-                spid: spid,
-                res_celda: res_celda,
-                res_celda_sp: res_celda_sp,
-                res_celda_snib: res_celda_snib,
-                res_celda_snib_tb: res_celda_snib_tb, 
-                sfosil: lb_fosil
-          })
+  }
+  else if( parseInt(fecha_incio.format('YYYY')) == 1500 && parseInt(fecha_fin.format('YYYY')) == parseInt(moment().format('YYYY'))  && sfecha === 'false'){
+    debug('CASO: solo sin fecha')
+    pool.any(queries.getSpeciesNiche.getSpeciesSD, {
+      spid: spid,
+      res_celda: res_celda,
+      res_celda_sp: res_celda_sp,
+      res_celda_snib: res_celda_snib,
+      res_celda_snib_tb: res_celda_snib_tb, 
+      sfosil: lb_fosil
+    })
           .then(function (data) {
                 // debug(data)
-                res.json({'data': data})
+            res.json({'data': data})
           })
           .catch(function (error) {
-                debug(error)
-                next(error)
+            debug(error)
+            next(error)
           })
-      }
-      else if( parseInt(fecha_incio.format('YYYY')) != 1500 || parseInt(fecha_fin.format('YYYY')) != parseInt(moment().format('YYYY')) ){
-          debug("CASO: solo rango")
-          pool.any(queries.getSpeciesNiche.getSpeciesR, {
-                spid: spid,
-                lim_inf: fecha_incio.format('YYYY'),
-                lim_sup: fecha_fin.format('YYYY'),
-                res_celda: res_celda,
-                res_celda_sp: res_celda_sp,
-                res_celda_snib: res_celda_snib,
-                res_celda_snib_tb: res_celda_snib_tb, 
-                sfosil: lb_fosil
-          })
+  }
+  else if( parseInt(fecha_incio.format('YYYY')) != 1500 || parseInt(fecha_fin.format('YYYY')) != parseInt(moment().format('YYYY')) ){
+    debug('CASO: solo rango')
+    pool.any(queries.getSpeciesNiche.getSpeciesR, {
+      spid: spid,
+      lim_inf: fecha_incio.format('YYYY'),
+      lim_sup: fecha_fin.format('YYYY'),
+      res_celda: res_celda,
+      res_celda_sp: res_celda_sp,
+      res_celda_snib: res_celda_snib,
+      res_celda_snib_tb: res_celda_snib_tb, 
+      sfosil: lb_fosil
+    })
           .then(function (data) {
                 // debug(data)
-                res.json({'data': data})
+            res.json({'data': data})
           })
           .catch(function (error) {
-                debug(error)
-                next(error)
+            debug(error)
+            next(error)
           })
-      }
-      else{
-          debug("CASO: sin filtros")
-          pool.any(queries.getSpeciesNiche.getSpecies, {
-                spid: spid,
-                res_celda: res_celda,
-                res_celda_sp: res_celda_sp,
-                res_celda_snib: res_celda_snib,
-                res_celda_snib_tb: res_celda_snib_tb, 
-                sfosil: lb_fosil
-          })
+  }
+  else{
+    debug('CASO: sin filtros')
+    pool.any(queries.getSpeciesNiche.getSpecies, {
+      spid: spid,
+      res_celda: res_celda,
+      res_celda_sp: res_celda_sp,
+      res_celda_snib: res_celda_snib,
+      res_celda_snib_tb: res_celda_snib_tb, 
+      sfosil: lb_fosil
+    })
           .then(function (data) {
                 // debug(data)
-                res.json({'data': data})
+            res.json({'data': data})
           })
           .catch(function (error) {
-                debug(error)
-                next(error)
+            debug(error)
+            next(error)
           })
-      }
+  }
       
 }
 
@@ -1132,23 +1130,23 @@ exports.getSpeciesNiche = function (req, res, next) {
 
 exports.getEntListNiche = function (req, res, next) {
   
-      debug("getEntListNiche")
+  debug('getEntListNiche')
 
-      var str       = getParam(req, 'searchStr')
-      var has_limit = parseInt(getParam(req, 'limit', false))
-      var source    = parseInt(getParam(req, 'source'))
-      var nivel     = getParam(req, 'nivel', min_taxon_name)
-      var columnas  = verb_utils.getColumns(source, nivel)
+  var str       = getParam(req, 'searchStr')
+  var has_limit = parseInt(getParam(req, 'limit', false))
+  var source    = parseInt(getParam(req, 'source'))
+  var nivel     = getParam(req, 'nivel', min_taxon_name)
+  var columnas  = verb_utils.getColumns(source, nivel)
 
-      var grid_resolution = getParam(req, 'grid_res',16)
-      var res_celda_sp =  "cells_"+grid_resolution+"km"   
-      var res_celda_snib =  "gridid_"+grid_resolution+"km" 
-      var res_celda_snib_tb = "grid_"+grid_resolution+"km_aoi" 
+  var grid_resolution = getParam(req, 'grid_res',16)
+  var res_celda_sp =  'cells_'+grid_resolution+'km'   
+  var res_celda_snib =  'gridid_'+grid_resolution+'km' 
+  var res_celda_snib_tb = 'grid_'+grid_resolution+'km_aoi' 
 
-      res_celda_sp = (source == 1) ? res_celda_sp : "array[]::int[]";
-      var val_tree = (source == 1) ? " and icount("+res_celda_sp+") > 0 " : "";
+  res_celda_sp = (source == 1) ? res_celda_sp : 'array[]::int[]'
+  var val_tree = (source == 1) ? ' and icount('+res_celda_sp+') > 0 ' : ''
 
-      var txt_limite = has_limit === false ? "" : "limit " + limite
+  var txt_limite = has_limit === false ? '' : 'limit ' + limite
       
       // debug(nivel)
       // debug(str)
@@ -1157,24 +1155,24 @@ exports.getEntListNiche = function (req, res, next) {
       // debug("res_celda_sp: " + res_celda_sp)
       // debug("val_tree: " + val_tree)
 
-      pool.any(queries.getEntListNiche.getEntList, {
-            str: str,
-            columnas: columnas,
-            nivel: nivel,
-            res_celda_sp: res_celda_sp,
-            res_celda_snib: res_celda_snib,
-            res_celda_snib_tb: res_celda_snib_tb, 
-            val_tree: val_tree,
-            limite: txt_limite
-      })
+  pool.any(queries.getEntListNiche.getEntList, {
+    str: str,
+    columnas: columnas,
+    nivel: nivel,
+    res_celda_sp: res_celda_sp,
+    res_celda_snib: res_celda_snib,
+    res_celda_snib_tb: res_celda_snib_tb, 
+    val_tree: val_tree,
+    limite: txt_limite
+  })
           .then(function (data) {
             // debug(data)
             res.json({'data': data})
-      })
+          })
           .catch(function (error) {
             debug(error)
             next(error)
-      })
+          })
 
 }
 
