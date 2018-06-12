@@ -199,25 +199,6 @@ exports.infoSpecie = function (req, res, next) {
   })
 }
 
-/**
-* getCountGridid regresa el conteo por celda de un conjunto de especies
-* definidas por el cliente
-*
-* @param {express.Request} req
-* @param {express.Response} res
-*
-*/
-// exports.getCountGridid = function (req, res, next) {
-//   var speciesIdArray = getParam(req, 'cat_spids', [])
-// 
-//   pool.any(queries.interaction.getCount, {spid_array: speciesIdArray})
-//   .then(function (data) {
-//     res.json({'data': data})
-//   })
-//   .catch(function (error) {
-//     next(error)
-//   })
-// }
 
 /**
 * getCountByGroup obtiene las especies que están relacionadas con una
@@ -914,8 +895,6 @@ exports.getAvailableVariables = function (req, res, next) {
 * @param {express.Response} res
 *
 */
-
-
 exports.getCountGridid = function (req, res, next) {
   debug('getCountGridid')
   var columnas = ['gridid', 'conteo']
@@ -940,7 +919,6 @@ exports.getCountGridid = function (req, res, next) {
   }).then(function (data) {
     res.json({'data': data})
   }).catch(function (error) {
-    debug(error)
     next(error)
   })
 }
