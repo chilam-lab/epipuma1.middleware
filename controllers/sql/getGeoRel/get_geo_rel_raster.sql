@@ -17,7 +17,7 @@ select
 	round(avg(out_score),2) as score
 from iteratevalidationprocess($<iterations>, $<spid>, $<n_grid_coverage>, $<alpha>, $<min_occ>, array[$<discardedDeleted:raw>]::int[], '$<res_celda_sp:raw>', '$<res_celda_snib:raw>', '$<res_celda_snib_tb:raw>','', '$<where_config_raster:value>', 'abio', $<filter_time>, $<caso>, $<lim_inf>, $<lim_sup>, '$<fossil:value>', '$<idtabla:value>')
 --from iteratevalidationprocess(1, 28923, 94544, 0.01, 0, array[]::int[], 'cells_16km', 'gridid_16km', 'grid_16km_aoi', 'where clasevalida = ''Mammalia'' ', '', 'bio', false, -1, 2010, 2020, '', 'temp_01')
---from iteratevalidationprocess(1, 27332, 94544, 0.01, 0, array[]::int[], 'cells_16km', 'gridid_16km', 'grid_16km_aoi', '', 'where layer = ''bio01'' ', 'abio', false, -1, 2010, 2020, '', 'temp_01')
+--from iteratevalidationprocess(1, 27333, 'full', 0.01, 1, array[]::int[], 'cells_16km', 'gridid_16km', 'grid_16km_aoi', '', 'where layer = ''bio1'' ', 'abio', false, -1, 2010, 2020, '', 'temp_01')
 where out_spid is not null
 group by 	out_spid,
 			out_especievalidabusqueda,
