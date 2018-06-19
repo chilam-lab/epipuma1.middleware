@@ -47,17 +47,17 @@ SELECT 	temp_target.spid,
 		round( cast( 
 			get_epsilon(
 				${alpha},
-				cast( temp_target.nj as integer), 
-				cast( icount(temp_source.cells & temp_target.cells) as integer), 
-				cast( temp_source.ni as integer), 
+				cast( temp_target.nj as integer),
+				cast( icount(temp_source.cells & temp_target.cells) as integer),
+				cast( temp_source.ni as integer),
 				cast( ${N} as integer)
 			)as numeric), 2)  as epsilon,
 		round( cast(  ln(   
 			get_score(
 				${alpha},
-				cast( temp_target.nj as integer), 
-				cast( icount(temp_source.cells & temp_target.cells) as integer), 
-				cast( temp_source.ni as integer), 
+				cast( temp_target.nj as integer),
+				cast( icount(temp_source.cells & temp_target.cells) as integer),
+				cast( temp_source.ni as integer),
 				cast( ${N} as integer)
 			)
 		) as numeric), 2) as score

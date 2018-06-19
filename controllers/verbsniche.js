@@ -710,6 +710,7 @@ exports.getGridGeoJsonNiche = function (req, res, next) {
     
     var grid_res = getParam(req, 'grid_res',16)
     var footprint_region = parseInt(getParam(req, 'footprint_region', 1))
+
     
     debug('grid_res: ' + grid_res)
     debug('footprint_region: ' + footprint_region)
@@ -750,6 +751,10 @@ exports.getVariablesNiche = function (req, res, next) {
       var field = getParam(req, 'field',"")
       var parentfield = getParam(req, 'parentfield',"")
       var parentitem = getParam(req, 'parentitem',"")
+
+      // Verificar si es necesario enviar el footprint_region, puede existir cambio de region despues 
+      // de seleccionar las covariables
+      var region = parseInt(getParam(req, 'footprint_region', 1))
 
       // debug(field)
       // debug(parentfield)
@@ -1015,11 +1020,14 @@ exports.getSpeciesNiche = function (req, res, next) {
       var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
       var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
       var res_celda = getParam(req, 'res_celda', "gridid_16km")
+      var region    = parseInt(getParam(req, 'footprint_region',1))
 
       var grid_resolution = getParam(req, 'grid_res',16)
       var res_celda_sp =  "cells_"+grid_resolution+"km"   
       var res_celda_snib =  "gridid_"+grid_resolution+"km" 
       var res_celda_snib_tb = "grid_"+grid_resolution+"km_aoi" 
+
+
       
       
       // debug(spid)
@@ -1133,6 +1141,7 @@ exports.getEntListNiche = function (req, res, next) {
       var str       = getParam(req, 'searchStr')
       var has_limit = parseInt(getParam(req, 'limit', false))
       var source    = parseInt(getParam(req, 'source'))
+      var region    = parseInt(getParam(req, 'footprint_region',1))
       var nivel     = getParam(req, 'nivel', min_taxon_name)
       var columnas  = verb_utils.getColumns(source, nivel)
 
@@ -1203,6 +1212,49 @@ exports.getSubAOI = function(req, res, next) {
           })
           next(error)
         })
+}
+
+
+/**
+* getN
+*
+* Obtiene la N para analisis dependiendo la region
+* 
+* @param {express.Request} req
+* @param {express.Response} res
+*
+*/
+exports.getN = function(req, res) {
+
+      debug("getN");
+
+      var grid_resolution = verb_utils.getParam(req, 'grid_res',16)
+      var res_celda_snib_tb = "grid_"+grid_resolution+"km_aoi" 
+      
+      var footprint_region = parseInt(verb_utils.getParam(req, 'footprint_region', 1))
+      var country = verb_utils.getRegionCountry(footprint_region)
+
+      debug("res_celda_snib_tb: " + res_celda_snib_tb)
+      debug("country: " + country)
+
+      pool.any(queries.basicAnalysis.getN,{
+        res_celda_snib_tb: res_celda_snib_tb,
+        country: country
+      })
+        .then(function (data) {
+          res.json({
+            'data': data,
+            ok: true
+          })
+        })
+        .catch(function (error) {
+          return res.json({
+            err: error,
+            ok: false,
+            message: "Error al procesar la query"
+          })
+        })
+
 }
 
 
