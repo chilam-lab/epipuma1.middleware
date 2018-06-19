@@ -106,4 +106,9 @@ router.route('/especie/getSubAOI')
   .post(verbsCtrl.getSubAOI)
 
 
+router.route('/especie/getN')
+  .get(verbsCtrl.getN)
+  .post(verbsCtrl.getN)
+
+
 module.exports = router

@@ -475,15 +475,32 @@ verb_utils.getRequestParams = function(req, verbose){
 
   data_request["alpha"] = verb_utils.alpha
 
-
-  
-
   if(verbose){
     debug(data_request)
   }
 
 
   return data_request;
+
+}
+
+
+
+verb_utils.getRegionCountry = function(footprint_region){
+
+    var country = "'MEXICO'";
+
+    if(footprint_region == 1){
+      country = "MEXICO";
+    }
+    else if(footprint_region == 1){
+      country = "'UNITED STATES, THE'"; 
+    }
+    else{
+      country = "'MEXICO' and country = 'UNITED STATES, THE'";  
+    }
+
+    return country;
 
 }
 

@@ -33,10 +33,13 @@ var buckets = verb_utils.buckets
  */
 exports.getBasicInfo = function(req, res, next) {
   
-
   debug('getBasicInfo')
 
-  var data_request = verb_utils.getRequestParams(req, true)
+  var footprint_region = parseInt(verb_utils.getParam(req, 'footprint_region', 1))
+  var country = verb_utils.getRegionCountry(footprint_region)
+
+  var data_request = verb_utils.getRequestParams(req, false)
+
   
   if (data_request.hasBios === 'true' && data_request.hasRaster === 'false' ) {
 
@@ -47,11 +50,12 @@ exports.getBasicInfo = function(req, res, next) {
 
         return t.one(queries.basicAnalysis.getN, {
 
-            res_celda_snib_tb: data_request.res_celda_snib_tb
+            res_celda_snib_tb: data_request.res_celda_snib_tb,
+            country: country
 
         }).then(resp => {
 
-            // debug("N:" + resp.n)
+            debug("N:" + resp.n)
             data_request["N"] = resp.n 
 
             // seleccion de caso para obtener datos de especie ibjetivo

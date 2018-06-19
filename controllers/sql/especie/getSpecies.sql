@@ -19,3 +19,21 @@ WHERE
 		--and (ejemplarfosil <> 'SI' or ejemplarfosil is null)
 
 
+-- SELECT DISTINCT st_asgeojson(the_geom) as json_geom, 
+-- 				gridid_16km as gridid,
+-- 				urlejemplar,
+-- 				fechacolecta,
+-- 				aniocolecta,
+-- 				0 as occ
+-- 				--icount(sp_snib.cells_16km) as occ
+-- FROM snib 
+-- join sp_snib
+-- on snib.spid = sp_snib.spid
+-- join america
+-- on st_intersects(america.geom, snib.the_geom) 
+-- WHERE 	
+-- 	snib.spid = 27333 
+-- 	and snib.especievalidabusqueda <> ''
+-- 	and fechacolecta <> ''
+-- 	and gridid_16km is not null
+-- 	and america.country = 'MEXICO'
