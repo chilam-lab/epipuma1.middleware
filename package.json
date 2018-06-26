@@ -43,6 +43,6 @@
     "pg-monitor": "^0.5.11",
     "should": "^13.1.0",
     "supertest": "~2.0.0",
-    "swagger-markdown": "^0.1.8"
+    "swagger-markdown": "^1.1.3"
   }
 }
