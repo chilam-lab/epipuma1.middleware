@@ -1,17 +1,57 @@
 /*getGeoRel sin filtros*/
-with source AS (
-	SELECT  bid as spid,
-			$<res_celda:raw> AS cells 
+with raster_cell as (
+	SELECT 
+		case when strpos(label,'Precipit') = 0 then
+		(layer || ' ' || round(cast(split_part(split_part(tag,':',1),'.',1) as numeric)/10,2)  ||' ºC - ' || round(cast(split_part(split_part(tag,':',2),'.',1) as numeric)/10,2) || ' ºC')
+		else
+		(layer || ' ' || round(cast(split_part(split_part(tag,':',1),'.',1) as numeric),2)  ||' mm - ' || round(cast(split_part(split_part(tag,':',2),'.',1) as numeric),2) || ' mm')
+		end as especievalidabusqueda,
+	bid as spid,
+	unnest($<res_celda:raw>) as cell
+	--unnest(cells_16km) as cell
 	FROM raster_bins
-	--where layer = 'bio01'
-	$<where_config_source_raster:raw>	 	 
+	$<where_config_source_raster:raw>
+	--where layer = 'bio1'
+),
+source AS (
+	SELECT  spid,
+			array_agg(rc.cell) as cells 
+	FROM raster_cell as rc
+	--join grid_16km_aoi as gdkm
+	join $<res_celda_snib_tb:raw> as gdkm
+	--on rc.cell = gdkm.gridid_16km
+	on rc.cell = gdkm.$<res_celda_snib:raw>
+	join america
+	on st_intersects(america.geom, gdkm.small_geom)
+	where america.country = 'MEXICO'
+	group by spid	 	 
+),
+raster_cell_target as (
+	SELECT 
+		case when strpos(label,'Precipit') = 0 then
+		(layer || ' ' || round(cast(split_part(split_part(tag,':',1),'.',1) as numeric)/10,2)  ||' ºC - ' || round(cast(split_part(split_part(tag,':',2),'.',1) as numeric)/10,2) || ' ºC')
+		else
+		(layer || ' ' || round(cast(split_part(split_part(tag,':',1),'.',1) as numeric),2)  ||' mm - ' || round(cast(split_part(split_part(tag,':',2),'.',1) as numeric),2) || ' mm')
+		end as especievalidabusqueda,
+	bid as spid,
+	unnest($<res_celda:raw>) as cell
+	--unnest(cells_16km) as cell
+	FROM raster_bins
+	$<where_config_target_raster:raw>
+	--where layer = 'bio1'
 ),
 target AS (
-	SELECT  bid as spid,
-			$<res_celda:raw> AS cells 
-	FROM raster_bins
-	--where layer = 'bio01'
-	$<where_config_target_raster:raw>	  
+	SELECT  spid,
+			array_agg(rc.cell) as cells 
+	FROM raster_cell_target as rc
+	--join grid_16km_aoi as gdkm
+	join $<res_celda_snib_tb:raw> as gdkm
+	--on rc.cell = gdkm.gridid_16km
+	on rc.cell = gdkm.$<res_celda_snib:raw>
+	join america
+	on st_intersects(america.geom, gdkm.small_geom)
+	where america.country = 'MEXICO'
+	group by spid		 
 ),
 n_res AS (
 	SELECT count(*) AS n FROM $<res_celda_snib_tb:raw>

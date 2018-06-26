@@ -45,8 +45,8 @@ describe("Prueba petición variables abioticas, su contenido y su tamaño",funct
 
 	it("Árbol variables abioticas - DISPONIBLE", function(done){
 
-		supertest(server).post("/niche/especie")
-		.send({level : 0, qtype : "getRasterVariables", type: 1})
+		supertest(server).post("/niche/especie/getRasterVariables")
+		.send({level : 0, type: 1})
 		.expect("Content-type",/json/)
 		.expect(200)
 		.end(function(err, response){
@@ -69,8 +69,8 @@ describe("Prueba búsqueda de especies, su contenido y tipo de valor",function()
 
 	it("Buscador de especies - DISPONIBLE", function(done){
 
-		supertest(server).post("/niche/especie")
-		.send({limit : 15, nivel: "especievalidabusqueda", qtype : "getEntList", searchStr: "Lynx", source: 1})
+		supertest(server).post("/niche/especie/getEntList")
+		.send({limit : 15, nivel: "especievalidabusqueda", searchStr: "Lynx", source: 1})
 		.expect("Content-type",/json/)
 		.expect(200)
 		.end(function(err, response){
@@ -101,13 +101,20 @@ describe("Prueba búsqueda de especies, su contenido y tipo de valor",function()
 });
 
 
-[["false", "false", "false"], ["false", "false", "true"], ["true", "true", "true"], ["true", "true", "false"], ["false", "true", "false"], ["false", "true", "true"], ["true", "false", "true"], ["true", "false", "false"]].forEach(pair => {
+[["false", "false", "false"], 
+ ["false", "false", "true"], 
+ ["true", "true", "true"], 
+ ["true", "true", "false"], 
+ ["false", "true", "false"], 
+ ["false", "true", "true"], 
+ ["true", "false", "true"],
+ ["true", "false", "false"]].forEach(function(pair) {
 
 	describe("Prueba obtención de ocurrencias de especie objetivo con (sfecha, rango, sfosil) => " + pair, function(done){
 
 		this.timeout(1000 * 60 * 2); // 3 minutos maximo
-		var spid = 27332;
-		var lim_inf = 1500
+		var spid = 27333;
+		var lim_inf = 1500;
 		var lim_sup = parseInt(moment().format('YYYY'));
 
 		if(pair[1] === "false"){
@@ -119,14 +126,14 @@ describe("Prueba búsqueda de especies, su contenido y tipo de valor",function()
 
 			it("Ocurrencias de especies - DISPONIBLE", function(done){
 
-				supertest(server).post("/niche/especie")
+				supertest(server).post("/niche/especie/getSpecies")
 				.send({
-					id : spid, 
-					qtype: "getSpecies", 
-					sfecha: pair[0], 
+					id : spid,
+					sfecha: pair[0],
 					sfosil: pair[2],
 					lim_inf: lim_inf,
-					lim_sup: lim_sup
+					lim_sup: lim_sup,
+          grid_res: 16
 				})
 				.expect("Content-type",/json/)
 				.expect(200)
@@ -164,8 +171,8 @@ describe("Petición de mallas a diferentes resoluciones",function(){
 
 		it("\nPetición de la malla de " + cell_res, function(done){
 
-			supertest(server).post("/niche/especie")
-			.send({grid_res : ""+cell_res, qtype : "getGridGeoJsonMX", api: "local"})
+			supertest(server).post("/niche/especie/getGridGeoJson")
+			.send({grid_res : ""+cell_res})
 			.expect("Content-type",/json/)
 			.expect(200)
 			.end(function(err, response){
@@ -271,7 +278,7 @@ describe("Petición de mallas a diferentes resoluciones",function(){
 // 		});
 // 	});
 
-// 	var niveles_tax = [ 
+// 	var niveles_tax = [
 // 		["generovalido", "Panthera"]];
 
 // 	niveles_tax.forEach(pair => {

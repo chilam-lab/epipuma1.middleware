@@ -88,7 +88,9 @@ function getNodesNiche(req, res, next) {
       where_config_source_raster: whereVarSourceRaster,
       where_config_target: whereVarTarget,
       where_config_target_raster: whereVarTargetRaster,
-      res_celda: res_celda
+      res_celda: res_celda,
+      res_celda_snib: res_celda_snib,
+      res_celda_snib_tb: res_celda_snib_tb
     })
       .then(function (data) {
         res.json({'data': data})
@@ -113,7 +115,9 @@ function getNodesNiche(req, res, next) {
       where_config_source: whereVarSource,
       where_config_source_raster: whereVarSourceRaster,
       where_config_target: whereVarTarget,
-      res_celda: res_celda
+      res_celda: res_celda,
+      res_celda_snib: res_celda_snib,
+      res_celda_snib_tb: res_celda_snib_tb
       // where_config_target_raster: whereVarTargetRaster
     })
       .then(function (data) {
@@ -140,7 +144,9 @@ function getNodesNiche(req, res, next) {
       where_config_source_raster: whereVarSourceRaster,
       // where_config_target: whereVarTarget,
       where_config_target_raster: whereVarTargetRaster,
-      res_celda: res_celda
+      res_celda: res_celda,
+      res_celda_snib: res_celda_snib,
+      res_celda_snib_tb: res_celda_snib_tb
     })
       .then(function (data) {
         res.json({'data': data})
@@ -166,7 +172,9 @@ function getNodesNiche(req, res, next) {
           // where_config_source_raster: whereVarSourceRaster,
       where_config_target: whereVarTarget,
       where_config_target_raster: whereVarTargetRaster,
-      res_celda: res_celda
+      res_celda: res_celda,
+      res_celda_snib: res_celda_snib,
+      res_celda_snib_tb: res_celda_snib_tb
     })
       .then(function (data) {
         res.json({'data': data})
@@ -192,7 +200,9 @@ function getNodesNiche(req, res, next) {
       where_config_source_raster: whereVarSourceRaster,
       where_config_target: whereVarTarget,
       where_config_target_raster: whereVarTargetRaster,
-      res_celda: res_celda
+      res_celda: res_celda,
+      res_celda_snib: res_celda_snib,
+      res_celda_snib_tb: res_celda_snib_tb
     })
       .then(function (data) {
         res.json({'data': data})
@@ -221,7 +231,9 @@ function getNodesNiche(req, res, next) {
       where_config_source: whereVarSource,
       // where_config_source_raster: whereVarSourceRaster,
       where_config_target: whereVarTarget,
-      res_celda: res_celda
+      res_celda: res_celda,
+      res_celda_snib: res_celda_snib,
+      res_celda_snib_tb: res_celda_snib_tb
       // where_config_target_raster: whereVarTargetRaster
     })
       .then(function (data) {
@@ -246,7 +258,9 @@ function getNodesNiche(req, res, next) {
       // where_config_source_raster: whereVarSourceRaster,
       // where_config_target: whereVarTarget,
       where_config_target_raster: whereVarTargetRaster,
-      res_celda: res_celda
+      res_celda: res_celda,
+      res_celda_snib: res_celda_snib,
+      res_celda_snib_tb: res_celda_snib_tb
     })
       .then(function (data) {
         res.json({'data': data})
@@ -270,7 +284,9 @@ function getNodesNiche(req, res, next) {
       // where_config_source: whereVarSource,
       where_config_source_raster: whereVarSourceRaster,
       where_config_target: whereVarTarget,
-      res_celda: res_celda
+      res_celda: res_celda,
+      res_celda_snib: res_celda_snib,
+      res_celda_snib_tb: res_celda_snib_tb
       // where_config_target_raster: whereVarTargetRaster
     })
       .then(function (data) {
@@ -299,7 +315,9 @@ function getNodesNiche(req, res, next) {
       where_config_source_raster: whereVarSourceRaster,
       // where_config_target: whereVarTarget,
       where_config_target_raster: whereVarTargetRaster,
-      res_celda: res_celda
+      res_celda: res_celda,
+      res_celda_snib: res_celda_snib,
+      res_celda_snib_tb: res_celda_snib_tb
     })
       .then(function (data) {
         // debug(data)

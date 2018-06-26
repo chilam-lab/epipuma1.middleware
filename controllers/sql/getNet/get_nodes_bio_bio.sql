@@ -2,7 +2,8 @@ with source AS (
 	SELECT  spid,
 			reinovalido, phylumdivisionvalido, clasevalida, ordenvalido, familiavalida, generovalido, especievalidabusqueda,
 			1 as grp,
-			$<res_celda:raw> AS cells 
+			$<res_celda:raw> AS cells
+			--sp_snib.cells_16km as cells
 	FROM sp_snib 
 	--WHERE generovalido = 'Aedes'
 	$<where_config_source:raw>	 
