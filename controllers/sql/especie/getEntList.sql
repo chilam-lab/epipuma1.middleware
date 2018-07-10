@@ -1,3 +1,6 @@
+-- TODO: Se puede agregar los filtros como el verbo getSpecies
+-- Requiere realizar la agrupación de todas las especies que considen con una cadena dada,
+-- esto consume tiempo excesivo para un operación rápida que se necesita
 select 	
 		$<columnas:raw>,
 		--reinovalido, phylumdivisionvalido, clasevalida, ordenvalido, familiavalida, generovalido, especievalidabusqueda,
