@@ -32,6 +32,7 @@ verb_utils.min_taxon_name = 'especievalidabusqueda' // nombre de columna del val
 verb_utils.max_taxon_name = 'reinovalido' // nombre de columna del valor maximo taxonomico en base de datos
 buckets = 20
 deciles = 10
+verb_utils.region_mx = 19
 
 
 
@@ -486,23 +487,26 @@ verb_utils.getRequestParams = function(req, verbose){
 
 
 
-verb_utils.getRegionCountry = function(footprint_region){
+// verb_utils.getRegionCountry = function(footprint_region){
 
-    var country = "'MEXICO'";
+//     var country = "'MEXICO'";
 
-    if(footprint_region == 1){
-      country = "MEXICO";
-    }
-    else if(footprint_region == 1){
-      country = "'UNITED STATES, THE'"; 
-    }
-    else{
-      country = "'MEXICO' and country = 'UNITED STATES, THE'";  
-    }
+//     if(footprint_region == 19){
+//       country = "MEXICO";
+//     }
+//     else if(footprint_region == 28){
+//       country = "'UNITED STATES, THE'"; 
+//     }
+//     else if(footprint_region == 33){
+//       country = "'UNITED STATES, THE'"; 
+//     }
+//     else{
+//       country = "'MEXICO' and country = 'UNITED STATES, THE'";  
+//     }
 
-    return country;
+//     return country;
 
-}
+// }
 
 
 verb_utils.processDataForScoreDecil = function (data_cell){

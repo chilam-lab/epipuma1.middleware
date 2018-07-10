@@ -20,6 +20,8 @@ var iterations = verb_utils.iterations
 var limite = verb_utils.limite
 var min_taxon_name = verb_utils.min_taxon_name
 var max_taxon_name = verb_utils.max_taxon_name
+var default_region = verb_utils.region_mx
+
 
 
 /**
@@ -688,14 +690,17 @@ exports.getGridGeoJsonNiche = function (req, res, next) {
   debug('getGridGeoJsonNiche')
 
   var grid_res = getParam(req, 'grid_res',16)
-  var footprint_region = parseInt(getParam(req, 'footprint_region', 1))
+  var footprint_region = parseInt(getParam(req, 'footprint_region', default_region))
 
+  debug("grid_res: " + grid_res)
+  debug("footprint_region: " + footprint_region)
 
   pool.any(queries.grid.gridxxkm, {
     grid_res: parseInt(grid_res),
-    region: footprint_region
+    id_country: footprint_region
   })
     .then(function(data) {
+      // debug(data)
       res.json(data[0].json)
     })
     .catch(function(error) {
@@ -729,7 +734,7 @@ exports.getVariablesNiche = function (req, res, next) {
 
   // Verificar si es necesario enviar el footprint_region, puede existir cambio de region despues 
   // de seleccionar las covariables
-  var region = parseInt(getParam(req, 'footprint_region', 1))
+  var region = parseInt(getParam(req, 'footprint_region', default_region))
 
   // debug(field)
   // debug(parentfield)
@@ -794,7 +799,7 @@ exports.getRasterNiche = function (req, res, next) {
 
   var field = getParam(req, 'field', '')
   var level = parseInt(getParam(req, 'level', 0))
-  var region = parseInt(getParam(req, 'footprint_region', 1))
+  var region = parseInt(getParam(req, 'footprint_region', default_region))
   var type = parseInt(getParam(req, 'type', 1))
 
   debug('field: ' + field)
@@ -847,7 +852,7 @@ exports.getRasterNiche = function (req, res, next) {
       typename: type
     })
         .then(function (data) {
-          debug(data)
+          // debug(data)
           res.json({'data': data})
         })
         .catch(function (error) {
@@ -980,12 +985,14 @@ exports.getSpeciesNiche = function (req, res, next) {
       var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
       var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
       var res_celda = getParam(req, 'res_celda', "gridid_16km")
-      var region    = parseInt(getParam(req, 'footprint_region',1))
+      var region    = parseInt(getParam(req, 'footprint_region',default_region))
 
       var grid_resolution = getParam(req, 'grid_res',16)
       var res_celda_sp =  "cells_"+grid_resolution+"km"   
       var res_celda_snib =  "gridid_"+grid_resolution+"km" 
       var res_celda_snib_tb = "grid_"+grid_resolution+"km_aoi" 
+
+      debug("region: " + region)
 
 
       // debug(spid)
@@ -1006,7 +1013,8 @@ exports.getSpeciesNiche = function (req, res, next) {
       res_celda_sp: res_celda_sp,
       res_celda_snib: res_celda_snib,
       res_celda_snib_tb: res_celda_snib_tb,
-      sfosil: lb_fosil
+      sfosil: lb_fosil,
+      id_country: region
     })
           .then(function (data) {
                 // debug(data)
@@ -1025,7 +1033,8 @@ exports.getSpeciesNiche = function (req, res, next) {
       res_celda_sp: res_celda_sp,
       res_celda_snib: res_celda_snib,
       res_celda_snib_tb: res_celda_snib_tb,
-      sfosil: lb_fosil
+      sfosil: lb_fosil,
+      id_country: region
     })
           .then(function (data) {
                 // debug(data)
@@ -1046,7 +1055,8 @@ exports.getSpeciesNiche = function (req, res, next) {
       res_celda_sp: res_celda_sp,
       res_celda_snib: res_celda_snib,
       res_celda_snib_tb: res_celda_snib_tb,
-      sfosil: lb_fosil
+      sfosil: lb_fosil,
+      id_country: region
     })
           .then(function (data) {
                 // debug(data)
@@ -1065,7 +1075,8 @@ exports.getSpeciesNiche = function (req, res, next) {
       res_celda_sp: res_celda_sp,
       res_celda_snib: res_celda_snib,
       res_celda_snib_tb: res_celda_snib_tb,
-      sfosil: lb_fosil
+      sfosil: lb_fosil,
+      id_country: region
     })
           .then(function (data) {
                 // debug(data)
@@ -1094,49 +1105,49 @@ exports.getSpeciesNiche = function (req, res, next) {
 
 exports.getEntListNiche = function (req, res, next) {
 
-      var str       = getParam(req, 'searchStr')
-      var has_limit = parseInt(getParam(req, 'limit', false))
-      var source    = parseInt(getParam(req, 'source'))
-      var region    = parseInt(getParam(req, 'footprint_region',1))
-      var nivel     = getParam(req, 'nivel', min_taxon_name)
-      var columnas  = verb_utils.getColumns(source, nivel)
+    var str       = getParam(req, 'searchStr')
+    var has_limit = parseInt(getParam(req, 'limit', false))
+    var source    = parseInt(getParam(req, 'source'))
+    var region    = parseInt(getParam(req, 'footprint_region',default_region))
+    var nivel     = getParam(req, 'nivel', min_taxon_name)
+    var columnas  = verb_utils.getColumns(source, nivel)
 
+    var grid_resolution = getParam(req, 'grid_res',16)
+    var res_celda_sp =  'cells_'+grid_resolution+'km'
+    var res_celda_snib =  'gridid_'+grid_resolution+'km'
+    var res_celda_snib_tb = 'grid_'+grid_resolution+'km_aoi'
+    
+    res_celda_sp = (source == 1) ? res_celda_sp : 'array[]::int[]'
+    var val_tree = (source == 1) ? ' and icount('+res_celda_sp+') > 0 ' : ''
 
-  var grid_resolution = getParam(req, 'grid_res',16)
-  var res_celda_sp =  'cells_'+grid_resolution+'km'
-  var res_celda_snib =  'gridid_'+grid_resolution+'km'
-  var res_celda_snib_tb = 'grid_'+grid_resolution+'km_aoi'
+    var txt_limite = has_limit === false ? '' : 'limit ' + limite
 
-  res_celda_sp = (source == 1) ? res_celda_sp : 'array[]::int[]'
-  var val_tree = (source == 1) ? ' and icount('+res_celda_sp+') > 0 ' : ''
+      debug(nivel)
+      debug(str)
+      debug(limite)
+      debug("columnas: " + columnas)
+      debug("res_celda_sp: " + res_celda_sp)
+      debug("val_tree: " + val_tree)
 
-  var txt_limite = has_limit === false ? '' : 'limit ' + limite
-
-      // debug(nivel)
-      // debug(str)
-      // debug(limite)
-      // debug("columnas: " + columnas)
-      // debug("res_celda_sp: " + res_celda_sp)
-      // debug("val_tree: " + val_tree)
-
-  pool.any(queries.getEntListNiche.getEntList, {
-    str: str,
-    columnas: columnas,
-    nivel: nivel,
-    res_celda_sp: res_celda_sp,
-    res_celda_snib: res_celda_snib,
-    res_celda_snib_tb: res_celda_snib_tb,
-    val_tree: val_tree,
-    limite: txt_limite
-  })
-          .then(function (data) {
-            // debug(data)
-            res.json({'data': data})
-          })
-          .catch(function (error) {
-            debug(error)
-            next(error)
-          })
+    pool.any(queries.getEntListNiche.getEntList, {
+      str: str,
+      columnas: columnas,
+      nivel: nivel,
+      res_celda_sp: res_celda_sp,
+      res_celda_snib: res_celda_snib,
+      res_celda_snib_tb: res_celda_snib_tb,
+      val_tree: val_tree,
+      limite: txt_limite,
+      region: region
+    })
+    .then(function (data) {
+      // debug(data)
+      res.json({'data': data})
+    })
+    .catch(function (error) {
+      debug(error)
+      next(error)
+    })
 
 }
 
@@ -1188,15 +1199,15 @@ exports.getN = function(req, res) {
       var grid_resolution = verb_utils.getParam(req, 'grid_res',16)
       var res_celda_snib_tb = "grid_"+grid_resolution+"km_aoi" 
       
-      var footprint_region = parseInt(verb_utils.getParam(req, 'footprint_region', 1))
-      var country = verb_utils.getRegionCountry(footprint_region)
+      var footprint_region = parseInt(verb_utils.getParam(req, 'footprint_region', default_region))
+      // var country = verb_utils.getRegionCountry(footprint_region)
 
       debug("res_celda_snib_tb: " + res_celda_snib_tb)
-      debug("country: " + country)
+      debug("country: " + footprint_region)
 
       pool.any(queries.basicAnalysis.getN,{
         res_celda_snib_tb: res_celda_snib_tb,
-        country: country
+        id_country: footprint_region
       })
         .then(function (data) {
           res.json({
@@ -1213,6 +1224,41 @@ exports.getN = function(req, res) {
         })
 
 }
+
+
+
+/**
+* getN
+*
+* Obtiene la N para analisis dependiendo la region
+* 
+* @param {express.Request} req
+* @param {express.Response} res
+*
+*/
+exports.getAvailableCountries = function(req, res) {
+
+      debug("getAvailableCountries");
+
+      pool.any(queries.subaoi.getAvailableCountries,{
+      })
+        .then(function (data) {
+          res.json({
+            'data': data,
+            ok: true
+          })
+        })
+        .catch(function (error) {
+          return res.json({
+            err: error,
+            ok: false,
+            message: "Error al procesar la query"
+          })
+        })
+
+}
+
+
 
 
 

@@ -21,6 +21,7 @@ var N = verb_utils.N
 var iterations = verb_utils.iterations
 var alpha = verb_utils.alpha
 var buckets = verb_utils.buckets
+var default_region = verb_utils.region_mx
 
 
 /**
@@ -35,8 +36,8 @@ exports.getBasicInfo = function(req, res, next) {
   
   debug('getBasicInfo')
 
-  var footprint_region = parseInt(verb_utils.getParam(req, 'footprint_region', 1))
-  var country = verb_utils.getRegionCountry(footprint_region)
+  var footprint_region = parseInt(verb_utils.getParam(req, 'footprint_region', default_region))
+  // var country = verb_utils.getRegionCountry(footprint_region)
 
   var data_request = verb_utils.getRequestParams(req, false)
 
@@ -51,12 +52,15 @@ exports.getBasicInfo = function(req, res, next) {
         return t.one(queries.basicAnalysis.getN, {
 
             res_celda_snib_tb: data_request.res_celda_snib_tb,
-            country: country
+            id_country: footprint_region
 
         }).then(resp => {
 
             debug("N:" + resp.n)
             data_request["N"] = resp.n 
+
+            debug("id_country:" + footprint_region)
+            data_request["id_country"] = footprint_region
 
             // seleccion de caso para obtener datos de especie ibjetivo
             if(data_request.caso === -1 && data_request.fossil.length == 0){
@@ -82,10 +86,10 @@ exports.getBasicInfo = function(req, res, next) {
     })
     .then(data => {
 
-      debug("data_request.with_basic_data: " + data_request.with_basic_data)
-      debug("data_request.with_data_freq: " + data_request.with_data_freq)
-      debug("data_request.with_data_score_cell: " + data_request.with_data_score_cell)
-      debug("data_request.with_data_freq_cell: " + data_request.with_data_freq_cell)
+      // debug("data_request.with_basic_data: " + data_request.with_basic_data)
+      // debug("data_request.with_data_freq: " + data_request.with_data_freq)
+      // debug("data_request.with_data_score_cell: " + data_request.with_data_score_cell)
+      // debug("data_request.with_data_freq_cell: " + data_request.with_data_freq_cell)
 
         var data_freq = data_request.with_data_freq === "true" ? verb_utils.processDataForFreqSpecie(data) : []
         var data_score_cell = data_request.with_data_score_cell === "true" ? verb_utils.processDataForScoreCell(data) : []
