@@ -1,13 +1,22 @@
 with temp_source as (
 	SELECT 
 		spid, 
-		${res_celda_sp:raw} as cells, 
-		icount(${res_celda_sp:raw}) as ni
-		FROM sp_snib
-		WHERE 
+		--array_agg(distinct snib.gridid_16km ) as cells,
+		array_agg(distinct ${res_celda_snib:raw}) as cells, 
+		--icount(array_agg(distinct snib.gridid_16km)) as ni
+		icount(array_agg(distinct ${res_celda_snib:raw})) as ni
+	FROM snib
+	join aoi
+	on snib.gid = aoi.gid
+	WHERE 
+		--aoi.fgid = 19 and
+		aoi.fgid = $<id_country:raw> and
+		--spid = 27333
 		spid = ${spid}
 		and especievalidabusqueda <> ''
+		--and 27333 is not NULL
 		and ${spid} is not null
+	group by spid
 ),
 temp_target as (
 	SELECT  spid, 
@@ -18,10 +27,18 @@ temp_target as (
 			familiavalida, 
 			generovalido, 
 			especievalidabusqueda, 
-			${res_celda_sp:raw} as cells, 
-			icount(${res_celda_sp:raw}) as nj,
+			--array_agg(distinct snib.gridid_16km ) as cells,
+			array_agg(distinct ${res_celda_snib:raw}) as cells, 
+			--icount(array_agg(distinct snib.gridid_16km)) as nj,
+			icount(array_agg(distinct ${res_celda_snib:raw})) as nj,
 			0 as tipo
-	FROM sp_snib ${where_config:raw}
+	FROM snib
+	join aoi
+	on snib.gid = aoi.gid
+		--where clasevalida = 'Reptilia'
+		${where_config:raw}
+		--and aoi.fgid = 19
+		and aoi.fgid = $<id_country:raw>
 		and especievalidabusqueda <> ''
 		and reinovalido <> ''
 		and phylumdivisionvalido <> ''
@@ -29,6 +46,16 @@ temp_target as (
 		and ordenvalido <> ''
 		and familiavalida <> ''
 		and generovalido <> ''
+		--and snib.gridid_16km is not null
+		and ${res_celda_snib:raw} is not null
+		group by spid,
+			reinovalido, 
+			phylumdivisionvalido, 
+			clasevalida, 
+			ordenvalido, 
+			familiavalida, 
+			generovalido, 
+			especievalidabusqueda
 )
 SELECT 	temp_target.spid,
 		temp_target.tipo,

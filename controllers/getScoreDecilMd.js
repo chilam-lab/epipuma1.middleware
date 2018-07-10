@@ -20,6 +20,7 @@ var pool = verb_utils.pool
 var N = verb_utils.N 
 var iterations = verb_utils.iterations
 var alpha = verb_utils.alpha
+var default_region = verb_utils.region_mx
 
 
 /**
@@ -51,8 +52,11 @@ exports.getScoreDecil = function(req, res, next) {
 
         }).then(resp => {
 
-            // debug("N:" + resp.n)
+            debug("N:" + resp.n)
             data_request["N"] = resp.n 
+
+            debug("id_country:" + footprint_region)
+            data_request["id_country"] = footprint_region
 
             // seleccion de caso para obtener datos de especie ibjetivo
             if(data_request.caso === -1 && data_request.fossil.length == 0){

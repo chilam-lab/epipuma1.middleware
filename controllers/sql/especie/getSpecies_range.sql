@@ -1,24 +1,45 @@
+with spid_occ as (
+	select 
+		-- icount(array_agg(distinct gridid_16km)) as occ
+		icount(array_agg(distinct $<res_celda_snib:raw>)) as occ
+	FROM snib 
+	join aoi
+	on snib.gid = aoi.gid
+	WHERE 	
+			--aoi.fgid = 19 and
+			aoi.fgid = $<id_country:raw> and
+			--snib.spid = 27333 and
+			snib.spid = $<spid> AND
+			snib.especievalidabusqueda <> '' and
+			--gridid_16km is not null
+			$<res_celda_snib:raw> is not null
+			$<sfosil:raw> 
+			--and (ejemplarfosil <> 'SI' or ejemplarfosil is null)
+			and cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)>= cast( $<lim_inf:raw>  as integer)
+			and 
+			cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)<= cast( $<lim_sup:raw>  as integer)
+	group by spid
+)
 SELECT DISTINCT st_asgeojson(the_geom) as json_geom, 
 				$<res_celda_snib:raw> as gridid, 
 				urlejemplar,
 				fechacolecta,
-				--icount(sp_snib.cells_32km) as occ
-				icount($<res_celda_sp:raw>) as occ
+				spid_occ.occ as occ
 FROM snib 
-join sp_snib
-on snib.spid = sp_snib.spid
-WHERE 	--spid = 33553 AND
-		snib.spid = $<spid> AND 
-		snib.especievalidabusqueda <> ''
+join aoi
+on snib.gid = aoi.gid,
+spid_occ
+where
+		--aoi.fgid = 19 and
+		aoi.fgid = $<id_country:raw> and
+		--snib.spid = 27333 and
+		snib.spid = $<spid> AND
+		snib.especievalidabusqueda <> '' and
+		--gridid_16km is not null
+		$<res_celda_snib:raw> is not null
+		$<sfosil:raw> 
+		--and (ejemplarfosil <> 'SI' or ejemplarfosil is null)
+		and cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)>= cast( $<lim_inf:raw>  as integer)
 		and 
-		(
-			cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)>= cast( $<lim_inf>  as integer)
-			and 
-			cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)<= cast( $<lim_sup>  as integer)
-			or fechacolecta = ''
-		)
-		and $<res_celda_snib:raw> is not null
-		-- gridid_16km is not null
-		$<sfosil:raw>
-		--order by $<res_celda:raw> desc
+		cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)<= cast( $<lim_sup:raw>  as integer)
 		
