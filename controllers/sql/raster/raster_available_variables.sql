@@ -2,6 +2,7 @@ with arg_gids as (
 	select array_agg(gid) as arg_ids 
 	FROM aoi
 	where fgid = $<region>
+	--where fgid = 19
 	group by fgid
 ),
 footprint as (
@@ -24,7 +25,8 @@ FROM raster_bins
 	ON "type" = fuentes_bioclimaticas.id 
 , footprint
 WHERE 
-	footprint.footprint_region = ANY(fuentes_bioclimaticas.footprint_region)
+	-- footprint.footprint_region = ANY(fuentes_bioclimaticas.footprint_region)
+	1 = ANY(fuentes_bioclimaticas.footprint_region)
 GROUP BY 
 	"type",
 	fuentes_bioclimaticas.fuente
@@ -34,3 +36,10 @@ GROUP BY
 ORDER BY
 	"type";
 	--fuentes_bioclimaticas.fuente;
+-- Se cambio el footprint_region de las vistas
+--select * from fuentes_bioclimaticas
+/*SELECT
+		footprint_region, gids
+	FROM
+		grid_geojson_16km_aoi
+*/

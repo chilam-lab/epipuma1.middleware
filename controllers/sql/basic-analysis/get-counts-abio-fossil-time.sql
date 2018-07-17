@@ -1,10 +1,16 @@
 with temp_source as (
 	SELECT 
 		spid, 
+		--array_agg(distinct snib.gridid_16km ) as cells,
 		array_agg(distinct ${res_celda_snib:raw}) as cells, 
+		--icount(array_agg(distinct snib.gridid_16km)) as ni
 		icount(array_agg(distinct ${res_celda_snib:raw})) as ni
 	FROM snib
+	join aoi
+	on snib.gid = aoi.gid
 	WHERE 
+		--aoi.fgid = 19 and
+		aoi.fgid = $<id_country:raw> and
 		spid = ${spid} ${fossil:raw}
 		and especievalidabusqueda <> ''
 		and ${spid} is not null
