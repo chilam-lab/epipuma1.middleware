@@ -125,12 +125,16 @@ exports.getBasicInfo = function(req, res, next) {
 
         return t.one(queries.basicAnalysis.getN, {
 
-            res_celda_snib_tb: data_request.res_celda_snib_tb
+            res_celda_snib_tb: data_request.res_celda_snib_tb,
+            id_country: footprint_region
 
         }).then(resp => {
 
-            // debug("N:" + resp.n)
+            debug("N:" + resp.n)
             data_request["N"] = resp.n 
+
+            debug("id_country:" + footprint_region)
+            data_request["id_country"] = footprint_region
 
 
             // seleccion de caso para obtener datos de especie ibjetivo
@@ -184,12 +188,16 @@ exports.getBasicInfo = function(req, res, next) {
 
         return t.one(queries.basicAnalysis.getN, {
 
-            res_celda_snib_tb: data_request.res_celda_snib_tb
+            res_celda_snib_tb: data_request.res_celda_snib_tb,
+            id_country: footprint_region
 
         }).then(resp => {
 
-            // debug("N:" + resp.n)
-            data_request["N"] = resp.n
+            debug("N:" + resp.n)
+            data_request["N"] = resp.n 
+
+            debug("id_country:" + footprint_region)
+            data_request["id_country"] = footprint_region
 
             // seleccion de caso para obtener datos de especie ibjetivo
             if(data_request.caso === -1 && data_request.fossil.length == 0){
