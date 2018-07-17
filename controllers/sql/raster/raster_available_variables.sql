@@ -25,8 +25,8 @@ FROM raster_bins
 	ON "type" = fuentes_bioclimaticas.id 
 , footprint
 WHERE 
-	-- footprint.footprint_region = ANY(fuentes_bioclimaticas.footprint_region)
-	1 = ANY(fuentes_bioclimaticas.footprint_region)
+	footprint.footprint_region = ANY(fuentes_bioclimaticas.footprint_region)
+	-- 1 = ANY(fuentes_bioclimaticas.footprint_region)
 GROUP BY 
 	"type",
 	fuentes_bioclimaticas.fuente
