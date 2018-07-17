@@ -486,7 +486,9 @@ function getGridSpeciesNiche(req, res, next) {
       })
       .catch(function (error) {
         debug(error)
-        next(error)
+        // next(error)
+        res.json({'ok':false,
+            'data': []})
       })
   } 
   else if (hasBios === 'true') {
@@ -530,7 +532,9 @@ function getGridSpeciesNiche(req, res, next) {
       })
       .catch(function (error) {
         debug(error)
-        next(error)
+        // next(error)
+        res.json({'ok':false,
+            'data': []})
       })
 
       
@@ -571,7 +575,9 @@ function getGridSpeciesNiche(req, res, next) {
       })
       .catch(function (error) {
         debug(error)
-        next(error)
+        // next(error)
+        res.json({'ok':false,
+            'data': []})
       })
   } else {
 

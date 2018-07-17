@@ -1,7 +1,7 @@
 with arg_gids as (
 	select array_agg(gid) as arg_ids 
 	FROM aoi
-	--where fgid = 28 
+	--where fgid = 33
 	where fgid = $<id_country:raw>
 	group by fgid
 )
@@ -16,3 +16,9 @@ WHERE
 	-- se descarta opcion de MX y US al mismo tiempo
 	and footprint_region <> 3
 	-- footprint_region=$<id_country>
+
+	
+/*select gids, footprint_region
+from grid_geojson_16km_aoi
+where footprint_region = 2*/
+
