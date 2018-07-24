@@ -1,7 +1,12 @@
 /*getGeoRel sin filtros*/
 with source AS (
 	SELECT  bid as spid,
-			$<res_celda:raw> AS cells
+			array_intersection($<res_celda:raw>,
+				ARRAY(SELECT cells
+					FROM grid_geojson_$<resolution:raw>km_aoi
+					WHERE footprint_region = $<region:raw>
+				)
+			) AS cells
 			--raster_bins.cells_16km AS cells 
 	FROM raster_bins
 	--where cells_16km is null
@@ -11,7 +16,12 @@ with source AS (
 ),
 target AS (
 	SELECT  spid,
-			$<res_celda:raw> AS cells
+			array_intersection($<res_celda:raw>,
+				ARRAY(SELECT cells
+					FROM grid_geojson_$<resolution:raw>km_aoi
+					WHERE footprint_region = $<region:raw>
+				)
+			) AS cells
 			--sp_snib.cells_16km as cells 
 	FROM sp_snib
 	--where clasevalida = 'Mammalia'
