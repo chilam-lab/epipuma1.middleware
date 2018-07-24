@@ -9,7 +9,12 @@ with source AS (
 			--(label || ' ' || tag) 
 			end as especievalidabusqueda,
 			1 as grp,
-			$<res_celda:raw> AS cells
+			array_intersection($<res_celda:raw>,
+				ARRAY(SELECT cells
+					FROM grid_geojson_$<resolution:raw>km_aoi
+					WHERE footprint_region = $<region:raw>
+				)
+			) AS cells
 			--raster_bins.cells_16km AS cells
 	FROM raster_bins
 	--where layer = 'bio01'
@@ -26,7 +31,12 @@ target AS (
 			--(label || ' ' || tag) 
 			end as especievalidabusqueda,
 			2 as grp,
-			$<res_celda:raw> AS cells
+			array_intersection($<res_celda:raw>,
+				ARRAY(SELECT cells
+					FROM grid_geojson_$<resolution:raw>km_aoi
+					WHERE footprint_region = $<region:raw>
+				)
+			) AS cells
 			--raster_bins.cells_16km AS cells 
 	FROM raster_bins
 	--where bid = 300012
