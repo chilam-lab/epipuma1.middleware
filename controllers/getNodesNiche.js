@@ -58,6 +58,8 @@ function getNodesNiche(req, res, next) {
   var hasBiosTarget    = verb_utils.getParam(req, 'hasbiotarget')
   var hasRasterTarget    = verb_utils.getParam(req, 'hasrastertarget')
 
+  var footprint_region = verb_utils.getParam(req, 'footprint_region')
+  var resolution = grid_resolution
   // debug(hasBiosSource)
   // debug(hasRasterSource)
   // debug(hasBiosTarget)
@@ -88,7 +90,9 @@ function getNodesNiche(req, res, next) {
       where_config_source_raster: whereVarSourceRaster,
       where_config_target: whereVarTarget,
       where_config_target_raster: whereVarTargetRaster,
-      res_celda: res_celda
+      res_celda: res_celda,
+      region: footprint_region,
+      resolution: resolution
     })
       .then(function (data) {
         res.json({'data': data})
@@ -113,7 +117,9 @@ function getNodesNiche(req, res, next) {
       where_config_source: whereVarSource,
       where_config_source_raster: whereVarSourceRaster,
       where_config_target: whereVarTarget,
-      res_celda: res_celda
+      res_celda: res_celda,
+      region: footprint_region,
+      resolution: resolution
       // where_config_target_raster: whereVarTargetRaster
     })
       .then(function (data) {
@@ -140,7 +146,9 @@ function getNodesNiche(req, res, next) {
       where_config_source_raster: whereVarSourceRaster,
       // where_config_target: whereVarTarget,
       where_config_target_raster: whereVarTargetRaster,
-      res_celda: res_celda
+      res_celda: res_celda,
+      region:footprint_region,
+      resolution: resolution
     })
       .then(function (data) {
         res.json({'data': data})
@@ -166,7 +174,9 @@ function getNodesNiche(req, res, next) {
           // where_config_source_raster: whereVarSourceRaster,
       where_config_target: whereVarTarget,
       where_config_target_raster: whereVarTargetRaster,
-      res_celda: res_celda
+      res_celda: res_celda,
+      region:footprint_region,
+      resolution: resolution
     })
       .then(function (data) {
         res.json({'data': data})
@@ -192,7 +202,9 @@ function getNodesNiche(req, res, next) {
       where_config_source_raster: whereVarSourceRaster,
       where_config_target: whereVarTarget,
       where_config_target_raster: whereVarTargetRaster,
-      res_celda: res_celda
+      res_celda: res_celda,
+      region:footprint_region,
+      resolution: resolution
     })
       .then(function (data) {
         res.json({'data': data})
@@ -221,7 +233,9 @@ function getNodesNiche(req, res, next) {
       where_config_source: whereVarSource,
       // where_config_source_raster: whereVarSourceRaster,
       where_config_target: whereVarTarget,
-      res_celda: res_celda
+      res_celda: res_celda,
+      region:footprint_region,
+      resolution: resolution
       // where_config_target_raster: whereVarTargetRaster
     })
       .then(function (data) {
@@ -246,7 +260,9 @@ function getNodesNiche(req, res, next) {
       // where_config_source_raster: whereVarSourceRaster,
       // where_config_target: whereVarTarget,
       where_config_target_raster: whereVarTargetRaster,
-      res_celda: res_celda
+      res_celda: res_celda,
+      region:footprint_region,
+      resolution: resolution
     })
       .then(function (data) {
         res.json({'data': data})
@@ -270,7 +286,9 @@ function getNodesNiche(req, res, next) {
       // where_config_source: whereVarSource,
       where_config_source_raster: whereVarSourceRaster,
       where_config_target: whereVarTarget,
-      res_celda: res_celda
+      res_celda: res_celda,
+      region:footprint_region,
+      resolution: resolution
       // where_config_target_raster: whereVarTargetRaster
     })
       .then(function (data) {
@@ -299,7 +317,9 @@ function getNodesNiche(req, res, next) {
       where_config_source_raster: whereVarSourceRaster,
       // where_config_target: whereVarTarget,
       where_config_target_raster: whereVarTargetRaster,
-      res_celda: res_celda
+      res_celda: res_celda,
+      region:footprint_region,
+      resolution: resolution
     })
       .then(function (data) {
         // debug(data)

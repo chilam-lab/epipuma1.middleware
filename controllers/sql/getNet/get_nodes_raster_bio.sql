@@ -9,7 +9,12 @@ with source AS (
 			--(label || ' ' || tag) 
 			end as especievalidabusqueda,
 			1 as grp,
-			$<res_celda:raw> AS cells 
+			array_intersection($<res_celda:raw>,
+				ARRAY(SELECT cells
+					FROM grid_geojson_$<resolution:raw>km_aoi
+					WHERE footprint_region = $<region:raw>
+				)
+			) AS cells 
 	FROM raster_bins
 	--where bid = '300012'
 	--where layer = 'bio01'
@@ -19,7 +24,12 @@ target AS (
 	SELECT spid,
 	 		reinovalido, phylumdivisionvalido, clasevalida, ordenvalido, familiavalida, generovalido, especievalidabusqueda,
 	 		2 as grp,
-			$<res_celda:raw> AS cells 
+			array_intersection($<res_celda:raw>,
+				ARRAY(SELECT cells
+					FROM grid_geojson_$<resolution:raw>km_aoi
+					WHERE footprint_region = $<region:raw>
+				)
+			) AS cells 
 	FROM sp_snib
 	--WHERE clasevalida = 'Mammalia'
 	--WHERE generovalido = 'Lutzomyia'
