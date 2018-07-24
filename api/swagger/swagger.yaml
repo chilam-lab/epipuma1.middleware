@@ -5807,7 +5807,13 @@ paths:
             Bandera que confirma si existen variables de tipo abiotico en target
           type: boolean
           required: true
-        
+        -
+          name: footprint_region
+          in: query
+          description: |
+            Entero que indica el ID de las areas disponibles para hacer analisis
+          type: integer
+          required: true
           
       responses:
         "200":
