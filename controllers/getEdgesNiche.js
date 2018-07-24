@@ -61,7 +61,8 @@ function getEdgesNiche(req, res, next) {
   var hasRasterSource    = verb_utils.getParam(req, 'hasrastersource')
   var hasBiosTarget    = verb_utils.getParam(req, 'hasbiotarget')
   var hasRasterTarget    = verb_utils.getParam(req, 'hasrastertarget')
-
+  var footprint_region = verb_utils.getParam(req, 'footprint_region')
+  var resolution = grid_resolution
 
 
   if ( hasBiosSource === true && hasBiosTarget === true && 
@@ -85,7 +86,9 @@ function getEdgesNiche(req, res, next) {
       where_config_target: whereVarTarget,
       where_config_target_raster: whereVarTargetRaster,
       res_celda: res_celda_sp,
-      n_grid_coverage: n_grid_coverage
+      n_grid_coverage: n_grid_coverage,
+      region: footprint_region,
+      resolution: resolution
     })
         .then(function (data) {
           res.json({'data': data})
@@ -118,7 +121,9 @@ function getEdgesNiche(req, res, next) {
       where_config_source_raster: whereVarSourceRaster,
       where_config_target: whereVarTarget,
       res_celda: res_celda_sp,
-      n_grid_coverage: n_grid_coverage
+      n_grid_coverage: n_grid_coverage,
+      region: footprint_region,
+      resolution: resolution
           // where_config_target_raster: whereVarTargetRaster
     })
         .then(function (data) {
@@ -153,7 +158,9 @@ function getEdgesNiche(req, res, next) {
           // where_config_target: whereVarTarget,
       where_config_target_raster: whereVarTargetRaster,
       res_celda: res_celda_sp,
-      n_grid_coverage: n_grid_coverage
+      n_grid_coverage: n_grid_coverage,
+      region: footprint_region,
+      resolution: resolution
     })
         .then(function (data) {
           res.json({'data': data})
@@ -187,7 +194,9 @@ function getEdgesNiche(req, res, next) {
       where_config_target: whereVarTarget,
       where_config_target_raster: whereVarTargetRaster,
       res_celda: res_celda_sp,
-      n_grid_coverage: n_grid_coverage
+      n_grid_coverage: n_grid_coverage,
+      region: footprint_region,
+      resolution: resolution
     })
         .then(function (data) {
           res.json({'data': data})
@@ -221,7 +230,9 @@ function getEdgesNiche(req, res, next) {
       where_config_target: whereVarTarget,
       where_config_target_raster: whereVarTargetRaster,
       res_celda: res_celda_sp,
-      n_grid_coverage: n_grid_coverage
+      n_grid_coverage: n_grid_coverage,
+      region: footprint_region,
+      resolution: resolution
     })
         .then(function (data) {
           res.json({'data': data})
@@ -256,7 +267,9 @@ function getEdgesNiche(req, res, next) {
           // where_config_source_raster: whereVarSourceRaster,
       where_config_target: whereVarTarget,
       res_celda: res_celda_sp,
-      n_grid_coverage: n_grid_coverage
+      n_grid_coverage: n_grid_coverage,
+      region: footprint_region,
+      resolution: resolution
           // where_config_target_raster: whereVarTargetRaster
     })
         .then(function (data) {
@@ -290,7 +303,9 @@ function getEdgesNiche(req, res, next) {
           // where_config_target: whereVarTarget,
       where_config_target_raster: whereVarTargetRaster,
       res_celda: res_celda_sp,
-      n_grid_coverage: n_grid_coverage
+      n_grid_coverage: n_grid_coverage,
+      region: footprint_region,
+      resolution: resolution
     })
         .then(function (data) {
           res.json({'data': data})
@@ -325,7 +340,9 @@ function getEdgesNiche(req, res, next) {
       where_config_source_raster: whereVarSourceRaster,
       where_config_target: whereVarTarget,
       res_celda: res_celda_sp,
-      n_grid_coverage: n_grid_coverage
+      n_grid_coverage: n_grid_coverage,
+      region: footprint_region,
+      resolution: resolution
       // where_config_target_raster: whereVarTargetRaster
     })
         .then(function (data) {
@@ -362,7 +379,9 @@ function getEdgesNiche(req, res, next) {
           // where_config_target: whereVarTarget,
       where_config_target_raster: whereVarTargetRaster,
       res_celda: res_celda_sp,
-      n_grid_coverage: n_grid_coverage
+      n_grid_coverage: n_grid_coverage,
+      region: footprint_region,
+      resolution: resolution
     })
         .then(function (data) {
 
