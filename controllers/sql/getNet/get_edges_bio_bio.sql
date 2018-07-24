@@ -1,6 +1,11 @@
 with source AS (
 	SELECT  spid,
-			$<res_celda:raw> AS cells
+			array_intersection($<res_celda:raw>,
+				ARRAY(SELECT cells
+					FROM grid_geojson_$<resolution:raw>km_aoi
+					WHERE footprint_region = $<region:raw>
+				)
+			) AS cells
 			--cells_16km AS cells
 	FROM sp_snib 
 	--WHERE generovalido = 'Aedes'
@@ -8,8 +13,13 @@ with source AS (
 	and especievalidabusqueda <> ''	 
 ),
 target AS (
-	 SELECT  spid,
-			$<res_celda:raw> AS cells
+	 SELECT spid,
+			array_intersection($<res_celda:raw>,
+				ARRAY(SELECT cells
+					FROM grid_geojson_$<resolution:raw>km_aoi
+					WHERE footprint_region = $<region:raw>
+				)
+			) AS cells
 			--cells_16km AS cells 
 	FROM sp_snib 
 	--WHERE clasevalida = 'Mammalia'

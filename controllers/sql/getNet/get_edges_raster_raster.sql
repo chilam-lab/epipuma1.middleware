@@ -1,14 +1,24 @@
 /*getGeoRel sin filtros*/
 with source AS (
 	SELECT  bid as spid,
-			$<res_celda:raw> AS cells 
+			array_intersection($<res_celda:raw>,
+				ARRAY(SELECT cells
+					FROM grid_geojson_$<resolution:raw>km_aoi
+					WHERE footprint_region = $<region:raw>
+				)
+			) AS cells 
 	FROM raster_bins
 	--where layer = 'bio01'
 	$<where_config_source_raster:raw>	 	 
 ),
 target AS (
 	SELECT  bid as spid,
-			$<res_celda:raw> AS cells 
+			array_intersection($<res_celda:raw>,
+				ARRAY(SELECT cells
+					FROM grid_geojson_$<resolution:raw>km_aoi
+					WHERE footprint_region = $<region:raw>
+				)
+			) AS cells 
 	FROM raster_bins
 	--where layer = 'bio01'
 	$<where_config_target_raster:raw>	  
