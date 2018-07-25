@@ -831,7 +831,7 @@ exports.getRasterNiche = function (req, res, next) {
 
     pool.any(queries.getRasterNiche.getRasterVariableSelected, {
       layername: field,
-      typename: type
+      region: region
     })
         .then(function (data) {
               // debug(data)
@@ -849,7 +849,8 @@ exports.getRasterNiche = function (req, res, next) {
 
     pool.any(queries.getRasterNiche.getRasterVariableById, {
       layername: field,
-      typename: type
+      typename: type,
+      region
     })
         .then(function (data) {
           // debug(data)
