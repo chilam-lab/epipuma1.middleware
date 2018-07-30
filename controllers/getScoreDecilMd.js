@@ -35,12 +35,14 @@ exports.getScoreDecil = function(req, res, next) {
   
   debug('getScoreDecil')
 
-
   var data_request = verb_utils.getRequestParams(req, false)
   
-  debug("region: " + footprint_region)
-  data_request["region"] = footprint_region
+  const grid_res = verb_utils.getParam(req, 'grid_res', 16)
+  const region = verb_utils.getParam(req, 'footprint_region')
+  debug("region: " + data_request["footprint_region"])
+
   data_request["res_celda_snib_tb"] = "grid_geojson_"+grid_res+"km_aoi" 
+  data_request["region"] = region
   
   if (data_request.hasBios === 'true' && data_request.hasRaster === 'false' ) {
 
@@ -261,6 +263,13 @@ exports.getScoreDecilTable = function(req, res, next) {
   var data_request = verb_utils.getRequestParams(req, false)
   var decil = verb_utils.getParam(req, "decil", 10)
 
+  const grid_res = verb_utils.getParam(req, 'grid_res', 16)
+  const region = verb_utils.getParam(req, 'footprint_region')
+  debug("region: " + data_request["footprint_region"])
+
+  data_request["res_celda_snib_tb"] = "grid_geojson_"+grid_res+"km_aoi" 
+  data_request["region"] = region
+
   if (data_request.hasBios === 'true' && data_request.hasRaster === 'false' ) {
 
     debug('Caso: hasbio:true - hasRaster:false')
@@ -271,7 +280,8 @@ exports.getScoreDecilTable = function(req, res, next) {
 
         return t.one(queries.basicAnalysis.getN, {
 
-            res_celda_snib_tb: data_request.res_celda_snib_tb
+            res_celda_snib_tb: data_request.res_celda_snib_tb,
+            region: data_request.region
 
         }).then(resp => {
 
@@ -332,7 +342,8 @@ exports.getScoreDecilTable = function(req, res, next) {
 
         return t.one(queries.basicAnalysis.getN, {
 
-            res_celda_snib_tb: data_request.res_celda_snib_tb
+            res_celda_snib_tb: data_request.res_celda_snib_tb,
+            region: data_request.region
 
         }).then(resp => {
 
@@ -387,8 +398,9 @@ exports.getScoreDecilTable = function(req, res, next) {
 
         return t.one(queries.basicAnalysis.getN, {
 
-            res_celda_snib_tb: data_request.res_celda_snib_tb
-
+            res_celda_snib_tb: data_request.res_celda_snib_tb,
+            region: data_request.region
+          
         }).then(resp => {
 
             // debug("N:" + resp.n)
