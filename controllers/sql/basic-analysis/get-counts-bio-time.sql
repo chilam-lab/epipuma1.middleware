@@ -1,15 +1,22 @@
 with temp_source as (
 	SELECT 
-		spid, 
-		array_agg(distinct ${res_celda_snib:raw}) as cells, 
-		icount(array_agg(distinct ${res_celda_snib:raw})) as ni
-	FROM snib
-	join aoi
-	on snib.gid = aoi.gid
+		a.spid, 
+		--array_agg(distinct a.gridid_16km ) as cells,
+		array_agg(distinct a.${res_celda_snib:raw}) as cells, 
+		--icount(array_agg(distinct a.gridid_16km)) as ni          
+		icount(array_agg(distinct a.${res_celda_snib:raw})) as ni
+	FROM snib AS a
+	JOIN (
+		SELECT UNNEST(gid) AS gid 
+		--FROM grid_geojson_64km_aoi
+		FROM ${res_celda_snib_tb}
+		--WHERE footprint_region=1 
+		WHERE footprint_region=${region}
+		) AS b
+	ON a.gid = b.gid
 	WHERE 
-		spid = ${spid} ${fossil:raw}
-		--and aoi.fgid = 19
-		and aoi.fgid = $<id_country:raw>
+		--a.spid = 27333
+		a.spid = ${spid} ${fossil:raw}
 		and 
 			(case when ${caso} = 1 
 				  then 
@@ -29,28 +36,36 @@ with temp_source as (
 							or fechacolecta = ''
 						)
 			end) = true
-		and especievalidabusqueda <> ''
+		and a.especievalidabusqueda <> ''
+		--and 27333 is not NULL
 		and ${spid} is not null
-	group by spid
+	group by a.spid
 ),
 temp_target as (
-	SELECT  spid, 
-			reinovalido, 
-			phylumdivisionvalido, 
-			clasevalida, 
-			ordenvalido, 
-			familiavalida, 
-			generovalido, 
-			especievalidabusqueda, 
-			array_agg(distinct ${res_celda_snib:raw}) as cells, 
-			icount(array_agg(distinct ${res_celda_snib:raw})) as nj,
+	SELECT  a.spid, 
+			a.reinovalido, 
+			a.phylumdivisionvalido, 
+			a.clasevalida, 
+			a.ordenvalido, 
+			a.familiavalida, 
+			a.generovalido, 
+			a.especievalidabusqueda, 
+			--array_agg(distinct a.gridid_16km ) as cells,
+			array_agg(distinct a.${res_celda_snib:raw}) as cells, 
+			--icount(array_agg(distinct a.gridid_16km)) as ni,
+			icount(array_agg(distinct a.${res_celda_snib:raw})) as nj,
 			0 as tipo
-	FROM snib 
-	join aoi
-	on snib.gid = aoi.gid
+	FROM snib AS a
+	JOIN (
+		SELECT UNNEST(gid) AS gid 
+		--FROM grid_geojson_64km_aoi
+		FROM ${res_celda_snib_tb}
+		--WHERE footprint_region=1 
+		WHERE footprint_region=${region}
+		) AS b
+	ON a.gid = b.gid
+		--where a.clasevalida = 'Reptilia'
 		${where_config:raw} ${fossil:raw}
-		--and aoi.fgid = 19
-		and aoi.fgid = $<id_country:raw>
 		and 
 			(case when ${caso} = 1 
 				  then 
@@ -70,22 +85,23 @@ temp_target as (
 							or fechacolecta = ''
 						)
 			end) = true
-		and especievalidabusqueda <> ''
-		and reinovalido <> ''
-		and phylumdivisionvalido <> ''
-		and clasevalida <> ''
-		and ordenvalido <> ''
-		and familiavalida <> ''
-		and generovalido <> ''
-		and ${res_celda_snib:raw} is not null
-		group by spid,
-			reinovalido, 
-			phylumdivisionvalido, 
-			clasevalida, 
-			ordenvalido, 
-			familiavalida, 
-			generovalido, 
-			especievalidabusqueda
+		and a.especievalidabusqueda <> ''
+		and a.reinovalido <> ''
+		and a.phylumdivisionvalido <> ''
+		and a.clasevalida <> ''
+		and a.ordenvalido <> ''
+		and a.familiavalida <> ''
+		and a.generovalido <> ''
+		--and a.gridid_16km is not null
+		and a.${res_celda_snib:raw} is not null
+		group by a.spid,
+			a.reinovalido, 
+			a.phylumdivisionvalido, 
+			a.clasevalida, 
+			a.ordenvalido, 
+			a.familiavalida, 
+			a.generovalido, 
+			a.especievalidabusqueda
 )
 SELECT 	temp_target.spid,
 		temp_target.tipo,

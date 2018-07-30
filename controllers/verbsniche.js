@@ -1198,17 +1198,18 @@ exports.getN = function(req, res) {
       debug("getN");
 
       var grid_resolution = verb_utils.getParam(req, 'grid_res',16)
-      var res_celda_snib_tb = "grid_"+grid_resolution+"km_aoi" 
+      var res_celda_snib_tb = "grid_geojson_"+grid_resolution+"km_aoi" 
       
+      debug("default_region: " + default_region);
       var footprint_region = parseInt(verb_utils.getParam(req, 'footprint_region', default_region))
       // var country = verb_utils.getRegionCountry(footprint_region)
 
       debug("res_celda_snib_tb: " + res_celda_snib_tb)
-      debug("country: " + footprint_region)
+      debug("region: " + footprint_region)
 
       pool.any(queries.basicAnalysis.getN,{
         res_celda_snib_tb: res_celda_snib_tb,
-        id_country: footprint_region
+        region: footprint_region
       })
         .then(function (data) {
           res.json({
