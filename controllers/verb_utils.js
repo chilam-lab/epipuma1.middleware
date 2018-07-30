@@ -32,7 +32,7 @@ verb_utils.min_taxon_name = 'especievalidabusqueda' // nombre de columna del val
 verb_utils.max_taxon_name = 'reinovalido' // nombre de columna del valor maximo taxonomico en base de datos
 buckets = 20
 deciles = 10
-verb_utils.region_mx = 19
+verb_utils.region_mx = 1
 
 
 

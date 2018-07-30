@@ -1,61 +1,69 @@
 with temp_source as (
 	SELECT 
-		spid, 
+		a.spid, 
 		--array_agg(distinct snib.gridid_16km ) as cells,
-		array_agg(distinct ${res_celda_snib:raw}) as cells, 
+		array_agg(distinct a.${res_celda_snib:raw}) as cells, 
 		--icount(array_agg(distinct snib.gridid_16km)) as ni
-		icount(array_agg(distinct ${res_celda_snib:raw})) as ni
-	FROM snib
-	join aoi
-	on snib.gid = aoi.gid
+		icount(array_agg(distinct a.${res_celda_snib:raw})) as ni
+	FROM snib AS a
+	JOIN (
+		SELECT UNNEST(gid) AS gid 
+		--FROM grid_geojson_64km_aoi
+		FROM ${res_celda_snib_tb}
+		--WHERE footprint_region=1 
+		WHERE footprint_region=${region}
+		) AS b
+	ON a.gid = b.gid
 	WHERE 
-		--aoi.fgid = 19 and
-		aoi.fgid = $<id_country:raw> and
 		--spid = 27333
-		spid = ${spid}
-		and especievalidabusqueda <> ''
+		a.spid = ${spid}
+		and a.especievalidabusqueda <> ''
 		--and 27333 is not NULL
 		and ${spid} is not null
-	group by spid
+	group by a.spid
 ),
 temp_target as (
-	SELECT  spid, 
-			reinovalido, 
-			phylumdivisionvalido, 
-			clasevalida, 
-			ordenvalido, 
-			familiavalida, 
-			generovalido, 
-			especievalidabusqueda, 
+	SELECT  a.spid, 
+			a.reinovalido, 
+			a.phylumdivisionvalido, 
+			a.clasevalida, 
+			a.ordenvalido, 
+			a.familiavalida, 
+			a.generovalido, 
+			a.especievalidabusqueda, 
 			--array_agg(distinct snib.gridid_16km ) as cells,
-			array_agg(distinct ${res_celda_snib:raw}) as cells, 
+			array_agg(distinct a.${res_celda_snib:raw}) as cells, 
 			--icount(array_agg(distinct snib.gridid_16km)) as nj,
-			icount(array_agg(distinct ${res_celda_snib:raw})) as nj,
+			icount(array_agg(distinct a.${res_celda_snib:raw})) as nj,
 			0 as tipo
-	FROM snib
-	join aoi
-	on snib.gid = aoi.gid
-		--where clasevalida = 'Reptilia'
+	FROM snib AS a
+	JOIN (
+		SELECT UNNEST(gid) AS gid 
+		--FROM grid_geojson_64km_aoi
+		FROM ${res_celda_snib_tb}
+		--WHERE footprint_region=1 
+		WHERE footprint_region=${region}
+		) AS b
+	ON a.gid = b.gid
+		--where a.clasevalida = 'Reptilia'
 		${where_config:raw}
-		--and aoi.fgid = 19
-		and aoi.fgid = $<id_country:raw>
-		and especievalidabusqueda <> ''
-		and reinovalido <> ''
-		and phylumdivisionvalido <> ''
-		and clasevalida <> ''
-		and ordenvalido <> ''
-		and familiavalida <> ''
-		and generovalido <> ''
-		--and snib.gridid_16km is not null
-		and ${res_celda_snib:raw} is not null
-		group by spid,
-			reinovalido, 
-			phylumdivisionvalido, 
-			clasevalida, 
-			ordenvalido, 
-			familiavalida, 
-			generovalido, 
-			especievalidabusqueda
+		and a.especievalidabusqueda <> ''
+		and a.reinovalido <> ''
+		and a.phylumdivisionvalido <> ''
+		and a.clasevalida <> ''
+		and a.ordenvalido <> ''
+		and a.familiavalida <> ''
+		and a.generovalido <> ''
+		--and a.gridid_16km is not null
+		and a.${res_celda_snib:raw} is not null
+		group by a.spid,
+			a.reinovalido, 
+			a.phylumdivisionvalido, 
+			a.clasevalida, 
+			a.ordenvalido, 
+			a.familiavalida, 
+			a.generovalido, 
+			a.especievalidabusqueda
 )
 SELECT 	temp_target.spid,
 		temp_target.tipo,
