@@ -16,6 +16,8 @@ var queries = require('./sql/queryProvider')
 var pool = verb_utils.pool 
 var N = verb_utils.N 
 var alpha = verb_utils.alpha
+var default_region = verb_utils.region_mx
+var min_nj = verb_utils.min_occ
 
 
 /**
@@ -33,7 +35,7 @@ function getNodesNiche(req, res, next) {
   // debug(sfilters)
   var tfilters    = verb_utils.getParam(req, 't_tfilters')
   // debug(tfilters)
-  var min_occ     = verb_utils.getParam(req, 'min_occ', 1)
+  var min_occ     = verb_utils.getParam(req, 'min_occ', min_nj)
   // debug(min_occ)
   
   var grid_resolution = verb_utils.getParam(req, 'grid_res',16)
@@ -58,7 +60,7 @@ function getNodesNiche(req, res, next) {
   var hasBiosTarget    = verb_utils.getParam(req, 'hasbiotarget')
   var hasRasterTarget    = verb_utils.getParam(req, 'hasrastertarget')
 
-  var footprint_region = verb_utils.getParam(req, 'footprint_region')
+  var footprint_region = verb_utils.getParam(req, 'footprint_region', default_region)
   var resolution = grid_resolution
   // debug(hasBiosSource)
   // debug(hasRasterSource)
