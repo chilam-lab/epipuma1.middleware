@@ -33,6 +33,7 @@ verb_utils.max_taxon_name = 'reinovalido' // nombre de columna del valor maximo 
 buckets = 20
 deciles = 10
 verb_utils.region_mx = 19
+verb_utils.min_occ = 5
 
 
 

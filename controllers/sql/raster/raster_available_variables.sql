@@ -11,7 +11,7 @@ footprint as (
 	FROM
 		grid_geojson_16km_aoi, arg_gids
 	WHERE
-		gids @> arg_ids
+		gid @> arg_ids
 		-- se descarta opcion de MX y US al mismo tiempo
 		and footprint_region <> 3
 )
@@ -35,11 +35,3 @@ GROUP BY
 	-- fuentes_bioclimaticas.footprint_region
 ORDER BY
 	"type";
-	--fuentes_bioclimaticas.fuente;
--- Se cambio el footprint_region de las vistas
---select * from fuentes_bioclimaticas
-/*SELECT
-		footprint_region, gids
-	FROM
-		grid_geojson_16km_aoi
-*/

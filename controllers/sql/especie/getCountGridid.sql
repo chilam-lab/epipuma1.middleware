@@ -5,14 +5,14 @@ WITH gridid_specie AS (
          --unnest(cells_32km) as gridid
   FROM sp_snib
   WHERE spid IN ($<spids:csv>)
-  -- WHERE spid IN (8922, 8923, 27333)
+  --WHERE spid IN (300008)
   UNION
   SELECT bid AS spid,
          UNNEST($<res_celda:name>) AS gridid
          -- unnest(cells_32km) as gridid
   FROM raster_bins
   WHERE bid IN ($<spids:csv>)
-  -- WHERE bid IN (8922, 8923, 27333)
+  --WHERE bid IN (300008)
 ),
 count_spid AS (
   -- Agrupa para cada gridid el numero de ejemplares que hay
