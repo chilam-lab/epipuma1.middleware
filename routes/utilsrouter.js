@@ -116,4 +116,9 @@ router.route('/especie/getAvailableCountries')
   .post(verbsCtrl.getAvailableCountries)  
 
 
+router.route('/especie/getAvailableCountriesFootprint')
+  .get(verbsCtrl.getAvailableCountriesFootprint)
+  .post(verbsCtrl.getAvailableCountriesFootprint)  
+
+
 module.exports = router
