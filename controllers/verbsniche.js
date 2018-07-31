@@ -1228,9 +1228,9 @@ exports.getN = function(req, res) {
 
 
 /**
-* getN
+* getAvailableCountries
 *
-* Obtiene la N para analisis dependiendo la region
+* Obtiene la el id del pais que estan disponibles en el sistema
 * 
 * @param {express.Request} req
 * @param {express.Response} res
@@ -1241,6 +1241,38 @@ exports.getAvailableCountries = function(req, res) {
       debug("getAvailableCountries");
 
       pool.any(queries.subaoi.getAvailableCountries,{
+      })
+        .then(function (data) {
+          res.json({
+            'data': data,
+            ok: true
+          })
+        })
+        .catch(function (error) {
+          return res.json({
+            err: error,
+            ok: false,
+            message: "Error al procesar la query"
+          })
+        })
+
+}
+
+
+/**
+* getAvailableCountriesFootprint
+*
+* Obtiene la el footprint_region del pais que estan disponibles en el sistema
+* 
+* @param {express.Request} req
+* @param {express.Response} res
+*
+*/
+exports.getAvailableCountriesFootprint = function(req, res) {
+
+      debug("getAvailableCountriesFootprint");
+
+      pool.any(queries.subaoi.getAvailableCountriesFootprint,{
       })
         .then(function (data) {
           res.json({
