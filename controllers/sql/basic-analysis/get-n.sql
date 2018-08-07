@@ -1,12 +1,14 @@
--- select count(*) as n from ${res_celda_snib_tb:raw};
-select count(*) as n 
-from ${res_celda_snib_tb:raw}
-join america 
-on st_intersects(${res_celda_snib_tb:raw}.small_geom, america.geom)
-where america.gid = ${id_country:raw}
--- Revisar la corrección de the_geom con small_geom
--- select count(*) as n 
--- from grid_16km_aoi
--- join aoi 
--- on st_intersects(grid_16km_aoi.the_geom, aoi.geom)
--- where aoi.fgid = 33
+--SELECT icount(cells) as n
+--FROM grid_geojson_${grid_resolution:raw}km_aoi
+--where footprint_region = ${footprint_region:raw}
+with available_countries as(
+	SELECT country, fgid, array_agg(gid) as gids
+	FROM aoi
+	group by fgid, country
+)
+select fgid as id_country, icount(cells) as n
+from available_countries
+join grid_geojson_${grid_resolution:raw}km_aoi
+on available_countries.gids @> grid_geojson_${grid_resolution:raw}km_aoi.gid
+where footprint_region = ${footprint_region:raw}
+order by fgid

@@ -1,22 +1,43 @@
-with temp_source as (
+with lista_gridids as (
+	select array_agg(cell) as cells
+	from(
+		select cell
+		from temp_01
+		where iter = 1 and tipo_valor = 'test' and sp_obj = FALSE
+		order by cell
+	) as t1
+	group by true
+),
+lista_gridids_seccion_sp as (
+	select array_agg(cell) as cells
+	from(
+		select cell
+		from temp_01
+		where iter = 1 and tipo_valor = 'test' and sp_obj = TRUE
+		order by cell
+	) as t1
+	group by true
+),
+temp_source as (
 	SELECT 
 		spid, 
-		--array_agg(distinct snib.gridid_16km ) as cells,
-		array_agg(distinct ${res_celda_snib:raw}) as cells, 
-		--icount(array_agg(distinct snib.gridid_16km)) as ni
-		icount(array_agg(distinct ${res_celda_snib:raw})) as ni
+		(array_agg(distinct snib.gridid_16km) - lista_gridids_seccion_sp.cells) as cells,
+		--array_agg(distinct ${res_celda_snib:raw} - lista_gridids.cells) as cells, 
+		icount(array_agg(distinct snib.gridid_16km) - lista_gridids_seccion_sp.cells)  as ni
+		--icount(array_agg(distinct ${res_celda_snib:raw})) as ni
 	FROM snib
 	join aoi
-	on snib.gid = aoi.gid
+	on snib.gid = aoi.gid,
+	lista_gridids_seccion_sp
 	WHERE 
-		--aoi.fgid = 19 and
-		aoi.fgid = $<id_country:raw> and
-		--spid = 27333
-		spid = ${spid}
+		aoi.fgid = 19 and
+		--aoi.fgid = $<id_country:raw> and
+		spid = 27333
+		--spid = ${spid}
 		and especievalidabusqueda <> ''
-		--and 27333 is not NULL
-		and ${spid} is not null
-	group by spid
+		and 27333 is not NULL
+		--and ${spid} is not null
+	group by spid, lista_gridids_seccion_sp.cells
 ),
 temp_target as (
 	SELECT  spid, 
@@ -27,18 +48,19 @@ temp_target as (
 			familiavalida, 
 			generovalido, 
 			especievalidabusqueda, 
-			--array_agg(distinct snib.gridid_16km ) as cells,
-			array_agg(distinct ${res_celda_snib:raw}) as cells, 
-			--icount(array_agg(distinct snib.gridid_16km)) as nj,
-			icount(array_agg(distinct ${res_celda_snib:raw})) as nj,
+			(array_agg(distinct snib.gridid_16km) - lista_gridids.cells) as cells,
+			--array_agg(distinct ${res_celda_snib:raw}) as cells, 
+			icount(array_agg(distinct snib.gridid_16km) - lista_gridids.cells) as nj,
+			--icount(array_agg(distinct ${res_celda_snib:raw})) as nj,
 			0 as tipo
 	FROM snib
 	join aoi
-	on snib.gid = aoi.gid
-		--where clasevalida = 'Reptilia'
-		${where_config:raw}
-		--and aoi.fgid = 19
-		and aoi.fgid = $<id_country:raw>
+	on snib.gid = aoi.gid,
+	lista_gridids
+		where clasevalida = 'Mammalia'
+		--${where_config:raw}
+		and aoi.fgid = 19
+		--and aoi.fgid = $<id_country:raw>
 		and especievalidabusqueda <> ''
 		and reinovalido <> ''
 		and phylumdivisionvalido <> ''
@@ -46,8 +68,8 @@ temp_target as (
 		and ordenvalido <> ''
 		and familiavalida <> ''
 		and generovalido <> ''
-		--and snib.gridid_16km is not null
-		and ${res_celda_snib:raw} is not null
+		and snib.gridid_16km is not null
+		--and ${res_celda_snib:raw} is not null
 		group by spid,
 			reinovalido, 
 			phylumdivisionvalido, 
@@ -55,7 +77,8 @@ temp_target as (
 			ordenvalido, 
 			familiavalida, 
 			generovalido, 
-			especievalidabusqueda
+			especievalidabusqueda,
+			lista_gridids.cells
 )
 SELECT 	temp_target.spid,
 		temp_target.tipo,
