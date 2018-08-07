@@ -1,4 +1,4 @@
-with lista_gridids as (
+/*with lista_gridids as (
 	select array_agg(cell) as cells
 	from(
 		select cell
@@ -17,27 +17,29 @@ lista_gridids_seccion_sp as (
 		order by cell
 	) as t1
 	group by true
-),
-temp_source as (
+),*/
+with temp_source as (
 	SELECT 
 		spid, 
-		(array_agg(distinct snib.gridid_16km) - lista_gridids_seccion_sp.cells) as cells,
-		--array_agg(distinct ${res_celda_snib:raw} - lista_gridids.cells) as cells, 
-		icount(array_agg(distinct snib.gridid_16km) - lista_gridids_seccion_sp.cells)  as ni
+--		(array_agg(distinct snib.gridid_16km) - lista_gridids_seccion_sp.cells) as cells,
+		array_agg(distinct snib.gridid_16km) as cells,
+		--array_agg(distinct ${res_celda_snib:raw}) as cells, 
+		--icount(array_agg(distinct snib.gridid_16km) - lista_gridids_seccion_sp.cells)  as ni
+		icount(array_agg(distinct snib.gridid_16km))  as ni
 		--icount(array_agg(distinct ${res_celda_snib:raw})) as ni
 	FROM snib
 	join aoi
-	on snib.gid = aoi.gid,
-	lista_gridids_seccion_sp
+	on snib.gid = aoi.gid
+	--,lista_gridids_seccion_sp
 	WHERE 
 		aoi.fgid = 19 and
 		--aoi.fgid = $<id_country:raw> and
 		spid = 27333
 		--spid = ${spid}
 		and especievalidabusqueda <> ''
-		and 27333 is not NULL
-		--and ${spid} is not null
-	group by spid, lista_gridids_seccion_sp.cells
+		and spid is not null
+	group by spid
+	--, lista_gridids_seccion_sp.cells
 ),
 temp_target as (
 	SELECT  spid, 
@@ -48,16 +50,18 @@ temp_target as (
 			familiavalida, 
 			generovalido, 
 			especievalidabusqueda, 
-			(array_agg(distinct snib.gridid_16km) - lista_gridids.cells) as cells,
+			--(array_agg(distinct snib.gridid_16km) - lista_gridids.cells) as cells,
+			--array_agg(distinct snib.gridid_16km) as cells,
 			--array_agg(distinct ${res_celda_snib:raw}) as cells, 
-			icount(array_agg(distinct snib.gridid_16km) - lista_gridids.cells) as nj,
-			--icount(array_agg(distinct ${res_celda_snib:raw})) as nj,
+			--icount(array_agg(distinct snib.gridid_16km) - lista_gridids.cells) as nj,
+			--icount(array_agg(distinct snib.gridid_16km)) as nj,
+--			icount(array_agg(distinct ${res_celda_snib:raw})) as nj,
 			0 as tipo
 	FROM snib
 	join aoi
-	on snib.gid = aoi.gid,
-	lista_gridids
-		where clasevalida = 'Mammalia'
+	on snib.gid = aoi.gid
+	--,lista_gridids
+		where clasevalida = 'Reptilia'
 		--${where_config:raw}
 		and aoi.fgid = 19
 		--and aoi.fgid = $<id_country:raw>
@@ -77,8 +81,8 @@ temp_target as (
 			ordenvalido, 
 			familiavalida, 
 			generovalido, 
-			especievalidabusqueda,
-			lista_gridids.cells
+			especievalidabusqueda
+			--,lista_gridids.cells
 )
 SELECT 	temp_target.spid,
 		temp_target.tipo,
@@ -93,26 +97,33 @@ SELECT 	temp_target.spid,
 		icount(temp_source.cells & temp_target.cells) AS nij,
 		temp_target.nj AS nj,
 		temp_source.ni AS ni,
-		${N} as n,
+		--${N} as n,
+		9873 as n,
 		round( cast( 
 			get_epsilon(
-				${alpha},
+				--${alpha},
+				0.01,
 				cast( temp_target.nj as integer),
 				cast( icount(temp_source.cells & temp_target.cells) as integer),
 				cast( temp_source.ni as integer),
-				cast( ${N} as integer)
+--				cast( ${N} as integer)
+				cast( 9873 as integer)
 			)as numeric), 2)  as epsilon,
 		round( cast(  ln(   
 			get_score(
-				${alpha},
+				--${alpha},
+				0.01,
 				cast( temp_target.nj as integer),
 				cast( icount(temp_source.cells & temp_target.cells) as integer),
 				cast( temp_source.ni as integer),
-				cast( ${N} as integer)
+			--	cast( ${N} as integer)
+				cast( 9873 as integer)
 			)
 		) as numeric), 2) as score
 FROM temp_source,temp_target
 where 
-temp_target.spid <> ${spid}
-and icount(temp_target.cells) >= ${min_occ}
+--temp_target.spid <> ${spid}
+temp_target.spid <> 27333
+--and icount(temp_target.cells) >= ${min_occ}
+and icount(temp_target.cells) >= 5
 order by epsilon desc;
