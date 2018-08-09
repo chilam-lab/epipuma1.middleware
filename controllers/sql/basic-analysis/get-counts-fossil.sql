@@ -1,56 +1,69 @@
 with temp_source as (
 	SELECT 
-		spid, 
-		--array_agg(distinct snib.gridid_16km ) as cells,
-		array_agg(distinct ${res_celda_snib:raw}) as cells, 
-		--icount(array_agg(distinct snib.gridid_16km)) as ni
-		icount(array_agg(distinct ${res_celda_snib:raw})) as ni
-	FROM snib
-	join aoi
-	on snib.gid = aoi.gid
+		a.spid, 
+		--array_agg(distinct a.gridid_64km ) as cells,
+		array_agg(distinct a.${res_celda_snib:raw}) as cells, 
+		--icount(array_agg(distinct a.gridid_64km)) as ni
+		icount(array_agg(distinct a.${res_celda_snib:raw})) as ni
+	FROM snib AS a
+	JOIN (
+		SELECT UNNEST(gid) AS gid 
+		--FROM grid_geojson_64km_aoi
+		FROM ${res_celda_snib_tb}
+		--WHERE footprint_region=1 
+		WHERE footprint_region=${region}
+		) AS b
+	ON a.gid = b.gid
 	WHERE 
-		--aoi.fgid = 19 and
-		aoi.fgid = $<id_country:raw> and
-		spid = ${spid} ${fossil:raw}
-		and especievalidabusqueda <> ''
+		--spid = 27333
+		a.spid = ${spid} ${fossil:raw}
+		and a.especievalidabusqueda <> ''
+		--and 27333 is not NULL
 		and ${spid} is not null
-	group by spid
+	group by a.spid
 ),
 temp_target as (
-	SELECT  generovalido, 
-			especievalidabusqueda, 
-			spid, 
-			reinovalido, 
-			phylumdivisionvalido, 
-			clasevalida, 
-			ordenvalido, 
-			familiavalida, 
-			array_agg(distinct ${res_celda_snib:raw}) as cells, 
-			icount(array_agg(distinct ${res_celda_snib:raw})) as nj,
+	SELECT  a.generovalido, 
+			a.especievalidabusqueda, 
+			a.spid, 
+			a.reinovalido, 
+			a.phylumdivisionvalido, 
+			a.clasevalida, 
+			a.ordenvalido, 
+			a.familiavalida, 
+			--array_agg(distinct a.gridid_64km ) as cells,
+			array_agg(distinct a.${res_celda_snib:raw}) as cells, 
+			--icount(array_agg(distinct a.gridid_64km)) as nj,
+			icount(array_agg(distinct a.${res_celda_snib:raw})) as nj,
 			0 as tipo
-	FROM snib 
-	join aoi
-	on snib.gid = aoi.gid
+	FROM snib AS a
+	JOIN (
+		SELECT UNNEST(gid) AS gid 
+		--FROM grid_geojson_64km_aoi
+		FROM ${res_celda_snib_tb}
+		--WHERE footprint_region=1 
+		WHERE footprint_region=${region}
+		) AS b
+	ON a.gid = b.gid
 		--where clasevalida = 'Reptilia'
 		${where_config:raw}  ${fossil:raw}
-		--and aoi.fgid = 19
-		and aoi.fgid = $<id_country:raw>
-		and especievalidabusqueda <> ''
-		and reinovalido <> ''
-		and phylumdivisionvalido <> ''
-		and clasevalida <> ''
-		and ordenvalido <> ''
-		and familiavalida <> ''
-		and generovalido <> ''
-		and ${res_celda_snib:raw} is not null
-		group by spid,
-			generovalido, 
-			especievalidabusqueda,
-			reinovalido, 
-			phylumdivisionvalido, 
-			clasevalida, 
-			ordenvalido, 
-			familiavalida
+		and a.especievalidabusqueda <> ''
+		and a.reinovalido <> ''
+		and a.phylumdivisionvalido <> ''
+		and a.clasevalida <> ''
+		and a.ordenvalido <> ''
+		and a.familiavalida <> ''
+		and a.generovalido <> ''
+		--and a.gridid_64km is not null
+		and a.${res_celda_snib:raw} is not null
+		group by a.spid,
+			a.generovalido, 
+			a.especievalidabusqueda,
+			a.reinovalido, 
+			a.phylumdivisionvalido, 
+			a.clasevalida, 
+			a.ordenvalido, 
+			a.familiavalida
 	union
 	SELECT  
 		cast('' as text) generovalido,
@@ -69,10 +82,18 @@ temp_target as (
 		cast('' as text) clasevalida,
 		cast('' as text) ordenvalido,
 		cast('' as text) familiavalida,
-		${res_celda_sp:raw} as cells, 
-		icount(${res_celda_sp:raw}) as nj,
+		-- array_intersection(a.cells_64km,
+		-- ARRAY(SELECT cells FROM grid_geojson_64km_aoi WHERE footprint_region = 1)) as cells,
+		array_intersection(a.${res_celda_sp:raw}, 
+			ARRAY(SELECT cells FROM ${res_celda_snib_tb:raw} WHERE footprint_region = ${region})) as cells,
+		-- icount(array_intersection(a.cells_64km,
+		-- ARRAY(SELECT cells FROM grid_geojson_64km_aoi WHERE footprint_region = 1))) as nj, 
+		icount(array_intersection(a.${res_celda_sp:raw}, 
+			ARRAY(SELECT cells FROM ${res_celda_snib_tb:raw} WHERE footprint_region = ${region}))) as nj,
 		1 as tipo
-	FROM raster_bins ${where_config_raster:raw}
+	FROM raster_bins AS a 
+	-- WHERE layer = 'bio010'
+	${where_config_raster:raw}
 )
 SELECT 	temp_target.spid,
 		temp_target.tipo,

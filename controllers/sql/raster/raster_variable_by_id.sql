@@ -10,6 +10,7 @@ FROM raster_bins
 	ON "type" = fuentes_bioclimaticas.id 
 WHERE 
 	"type" = $<typename>
-	and layer = $<layername>
+	AND layer = $<layername>
+	AND $<region> = ANY(fuentes_bioclimaticas.footprint_region)
 ORDER BY
 	bid;

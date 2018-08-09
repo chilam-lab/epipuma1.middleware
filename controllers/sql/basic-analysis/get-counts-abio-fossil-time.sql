@@ -1,20 +1,26 @@
 with temp_source as (
 	SELECT 
-		spid, 
-		--array_agg(distinct snib.gridid_16km ) as cells,
-		array_agg(distinct ${res_celda_snib:raw}) as cells, 
-		--icount(array_agg(distinct snib.gridid_16km)) as ni
-		icount(array_agg(distinct ${res_celda_snib:raw})) as ni
-	FROM snib
-	join aoi
-	on snib.gid = aoi.gid
+		a.spid, 
+		--array_agg(distinct a.gridid_16km ) as cells,
+		array_agg(distinct a.${res_celda_snib:raw}) as cells, 
+		--icount(array_agg(distinct a.gridid_16km)) as ni
+		icount(array_agg(distinct a.${res_celda_snib:raw})) as ni
+	FROM snib  AS a
+	JOIN (
+		SELECT UNNEST(gid) AS gid 
+		--FROM grid_geojson_64km_aoi
+		FROM ${res_celda_snib_tb}
+		--WHERE footprint_region=1 
+		WHERE footprint_region=${region}
+		) AS b
+	ON a.gid = b.gid
 	WHERE 
-		--aoi.fgid = 19 and
-		aoi.fgid = $<id_country:raw> and
-		spid = ${spid} ${fossil:raw}
-		and especievalidabusqueda <> ''
+		--a.spid = 27333
+		a.spid = ${spid} ${fossil:raw}
+		and a.especievalidabusqueda <> ''
+		--and 27333 is not NULL
 		and ${spid} is not null
-	group by spid
+	GROUP BY a.spid
 ),
 temp_target as (
 	SELECT  
@@ -28,16 +34,24 @@ temp_target as (
 				(label || ' '  || round(cast(split_part(split_part(tag,':',1),'.',1) as numeric),2)  ||' mm - ' || round(cast(split_part(split_part(tag,':',2),'.',1) as numeric),2) || ' mm')
 				end
 		end as especievalidabusqueda,
-		bid as spid,
+		a.bid as spid,
 		cast('' as text) reinovalido,
 		cast('' as text) phylumdivisionvalido,
 		cast('' as text) clasevalida,
 		cast('' as text) ordenvalido,
 		cast('' as text) familiavalida,
-		${res_celda_sp:raw} as cells, 
-		icount(${res_celda_sp:raw}) as nj,
-		0 as tipo
-	FROM raster_bins ${where_config_raster:raw}
+		-- array_intersection(a.cells_64km,
+		-- ARRAY(SELECT cells FROM grid_geojson_64km_aoi WHERE footprint_region = 1)) as cells,
+		array_intersection(a.${res_celda_sp:raw}, 
+			ARRAY(SELECT cells FROM ${res_celda_snib_tb:raw} WHERE footprint_region = ${region})) as cells,
+		-- icount(array_intersection(a.cells_64km,
+		-- ARRAY(SELECT cells FROM grid_geojson_64km_aoi WHERE footprint_region = 1))) as nj, 
+		icount(array_intersection(a.${res_celda_sp:raw}, 
+			ARRAY(SELECT cells FROM ${res_celda_snib_tb:raw} WHERE footprint_region = ${region}))) as nj,
+		1 as tipo
+	FROM raster_bins AS a 
+	-- WHERE layer = 'bio010'
+	${where_config_raster:raw}
 )
 SELECT 	temp_target.spid,
 		temp_target.reinovalido,
