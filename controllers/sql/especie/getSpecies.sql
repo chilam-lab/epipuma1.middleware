@@ -21,7 +21,8 @@ SELECT DISTINCT st_asgeojson(the_geom) as json_geom,
 				--gridid_16km as gridid,
 				$<res_celda_snib:raw> as gridid,
 				urlejemplar, 
-				fechacolecta,
+				--fechacolecta,
+				aniocolecta,
 				spid_occ.occ as occ
 FROM snib 
 join aoi
