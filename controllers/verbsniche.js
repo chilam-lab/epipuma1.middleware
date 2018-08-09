@@ -848,8 +848,8 @@ exports.getRasterNiche = function (req, res, next) {
     debug('variable selected request')
 
     pool.any(queries.getRasterNiche.getRasterVariableSelected, {
-      layername: field,
-      typename: type
+      type: type,
+      region: region
     })
         .then(function (data) {
               // debug(data)
@@ -867,7 +867,8 @@ exports.getRasterNiche = function (req, res, next) {
 
     pool.any(queries.getRasterNiche.getRasterVariableById, {
       layername: field,
-      typename: type
+      typename: type,
+      region: region
     })
         .then(function (data) {
           // debug(data)
@@ -1216,8 +1217,9 @@ exports.getN = function(req, res) {
       debug("getN");
 
       var grid_resolution = verb_utils.getParam(req, 'grid_res',16)
-      var res_celda_snib_tb = "grid_"+grid_resolution+"km_aoi" 
+      var res_celda_snib_tb = "grid_geojson_"+grid_resolution+"km_aoi" 
       
+      debug("default_region: " + default_region);
       var footprint_region = parseInt(verb_utils.getParam(req, 'footprint_region', default_region))
       // var country = verb_utils.getRegionCountry(footprint_region)
 

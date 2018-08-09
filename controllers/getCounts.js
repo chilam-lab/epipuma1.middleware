@@ -36,8 +36,6 @@ exports.getBasicInfo = function(req, res, next) {
   
   debug('getBasicInfo')
 
-  default_region = 1;
-
   var footprint_region = parseInt(verb_utils.getParam(req, 'footprint_region', default_region))
   // var country = verb_utils.getRegionCountry(footprint_region)
 
@@ -145,80 +143,6 @@ exports.getBasicInfo = function(req, res, next) {
           });
       });
 
-
-    
-
-
-    
-
-    // // Inica tarea
-    // pool.task(t => {
-
-    //     return t.one(queries.basicAnalysis.getN, {
-
-    //         res_celda_snib_tb: data_request.res_celda_snib_tb,
-    //         id_country: footprint_region
-
-    //     }).then(resp => {
-
-    //         debug("N:" + resp.n)
-    //         data_request["N"] = resp.n 
-
-    //         debug("id_country:" + footprint_region)
-    //         data_request["id_country"] = footprint_region
-
-    //         // seleccion de caso para obtener datos de especie ibjetivo
-    //         if(data_request.caso === -1 && data_request.fossil.length == 0){
-    //           debug("counts case 1: basico")
-    //           // query_source = queries.basicAnalysis.getSource  
-    //           query = queries.basicAnalysis.getCountsBio
-    //         }
-    //         else if(data_request.caso === -1 && data_request.fossil.length > 1){
-    //           debug("counts case 2: sin fosil")
-    //           // query = queries.basicAnalysis.getSourceFossil
-    //           query = queries.basicAnalysis.getCountsBioFossil
-    //         }
-    //         else{
-    //           debug("counts case 3: tiempo y posible fosil")
-    //           // query = queries.basicAnalysis.getSourceTime  
-    //           query = queries.basicAnalysis.getCountsBioTime
-    //         }
-
-    //         return t.any(query, data_request)
-
-    //       })
-
-    // })
-    // .then(data => {
-
-    //   // debug("data_request.with_basic_data: " + data_request.with_basic_data)
-    //   // debug("data_request.with_data_freq: " + data_request.with_data_freq)
-    //   // debug("data_request.with_data_score_cell: " + data_request.with_data_score_cell)
-    //   // debug("data_request.with_data_freq_cell: " + data_request.with_data_freq_cell)
-
-    //     var data_freq = data_request.with_data_freq === "true" ? verb_utils.processDataForFreqSpecie(data) : []
-    //     var data_score_cell = data_request.with_data_score_cell === "true" ? verb_utils.processDataForScoreCell(data) : []
-    //     var data_freq_cell = data_request.with_data_freq_cell === "true" ? verb_utils.processDataForFreqCell(data_score_cell) : [];
-
-    //     res.json({
-    //       ok: true,
-    //       usuarioRequest: req.usuarioRequest,
-    //       data: data,
-    //       data_freq: data_freq,
-    //       data_score_cell: data_score_cell,
-    //       data_freq_cell: data_freq_cell
-    //     });
-
-
-    // })
-    // .catch(error => {
-    //     debug(error)
-    //     return res.json({
-    //       ok: false,
-    //       error: error
-    //     });
-    // });
-
   
   }
   else if (data_request.hasBios === 'false' && data_request.hasRaster === 'true' ) {
@@ -238,8 +162,10 @@ exports.getBasicInfo = function(req, res, next) {
             debug("N:" + resp.n)
             data_request["N"] = resp.n 
 
-            debug("id_country:" + footprint_region)
-            data_request["id_country"] = footprint_region
+            debug("id_country:" + resp.id_country)
+            data_request["id_country"] = resp.id_country
+
+            data_request["region"] = footprint_region
 
 
             // seleccion de caso para obtener datos de especie ibjetivo
@@ -301,8 +227,10 @@ exports.getBasicInfo = function(req, res, next) {
             debug("N:" + resp.n)
             data_request["N"] = resp.n 
 
-            debug("id_country:" + footprint_region)
-            data_request["id_country"] = footprint_region
+            debug("id_country:" + resp.id_country)
+            data_request["id_country"] = resp.id_country
+
+            data_request["region"] = footprint_region
 
             // seleccion de caso para obtener datos de especie ibjetivo
             if(data_request.caso === -1 && data_request.fossil.length == 0){
