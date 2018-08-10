@@ -1291,9 +1291,9 @@ exports.getAvailableCountries = function(req, res) {
 */
 exports.getAvailableCountriesFootprint = function(req, res) {
 
-      debug("getAvailableCountriesFootprint");
+      debug("getSubAOI");
 
-      pool.any(queries.subaoi.getAvailableCountriesFootprint,{
+      pool.any(queries.subaoi.getSubAOI,{
       })
         .then(function (data) {
           res.json({

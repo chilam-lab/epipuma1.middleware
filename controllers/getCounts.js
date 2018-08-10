@@ -148,6 +148,11 @@ exports.getBasicInfo = function(req, res, next) {
   else if (data_request.hasBios === 'false' && data_request.hasRaster === 'true' ) {
 
     debug('Caso: hasBios:false - hasRaster:true')
+    debug('grid_resolution: ' + data_request.grid_resolution)
+    debug('res_celda_snib: ' + data_request.res_celda_snib)
+    debug('res_celda_snib_tb: ' + data_request.res_celda_snib_tb)
+    debug('res_celda_snib_tb: ' + data_request.res_celda_snib_tb)
+    debug('region: ' + data_request.region)
 
     // Inica tarea
     pool.task(t => {
