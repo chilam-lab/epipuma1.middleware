@@ -1009,7 +1009,7 @@ exports.getSpeciesNiche = function (req, res, next) {
       var grid_resolution = getParam(req, 'grid_res',16)
       var res_celda_sp =  "cells_"+grid_resolution+"km"   
       var res_celda_snib =  "gridid_"+grid_resolution+"km" 
-      var res_celda_snib_tb = "grid_"+grid_resolution+"km_aoi" 
+      var res_celda_snib_tb = "grid_geojson_"+grid_resolution+"km_aoi" 
 
       debug("footprint_region: " + footprint_region)
 
@@ -1079,6 +1079,12 @@ exports.getSpeciesNiche = function (req, res, next) {
               }
               else{
                 debug('CASO: sin filtros')
+                debug("res_celda: " + res_celda)
+                debug("res_celda_sp: " + res_celda_sp)
+                debug("res_celda_snib: " + res_celda_snib)
+                debug("res_celda_snib_tb: " + res_celda_snib_tb)
+                debug("lb_fosil: " + lb_fosil)
+                debug("footprint_region: " + footprint_region)
                 return pool.any(queries.getSpeciesNiche.getSpecies, {
                   spid: spid,
                   res_celda: res_celda,
@@ -1086,7 +1092,7 @@ exports.getSpeciesNiche = function (req, res, next) {
                   res_celda_snib: res_celda_snib,
                   res_celda_snib_tb: res_celda_snib_tb,
                   sfosil: lb_fosil,
-                  id_country: region
+                  region: footprint_region
                 })
                       
               }
@@ -1095,7 +1101,6 @@ exports.getSpeciesNiche = function (req, res, next) {
 
       })
       .then(data => {
-
           res.json({'data': data})
 
       })
