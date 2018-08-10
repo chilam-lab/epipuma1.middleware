@@ -33,6 +33,7 @@ verb_utils.max_taxon_name = 'reinovalido' // nombre de columna del valor maximo 
 buckets = 20
 deciles = 10
 verb_utils.region_mx = 1
+verb_utils.min_occ = 5
 
 
 
@@ -413,6 +414,7 @@ verb_utils.getRequestParams = function(req, verbose){
   
   
   var grid_resolution = verb_utils.getParam(req, 'grid_res',16)
+  data_request["grid_resolution"] = grid_resolution
   data_request["res_celda_sp"] = "cells_"+grid_resolution+"km" 
   data_request["res_celda_snib"] = "gridid_"+grid_resolution+"km" 
   data_request["res_celda_snib_tb"] = "grid_"+grid_resolution+"km_aoi" 

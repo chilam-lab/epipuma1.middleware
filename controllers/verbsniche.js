@@ -695,18 +695,36 @@ exports.getGridGeoJsonNiche = function (req, res, next) {
   debug("grid_res: " + grid_res)
   debug("footprint_region: " + footprint_region)
 
-  pool.any(queries.grid.gridxxkm, {
-    grid_res: parseInt(grid_res),
-    id_country: footprint_region
-  })
-    .then(function(data) {
-      // debug(data)
-      res.json(data[0].json)
+ pool.task(t => {
+
+      return t.one(queries.basicAnalysis.getN, {
+
+          grid_resolution: grid_res,
+          footprint_region: footprint_region
+
+      }).then(resp => {
+
+          debug("id_country:" + resp.id_country)
+          var region = resp.id_country
+
+          return pool.any(queries.grid.gridxxkm, {
+                    grid_res: parseInt(grid_res),
+                    id_country: region
+                  })
+      })
     })
-    .catch(function(error) {
-      debug(error)
-      next(error)
-    })
+      .then(data => {
+
+          res.json(data[0].json)
+
+      })
+      .catch(error => {
+          debug(error)
+          return res.json({
+            ok: false,
+            error: error
+          });
+      })
 
 }
 
@@ -830,7 +848,7 @@ exports.getRasterNiche = function (req, res, next) {
     debug('variable selected request')
 
     pool.any(queries.getRasterNiche.getRasterVariableSelected, {
-      layername: field,
+      type: type,
       region: region
     })
         .then(function (data) {
@@ -850,7 +868,7 @@ exports.getRasterNiche = function (req, res, next) {
     pool.any(queries.getRasterNiche.getRasterVariableById, {
       layername: field,
       typename: type,
-      region
+      region: region
     })
         .then(function (data) {
           // debug(data)
@@ -986,14 +1004,14 @@ exports.getSpeciesNiche = function (req, res, next) {
       var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
       var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
       var res_celda = getParam(req, 'res_celda', "gridid_16km")
-      var region    = parseInt(getParam(req, 'footprint_region',default_region))
+      var footprint_region    = parseInt(getParam(req, 'footprint_region',default_region))
 
       var grid_resolution = getParam(req, 'grid_res',16)
       var res_celda_sp =  "cells_"+grid_resolution+"km"   
       var res_celda_snib =  "gridid_"+grid_resolution+"km" 
       var res_celda_snib_tb = "grid_"+grid_resolution+"km_aoi" 
 
-      debug("region: " + region)
+      debug("footprint_region: " + footprint_region)
 
 
       // debug(spid)
@@ -1004,90 +1022,91 @@ exports.getSpeciesNiche = function (req, res, next) {
       // debug(moment().format('YYYY-MM-DD'))
 
 
-  if( (parseInt(fecha_incio.format('YYYY')) != 1500 || parseInt(fecha_fin.format('YYYY')) != parseInt(moment().format('YYYY')) ) && sfecha === 'false'){
-    debug('CASO: rango y sin fecha')
-    pool.any(queries.getSpeciesNiche.getSpeciesSDR, {
-      spid: spid,
-      lim_inf: fecha_incio.format('YYYY'),
-      lim_sup: fecha_fin.format('YYYY'),
-      res_celda: res_celda,
-      res_celda_sp: res_celda_sp,
-      res_celda_snib: res_celda_snib,
-      res_celda_snib_tb: res_celda_snib_tb,
-      sfosil: lb_fosil,
-      id_country: region
-    })
-          .then(function (data) {
-                // debug(data)
-            res.json({'data': data})
+      pool.task(t => {
+
+          return t.one(queries.basicAnalysis.getN, {
+
+              grid_resolution: grid_resolution,
+              footprint_region: footprint_region
+
+          }).then(resp => {
+
+              debug("id_country:" + resp.id_country)
+              var region = resp.id_country
+
+              if( (parseInt(fecha_incio.format('YYYY')) != 1500 || parseInt(fecha_fin.format('YYYY')) != parseInt(moment().format('YYYY')) ) && sfecha === 'false'){
+                debug('CASO: rango y sin fecha')
+                return pool.any(queries.getSpeciesNiche.getSpeciesSDR, {
+                  spid: spid,
+                  lim_inf: fecha_incio.format('YYYY'),
+                  lim_sup: fecha_fin.format('YYYY'),
+                  res_celda: res_celda,
+                  res_celda_sp: res_celda_sp,
+                  res_celda_snib: res_celda_snib,
+                  res_celda_snib_tb: res_celda_snib_tb,
+                  sfosil: lb_fosil,
+                  id_country: region
+                })
+                      
+              }
+              else if( parseInt(fecha_incio.format('YYYY')) == 1500 && parseInt(fecha_fin.format('YYYY')) == parseInt(moment().format('YYYY'))  && sfecha === 'false'){
+                debug('CASO: solo sin fecha')
+                return pool.any(queries.getSpeciesNiche.getSpeciesSD, {
+                  spid: spid,
+                  res_celda: res_celda,
+                  res_celda_sp: res_celda_sp,
+                  res_celda_snib: res_celda_snib,
+                  res_celda_snib_tb: res_celda_snib_tb,
+                  sfosil: lb_fosil,
+                  id_country: region
+                })
+                      
+              }
+              else if( parseInt(fecha_incio.format('YYYY')) != 1500 || parseInt(fecha_fin.format('YYYY')) != parseInt(moment().format('YYYY')) ){
+                debug('CASO: solo rango')
+                return pool.any(queries.getSpeciesNiche.getSpeciesR, {
+                  spid: spid,
+                  lim_inf: fecha_incio.format('YYYY'),
+                  lim_sup: fecha_fin.format('YYYY'),
+                  res_celda: res_celda,
+                  res_celda_sp: res_celda_sp,
+                  res_celda_snib: res_celda_snib,
+                  res_celda_snib_tb: res_celda_snib_tb,
+                  sfosil: lb_fosil,
+                  id_country: region
+                })
+                      
+              }
+              else{
+                debug('CASO: sin filtros')
+                return pool.any(queries.getSpeciesNiche.getSpecies, {
+                  spid: spid,
+                  res_celda: res_celda,
+                  res_celda_sp: res_celda_sp,
+                  res_celda_snib: res_celda_snib,
+                  res_celda_snib_tb: res_celda_snib_tb,
+                  sfosil: lb_fosil,
+                  id_country: region
+                })
+                      
+              }
+
           })
-          .catch(function (error) {
-            debug(error)
-            next(error)
-          })
-  }
-  else if( parseInt(fecha_incio.format('YYYY')) == 1500 && parseInt(fecha_fin.format('YYYY')) == parseInt(moment().format('YYYY'))  && sfecha === 'false'){
-    debug('CASO: solo sin fecha')
-    pool.any(queries.getSpeciesNiche.getSpeciesSD, {
-      spid: spid,
-      res_celda: res_celda,
-      res_celda_sp: res_celda_sp,
-      res_celda_snib: res_celda_snib,
-      res_celda_snib_tb: res_celda_snib_tb,
-      sfosil: lb_fosil,
-      id_country: region
-    })
-          .then(function (data) {
-                // debug(data)
-            res.json({'data': data})
-          })
-          .catch(function (error) {
-            debug(error)
-            next(error)
-          })
-  }
-  else if( parseInt(fecha_incio.format('YYYY')) != 1500 || parseInt(fecha_fin.format('YYYY')) != parseInt(moment().format('YYYY')) ){
-    debug('CASO: solo rango')
-    pool.any(queries.getSpeciesNiche.getSpeciesR, {
-      spid: spid,
-      lim_inf: fecha_incio.format('YYYY'),
-      lim_sup: fecha_fin.format('YYYY'),
-      res_celda: res_celda,
-      res_celda_sp: res_celda_sp,
-      res_celda_snib: res_celda_snib,
-      res_celda_snib_tb: res_celda_snib_tb,
-      sfosil: lb_fosil,
-      id_country: region
-    })
-          .then(function (data) {
-                // debug(data)
-            res.json({'data': data})
-          })
-          .catch(function (error) {
-            debug(error)
-            next(error)
-          })
-  }
-  else{
-    debug('CASO: sin filtros')
-    pool.any(queries.getSpeciesNiche.getSpecies, {
-      spid: spid,
-      res_celda: res_celda,
-      res_celda_sp: res_celda_sp,
-      res_celda_snib: res_celda_snib,
-      res_celda_snib_tb: res_celda_snib_tb,
-      sfosil: lb_fosil,
-      id_country: region
-    })
-          .then(function (data) {
-                // debug(data)
-            res.json({'data': data})
-          })
-          .catch(function (error) {
-            debug(error)
-            next(error)
-          })
-  }
+
+      })
+      .then(data => {
+
+          res.json({'data': data})
+
+      })
+      .catch(error => {
+          debug(error)
+
+          return res.json({
+            ok: false,
+            error: error
+          });
+      });
 
 }
 
@@ -1204,12 +1223,12 @@ exports.getN = function(req, res) {
       var footprint_region = parseInt(verb_utils.getParam(req, 'footprint_region', default_region))
       // var country = verb_utils.getRegionCountry(footprint_region)
 
-      debug("res_celda_snib_tb: " + res_celda_snib_tb)
-      debug("region: " + footprint_region)
+      // debug("res_celda_snib_tb: " + res_celda_snib_tb)
+      debug("footprint_region: " + footprint_region)
 
       pool.any(queries.basicAnalysis.getN,{
-        res_celda_snib_tb: res_celda_snib_tb,
-        region: footprint_region
+        grid_resolution: grid_resolution,
+        footprint_region: footprint_region
       })
         .then(function (data) {
           res.json({
@@ -1230,9 +1249,9 @@ exports.getN = function(req, res) {
 
 
 /**
-* getN
+* getAvailableCountries
 *
-* Obtiene la N para analisis dependiendo la region
+* Obtiene la el id del pais que estan disponibles en el sistema
 * 
 * @param {express.Request} req
 * @param {express.Response} res
@@ -1243,6 +1262,38 @@ exports.getAvailableCountries = function(req, res) {
       debug("getAvailableCountries");
 
       pool.any(queries.subaoi.getAvailableCountries,{
+      })
+        .then(function (data) {
+          res.json({
+            'data': data,
+            ok: true
+          })
+        })
+        .catch(function (error) {
+          return res.json({
+            err: error,
+            ok: false,
+            message: "Error al procesar la query"
+          })
+        })
+
+}
+
+
+/**
+* getAvailableCountriesFootprint
+*
+* Obtiene la el footprint_region del pais que estan disponibles en el sistema
+* 
+* @param {express.Request} req
+* @param {express.Response} res
+*
+*/
+exports.getAvailableCountriesFootprint = function(req, res) {
+
+      debug("getAvailableCountriesFootprint");
+
+      pool.any(queries.subaoi.getAvailableCountriesFootprint,{
       })
         .then(function (data) {
           res.json({

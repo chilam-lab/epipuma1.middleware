@@ -12,6 +12,7 @@ var queries = require('./sql/queryProvider')
 var pool = verb_utils.pool
 var alpha = verb_utils.alpha
 var N = verb_utils.N
+var default_region = verb_utils.region_mx
 
 /**
  *
@@ -61,7 +62,7 @@ function getEdgesNiche(req, res, next) {
   var hasRasterSource    = verb_utils.getParam(req, 'hasrastersource')
   var hasBiosTarget    = verb_utils.getParam(req, 'hasbiotarget')
   var hasRasterTarget    = verb_utils.getParam(req, 'hasrastertarget')
-  var footprint_region = verb_utils.getParam(req, 'footprint_region')
+  var footprint_region = verb_utils.getParam(req, 'footprint_region', default_region)
   var resolution = grid_resolution
 
 
