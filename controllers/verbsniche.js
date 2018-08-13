@@ -704,12 +704,11 @@ exports.getGridGeoJsonNiche = function (req, res, next) {
 
       }).then(resp => {
 
-          debug("id_country:" + resp.id_country)
-          var region = resp.id_country
-
+          debug("TEST ...")
           return pool.any(queries.grid.gridxxkm, {
+
                     grid_res: parseInt(grid_res),
-                    id_country: region
+                    region: footprint_region
                   })
       })
     })

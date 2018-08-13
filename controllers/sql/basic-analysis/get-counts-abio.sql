@@ -9,7 +9,7 @@ with temp_source as (
 	JOIN (
 		SELECT UNNEST(gid) AS gid 
 		--FROM grid_geojson_64km_aoi
-		FROM ${res_celda_snib_tb}
+		FROM ${res_celda_snib_tb:raw}
 		--WHERE footprint_region=1 
 		WHERE footprint_region=${region}
 		) AS b
