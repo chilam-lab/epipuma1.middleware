@@ -1011,9 +1011,6 @@ exports.getSpeciesNiche = function (req, res, next) {
       var res_celda_snib =  "gridid_"+grid_resolution+"km" 
       var res_celda_snib_tb = "grid_geojson_"+grid_resolution+"km_aoi" 
 
-      debug("footprint_region: " + footprint_region)
-
-
       // debug(spid)
       // debug(sfecha)
       // debug(sfosil)
@@ -1036,6 +1033,12 @@ exports.getSpeciesNiche = function (req, res, next) {
 
               if( (parseInt(fecha_incio.format('YYYY')) != 1500 || parseInt(fecha_fin.format('YYYY')) != parseInt(moment().format('YYYY')) ) && sfecha === 'false'){
                 debug('CASO: rango y sin fecha')
+                debug("res_celda: " + res_celda)
+                debug("res_celda_sp: " + res_celda_sp)
+                debug("res_celda_snib: " + res_celda_snib)
+                debug("res_celda_snib_tb: " + res_celda_snib_tb)
+                debug("lb_fosil: " + lb_fosil)
+                debug("footprint_region: " + footprint_region)
                 return pool.any(queries.getSpeciesNiche.getSpeciesSDR, {
                   spid: spid,
                   lim_inf: fecha_incio.format('YYYY'),
@@ -1045,12 +1048,18 @@ exports.getSpeciesNiche = function (req, res, next) {
                   res_celda_snib: res_celda_snib,
                   res_celda_snib_tb: res_celda_snib_tb,
                   sfosil: lb_fosil,
-                  id_country: region
+                  region: footprint_region
                 })
                       
               }
               else if( parseInt(fecha_incio.format('YYYY')) == 1500 && parseInt(fecha_fin.format('YYYY')) == parseInt(moment().format('YYYY'))  && sfecha === 'false'){
                 debug('CASO: solo sin fecha')
+                debug("res_celda: " + res_celda)
+                debug("res_celda_sp: " + res_celda_sp)
+                debug("res_celda_snib: " + res_celda_snib)
+                debug("res_celda_snib_tb: " + res_celda_snib_tb)
+                debug("lb_fosil: " + lb_fosil)
+                debug("footprint_region: " + footprint_region)
                 return pool.any(queries.getSpeciesNiche.getSpeciesSD, {
                   spid: spid,
                   res_celda: res_celda,
@@ -1058,12 +1067,18 @@ exports.getSpeciesNiche = function (req, res, next) {
                   res_celda_snib: res_celda_snib,
                   res_celda_snib_tb: res_celda_snib_tb,
                   sfosil: lb_fosil,
-                  id_country: region
+                  region: footprint_region
                 })
                       
               }
               else if( parseInt(fecha_incio.format('YYYY')) != 1500 || parseInt(fecha_fin.format('YYYY')) != parseInt(moment().format('YYYY')) ){
                 debug('CASO: solo rango')
+                debug("res_celda: " + res_celda)
+                debug("res_celda_sp: " + res_celda_sp)
+                debug("res_celda_snib: " + res_celda_snib)
+                debug("res_celda_snib_tb: " + res_celda_snib_tb)
+                debug("lb_fosil: " + lb_fosil)
+                debug("footprint_region: " + footprint_region)
                 return pool.any(queries.getSpeciesNiche.getSpeciesR, {
                   spid: spid,
                   lim_inf: fecha_incio.format('YYYY'),
@@ -1073,7 +1088,7 @@ exports.getSpeciesNiche = function (req, res, next) {
                   res_celda_snib: res_celda_snib,
                   res_celda_snib_tb: res_celda_snib_tb,
                   sfosil: lb_fosil,
-                  id_country: region
+                  region: footprint_region
                 })
                       
               }
