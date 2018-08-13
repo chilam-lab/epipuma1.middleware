@@ -40,6 +40,8 @@ exports.getBasicInfo = function(req, res, next) {
   var data_request = verb_utils.getRequestParams(req, false)
 
   data_request["res_celda_snib_tb"] = "grid_geojson_" + data_request.grid_resolution + "km_aoi"
+  data_request["region"] = footprint_region
+  debug('region: ' + data_request.region)
 
   //agregar iteraciones para el proceso de validacion
 
@@ -69,7 +71,7 @@ exports.getBasicInfo = function(req, res, next) {
 
               debug("N:" + resp.n)
               data_request["N"] = resp.n 
-              
+
               // seleccion de caso para obtener datos de especie ibjetivo
               if(data_request.caso === -1 && data_request.fossil.length == 0){
                 debug("counts case 1: basico")
@@ -161,9 +163,6 @@ exports.getBasicInfo = function(req, res, next) {
             debug("N:" + resp.n)
             data_request["N"] = resp.n 
 
-            data_request["region"] = footprint_region
-            debug('region: ' + data_request.region)
-
             // seleccion de caso para obtener datos de especie ibjetivo
             if(data_request.caso === -1 && data_request.fossil.length == 0){
               debug("counts case 1: basico")
@@ -222,11 +221,6 @@ exports.getBasicInfo = function(req, res, next) {
 
             debug("N:" + resp.n)
             data_request["N"] = resp.n 
-
-            debug("id_country:" + resp.id_country)
-            data_request["id_country"] = resp.id_country
-
-            data_request["region"] = footprint_region
 
             // seleccion de caso para obtener datos de especie ibjetivo
             if(data_request.caso === -1 && data_request.fossil.length == 0){
