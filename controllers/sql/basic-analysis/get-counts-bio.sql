@@ -1,87 +1,74 @@
-/*with lista_gridids as (
-	select array_agg(cell) as cells
-	from(
-		select cell
-		from temp_01
-		where iter = 1 and tipo_valor = 'test' and sp_obj = FALSE
-		order by cell
-	) as t1
-	group by true
-),
-lista_gridids_seccion_sp as (
-	select array_agg(cell) as cells
-	from(
-		select cell
-		from temp_01
-		where iter = 1 and tipo_valor = 'test' and sp_obj = TRUE
-		order by cell
-	) as t1
-	group by true
-),*/
 with temp_source as (
 	SELECT 
-		spid, 
+		a.spid, 
 --		(array_agg(distinct snib.gridid_16km) - lista_gridids_seccion_sp.cells) as cells,
---		array_agg(distinct snib.gridid_16km) as cells,
-		array_agg(distinct ${res_celda_snib:raw}) as cells, 
+		array_agg(distinct a.gridid_16km) as cells,
+--		array_agg(distinct a.${res_celda_snib:raw}) as cells, 
 		--icount(array_agg(distinct snib.gridid_16km) - lista_gridids_seccion_sp.cells)  as ni
-		--icount(array_agg(distinct snib.gridid_16km))  as ni
-		icount(array_agg(distinct ${res_celda_snib:raw})) as ni
-	FROM snib
-	join aoi
-	on snib.gid = aoi.gid
-	--,lista_gridids_seccion_sp
+		icount(array_agg(distinct a.gridid_16km))  as ni
+		--icount(array_agg(distinct a.${res_celda_snib:raw})) as ni
+	FROM snib AS a
+	JOIN (
+		SELECT UNNEST(gid) AS gid 
+		FROM grid_geojson_16km_aoi
+		--FROM ${res_celda_snib_tb:raw}
+		WHERE footprint_region=1 
+		--WHERE footprint_region=${region}
+		) AS b
+	ON a.gid = b.gid
 	WHERE 
-		--aoi.fgid = 19 and
-		aoi.fgid = $<id_country:raw> and
-		--spid = 27333
-		spid = ${spid}
-		and especievalidabusqueda <> ''
-		and spid is not null
-	group by spid
+		a.spid = 27333
+		--a.spid = ${spid}
+		and a.especievalidabusqueda <> ''
+		and a.spid is not null
+	GROUP BY a.spid
 	--, lista_gridids_seccion_sp.cells
 ),
 temp_target as (
-	SELECT  spid, 
-			reinovalido, 
-			phylumdivisionvalido, 
-			clasevalida, 
-			ordenvalido, 
-			familiavalida, 
-			generovalido, 
-			especievalidabusqueda, 
+	SELECT  a.spid, 
+			a.reinovalido, 
+			a.phylumdivisionvalido, 
+			a.clasevalida, 
+			a.ordenvalido, 
+			a.familiavalida, 
+			a.generovalido, 
+			a.especievalidabusqueda, 
 			--(array_agg(distinct snib.gridid_16km) - lista_gridids.cells) as cells,
-			--array_agg(distinct snib.gridid_16km) as cells,
-			array_agg(distinct ${res_celda_snib:raw}) as cells, 
+			array_agg(distinct a.gridid_16km) as cells,
+			--array_agg(distinct a.${res_celda_snib:raw}) as cells, 
 			--icount(array_agg(distinct snib.gridid_16km) - lista_gridids.cells) as nj,
-			--icount(array_agg(distinct snib.gridid_16km)) as nj,
-			icount(array_agg(distinct ${res_celda_snib:raw})) as nj,
+			icount(array_agg(distinct a.gridid_16km)) as nj,
+			--icount(array_agg(distinct a.${res_celda_snib:raw})) as nj,
 			0 as tipo
-	FROM snib
-	join aoi
-	on snib.gid = aoi.gid
-	--,lista_gridids
-		--where clasevalida = 'Reptilia'
-		${where_config:raw}
-		--and aoi.fgid = 19
-		and aoi.fgid = $<id_country:raw>
-		and especievalidabusqueda <> ''
-		and reinovalido <> ''
-		and phylumdivisionvalido <> ''
-		and clasevalida <> ''
-		and ordenvalido <> ''
-		and familiavalida <> ''
-		and generovalido <> ''
-		--and snib.gridid_16km is not null
-		and ${res_celda_snib:raw} is not null
-		group by spid,
-			reinovalido, 
-			phylumdivisionvalido, 
-			clasevalida, 
-			ordenvalido, 
-			familiavalida, 
-			generovalido, 
-			especievalidabusqueda
+	FROM snib AS a
+	JOIN (
+		SELECT UNNEST(gid) AS gid 
+		FROM grid_geojson_16km_aoi
+		--FROM ${res_celda_snib_tb:raw}
+		WHERE footprint_region=1 
+		--WHERE footprint_region=${region}
+		) AS b
+	ON a.gid = b.gid
+		--,lista_gridids
+		where a.clasevalida = 'Reptilia'
+		--${where_config:raw}
+		and a.especievalidabusqueda <> ''
+		and a.reinovalido <> ''
+		and a.phylumdivisionvalido <> ''
+		and a.clasevalida <> ''
+		and a.ordenvalido <> ''
+		and a.familiavalida <> ''
+		and a.generovalido <> ''
+		and a.gridid_16km is not null
+		--and a.${res_celda_snib:raw} is not null
+		GROUP BY a.spid,
+			a.reinovalido, 
+			a.phylumdivisionvalido, 
+			a.clasevalida, 
+			a.ordenvalido, 
+			a.familiavalida, 
+			a.generovalido, 
+			a.especievalidabusqueda
 			--,lista_gridids.cells
 )
 SELECT 	temp_target.spid,
