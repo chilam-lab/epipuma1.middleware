@@ -37,7 +37,7 @@ exports.getBasicInfo = function(req, res, next) {
   debug('getBasicInfo')
 
   var footprint_region = parseInt(verb_utils.getParam(req, 'footprint_region', default_region))
-  var data_request = verb_utils.getRequestParams(req, false)
+  var data_request = verb_utils.getRequestParams(req, true)
 
   data_request["res_celda_snib_tb"] = "grid_geojson_" + data_request.grid_resolution + "km_aoi"
   data_request["region"] = footprint_region
@@ -95,6 +95,8 @@ exports.getBasicInfo = function(req, res, next) {
 
       })
       .then(data => {
+
+        // debug(data)
 
         
         // iter++;
@@ -181,6 +183,8 @@ exports.getBasicInfo = function(req, res, next) {
 
     })
     .then(data => {
+
+      // debug(data)
 
         var data_freq = data_request.with_data_freq === "true" ? verb_utils.processDataForFreqSpecie(data) : []
         var data_score_cell = data_request.with_data_score_cell === "true" ? verb_utils.processDataForScoreCell(data) : []
