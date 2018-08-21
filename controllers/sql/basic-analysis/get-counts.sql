@@ -66,8 +66,8 @@ temp_target as (
 			a.especievalidabusqueda
 	union
 	SELECT  
-		cast('' as text) generovalido,
-		case when type = 1 then
+		cast('' as text) generovalido, layer as especievalidabusqueda,
+		/*case when type = 1 then
 			layer
 			else
 				case when strpos(label,'Precipit') = 0 then
@@ -75,7 +75,7 @@ temp_target as (
 				else
 				(label || ' '  || round(cast(split_part(split_part(tag,':',1),'.',1) as numeric),2)  ||' mm - ' || round(cast(split_part(split_part(tag,':',2),'.',1) as numeric),2) || ' mm')
 				end
-		end as especievalidabusqueda,
+		end as especievalidabusqueda,*/
 		a.bid as spid,
 		cast('' as text) reinovalido,
 		cast('' as text) phylumdivisionvalido,
