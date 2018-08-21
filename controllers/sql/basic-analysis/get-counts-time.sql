@@ -9,7 +9,7 @@ with temp_source as (
 	JOIN (
 		SELECT UNNEST(gid) AS gid 
 		--FROM grid_geojson_64km_aoi
-		FROM ${res_celda_snib_tb}
+		FROM ${res_celda_snib_tb:raw}
 		--WHERE footprint_region=1 
 		WHERE footprint_region=${region}
 		) AS b
@@ -20,20 +20,20 @@ with temp_source as (
 		and 
 			(case when ${caso} = 1 
 				  then 
-						fechacolecta <> ''
+						aniocolecta <> 9999
 				  when ${caso} = 2 
 				  then
-						cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)>= cast( ${lim_inf}  as integer)
+						aniocolecta >= cast( ${lim_inf}  as integer)
 						and 
-						cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)<= cast( ${lim_sup} as integer)
+						aniocolecta <= cast( ${lim_sup} as integer)
 				  else
 				  		(
 							(
-							cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)>= cast( ${lim_inf}  as integer)
+							aniocolecta >= cast( ${lim_inf}  as integer)
 							and 
-							cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)<= cast( ${lim_sup}  as integer)
+							aniocolecta <= cast( ${lim_sup}  as integer)
 							)
-							or fechacolecta = ''
+							or aniocolecta = 9999
 						)
 			end) = true
 		and a.especievalidabusqueda <> ''
@@ -59,7 +59,7 @@ temp_target as (
 	JOIN (
 		SELECT UNNEST(gid) AS gid 
 		--FROM grid_geojson_64km_aoi
-		FROM ${res_celda_snib_tb}
+		FROM ${res_celda_snib_tb:raw}
 		--WHERE footprint_region=1 
 		WHERE footprint_region=${region}
 		) AS b
@@ -69,20 +69,20 @@ temp_target as (
 		and 
 			(case when ${caso} = 1 
 				  then 
-						fechacolecta <> ''
+						aniocolecta <> 9999
 				  when ${caso} = 2 
 				  then
-						cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)>= cast( ${lim_inf}  as integer)
+						aniocolecta >= cast( ${lim_inf}  as integer)
 						and 
-						cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)<= cast( ${lim_sup} as integer)
+						aniocolecta <= cast( ${lim_sup} as integer)
 				  else
 				  		(
 							(
-							cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)>= cast( ${lim_inf}  as integer)
+							aniocolecta >= cast( ${lim_inf}  as integer)
 							and 
-							cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)<= cast( ${lim_sup}  as integer)
+							aniocolecta <= cast( ${lim_sup}  as integer)
 							)
-							or fechacolecta = ''
+							or aniocolecta = 9999
 						)
 			end) = true
 		and a.especievalidabusqueda <> ''
@@ -104,8 +104,8 @@ temp_target as (
 			a.especievalidabusqueda
 	union
 	SELECT  
-		cast('' as text) generovalido,
-		case when type = 1 then
+		cast('' as text) generovalido, layer as especievalidabusqueda,
+		/*case when type = 1 then
 			layer
 			else
 				case when strpos(label,'Precipit') = 0 then
@@ -113,7 +113,7 @@ temp_target as (
 				else
 				(label || ' '  || round(cast(split_part(split_part(tag,':',1),'.',1) as numeric),2)  ||' mm - ' || round(cast(split_part(split_part(tag,':',2),'.',1) as numeric),2) || ' mm')
 				end
-		end as especievalidabusqueda,
+		end as especievalidabusqueda,*/
 		bid as spid,
 		cast('' as text) reinovalido,
 		cast('' as text) phylumdivisionvalido,
