@@ -34,6 +34,7 @@ buckets = 20
 deciles = 10
 verb_utils.region_mx = 1
 verb_utils.min_occ = 5
+verb_utils.type_taxon = 0
 
 
 
@@ -74,7 +75,7 @@ verb_utils.processBioFilters = function(tfilters_total, spid){
   var tfilters = []
 
   for (var i = 0; i < tfilters_total.length; i++) {
-    if(tfilters_total[i].type == 4) {
+    if(tfilters_total[i].type == verb_utils.type_taxon) {
       tfilters.push(tfilters_total[i])
     }
   }
@@ -126,7 +127,7 @@ verb_utils.processRasterFilters = function(tfilters_total){
   var tfilters = []
 
   for (var i = 0; i < tfilters_total.length; i++) {
-    if(tfilters_total[i].type != 4) {
+    if(tfilters_total[i].type != verb_utils.type_taxon) {
       tfilters.push(tfilters_total[i])
     }
   }
