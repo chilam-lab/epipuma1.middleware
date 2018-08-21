@@ -751,7 +751,7 @@ exports.getVariablesNiche = function (req, res, next) {
 
   // Verificar si es necesario enviar el footprint_region, puede existir cambio de region despues 
   // de seleccionar las covariables
-  var region = parseInt(getParam(req, 'footprint_region', default_region))
+  var footprint_region = parseInt(getParam(req, 'footprint_region', default_region))
 
   // debug(field)
   // debug(parentfield)
@@ -761,7 +761,8 @@ exports.getVariablesNiche = function (req, res, next) {
 
         // debug("entra reino")
     pool.any(queries.getVariablesNiche.getVariablesReino, {
-      taxon: field
+      taxon: field,
+      region:footprint_region
     })
         .then(function (data) {
               // debug(data)
@@ -778,7 +779,8 @@ exports.getVariablesNiche = function (req, res, next) {
     pool.any(queries.getVariablesNiche.getVariables, {
       taxon: field,
       parent_taxon: parentfield,
-      parent_valor: parentitem
+      parent_valor: parentitem,
+      region:footprint_region
     })
         .then(function (data) {
               // debug(data)
