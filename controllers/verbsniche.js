@@ -704,7 +704,7 @@ exports.getGridGeoJsonNiche = function (req, res, next) {
 
       }).then(resp => {
 
-          debug("TEST ...")
+          // debug("TEST ...")
           return pool.any(queries.grid.gridxxkm, {
 
                     grid_res: parseInt(grid_res),
@@ -1013,10 +1013,12 @@ exports.getSpeciesNiche = function (req, res, next) {
       // debug(spid)
       // debug(sfecha)
       // debug(sfosil)
-      // debug(fecha_incio.format('YYYY'))
-      // debug(fecha_fin.format('YYYY'))
-      // debug(moment().format('YYYY-MM-DD'))
-
+      // debug(grid_resolution)
+      // debug(fecha_incio)
+      // debug(fecha_fin)
+      // debug(footprint_region)
+      
+      
 
       pool.task(t => {
 
