@@ -35,18 +35,25 @@ exports.getScoreDecil = function(req, res, next) {
   
   debug('getScoreDecil')
 
-  var data_request = verb_utils.getRequestParams(req, false)
-  
-  const grid_res = verb_utils.getParam(req, 'grid_res', 16)
-  const region = verb_utils.getParam(req, 'footprint_region')
-  debug("region: " + data_request["footprint_region"])
 
-  data_request["res_celda_snib_tb"] = "grid_geojson_"+grid_res+"km_aoi" 
-  data_request["region"] = region
-  
+  var footprint_region = parseInt(verb_utils.getParam(req, 'footprint_region', default_region))
+  var data_request = verb_utils.getRequestParams(req, false)
+
+  data_request["res_celda_snib_tb"] = "grid_geojson_" + data_request.grid_resolution + "km_aoi"
+  data_request["region"] = footprint_region
+  debug('region: ' + data_request.region)
+
+
+
   if (data_request.hasBios === 'true' && data_request.hasRaster === 'false' ) {
 
     debug('Caso: hasbio:true - hasRaster:false')
+
+    debug('grid_resolution: ' + data_request.grid_resolution)
+    debug('iterations: ' + data_request.iterations)
+
+    var data_georel = [];
+    var iter = 0;
 
 
     // Inica tarea
@@ -54,8 +61,8 @@ exports.getScoreDecil = function(req, res, next) {
 
         return t.one(queries.basicAnalysis.getN, {
 
-            res_celda_snib_tb: data_request.res_celda_snib_tb,
-            region: data_request.region
+            grid_resolution: data_request.grid_resolution,
+            footprint_region: footprint_region
 
         }).then(resp => {
 
@@ -86,9 +93,22 @@ exports.getScoreDecil = function(req, res, next) {
     })
     .then(data => {
 
-        var data_score_cell = verb_utils.processDataForScoreCell(data);
-        var data_freq_decil = verb_utils.processDataForScoreDecil(data_score_cell);
+        var apriori = false
+        debug("data_request.apriori: " + data_request.apriori)
+        if(data_request.apriori !== false && data[0].ni !== undefined){
+          apriori = true
+        }
 
+        var mapa_prob = false
+        debug("data_request.mapa_prob: " + data_request.mapa_prob)
+        if(data_request.mapa_prob !== false && data[0].ni !== undefined){
+          mapa_prob = true          
+        }
+
+        var data_score_cell = data_request.with_data_score_cell === "true" ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob) : []
+        var data_freq_decil = data_request.with_data_score_decil === "true" ? verb_utils.processDataForScoreDecil(data_score_cell) : []
+
+        
         for(var i = 0; i < data_freq_decil.length; i++){
           var item = data_freq_decil[i]
           item['title'] = data_request.title_valor
@@ -121,8 +141,8 @@ exports.getScoreDecil = function(req, res, next) {
 
         return t.one(queries.basicAnalysis.getN, {
 
-            res_celda_snib_tb: data_request.res_celda_snib_tb,
-            region: data_request.region
+            grid_resolution: data_request.grid_resolution,
+            footprint_region: footprint_region
 
         }).then(resp => {
 
@@ -149,8 +169,20 @@ exports.getScoreDecil = function(req, res, next) {
     })
     .then(data => {
 
-        var data_score_cell = verb_utils.processDataForScoreCell(data);
-        var data_freq_decil = verb_utils.processDataForScoreDecil(data_score_cell);
+        var apriori = false
+        debug("data_request.apriori: " + data_request.apriori)
+        if(data_request.apriori !== false && data[0].ni !== undefined){
+          apriori = true
+        }
+
+        var mapa_prob = false
+        debug("data_request.mapa_prob: " + data_request.mapa_prob)
+        if(data_request.mapa_prob !== false && data[0].ni !== undefined){
+          mapa_prob = true          
+        }
+
+        var data_score_cell = data_request.with_data_score_cell === "true" ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob) : []
+        var data_freq_decil = data_request.with_data_score_decil === "true" ? verb_utils.processDataForScoreDecil(data_score_cell) : []
 
         for(var i = 0; i < data_freq_decil.length; i++){
           var item = data_freq_decil[i]
@@ -182,8 +214,8 @@ exports.getScoreDecil = function(req, res, next) {
 
         return t.one(queries.basicAnalysis.getN, {
 
-            res_celda_snib_tb: data_request.res_celda_snib_tb,
-            region: data_request.region
+            grid_resolution: data_request.grid_resolution,
+            footprint_region: footprint_region
 
         }).then(resp => {
 
@@ -213,9 +245,22 @@ exports.getScoreDecil = function(req, res, next) {
 
     })
     .then(data => {
+      
 
-        var data_score_cell = verb_utils.processDataForScoreCell(data);
-        var data_freq_decil = verb_utils.processDataForScoreDecil(data_score_cell);
+        var apriori = false
+        debug("data_request.apriori: " + data_request.apriori)
+        if(data_request.apriori !== false && data[0].ni !== undefined){
+          apriori = true
+        }
+
+        var mapa_prob = false
+        debug("data_request.mapa_prob: " + data_request.mapa_prob)
+        if(data_request.mapa_prob !== false && data[0].ni !== undefined){
+          mapa_prob = true          
+        }
+
+        var data_score_cell = data_request.with_data_score_cell === "true" ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob) : []
+        var data_freq_decil = data_request.with_data_score_decil === "true" ? verb_utils.processDataForScoreDecil(data_score_cell) : []
 
         for(var i = 0; i < data_freq_decil.length; i++){
           var item = data_freq_decil[i]
