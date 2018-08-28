@@ -22,6 +22,8 @@ var iterations = verb_utils.iterations
 var alpha = verb_utils.alpha
 var buckets = verb_utils.buckets
 var default_region = verb_utils.region_mx
+var max_score = verb_utils.maxscore
+var min_score = verb_utils.minscore
 
 
 /**
@@ -97,27 +99,29 @@ exports.getBasicInfo = function(req, res, next) {
       .then(data => {
 
         // debug(data)
-
         
         // iter++;
         // debug("resp_iter: " + iter)
-
-
         // data_georel.push({
         //   data_iter: data,
         //   iter: iter
         // })
 
+        var apriori = false
+        debug("data_request.apriori: " + data_request.apriori)
+        if(data_request.apriori !== false && data[0].ni !== undefined){
+          apriori = true
+        }
 
-
-        // debug("data_request.with_basic_data: " + data_request.with_basic_data)
-        // debug("data_request.with_data_freq: " + data_request.with_data_freq)
-        // debug("data_request.with_data_score_cell: " + data_request.with_data_score_cell)
-        // debug("data_request.with_data_freq_cell: " + data_request.with_data_freq_cell)
+        var mapa_prob = false
+        debug("data_request.mapa_prob: " + data_request.mapa_prob)
+        if(data_request.mapa_prob !== false && data[0].ni !== undefined){
+          mapa_prob = true          
+        }
 
         var data_freq = data_request.with_data_freq === "true" ? verb_utils.processDataForFreqSpecie(data) : []
-        var data_score_cell = data_request.with_data_score_cell === "true" ? verb_utils.processDataForScoreCell(data) : []
-        var data_freq_cell = data_request.with_data_freq_cell === "true" ? verb_utils.processDataForFreqCell(data_score_cell) : [];
+        var data_score_cell = data_request.with_data_score_cell === "true" ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob) : []
+        var data_freq_cell = data_request.with_data_freq_cell === "true" ? verb_utils.processDataForFreqCell(data_score_cell) : []
 
         // if(iter == 5){
           res.json({
@@ -184,11 +188,23 @@ exports.getBasicInfo = function(req, res, next) {
     })
     .then(data => {
 
-      // debug(data)
+        // debug(data)
+
+        var apriori = false
+        debug("data_request.apriori: " + data_request.apriori)
+        if(data_request.apriori !== false && data[0].ni !== undefined){
+          apriori = true
+        }
+
+        var mapa_prob = false
+        debug("data_request.mapa_prob: " + data_request.mapa_prob)
+        if(data_request.mapa_prob !== false && data[0].ni !== undefined){
+          mapa_prob = true          
+        }
 
         var data_freq = data_request.with_data_freq === "true" ? verb_utils.processDataForFreqSpecie(data) : []
-        var data_score_cell = data_request.with_data_score_cell === "true" ? verb_utils.processDataForScoreCell(data) : []
-        var data_freq_cell = data_request.with_data_freq_cell === "true" ? verb_utils.processDataForFreqCell(data_score_cell) : [];
+        var data_score_cell = data_request.with_data_score_cell === "true" ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob) : []
+        var data_freq_cell = data_request.with_data_freq_cell === "true" ? verb_utils.processDataForFreqCell(data_score_cell) : []
 
         res.json({
           ok: true,
@@ -250,9 +266,25 @@ exports.getBasicInfo = function(req, res, next) {
     })
     .then(data => {
 
+
+        // var apriori = 0
+        // if(!data_request.apriori && data[0].ni !== undefined){
+
+        var apriori = false
+        debug("data_request.apriori: " + data_request.apriori)
+        if(data_request.apriori !== false && data[0].ni !== undefined){
+          apriori = true
+        }
+
+        var mapa_prob = false
+        debug("data_request.mapa_prob: " + data_request.mapa_prob)
+        if(data_request.mapa_prob !== false && data[0].ni !== undefined){
+          mapa_prob = true          
+        }
+
         var data_freq = data_request.with_data_freq === "true" ? verb_utils.processDataForFreqSpecie(data) : []
-        var data_score_cell = data_request.with_data_score_cell === "true" ? verb_utils.processDataForScoreCell(data) : []
-        var data_freq_cell = data_request.with_data_freq_cell === "true" ? verb_utils.processDataForFreqCell(data_score_cell) : [];
+        var data_score_cell = data_request.with_data_score_cell === "true" ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob) : []
+        var data_freq_cell = data_request.with_data_freq_cell === "true" ? verb_utils.processDataForFreqCell(data_score_cell) : []
 
         res.json({
           ok: true,
