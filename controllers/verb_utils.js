@@ -27,6 +27,7 @@ verb_utils.N = 0 // Deprecated: Ahora se obtiene la cuenta del store en tiempo d
 verb_utils.iterations = 5 // Iteraciones realizadas en proceso de validación
 verb_utils.alpha = 1/10000 // Deprecated: Ahora se obtiene el valor dentro del store en tiempo de ejecución dependiendo de la resolución enviada
 verb_utils.maxscore = 700 // Valor para realizar el calculo de probabilidad de epsilon
+verb_utils.minscore = -700
 verb_utils.limite = 15 // numero de elemntos mostrados en autocomplete de especie
 verb_utils.min_taxon_name = 'especievalidabusqueda' // nombre de columna del valor minimo taxonomico en base de datos
 verb_utils.max_taxon_name = 'reinovalido' // nombre de columna del valor maximo taxonomico en base de datos
@@ -110,6 +111,7 @@ verb_utils.processBioFilters = function(tfilters_total, spid){
     whereVar = whereVar + ') '
   }
 
+  debug("bio whereVar:" + whereVar)
   return whereVar
 }
 
@@ -193,6 +195,7 @@ verb_utils.processRasterFilters = function(tfilters_total){
 
   }
 
+  debug("raster whereVar:" + whereVar)
   return whereVar
 }
 
@@ -256,32 +259,31 @@ verb_utils.processTitleGroup = function(groupid, tfilters){
 
   if(groupid != undefined) {
     // group_item = 0 ->> root
-    if (tfilters[0].type == 4) {
+    if (tfilters[0].type == 0) {
       title_valor = JSON.stringify(
         {'title':'Grupo Bio ' + groupid, 
           'type': tfilters[0].type , 
           'group_item': tfilters[0].group_item, 
           'is_parent':true })
-    } else if (tfilters[0].type == 0) {
+    } else { //if (tfilters[0].type != 0) {
       title_valor = JSON.stringify(
-        {'title':'Grupo Abio ' + groupid, 
+        {'title':'Grupo Raster ' + groupid, 
           'type': tfilters[0].type , 
           'group_item': tfilters[0].group_item, 
           'is_parent':true })
-	// title_valor = "Grupo Abio " + groupid;
-    } else { // if (tfilters[0].type == 1){
-      title_valor = JSON.stringify(
-        {'title':'Grupo Topo ' + groupid, 
-          'type': tfilters[0].type , 
-          'group_item': tfilters[0].group_item, 
-          'is_parent':true })
-	// title_valor = "Grupo Abio " + groupid;
-    }
+    } 
+    // else { 
+    //   title_valor = JSON.stringify(
+    //     {'title':'Grupo Topo ' + groupid, 
+    //       'type': tfilters[0].type , 
+    //       'group_item': tfilters[0].group_item, 
+    //       'is_parent':true })
+    // }
   } else if (tfilters[0].value) {
     // debug("title: " + tfilters[0].value);
     // debug("title: " + tfilters[0].label);
     // debug(group_item);
-    if (tfilters[0].type == 4) {
+    if (tfilters[0].type == 0) {
       title_valor = JSON.stringify(
         {'title':tfilters[0].value, 
           'type':tfilters[0].type , 
@@ -296,7 +298,7 @@ verb_utils.processTitleGroup = function(groupid, tfilters){
     }
   }
 		
-  // debug("title_valor: " + title_valor);
+  debug("title_valor: " + title_valor);
   return JSON.parse(title_valor)
 }
 
@@ -409,6 +411,7 @@ verb_utils.getRequestParams = function(req, verbose){
   data_request["with_data_freq"] = verb_utils.getParam(req, 'with_data_freq', "true");
   data_request["with_data_score_cell"] = verb_utils.getParam(req, 'with_data_score_cell', "true");
   data_request["with_data_freq_cell"] = verb_utils.getParam(req, 'with_data_freq_cell', "true");
+  data_request["with_data_score_decil"] = verb_utils.getParam(req, 'with_data_score_decil', "true");
 
   data_request["spid"] = parseInt(verb_utils.getParam(req, 'id'))
   var tfilters = verb_utils.getParam(req, 'tfilters')
@@ -455,7 +458,10 @@ verb_utils.getRequestParams = function(req, verbose){
   // variables bioticas, raster y apriori
   data_request["hasBios"] = verb_utils.getParam(req, 'hasBios')
   data_request["hasRaster"] = verb_utils.getParam(req, 'hasRaster')
-  data_request["apriori"] = verb_utils.getParam(req, 'apriori')
+  data_request["apriori"] = verb_utils.getParam(req, 'apriori', false)
+  data_request["mapa_prob"] = verb_utils.getParam(req, 'mapa_prob', false)
+
+  
 
 
   var groupid = verb_utils.getParam(req, 'groupid')
@@ -641,7 +647,7 @@ verb_utils.processDataForScoreDecilTable = function (data_cell, decil_selected){
 }
 
 
-verb_utils.processDataForScoreCell = function (data){
+verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob){
 
   var cells_array = data.map(function(d) {return {cells: d.cells, score: parseFloat(d.score)}})
 
@@ -663,15 +669,52 @@ verb_utils.processDataForScoreCell = function (data){
   // debug(map_cell)
 
  var cell_score_array = [];
+
+ var val_apriori = 0
+ debug("apriori: " + apriori)
+ debug("mapa_prob: " + mapa_prob)
+ if(apriori || mapa_prob){
+    val_apriori = data[0].ni / (data[0].n- data[0].ni)
+    debug("val_apriori: " + val_apriori)
+ }
+ 
+
  for(var i=0; i<map_cell.length; i++){
+
       const entry = map_cell[i];
-      cell_score_array.push({gridid: entry["key"], tscore: parseFloat(entry["value"].toFixed(3))})
+
+      var tscore = parseFloat(entry["value"])
+      var gridid = entry["key"]
+
+      var apriori_computed = false
+      if(apriori){
+        tscore = tscore + val_apriori
+        apriori_computed = true;
+      }
+      if(mapa_prob){
+        if(tscore <= verb_utils.minscore){
+          tscore = 0
+        }
+        else if(tscore >= verb_utils.maxscore){
+          tscore = 1 
+        }
+        else{
+          // verifica que el calculo de apriori no se calcule dos veces
+          tscore = apriori_computed ? tscore : tscore+val_apriori
+          tscore = Math.exp(tscore) /  (1+Math.exp(tscore))
+        }
+      }
+
+      // debug("tscore: " + tscore)
+      cell_score_array.push({gridid: gridid, tscore: parseFloat(tscore).toFixed(3)})
+      
   }
 
-  var data_freq = [];
-
+  // var data_freq = [];
   // debug(cell_score_array)
+  
   return cell_score_array
+      
 
 }
 
@@ -798,7 +841,16 @@ verb_utils.processDataForScoreCellTable = function (data){
 
 
 
+// verb_utils.processDataForFreqCell = function (data_origin, data, apriori, mapa_prob){
 verb_utils.processDataForFreqCell = function (data){
+
+  // var val_apriori = 0
+  // debug("apriori: " + apriori)
+  // debug("mapa_prob: " + mapa_prob)
+  // if(apriori || mapa_prob){
+  //   val_apriori = data_origin[0].ni / (data_origin[0].n- data_origin[0].ni)
+  //   debug("val_apriori: " + val_apriori)
+  // }
 
 
   var min_scr = d3.min(data.map(function(d) {return parseFloat(d.tscore);}));
@@ -810,9 +862,12 @@ verb_utils.processDataForFreqCell = function (data){
   var scrRange = d3.scaleQuantile().domain([min_scr, max_scr]).range(beans);
 
   var cross_score = crossfilter(data)
-  cross_score.groupAll();
+  cross_score.groupAll();  
 
-  var scr_dimension = cross_score.dimension(function(d) { return parseFloat(d.tscore); });
+  var scr_dimension = cross_score.dimension(function(d) { 
+    // return parseFloat(d.tscore)+val_apriori; 
+    return parseFloat(d.tscore) 
+  });
 
   var groupByScoreCell = scr_dimension.group(function(d){
     return scrRange(d)
