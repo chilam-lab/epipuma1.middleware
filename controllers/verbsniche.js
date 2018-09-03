@@ -922,12 +922,13 @@ exports.getAvailableVariables = function (req, res, next) {
 */
 exports.getCountGridid = function (req, res, next) {
   debug('getCountGridid')
+
   var columnas = ['gridid', 'conteo']
   var spids = getParam(req, 'spids')
   var isNicho = getParam(req, 'nicho')
+  var footprint_region = getParam(req, 'footprint_region', default_region)
 
   var resolution = getParam(req, 'grid_res', 16)
-
   var res_celda = 'cells_' + resolution + 'km'
   var res_grid = 'gridid_' + resolution + 'km'
 
@@ -940,7 +941,8 @@ exports.getCountGridid = function (req, res, next) {
     spids: spids,
     res_celda: res_celda,
     res_grid: res_grid,
-    columns: columnas
+    columns: columnas,
+    footprint_region: footprint_region
   }).then(function (data) {
     res.json({'data': data})
   }).catch(function (error) {
