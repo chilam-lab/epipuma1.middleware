@@ -14,7 +14,6 @@ config.port = process.env.PORT
 
 // Configure pool of connections
 config.db.poolSize = 10
-
 config.SEED = "@hardseedconabio2018";
 config.TIME_TOKEN = 14400;
 

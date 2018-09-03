@@ -929,6 +929,7 @@ exports.getCountGridid = function (req, res, next) {
   var footprint_region = getParam(req, 'footprint_region', default_region)
 
   var resolution = getParam(req, 'grid_res', 16)
+
   var res_celda = 'cells_' + resolution + 'km'
   var res_grid = 'gridid_' + resolution + 'km'
 
