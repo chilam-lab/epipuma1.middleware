@@ -928,10 +928,15 @@ exports.getCountGridid = function (req, res, next) {
   var isNicho = getParam(req, 'nicho')
   var footprint_region = getParam(req, 'footprint_region', default_region)
 
-  var resolution = getParam(req, 'grid_res', 16)
+  var grid_res = getParam(req, 'grid_res', 16)
 
-  var res_celda = 'cells_' + resolution + 'km'
-  var res_grid = 'gridid_' + resolution + 'km'
+  var res_celda = 'cells_' + grid_res + 'km'
+  var res_grid = 'gridid_' + grid_res + 'km'
+
+  //debug(footprint_region)
+  //debug(res_celda)
+  //debug(res_grid)
+  //debug(grid_res)
 
   if (isNicho === 'true') {
     columnas.push('spids')
@@ -943,7 +948,8 @@ exports.getCountGridid = function (req, res, next) {
     res_celda: res_celda,
     res_grid: res_grid,
     columns: columnas,
-    footprint_region: footprint_region
+    footprint_region: footprint_region,
+    grid_res:grid_res
   }).then(function (data) {
     res.json({'data': data})
   }).catch(function (error) {
