@@ -320,8 +320,8 @@ function getEdgesNiche(req, res, next) {
   }
   else if ( hasRasterSource === true && hasBiosTarget === true ){
     debug('hasRasterSource === true && hasBiosTarget === true')
-    debug(sfilters)
-    debug(tfilters)
+    // debug(sfilters)
+    // debug(tfilters)
     // var whereVarSource = verb_utils.processBioFilters(sfilters)
 
     var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters)

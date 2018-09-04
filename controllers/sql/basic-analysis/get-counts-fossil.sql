@@ -66,7 +66,9 @@ temp_target as (
 			a.familiavalida
 	union
 	SELECT  
-		cast('' as text) generovalido, layer as especievalidabusqueda,
+		cast('' as text) generovalido, 
+		layer || ' ' || round(cast(split_part(tag,':',1) as numeric),2) || ' ' || round(cast(split_part(tag,':',2) as numeric),2)
+		as especievalidabusqueda,
 		/*case when type = 1 then
 			layer
 			else
