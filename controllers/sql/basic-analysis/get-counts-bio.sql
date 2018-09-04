@@ -2,10 +2,10 @@ with temp_source as (
 	SELECT 
 		a.spid, 
 --		(array_agg(distinct snib.gridid_16km) - lista_gridids_seccion_sp.cells) as cells,
-		-- array_agg(distinct a.gridid_16km) as cells,
+--		array_agg(distinct a.gridid_16km) as cells,
 		array_agg(distinct a.${res_celda_snib:raw}) as cells, 
 		--icount(array_agg(distinct snib.gridid_16km) - lista_gridids_seccion_sp.cells)  as ni
-		--icount(array_agg(distinct a.gridid_16km))  as ni
+--		icount(array_agg(distinct a.gridid_16km))  as ni
 		icount(array_agg(distinct a.${res_celda_snib:raw})) as ni
 	FROM snib AS a
 	JOIN (

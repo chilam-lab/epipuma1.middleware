@@ -70,6 +70,7 @@ function getEdgesNiche(req, res, next) {
        hasRasterSource === true && hasRasterTarget === true ){
 
     debug('hasBiosSource === true && hasBiosTarget === true && hasRasterSource === true && hasRasterTarget === true')
+
     var whereVarSource = verb_utils.processBioFilters(sfilters)
     var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters)
 
@@ -105,6 +106,7 @@ function getEdgesNiche(req, res, next) {
             hasBiosTarget === true ){
 
     debug('hasBiosSource === true && hasRasterSource === true && hasBiosTarget === true')
+
     var whereVarSource = verb_utils.processBioFilters(sfilters)
     var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters)
 
@@ -139,7 +141,9 @@ function getEdgesNiche(req, res, next) {
   }
   else if ( hasBiosSource === true && hasRasterSource === true && hasRasterTarget === true ){
 
+
     debug('hasBiosSource === true && hasRasterSource === true && hasRasterTarget === true')
+
     var whereVarSource = verb_utils.processBioFilters(sfilters)
     var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters)
 
@@ -175,7 +179,9 @@ function getEdgesNiche(req, res, next) {
   }
   else if ( hasBiosSource === true && hasBiosTarget === true && hasRasterTarget === true ){
 
+
     debug('hasBiosSource === true && hasBiosTarget === true && hasRasterTarget === true')
+
     var whereVarSource = verb_utils.processBioFilters(sfilters)
         // var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters)
       
@@ -211,7 +217,9 @@ function getEdgesNiche(req, res, next) {
   }
   else if ( hasRasterSource === true && hasBiosTarget === true && hasRasterTarget === true ){
 
+
     debug('hasRasterSource === true && hasBiosTarget === true && hasRasterTarget === true')
+
         // var whereVarSource = verb_utils.processBioFilters(sfilters)
     var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters)
 
@@ -247,7 +255,9 @@ function getEdgesNiche(req, res, next) {
   }
   else if ( hasBiosSource === true && hasBiosTarget === true ){
 
+
     debug('hasBiosSource === true && hasBiosTarget === true')
+
     var whereVarSource = verb_utils.processBioFilters(sfilters)
         // var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters)
 
@@ -285,7 +295,9 @@ function getEdgesNiche(req, res, next) {
   }
   else if ( hasBiosSource === true && hasRasterTarget === true ){
 
+
     debug('hasBiosSource === true && hasRasterTarget === true')
+
     var whereVarSource = verb_utils.processBioFilters(sfilters)
         // var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters)
         // var whereVarTarget = verb_utils.processBioFilters(tfilters)
@@ -319,9 +331,11 @@ function getEdgesNiche(req, res, next) {
       
   }
   else if ( hasRasterSource === true && hasBiosTarget === true ){
+
     debug('hasRasterSource === true && hasBiosTarget === true')
     // debug(sfilters)
     // debug(tfilters)
+
     // var whereVarSource = verb_utils.processBioFilters(sfilters)
 
     var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters)
@@ -358,15 +372,19 @@ function getEdgesNiche(req, res, next) {
   }
   else if ( hasRasterSource === true && hasRasterTarget === true ){
 
+
     debug('hasRasterSource === true && hasRasterTarget === true')
+
         // var whereVarSource = verb_utils.processBioFilters(sfilters)
     var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters)
 
         // var whereVarTarget = verb_utils.processBioFilters(tfilters)
     var whereVarTargetRaster = verb_utils.processRasterFilters(tfilters)
 
+
     debug(whereVarTargetRaster)
     debug(whereVarSourceRaster)
+
 
 
     pool.any(queries.getEdgesNiche.getEdgesNicheRaster_Raster, {
