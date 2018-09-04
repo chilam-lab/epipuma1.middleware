@@ -257,15 +257,26 @@ verb_utils.processTitleGroup = function(groupid, tfilters){
 
   var title_valor = ''
 
-  if(groupid != undefined) {
+  // debug("groupid: " + groupid)
+  // debug(tfilters)
+
+  if(groupid !== undefined) {
+
     // group_item = 0 ->> root
-    if (tfilters[0].type == 0) {
+    if (parseInt(tfilters[0].type) === 0) {
+
+      debug("if (parseInt(tfilters[0].type)");
+
+
       title_valor = JSON.stringify(
         {'title':'Grupo Bio ' + groupid, 
           'type': tfilters[0].type , 
           'group_item': tfilters[0].group_item, 
           'is_parent':true })
     } else { //if (tfilters[0].type != 0) {
+
+      debug("else ");
+
       title_valor = JSON.stringify(
         {'title':'Grupo Raster ' + groupid, 
           'type': tfilters[0].type , 
@@ -280,25 +291,27 @@ verb_utils.processTitleGroup = function(groupid, tfilters){
     //       'is_parent':true })
     // }
   } else if (tfilters[0].value) {
-    // debug("title: " + tfilters[0].value);
-    // debug("title: " + tfilters[0].label);
-    // debug(group_item);
-    if (tfilters[0].type == 0) {
+
+    if (parseInt(tfilters[0].type) === 0) {
+
+      
       title_valor = JSON.stringify(
-        {'title':tfilters[0].value, 
-          'type':tfilters[0].type , 
+        {'title': tfilters[0].value, 
+          'type': tfilters[0].type , 
           'group_item': tfilters[0].group_item, 
-          'is_parent':false })
+          'is_parent': false })
     } else {
+
+      
       title_valor = JSON.stringify(
-        {'title':tfilters[0].label, 
-          'type':tfilters[0].type , 
+        {'title': tfilters[0].label, 
+          'type': tfilters[0].type , 
           'group_item': tfilters[0].group_item, 
-          'is_parent':false })
+          'is_parent': false })
     }
   }
 		
-  debug("title_valor: " + title_valor);
+  // debug("title_valor: " + title_valor);
   return JSON.parse(title_valor)
 }
 
@@ -460,12 +473,15 @@ verb_utils.getRequestParams = function(req, verbose){
   data_request["hasRaster"] = verb_utils.getParam(req, 'hasRaster')
   data_request["apriori"] = verb_utils.getParam(req, 'apriori', false)
   data_request["mapa_prob"] = verb_utils.getParam(req, 'mapa_prob', false)
-
+  data_request["get_grid_species"] = verb_utils.getParam(req, 'get_grid_species', false)
   
 
 
   var groupid = verb_utils.getParam(req, 'groupid')
-  if(groupid != undefined || tfilters != undefined){
+  // debug("groupid: " + groupid !== undefined)
+  // debug("tfilters: " + tfilters !== undefined)
+
+  if(groupid !== undefined || tfilters !== undefined){
     data_request["title_valor"] = verb_utils.processTitleGroup(groupid, tfilters)  
   }
 
@@ -647,7 +663,7 @@ verb_utils.processDataForScoreDecilTable = function (data_cell, decil_selected){
 }
 
 
-verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob){
+verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, gridid){
 
   var cells_array = data.map(function(d) {return {cells: d.cells, score: parseFloat(d.score)}})
 

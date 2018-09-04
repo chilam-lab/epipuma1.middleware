@@ -43,7 +43,9 @@ exports.getBasicInfo = function(req, res, next) {
 
   data_request["res_celda_snib_tb"] = "grid_geojson_" + data_request.grid_resolution + "km_aoi"
   data_request["region"] = footprint_region
+  
   debug('region: ' + data_request.region)
+  debug('res_celda_snib_tb: ' + data_request.res_celda_snib_tb)
 
   //agregar iteraciones para el proceso de validacion
 
@@ -91,7 +93,63 @@ exports.getBasicInfo = function(req, res, next) {
                 query = queries.basicAnalysis.getCountsBioTime
               }
 
-              return t.any(query, data_request)
+
+              //TODO: getgridspecies
+              debug("data_request.get_grid_species: " + data_request.get_grid_species)
+              // if(data_request.get_grid_species !== false && data[0].ni !== undefined){
+              if(data_request.get_grid_species !== false){
+
+                debug("analisis en celda")
+
+                var lat = verb_utils.getParam(req, 'lat')
+                var long = verb_utils.getParam(req, 'long')
+
+                debug("lat: " + lat)
+                debug("long: " + long)
+
+                data_request["lat"] = lat
+                data_request["long"] = long
+
+                // sobreescribe tablas de vistas por tablas de grid_16km_aoi
+                var grid_resolution = data_request.grid_resolution
+                data_request["res_celda_sp"] = "cells_"+grid_resolution+"km" 
+                data_request["res_celda_snib"] = "gridid_"+grid_resolution+"km" 
+                data_request["res_celda_snib_tb"] = "grid_"+grid_resolution+"km_aoi" 
+
+                debug('res_celda_snib_tb: ' + data_request.res_celda_snib_tb)
+
+                return t.one(queries.basicAnalysis.getGridIdByLatLong, data_request).then(resp => {
+
+                  debug(resp)
+                  var cell_id = resp.gridid
+                  debug("cell_id: " + cell_id)
+                  // debug(data)
+
+                  // var data_score_cell = verb_utils.processDataForScoreCell(data, apriori, mapa_prob, cell_id)
+
+                  // res.json({
+                  //   ok: true
+                  // })
+                  // .catch(error => {
+                  //     debug(error)
+                  //     return res.json({
+                  //       ok: false,
+                  //       error: error
+                  //     })
+                  // })
+
+                })
+
+              }
+              else{
+
+                return t.any(query, data_request)  
+
+              }
+
+
+              
+              
 
             })
 
@@ -120,7 +178,7 @@ exports.getBasicInfo = function(req, res, next) {
         }
 
         var data_freq = data_request.with_data_freq === "true" ? verb_utils.processDataForFreqSpecie(data) : []
-        var data_score_cell = data_request.with_data_score_cell === "true" ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob) : []
+        var data_score_cell = data_request.with_data_score_cell === "true" ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob, 0) : []
         var data_freq_cell = data_request.with_data_freq_cell === "true" ? verb_utils.processDataForFreqCell(data_score_cell) : []
 
         // if(iter == 5){
@@ -135,7 +193,7 @@ exports.getBasicInfo = function(req, res, next) {
           });
         // }
 
-        
+     
 
       })
       .catch(error => {

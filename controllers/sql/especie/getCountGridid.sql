@@ -1,14 +1,26 @@
 WITH gridid_specie AS (
   -- Regresa una tabla con renglones spid y gridid
   SELECT spid,
-         UNNEST($<res_celda:name>) AS gridid
+         UNNEST(array_intersection($<res_celda:name>, 
+                                    ARRAY( SELECT cells 
+                                           FROM grid_geojson_$<grid_res>km_aoi 
+                                           WHERE footprint_region = $<footprint_region>
+                                          )
+                                  )
+         ) AS gridid
          --unnest(cells_32km) as gridid
   FROM sp_snib
   WHERE spid IN ($<spids:csv>)
   --WHERE spid IN (300008)
   UNION
   SELECT bid AS spid,
-         UNNEST($<res_celda:name>) AS gridid
+         UNNEST(array_intersection($<res_celda:name>, 
+                                    ARRAY( SELECT cells 
+                                           FROM grid_geojson_$<grid_res>km_aoi 
+                                           WHERE footprint_region = $<footprint_region>
+                                          )::integer[]
+                                  )
+         ) AS gridid
          -- unnest(cells_32km) as gridid
   FROM raster_bins
   WHERE bid IN ($<spids:csv>)

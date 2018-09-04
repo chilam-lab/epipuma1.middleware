@@ -180,6 +180,7 @@ var queryProvider = {
 
   basicAnalysis:{
     getN: sqlPath("basic-analysis/get-n.sql"),
+    getGridIdByLatLong: sqlPath("basic-analysis/getGridIdByLatLong.sql"),
 
     getCountsBio: sqlPath("basic-analysis/get-counts-bio.sql"),
     getCountsBioFossil: sqlPath("basic-analysis/get-counts-bio-fossil.sql"),
