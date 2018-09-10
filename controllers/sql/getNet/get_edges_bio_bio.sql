@@ -28,8 +28,9 @@ target AS (
 	and especievalidabusqueda <> ''	  
 ),
 n_res AS (
-	SELECT count(*) AS n FROM $<res_celda_snib_tb:raw>
-	--SELECT count(*) AS n FROM grid_16km_aoi
+	SELECT array_length(cells, 1) AS n
+	FROM grid_geojson_$<resolution:raw>km_aoi
+	WHERE footprint_region = $<region:raw>
 ),
 counts AS (
 	SELECT 	source.spid as source,
