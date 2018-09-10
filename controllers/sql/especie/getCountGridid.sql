@@ -3,7 +3,7 @@ WITH gridid_specie AS (
   SELECT spid,
          UNNEST(array_intersection($<res_celda:name>, 
                                     ARRAY( SELECT cells 
-                                           FROM grid_geojson_$<grid_res>km_aoi 
+                                           FROM grid_geojson_$<grid_res:raw>km_aoi 
                                            WHERE footprint_region = $<footprint_region>
                                           )
                                   )
@@ -16,7 +16,7 @@ WITH gridid_specie AS (
   SELECT bid AS spid,
          UNNEST(array_intersection($<res_celda:name>, 
                                     ARRAY( SELECT cells 
-                                           FROM grid_geojson_$<grid_res>km_aoi 
+                                           FROM grid_geojson_$<grid_res:raw>km_aoi 
                                            WHERE footprint_region = $<footprint_region>
                                           )::integer[]
                                   )
