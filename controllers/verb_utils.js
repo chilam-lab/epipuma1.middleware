@@ -673,63 +673,84 @@ verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, gridid)
           cells.push({cell: cell_item, score: item.score})
     })
   })
-  // debug(cells)
+  debug("gridid: " + gridid)
 
   var cross_cells = crossfilter(cells)
-  cross_cells.groupAll();
 
-  var cells_dimension = cross_cells.dimension(function(d) { return d.cell; });
-  var groupByCell = cells_dimension.group().reduceSum(function(d) { return parseFloat(parseFloat(d.score).toFixed(3)); });
-  var map_cell = groupByCell.top(Infinity);
+  if(gridid === 0){
 
-  // debug(map_cell)
+    cross_cells.groupAll();
 
- var cell_score_array = [];
+    var groupByCell = cells_dimension.group().reduceSum(function(d) { return parseFloat(parseFloat(d.score).toFixed(3)); });
+    var map_cell = groupByCell.top(Infinity);
+    // debug(map_cell)
 
- var val_apriori = 0
- debug("apriori: " + apriori)
- debug("mapa_prob: " + mapa_prob)
- if(apriori || mapa_prob){
-    val_apriori = data[0].ni / (data[0].n- data[0].ni)
-    debug("val_apriori: " + val_apriori)
- }
- 
+    var cell_score_array = [];
 
- for(var i=0; i<map_cell.length; i++){
+     var val_apriori = 0
+     debug("apriori: " + apriori)
+     debug("mapa_prob: " + mapa_prob)
+     if(apriori || mapa_prob){
+        val_apriori = data[0].ni / (data[0].n- data[0].ni)
+        debug("val_apriori: " + val_apriori)
+     }
 
-      const entry = map_cell[i];
+     for(var i=0; i<map_cell.length; i++){
 
-      var tscore = parseFloat(entry["value"])
-      var gridid = entry["key"]
+          const entry = map_cell[i];
 
-      var apriori_computed = false
-      if(apriori){
-        tscore = tscore + val_apriori
-        apriori_computed = true;
+          var tscore = parseFloat(entry["value"])
+          var gridid = entry["key"]
+
+          var apriori_computed = false
+          if(apriori){
+            tscore = tscore + val_apriori
+            apriori_computed = true;
+          }
+          if(mapa_prob){
+            if(tscore <= verb_utils.minscore){
+              tscore = 0
+            }
+            else if(tscore >= verb_utils.maxscore){
+              tscore = 1 
+            }
+            else{
+              // verifica que el calculo de apriori no se calcule dos veces
+              tscore = apriori_computed ? tscore : tscore+val_apriori
+              tscore = Math.exp(tscore) /  (1+Math.exp(tscore))
+            }
+          }
+
+          // debug("tscore: " + tscore)
+          cell_score_array.push({gridid: gridid, tscore: parseFloat(tscore).toFixed(3)})
+          
       }
-      if(mapa_prob){
-        if(tscore <= verb_utils.minscore){
-          tscore = 0
-        }
-        else if(tscore >= verb_utils.maxscore){
-          tscore = 1 
-        }
-        else{
-          // verifica que el calculo de apriori no se calcule dos veces
-          tscore = apriori_computed ? tscore : tscore+val_apriori
-          tscore = Math.exp(tscore) /  (1+Math.exp(tscore))
-        }
-      }
 
-      // debug("tscore: " + tscore)
-      cell_score_array.push({gridid: gridid, tscore: parseFloat(tscore).toFixed(3)})
+      // var data_freq = [];
+      // debug(cell_score_array)
       
-  }
+      return cell_score_array
 
-  // var data_freq = [];
-  // debug(cell_score_array)
+  }
+  else{
+
+    var cells_dimension = cross_cells.dimension(function(d) { return d.cell; });
+    cells_dimension.filter(gridid)
+
+    var tscore = cross_cells.groupAll().reduceSum(function(d) { return parseFloat(parseFloat(d.score).toFixed(3)); }).value()
+    debug(tscore)
+    return tscore
+    
+
+  }
   
-  return cell_score_array
+
+  
+
+
+  
+
+ 
       
 
 }
