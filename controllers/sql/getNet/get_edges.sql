@@ -68,7 +68,12 @@ target AS (
 	group by spid	  
 ),
 n_res AS (
-	SELECT count(*) AS n FROM $<res_celda_snib_tb:raw>
+	SELECT count(*) AS n 
+	--FROM grid_16km_aoi as grid_tbl
+	FROM $<res_celda_snib_tb:raw> as grid_tbl
+	join america 
+	on st_intersects(america.geom,grid_tbl.the_geom)
+	where america.gid = 19
 ),
 counts AS (
 	SELECT 	source.spid as source,
