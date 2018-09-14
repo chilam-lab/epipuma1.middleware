@@ -101,7 +101,7 @@ function getNodesNiche(req, res, next) {
       })
   } else if ( hasBiosSource === true && hasRasterSource === true && 
               hasBiosTarget === true ) {
-    debug('T')
+    debug('hasBiosSource - hasBiosTarget - hasRasterSource')
     var whereVarSource = verb_utils.processBioFilters(sfilters)
     var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters)
 
@@ -129,6 +129,7 @@ function getNodesNiche(req, res, next) {
       })
   } else if ( hasBiosSource === true && hasRasterSource === true && 
               hasRasterTarget === true ) {
+    debug('hasBiosSource - hasRasterSource - hasRasterTarget')
     debug('T')
     var whereVarSource = verb_utils.processBioFilters(sfilters)
     var whereVarSourceRaster = verb_utils.processRasterFilters(sfilters)

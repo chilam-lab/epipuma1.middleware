@@ -1,5 +1,13 @@
 /*getGeoRel sin filtros*/
-with source AS (
+with mexico as (
+		SELECT
+			$<res_celda_snib:raw> AS mex_cells
+		FROM $<res_celda_snib_tb:raw> AS a
+		JOIN aoi AS b
+		ON ST_intersects(a.the_geom, b.geom)
+		WHERE b.country = 'MEXICO'
+),
+source AS (
 	SELECT  spid,
 			reinovalido, phylumdivisionvalido, clasevalida, ordenvalido, familiavalida, generovalido, especievalidabusqueda,
 			1 as grp,
@@ -23,7 +31,7 @@ raster_cell as (
 			end
 		end as especievalidabusqueda,
 		2 as grp,
-		unnest($<res_celda:raw>) as cell
+		unnest(array_intersection($<res_celda:raw>, ARRAY(SELECT mex_cells FROM mexico)::integer[])) as cell
 		--unnest(cells_16km) as cell
 	FROM raster_bins
 	$<where_config_target_raster:raw>
@@ -38,9 +46,6 @@ target AS (
 	join $<res_celda_snib_tb:raw> as gdkm
 	--on rc.cell = gdkm.gridid_16km
 	on rc.cell = gdkm.$<res_celda_snib:raw>
-	join america
-	on st_intersects(america.geom, gdkm.small_geom)
-	where america.country = 'MEXICO'
 	group by spid, reinovalido, phylumdivisionvalido, clasevalida, ordenvalido, familiavalida, generovalido, especievalidabusqueda, grp	
 )
 select 	spid,

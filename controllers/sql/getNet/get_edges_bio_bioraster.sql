@@ -1,4 +1,12 @@
-with source AS (
+with mexico as (
+		SELECT
+			$<res_celda_snib:raw> AS mex_cells
+		FROM $<res_celda_snib_tb:raw> AS a
+		JOIN aoi AS b
+		ON ST_intersects(a.the_geom, b.geom)
+		WHERE b.country = 'MEXICO'
+), 
+source AS (
 	SELECT  spid,
 			$<res_celda:raw> AS cells 
 	FROM sp_snib 
