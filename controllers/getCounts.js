@@ -94,9 +94,7 @@ exports.getBasicInfo = function(req, res, next) {
               }
 
 
-              //TODO: getgridspecies
               debug("data_request.get_grid_species: " + data_request.get_grid_species)
-              // if(data_request.get_grid_species !== false && data[0].ni !== undefined){
               if(data_request.get_grid_species !== false){
 
                 debug("analisis en celda")
@@ -120,35 +118,22 @@ exports.getBasicInfo = function(req, res, next) {
 
                 return t.one(queries.basicAnalysis.getGridIdByLatLong, data_request).then(resp => {
 
-                  debug(resp)
-                  var cell_id = resp.gridid
-                  debug("cell_id: " + cell_id)
-                  // debug(data)
+                  data_request["cell_id"] = resp.gridid
+                  debug("cell_id: " + data_request.cell_id)
 
-                  // var data_score_cell = verb_utils.processDataForScoreCell(data, apriori, mapa_prob, cell_id)
+                  data_request["res_celda_snib_tb"] = "grid_geojson_" + data_request.grid_resolution + "km_aoi"
 
-                  // res.json({
-                  //   ok: true
-                  // })
-                  // .catch(error => {
-                  //     debug(error)
-                  //     return res.json({
-                  //       ok: false,
-                  //       error: error
-                  //     })
-                  // })
+                  return t.any(query, data_request)  
 
                 })
 
               }
               else{
 
-                return t.any(query, data_request)  
+                data_request["cell_id"] = 0
+                return t.any(query, data_request)
 
-              }
-
-
-              
+              }              
               
 
             })
@@ -157,13 +142,6 @@ exports.getBasicInfo = function(req, res, next) {
       .then(data => {
 
         // debug(data)
-        
-        // iter++;
-        // debug("resp_iter: " + iter)
-        // data_georel.push({
-        //   data_iter: data,
-        //   iter: iter
-        // })
 
         var apriori = false
         debug("data_request.apriori: " + data_request.apriori)
@@ -177,22 +155,39 @@ exports.getBasicInfo = function(req, res, next) {
           mapa_prob = true          
         }
 
+
+        var cell_id = 0
+        if(data_request.get_grid_species !== false){
+
+          cell_id = data_request.cell_id
+          debug("cell_id last: " + cell_id)
+          data = verb_utils.processDataForCellId(data, apriori, mapa_prob, cell_id)
+
+        }
+        
+
+        // iter++;
+        // debug("resp_iter: " + iter)
+        // data_georel.push({
+        //   data_iter: data,
+        //   iter: iter
+        // })
+        
+
         var data_freq = data_request.with_data_freq === "true" ? verb_utils.processDataForFreqSpecie(data) : []
-        var data_score_cell = data_request.with_data_score_cell === "true" ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob, 0) : []
+        var data_score_cell = data_request.with_data_score_cell === "true" ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob) : []
         var data_freq_cell = data_request.with_data_freq_cell === "true" ? verb_utils.processDataForFreqCell(data_score_cell) : []
 
         // if(iter == 5){
           res.json({
             ok: true,
             usuarioRequest: req.usuarioRequest,
-            // data: data_georel
             data: data,
             data_freq: data_freq,
             data_score_cell: data_score_cell,
             data_freq_cell: data_freq_cell
           });
         // }
-
      
 
       })
@@ -238,7 +233,47 @@ exports.getBasicInfo = function(req, res, next) {
             }
 
 
-            return t.any(query, data_request)
+            debug("data_request.get_grid_species: " + data_request.get_grid_species)
+              if(data_request.get_grid_species !== false){
+
+                debug("analisis en celda")
+
+                var lat = verb_utils.getParam(req, 'lat')
+                var long = verb_utils.getParam(req, 'long')
+
+                debug("lat: " + lat)
+                debug("long: " + long)
+
+                data_request["lat"] = lat
+                data_request["long"] = long
+
+                // sobreescribe tablas de vistas por tablas de grid_16km_aoi
+                var grid_resolution = data_request.grid_resolution
+                data_request["res_celda_sp"] = "cells_"+grid_resolution+"km" 
+                data_request["res_celda_snib"] = "gridid_"+grid_resolution+"km" 
+                data_request["res_celda_snib_tb"] = "grid_"+grid_resolution+"km_aoi" 
+
+                debug('res_celda_snib_tb: ' + data_request.res_celda_snib_tb)
+
+                return t.one(queries.basicAnalysis.getGridIdByLatLong, data_request).then(resp => {
+
+                  data_request["cell_id"] = resp.gridid
+                  debug("cell_id: " + data_request.cell_id)
+
+                  data_request["res_celda_snib_tb"] = "grid_geojson_" + data_request.grid_resolution + "km_aoi"
+
+                  return t.any(query, data_request)  
+
+                })
+
+              }
+              else{
+
+                data_request["cell_id"] = 0
+                return t.any(query, data_request)
+
+              }  
+
 
           })
         
@@ -258,6 +293,15 @@ exports.getBasicInfo = function(req, res, next) {
         debug("data_request.mapa_prob: " + data_request.mapa_prob)
         if(data_request.mapa_prob !== false && data[0].ni !== undefined){
           mapa_prob = true          
+        }
+
+        var cell_id = 0
+        if(data_request.get_grid_species !== false){
+
+          cell_id = data_request.cell_id
+          debug("cell_id last: " + cell_id)
+          data = verb_utils.processDataForCellId(data, apriori, mapa_prob, cell_id)
+
         }
 
         var data_freq = data_request.with_data_freq === "true" ? verb_utils.processDataForFreqSpecie(data) : []
@@ -316,7 +360,47 @@ exports.getBasicInfo = function(req, res, next) {
               query = queries.basicAnalysis.getCountsTime
             }
 
-            return t.any(query, data_request)
+
+            debug("data_request.get_grid_species: " + data_request.get_grid_species)
+              if(data_request.get_grid_species !== false){
+
+                debug("analisis en celda")
+
+                var lat = verb_utils.getParam(req, 'lat')
+                var long = verb_utils.getParam(req, 'long')
+
+                debug("lat: " + lat)
+                debug("long: " + long)
+
+                data_request["lat"] = lat
+                data_request["long"] = long
+
+                // sobreescribe tablas de vistas por tablas de grid_16km_aoi
+                var grid_resolution = data_request.grid_resolution
+                data_request["res_celda_sp"] = "cells_"+grid_resolution+"km" 
+                data_request["res_celda_snib"] = "gridid_"+grid_resolution+"km" 
+                data_request["res_celda_snib_tb"] = "grid_"+grid_resolution+"km_aoi" 
+
+                debug('res_celda_snib_tb: ' + data_request.res_celda_snib_tb)
+
+                return t.one(queries.basicAnalysis.getGridIdByLatLong, data_request).then(resp => {
+
+                  data_request["cell_id"] = resp.gridid
+                  debug("cell_id: " + data_request.cell_id)
+
+                  data_request["res_celda_snib_tb"] = "grid_geojson_" + data_request.grid_resolution + "km_aoi"
+
+                  return t.any(query, data_request)  
+
+                })
+
+              }
+              else{
+
+                data_request["cell_id"] = 0
+                return t.any(query, data_request)
+
+              }  
 
           })
         
@@ -338,6 +422,15 @@ exports.getBasicInfo = function(req, res, next) {
         debug("data_request.mapa_prob: " + data_request.mapa_prob)
         if(data_request.mapa_prob !== false && data[0].ni !== undefined){
           mapa_prob = true          
+        }
+
+        var cell_id = 0
+        if(data_request.get_grid_species !== false){
+
+          cell_id = data_request.cell_id
+          debug("cell_id last: " + cell_id)
+          data = verb_utils.processDataForCellId(data, apriori, mapa_prob, cell_id)
+
         }
 
         var data_freq = data_request.with_data_freq === "true" ? verb_utils.processDataForFreqSpecie(data) : []

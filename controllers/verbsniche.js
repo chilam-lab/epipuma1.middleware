@@ -1180,6 +1180,8 @@ exports.getEntListNiche = function (req, res, next) {
       debug("res_celda_sp: " + res_celda_sp)
       debug("val_tree: " + val_tree)
 
+      debug(pool)
+
     pool.any(queries.getEntListNiche.getEntList, {
       str: str,
       columnas: columnas,
