@@ -277,6 +277,7 @@ function getFreqMapNiche_A(req, res, next) {
       n_grid_coverage: n_grid_coverage
     })
       .then(function (data) {
+        debug("data.length: " + data.length)
         res.json({'data': data})
       })
       .catch(function (error) {
@@ -315,6 +316,7 @@ function getFreqMapNiche_A(req, res, next) {
       n_grid_coverage: n_grid_coverage
     })
       .then(function (data) {
+        debug("data.length: " + data.length)
         res.json({'data': data})
       })
       .catch(function (error) {
@@ -347,6 +349,7 @@ function getFreqMapNiche_A(req, res, next) {
       n_grid_coverage: n_grid_coverage
     })
       .then(function (data) {
+        debug("data.length: " + data.length)
         res.json({'data': data})
       })
       .catch(function (error) {
