@@ -38,14 +38,13 @@ exports.getBasicInfo = function(req, res, next) {
   
   debug('getBasicInfo')
 
-  var footprint_region = parseInt(verb_utils.getParam(req, 'footprint_region', default_region))
+  
   var data_request = verb_utils.getRequestParams(req, false)
 
   data_request["res_celda_snib_tb"] = "grid_geojson_" + data_request.grid_resolution + "km_aoi"
-  data_request["region"] = footprint_region
-  
   debug('region: ' + data_request.region)
   debug('res_celda_snib_tb: ' + data_request.res_celda_snib_tb)
+
 
   //agregar iteraciones para el proceso de validacion
 
@@ -69,7 +68,7 @@ exports.getBasicInfo = function(req, res, next) {
           return t.one(queries.basicAnalysis.getN, {
 
               grid_resolution: data_request.grid_resolution,
-              footprint_region: footprint_region
+              footprint_region: data_request.region
 
           }).then(resp => {
 
@@ -94,7 +93,7 @@ exports.getBasicInfo = function(req, res, next) {
               }
 
 
-              debug("data_request.get_grid_species: " + data_request.get_grid_species)
+              // debug("data_request.get_grid_species: " + data_request.get_grid_species)
               if(data_request.get_grid_species !== false){
 
                 debug("analisis en celda")
@@ -130,8 +129,30 @@ exports.getBasicInfo = function(req, res, next) {
               }
               else{
 
+                debug("analisis general")
+
                 data_request["cell_id"] = 0
-                return t.any(query, data_request)
+
+                // Se obtiene todas las celdas para mandar valor de apriori o mapa de probabildiad
+                if(data_request.apriori === true){
+
+                  debug("analisis con apriori")
+
+                  return t.one(queries.basicAnalysis.getAllGridId, data_request).then(data => {
+
+                    data_request.all_cells = data
+                    return t.any(query, data_request)
+
+                  })
+
+                }
+                else{
+
+                  debug("analisis basico")
+
+                  return t.any(query, data_request)
+                }
+                
 
               }              
               
@@ -143,18 +164,21 @@ exports.getBasicInfo = function(req, res, next) {
 
         // debug(data)
 
+        
         var apriori = false
         debug("data_request.apriori: " + data_request.apriori)
         if(data_request.apriori !== false && data[0].ni !== undefined){
           apriori = true
+          // debug(data_request.all_cells)
         }
+        
 
         var mapa_prob = false
         debug("data_request.mapa_prob: " + data_request.mapa_prob)
         if(data_request.mapa_prob !== false && data[0].ni !== undefined){
           mapa_prob = true          
         }
-
+        
 
         var cell_id = 0
         if(data_request.get_grid_species !== false){
@@ -175,8 +199,8 @@ exports.getBasicInfo = function(req, res, next) {
         
 
         var data_freq = data_request.with_data_freq === "true" ? verb_utils.processDataForFreqSpecie(data) : []
-        var data_score_cell = data_request.with_data_score_cell === "true" ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob) : []
-        var data_freq_cell = data_request.with_data_freq_cell === "true" ? verb_utils.processDataForFreqCell(data_score_cell) : []
+        var data_score_cell = data_request.with_data_score_cell === "true" ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob, data_request.all_cells) : []
+        var data_freq_cell = data_request.with_data_freq_cell === "true" ? verb_utils.processDataForFreqCell(data_score_cell.data) : []
 
         // if(iter == 5){
           res.json({
@@ -215,7 +239,7 @@ exports.getBasicInfo = function(req, res, next) {
         return t.one(queries.basicAnalysis.getN, {
 
             grid_resolution: data_request.grid_resolution,
-            footprint_region: footprint_region
+            footprint_region: data_request.region
 
         }).then(resp => {
 
@@ -269,8 +293,29 @@ exports.getBasicInfo = function(req, res, next) {
               }
               else{
 
+                debug("analisis general")
+
                 data_request["cell_id"] = 0
-                return t.any(query, data_request)
+
+                // Se obtiene todas las celdas para mandar valor de apriori o mapa de probabildiad
+                if(data_request.apriori === true){
+
+                  debug("analisis con apriori")
+
+                  return t.one(queries.basicAnalysis.getAllGridId, data_request).then(data => {
+
+                    data_request.all_cells = data
+                    return t.any(query, data_request)
+
+                  })
+
+                }
+                else{
+
+                  debug("analisis basico")
+
+                  return t.any(query, data_request)
+                }
 
               }  
 
@@ -305,8 +350,8 @@ exports.getBasicInfo = function(req, res, next) {
         }
 
         var data_freq = data_request.with_data_freq === "true" ? verb_utils.processDataForFreqSpecie(data) : []
-        var data_score_cell = data_request.with_data_score_cell === "true" ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob) : []
-        var data_freq_cell = data_request.with_data_freq_cell === "true" ? verb_utils.processDataForFreqCell(data_score_cell) : []
+        var data_score_cell = data_request.with_data_score_cell === "true" ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob, data_request.all_cells) : []
+        var data_freq_cell = data_request.with_data_freq_cell === "true" ? verb_utils.processDataForFreqCell(data_score_cell.data) : []
 
         res.json({
           ok: true,
@@ -337,7 +382,7 @@ exports.getBasicInfo = function(req, res, next) {
         return t.one(queries.basicAnalysis.getN, {
 
             grid_resolution: data_request.grid_resolution,
-            footprint_region: footprint_region
+            footprint_region: data_request.region
 
         }).then(resp => {
 
@@ -397,8 +442,29 @@ exports.getBasicInfo = function(req, res, next) {
               }
               else{
 
+                debug("analisis general")
+
                 data_request["cell_id"] = 0
-                return t.any(query, data_request)
+
+                // Se obtiene todas las celdas para mandar valor de apriori o mapa de probabildiad
+                if(data_request.apriori === true){
+
+                  debug("analisis con apriori")
+
+                  return t.one(queries.basicAnalysis.getAllGridId, data_request).then(data => {
+
+                    data_request.all_cells = data
+                    return t.any(query, data_request)
+
+                  })
+
+                }
+                else{
+
+                  debug("analisis basico")
+
+                  return t.any(query, data_request)
+                }
 
               }  
 
@@ -434,8 +500,8 @@ exports.getBasicInfo = function(req, res, next) {
         }
 
         var data_freq = data_request.with_data_freq === "true" ? verb_utils.processDataForFreqSpecie(data) : []
-        var data_score_cell = data_request.with_data_score_cell === "true" ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob) : []
-        var data_freq_cell = data_request.with_data_freq_cell === "true" ? verb_utils.processDataForFreqCell(data_score_cell) : []
+        var data_score_cell = data_request.with_data_score_cell === "true" ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob, data_request.all_cells) : []
+        var data_freq_cell = data_request.with_data_freq_cell === "true" ? verb_utils.processDataForFreqCell(data_score_cell.data) : []
 
         res.json({
           ok: true,

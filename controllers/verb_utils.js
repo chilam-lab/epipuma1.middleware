@@ -428,6 +428,10 @@ verb_utils.getRequestParams = function(req, verbose){
 
   data_request["spid"] = parseInt(verb_utils.getParam(req, 'id'))
   var tfilters = verb_utils.getParam(req, 'tfilters')
+
+
+  var footprint_region = parseInt(verb_utils.getParam(req, 'footprint_region', verb_utils.region_mx))
+  data_request["region"] = footprint_region
   
   
   var grid_resolution = verb_utils.getParam(req, 'grid_res',16)
@@ -471,8 +475,8 @@ verb_utils.getRequestParams = function(req, verbose){
   // variables bioticas, raster y apriori
   data_request["hasBios"] = verb_utils.getParam(req, 'hasBios')
   data_request["hasRaster"] = verb_utils.getParam(req, 'hasRaster')
-  data_request["apriori"] = verb_utils.getParam(req, 'apriori', false)
-  data_request["mapa_prob"] = verb_utils.getParam(req, 'mapa_prob', false)
+  data_request["apriori"] = verb_utils.getParam(req, 'apriori', false) !== false ? true : false
+  data_request["mapa_prob"] = verb_utils.getParam(req, 'mapa_prob', false) !== false ? true : false
   data_request["get_grid_species"] = verb_utils.getParam(req, 'get_grid_species', false)
   
 
@@ -757,9 +761,14 @@ verb_utils.processDataForCellId = function (data, apriori, mapa_prob, gridid){
 }
 
 
-verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob){
+verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, all_cells = []){
+
+  var data_resp_score_cell = {}
+  data_resp_score_cell.apriori = apriori
+  data_resp_score_cell.mapa_prob = mapa_prob
 
   var cells_array = data.map(function(d) {return {cells: d.cells, score: parseFloat(d.score)}})
+  // debug(all_cells)
 
   var cells = []
   cells_array.forEach(function (item, index){
@@ -772,63 +781,92 @@ verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob){
   var cross_cells = crossfilter(cells)
 
   
-    cross_cells.groupAll();
-    var cells_dimension = cross_cells.dimension(function(d) { return d.cell; });
+  cross_cells.groupAll();
+  var cells_dimension = cross_cells.dimension(function(d) { return d.cell; });
 
-    var groupByCell = cells_dimension.group().reduceSum(function(d) { return parseFloat(parseFloat(d.score).toFixed(3)); });
-    var map_cell = groupByCell.top(Infinity);
-    // debug(map_cell)
+  var groupByCell = cells_dimension.group().reduceSum(function(d) { return parseFloat(parseFloat(d.score).toFixed(3)); });
+  var map_cell = groupByCell.top(Infinity)
 
-    var cell_score_array = [];
+  // debug(map_cell)
+  
+  var keys = [];
+  var cell_score_array = [];
 
-     var val_apriori = 0
-     debug("apriori: " + apriori)
-     debug("mapa_prob: " + mapa_prob)
+   var val_apriori = 0
+   debug("apriori: " + apriori)
+   debug("mapa_prob: " + mapa_prob)
 
-     if(apriori || mapa_prob){
-        val_apriori = data[0].ni / (data[0].n- data[0].ni)
-        debug("val_apriori: " + val_apriori)
-     }
+   if(apriori || mapa_prob){
+      val_apriori = parseFloat((data[0].ni / (data[0].n- data[0].ni)).toFixed(3)) 
+      debug("val_apriori: " + val_apriori)
+      data_resp_score_cell.val_apriori = val_apriori
+   }
 
-     for(var i=0; i<map_cell.length; i++){
+   for(var i=0; i<map_cell.length; i++){
 
-          const entry = map_cell[i];
+        const entry = map_cell[i];
 
-          var tscore = parseFloat(entry["value"])
-          var gridid = entry["key"]
+        var tscore = parseFloat(entry["value"])
+        var gridid = entry["key"]
+        keys.push(gridid)
 
-          var apriori_computed = false
-          if(apriori){
-            tscore = tscore + val_apriori
-            apriori_computed = true;
+        var apriori_computed = false
+        if(apriori){
+          tscore = tscore + val_apriori
+          apriori_computed = true;
+        }
+        if(mapa_prob){
+          if(tscore <= verb_utils.minscore){
+            tscore = 0
           }
-          if(mapa_prob){
-            if(tscore <= verb_utils.minscore){
-              tscore = 0
-            }
-            else if(tscore >= verb_utils.maxscore){
-              tscore = 1 
-            }
-            else{
-              // verifica que el calculo de apriori no se calcule dos veces
-              tscore = apriori_computed ? tscore : tscore+val_apriori
-              tscore = Math.exp(tscore) /  (1+Math.exp(tscore))
-            }
+          else if(tscore >= verb_utils.maxscore){
+            tscore = 1 
           }
+          else{
+            // verifica que el calculo de apriori no se calcule dos veces
+            tscore = apriori_computed ? tscore : tscore+val_apriori
+            tscore = Math.exp(tscore) /  (1+Math.exp(tscore))
+          }
+        }
 
-          // debug("tscore: " + tscore)
-          cell_score_array.push({gridid: gridid, tscore: parseFloat(tscore).toFixed(3)})
-          
+        // debug("tscore: " + tscore)
+        cell_score_array.push({gridid: gridid, tscore: parseFloat(tscore.toFixed(3))})
+        
+    }
+
+    // debug(keys)
+
+    var test = []
+    debug(val_apriori)
+    // debug(all_cells)
+    // debug(all_cells["cells"])
+    
+    if(all_cells["cells"]){
+
+      for(var i=0; i<all_cells.cells.length; i++){
+        var gridid = all_cells.cells[i];
+        // debug(gridid)
+        if(keys.indexOf(gridid) === -1){
+          cell_score_array.push({gridid: gridid, tscore: val_apriori})  
+        }
+
       }
+    }
 
-      // var data_freq = [];
-      // debug(cell_score_array)
-      
-      return cell_score_array
+    // debug(test)
+
+    // cell_score_array.sort(function(a, b){
+    //   return b.tscore-a.tscore
+    // });
+
+    
+    data_resp_score_cell.data = cell_score_array
+    debug(data_resp_score_cell)
+
+    return data_resp_score_cell
       
 
 }
-
 
 
 verb_utils.processDataForScoreCellTable = function (data){
