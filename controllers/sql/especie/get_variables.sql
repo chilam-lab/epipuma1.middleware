@@ -9,9 +9,7 @@ WHERE
 	AND a.$<parent_taxon:raw> = $<parent_valor>
 	--and a.reinovalido = 'Animalia'
 	AND a.especievalidabusqueda <> ''
-	AND array_length( array_intersection( ARRAY(SELECT cells 
-		FROM grid_geojson_64km_aoi
-		WHERE footprint_region=$<region>)::integer[], a.cells_64km), 1) > 0 
+	AND array_length(a.cells_64km_$<region:raw>, 1) > 0 
 --group by a.phylumdivisionvalido 
 --order by a.phylumdivisionvalido
 GROUP BY a.$<taxon:raw> 
