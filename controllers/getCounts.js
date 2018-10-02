@@ -114,6 +114,7 @@ exports.getBasicInfo = function(req, res, next) {
                 data_request["res_celda_snib_tb"] = "grid_"+grid_resolution+"km_aoi" 
 
                 debug('res_celda_snib_tb: ' + data_request.res_celda_snib_tb)
+                debug("cells : " + data_request.res_celda_sp)
 
                 return t.one(queries.basicAnalysis.getGridIdByLatLong, data_request).then(resp => {
 
@@ -132,6 +133,7 @@ exports.getBasicInfo = function(req, res, next) {
                 debug("analisis general")
 
                 data_request["cell_id"] = 0
+
 
                 // Se obtiene todas las celdas para mandar valor de apriori o mapa de probabildiad
                 if(data_request.apriori === true){

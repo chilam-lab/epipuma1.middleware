@@ -933,10 +933,8 @@ exports.getCountGridid = function (req, res, next) {
   var res_celda = 'cells_' + grid_res + 'km'
   var res_grid = 'gridid_' + grid_res + 'km'
 
-  //debug(footprint_region)
-  //debug(res_celda)
-  //debug(res_grid)
-  //debug(grid_res)
+  //debug(columnas)
+  //debug(spids)
 
   if (isNicho === 'true') {
     columnas.push('spids')
@@ -953,6 +951,7 @@ exports.getCountGridid = function (req, res, next) {
   }).then(function (data) {
     res.json({'data': data})
   }).catch(function (error) {
+    debug(error)
     next(error)
   })
 }
