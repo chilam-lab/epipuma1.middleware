@@ -136,9 +136,9 @@ exports.getBasicInfo = function(req, res, next) {
 
 
                 // Se obtiene todas las celdas para mandar valor de apriori o mapa de probabildiad
-                if(data_request.apriori === true){
+                if(data_request.apriori === true || data_request.mapa_prob === true){
 
-                  debug("analisis con apriori")
+                  debug("obteniendo todas las celdas, analisis con apriori o mapa de probabilidad")
 
                   return t.one(queries.basicAnalysis.getAllGridId, data_request).then(data => {
 
