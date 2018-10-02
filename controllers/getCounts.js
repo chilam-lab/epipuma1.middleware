@@ -51,7 +51,7 @@ exports.getBasicInfo = function(req, res, next) {
   
   if (data_request.hasBios === 'true' && data_request.hasRaster === 'false' ) {
 
-    debug('Caso: hasBios:true - hasRaster:false')
+    debug('hasBios:true - hasRaster:false')
 
     debug('grid_resolution: ' + data_request.grid_resolution)
     debug('iterations: ' + data_request.iterations)
@@ -200,7 +200,10 @@ exports.getBasicInfo = function(req, res, next) {
 
         var data_freq = data_request.with_data_freq === "true" ? verb_utils.processDataForFreqSpecie(data) : []
         var data_score_cell = data_request.with_data_score_cell === "true" ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob, data_request.all_cells) : []
-        var data_freq_cell = data_request.with_data_freq_cell === "true" ? verb_utils.processDataForFreqCell(data_score_cell.data) : []
+        var data_freq_cell = data_request.with_data_freq_cell === "true" ? verb_utils.processDataForFreqCell(data_score_cell) : []
+
+        // debug('hasBios:true - hasRaster:false')
+        // debug(data)
 
         // if(iter == 5){
           res.json({
@@ -229,9 +232,9 @@ exports.getBasicInfo = function(req, res, next) {
   else if (data_request.hasBios === 'false' && data_request.hasRaster === 'true' ) {
 
     debug('Caso: hasBios:false - hasRaster:true')
-    debug('grid_resolution: ' + data_request.grid_resolution)
-    debug('res_celda_snib: ' + data_request.res_celda_snib)
-    debug('res_celda_snib_tb: ' + data_request.res_celda_snib_tb)
+    // debug('grid_resolution: ' + data_request.grid_resolution)
+    // debug('res_celda_snib: ' + data_request.res_celda_snib)
+    // debug('res_celda_snib_tb: ' + data_request.res_celda_snib_tb)
 
     // Inica tarea
     pool.task(t => {
@@ -351,7 +354,10 @@ exports.getBasicInfo = function(req, res, next) {
 
         var data_freq = data_request.with_data_freq === "true" ? verb_utils.processDataForFreqSpecie(data) : []
         var data_score_cell = data_request.with_data_score_cell === "true" ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob, data_request.all_cells) : []
-        var data_freq_cell = data_request.with_data_freq_cell === "true" ? verb_utils.processDataForFreqCell(data_score_cell.data) : []
+        var data_freq_cell = data_request.with_data_freq_cell === "true" ? verb_utils.processDataForFreqCell(data_score_cell) : []
+
+        // debug('hasBios:false - hasRaster:true')
+        // debug(data)
 
         res.json({
           ok: true,
@@ -450,6 +456,7 @@ exports.getBasicInfo = function(req, res, next) {
                 if(data_request.apriori === true){
 
                   debug("analisis con apriori")
+                  // debug('data_request: ' + data_request.where_config)
 
                   return t.one(queries.basicAnalysis.getAllGridId, data_request).then(data => {
 
@@ -501,7 +508,10 @@ exports.getBasicInfo = function(req, res, next) {
 
         var data_freq = data_request.with_data_freq === "true" ? verb_utils.processDataForFreqSpecie(data) : []
         var data_score_cell = data_request.with_data_score_cell === "true" ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob, data_request.all_cells) : []
-        var data_freq_cell = data_request.with_data_freq_cell === "true" ? verb_utils.processDataForFreqCell(data_score_cell.data) : []
+        var data_freq_cell = data_request.with_data_freq_cell === "true" ? verb_utils.processDataForFreqCell(data_score_cell) : []
+
+        // debug('hasBios:true - hasRaster:true')
+        // debug(data)
 
         res.json({
           ok: true,

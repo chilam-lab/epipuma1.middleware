@@ -686,7 +686,7 @@ verb_utils.processDataForCellId = function (data, apriori, mapa_prob, gridid){
   if(apriori || mapa_prob){
     debug("Con apriori")
 
-    val_apriori = data[0].ni / (data[0].n- data[0].ni)
+    val_apriori = parseFloat(Math.log(data[0].ni / (data[0].n- data[0].ni)).toFixed(2)) 
     info_incell.apriori = val_apriori
 
     debug("val_apriori: " + val_apriori)
@@ -723,7 +723,7 @@ verb_utils.processDataForCellId = function (data, apriori, mapa_prob, gridid){
   })
 
 
-  info_incell.tscore = tscore;
+  info_incell.tscore = parseFloat((tscore).toFixed(2));
   info_incell.bios = bios;
   info_incell.raster = raster;
   info_incell.positives = positives;
@@ -748,8 +748,7 @@ verb_utils.processDataForCellId = function (data, apriori, mapa_prob, gridid){
       val_mapa_prob = Math.exp(fscore) /  (1+Math.exp(fscore))
     }
 
-    info_incell.mapa_prob = val_mapa_prob
-
+    info_incell.mapa_prob = parseFloat((val_mapa_prob*100).toFixed(2))
     debug("mapa_prob: " + val_mapa_prob)
   }
   
@@ -763,10 +762,6 @@ verb_utils.processDataForCellId = function (data, apriori, mapa_prob, gridid){
 
 verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, all_cells = []){
 
-  var data_resp_score_cell = {}
-  data_resp_score_cell.apriori = apriori
-  data_resp_score_cell.mapa_prob = mapa_prob
-
   var cells_array = data.map(function(d) {return {cells: d.cells, score: parseFloat(d.score)}})
   // debug(all_cells)
 
@@ -776,10 +771,8 @@ verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, all_cel
           cells.push({cell: cell_item, score: item.score})
     })
   })
-  // debug("gridid: " + gridid)
-
+  
   var cross_cells = crossfilter(cells)
-
   
   cross_cells.groupAll();
   var cells_dimension = cross_cells.dimension(function(d) { return d.cell; });
@@ -787,8 +780,6 @@ verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, all_cel
   var groupByCell = cells_dimension.group().reduceSum(function(d) { return parseFloat(parseFloat(d.score).toFixed(3)); });
   var map_cell = groupByCell.top(Infinity)
 
-  // debug(map_cell)
-  
   var keys = [];
   var cell_score_array = [];
 
@@ -797,9 +788,12 @@ verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, all_cel
    debug("mapa_prob: " + mapa_prob)
 
    if(apriori || mapa_prob){
-      val_apriori = parseFloat((data[0].ni / (data[0].n- data[0].ni)).toFixed(3)) 
+
+      // debug("ni: " + data[0].ni)
+      // debug("n: " + data[0].n)
+      // debug("aprior: " + Math.log(data[0].ni / (data[0].n- data[0].ni)) )
+      val_apriori = parseFloat(Math.log(data[0].ni / (data[0].n- data[0].ni)).toFixed(3)) 
       debug("val_apriori: " + val_apriori)
-      data_resp_score_cell.val_apriori = val_apriori
    }
 
    for(var i=0; i<map_cell.length; i++){
@@ -837,7 +831,7 @@ verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, all_cel
     // debug(keys)
 
     var test = []
-    debug(val_apriori)
+    // debug(val_apriori)
     // debug(all_cells)
     // debug(all_cells["cells"])
     
@@ -853,17 +847,16 @@ verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, all_cel
       }
     }
 
-    // debug(test)
+    // debug("cell_score_array: " + cell_score_array.length)
+    // debug("gridid: " + cell_score_array[0].gridid)
+    // debug("tscore: " + cell_score_array[0].tscore)
 
     // cell_score_array.sort(function(a, b){
     //   return b.tscore-a.tscore
     // });
 
     
-    data_resp_score_cell.data = cell_score_array
-    debug(data_resp_score_cell)
-
-    return data_resp_score_cell
+    return cell_score_array
       
 
 }
