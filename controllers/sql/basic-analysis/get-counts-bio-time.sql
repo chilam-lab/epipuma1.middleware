@@ -1,4 +1,4 @@
-with temp_source as (
+WITH temp_source as (
 	SELECT 
 		a.spid, 
 		--array_agg(distinct a.gridid_16km ) as cells,
@@ -42,50 +42,23 @@ with temp_source as (
 	group by a.spid
 ),
 temp_target as (
-	SELECT  a.spid, 
-			a.reinovalido, 
-			a.phylumdivisionvalido, 
-			a.clasevalida, 
-			a.ordenvalido, 
-			a.familiavalida, 
-			a.generovalido, 
-			a.especievalidabusqueda, 
-			--array_agg(distinct a.gridid_16km ) as cells,
-			array_agg(distinct a.${res_celda_snib:raw}) as cells, 
-			--icount(array_agg(distinct a.gridid_16km)) as ni,
-			icount(array_agg(distinct a.${res_celda_snib:raw})) as nj,
-			0 as tipo
-	FROM snib AS a
-	JOIN (
-		SELECT UNNEST(gid) AS gid 
-		--FROM grid_geojson_64km_aoi
-		FROM ${res_celda_snib_tb:raw}
-		--WHERE footprint_region=1 
-		WHERE footprint_region=${region}
-		) AS b
-	ON a.gid = b.gid
-		--where a.clasevalida = 'Reptilia'
-		${where_config:raw} ${fossil:raw}
-		and 
-			(case when ${caso} = 1 
-				  then 
-						aniocolecta <> 9999
-						--fechacolecta <> ''
-				  when ${caso} = 2 
-				  then
-						aniocolecta >= cast( ${lim_inf}  as integer)
-						and 
-						aniocolecta <= cast( ${lim_sup} as integer)
-				  else
-				  		(
-							(
-							aniocolecta >= cast( ${lim_inf}  as integer)
-							and 
-							aniocolecta <= cast( ${lim_sup}  as integer)
-							)
-							or aniocolecta = 9999
-						)
-			end) = true
+	SELECT  
+		a.spid, 
+		a.reinovalido, 
+		a.phylumdivisionvalido, 
+		a.clasevalida, 
+		a.ordenvalido, 
+		a.familiavalida, 
+		a.generovalido, 
+		a.especievalidabusqueda, 
+--		a.cells_16km_1 as cells,
+		a.${res_celda_sp:raw}_${region:raw} as cells,
+--		array_length(a.cells_16km_1, 1) as ni 
+		array_length(a.${res_celda_sp:raw}_${region:raw}, 1) as nj,
+		0 as tipo
+	FROM sp_snib AS a
+	--where a.clasevalida = 'Reptilia'
+	${where_config:raw}
 		and a.especievalidabusqueda <> ''
 		and a.reinovalido <> ''
 		and a.phylumdivisionvalido <> ''
@@ -93,16 +66,16 @@ temp_target as (
 		and a.ordenvalido <> ''
 		and a.familiavalida <> ''
 		and a.generovalido <> ''
-		--and a.gridid_16km is not null
-		and a.${res_celda_snib:raw} is not null
-		group by a.spid,
-			a.reinovalido, 
-			a.phylumdivisionvalido, 
-			a.clasevalida, 
-			a.ordenvalido, 
-			a.familiavalida, 
-			a.generovalido, 
-			a.especievalidabusqueda
+	group by a.spid,
+		a.reinovalido, 
+		a.phylumdivisionvalido, 
+		a.clasevalida, 
+		a.ordenvalido, 
+		a.familiavalida, 
+		a.generovalido, 
+		a.especievalidabusqueda,
+--		a.cells_16km_1
+		a.${res_celda_sp:raw}_${region:raw}
 )
 SELECT 	temp_target.spid,
 		temp_target.tipo,

@@ -1,52 +1,46 @@
-with temp_source as (
+WITH cells_region AS (
+	SELECT cells 
+--  FROM grid_geojson_16km_aoi
+	FROM ${res_celda_snib_tb:raw}
+--  WHERE footprint_region = 1
+	WHERE footprint_region = ${region}
+),
+temp_source as (
 	SELECT 
 		a.spid, 
-		--array_agg(distinct a.gridid_16km ) as cells,
-		array_agg(distinct a.${res_celda_snib:raw}) as cells, 
-		--icount(array_agg(distinct a.gridid_16km)) as ni
-		icount(array_agg(distinct a.${res_celda_snib:raw})) as ni
-	FROM snib AS a
-	JOIN (
-		SELECT UNNEST(gid) AS gid 
-		--FROM grid_geojson_64km_aoi
-		FROM ${res_celda_snib_tb:raw}
-		--WHERE footprint_region=1 
-		WHERE footprint_region=${region}
-		) AS b
-	ON a.gid = b.gid
+--		a.cells_16km_1 as cells,
+		a.${res_celda_sp:raw}_${region:raw} as cells,
+--		array_length(a.cells_16km_1, 1) as ni 
+		array_length(a.${res_celda_sp:raw}_${region:raw}, 1) as ni
+	FROM sp_snib AS a
 	WHERE
 		--a.spid = 27333
 		a.spid = ${spid}
 		and a.especievalidabusqueda <> ''
 		--and 27333 is not NULL
 		and ${spid} is not NULL
-	group by a.spid
+	group by a.spid,
+--			 a.cells_16_1
+			 a.${res_celda_sp:raw}_${region:raw}
 ),
 temp_target as (
-	SELECT  a.generovalido,
-			a.especievalidabusqueda,
-			a.spid, 
-			a.reinovalido, 
-			a.phylumdivisionvalido, 
-			a.clasevalida, 
-			a.ordenvalido, 
-			a.familiavalida, 
-			--array_agg(distinct a.gridid_16km ) as cells,
-			array_agg(distinct a.${res_celda_snib:raw}) as cells, 
-			--icount(array_agg(distinct a.gridid_16km)) as nj,
-			icount(array_agg(distinct a.${res_celda_snib:raw})) as nj,
-			0 as tipo
-	FROM snib AS a
-	JOIN (
-		SELECT UNNEST(gid) AS gid 
-		--FROM grid_geojson_64km_aoi
-		FROM ${res_celda_snib_tb:raw}
-		--WHERE footprint_region=1 
-		WHERE footprint_region=${region}
-		) AS b
-	ON a.gid = b.gid
-		--where clasevalida = 'Reptilia'
-		${where_config:raw}
+	SELECT  
+		a.generovalido,
+		a.especievalidabusqueda,
+		a.spid, 
+		a.reinovalido, 
+		a.phylumdivisionvalido, 
+		a.clasevalida, 
+		a.ordenvalido, 
+		a.familiavalida, 
+--		a.cells_16km_1 as cells,
+		a.${res_celda_sp:raw}_${region:raw} as cells,
+--		array_length(a.cells_16km_1, 1) as ni 
+		array_length(a.${res_celda_sp:raw}_${region:raw}, 1) as nj,
+		0 as tipo
+	FROM sp_snib AS a
+	--where clasevalida = 'Reptilia'
+	${where_config:raw}
 		and a.especievalidabusqueda <> ''
 		and a.reinovalido <> ''
 		and a.phylumdivisionvalido <> ''
@@ -54,8 +48,6 @@ temp_target as (
 		and a.ordenvalido <> ''
 		and a.familiavalida <> ''
 		and a.generovalido <> ''
-		--and a.gridid_64km is not null
-		and a.${res_celda_snib:raw} is not null
 	group by a.spid,
 			a.reinovalido, 
 			a.phylumdivisionvalido, 
@@ -63,7 +55,9 @@ temp_target as (
 			a.ordenvalido, 
 			a.familiavalida, 
 			a.generovalido, 
-			a.especievalidabusqueda
+			a.especievalidabusqueda,
+--			a.cells_16km_1
+			a.${res_celda_sp:raw}_${region:raw}
 	union
 	SELECT  
 		cast('' as text) generovalido, 
@@ -84,16 +78,12 @@ temp_target as (
 		cast('' as text) clasevalida,
 		cast('' as text) ordenvalido,
 		cast('' as text) familiavalida,
-		-- array_intersection(a.cells_64km,
-		-- ARRAY(SELECT cells FROM grid_geojson_64km_aoi WHERE footprint_region = 1)) as cells,
-		array_intersection(a.${res_celda_sp:raw}, 
-			ARRAY(SELECT cells FROM ${res_celda_snib_tb:raw} WHERE footprint_region = ${region})) as cells,
-		-- icount(array_intersection(a.cells_64km,
-		-- ARRAY(SELECT cells FROM grid_geojson_64km_aoi WHERE footprint_region = 1))) as nj, 
-		icount(array_intersection(a.${res_celda_sp:raw}, 
-			ARRAY(SELECT cells FROM ${res_celda_snib_tb:raw} WHERE footprint_region = ${region}))) as nj,
+--		array_intersection(a.cells_16km, b.cells) as cells,
+		array_intersection(a.${res_celda_sp:raw}, b.cells) as cells,
+--		icount(array_intersection(a.cells_16km, b.cells)) as nj,
+		icount(array_intersection(a.${res_celda_sp:raw}, b.cells)) as nj,
 		1 as tipo
-	FROM raster_bins AS a 
+	FROM raster_bins AS a, cells_region AS b
 	-- WHERE layer = 'bio010'
 	${where_config_raster:raw}
 )
