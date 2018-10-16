@@ -71,15 +71,20 @@ verb_utils.getParam = function (req, name, defaultValue) {
  * @returns {string} Raw SQL statement to filter
  */
 verb_utils.processBioFilters = function(tfilters_total, spid){
+
+  debug("processBioFilters")
+
   var whereVar = ''
   var first_bio = true
   var tfilters = []
 
   for (var i = 0; i < tfilters_total.length; i++) {
-    if(tfilters_total[i].type == verb_utils.type_taxon) {
+    if(parseInt(tfilters_total[i].type) === verb_utils.type_taxon) {
       tfilters.push(tfilters_total[i])
     }
   }
+
+  debug(tfilters)
 
   var filter_disj = ''
   if(spid) {
@@ -124,15 +129,21 @@ verb_utils.processBioFilters = function(tfilters_total, spid){
  * @returns {string} Raw SQL statement to filter
  */
 verb_utils.processRasterFilters = function(tfilters_total){
+
+  debug("processRasterFilters")
+
+
   var whereVar = ''
   var first_other = true
   var tfilters = []
 
   for (var i = 0; i < tfilters_total.length; i++) {
-    if(tfilters_total[i].type != verb_utils.type_taxon) {
+    if( parseInt(tfilters_total[i].type) !== verb_utils.type_taxon) {
       tfilters.push(tfilters_total[i])
     }
   }
+
+  debug(tfilters)
 
   for (var i = 0; i < tfilters.length; i++) {
 
@@ -265,7 +276,7 @@ verb_utils.processTitleGroup = function(groupid, tfilters){
     // group_item = 0 ->> root
     if (parseInt(tfilters[0].type) === 0) {
 
-      debug("if (parseInt(tfilters[0].type)");
+      // debug("if (parseInt(tfilters[0].type)");
 
 
       title_valor = JSON.stringify(
@@ -275,7 +286,7 @@ verb_utils.processTitleGroup = function(groupid, tfilters){
           'is_parent':true })
     } else { //if (tfilters[0].type != 0) {
 
-      debug("else ");
+      // debug("else ");
 
       title_valor = JSON.stringify(
         {'title':'Grupo Raster ' + groupid, 

@@ -42,8 +42,8 @@ exports.getBasicInfo = function(req, res, next) {
   var data_request = verb_utils.getRequestParams(req, false)
 
   data_request["res_celda_snib_tb"] = "grid_geojson_" + data_request.grid_resolution + "km_aoi"
-  debug('region: ' + data_request.region)
-  debug('res_celda_snib_tb: ' + data_request.res_celda_snib_tb)
+  // debug('region: ' + data_request.region)
+  // debug('res_celda_snib_tb: ' + data_request.res_celda_snib_tb)
 
 
   //agregar iteraciones para el proceso de validacion
@@ -75,21 +75,23 @@ exports.getBasicInfo = function(req, res, next) {
               debug("N:" + resp.n)
               data_request["N"] = resp.n 
 
+              var query_bio;
+
               // seleccion de caso para obtener datos de especie ibjetivo
               if(data_request.caso === -1 && data_request.fossil.length == 0){
                 debug("counts case 1: basico")
                 // query_source = queries.basicAnalysis.getSource  
-                query = queries.basicAnalysis.getCountsBio
+                query_bio = queries.basicAnalysis.getCountsBio
               }
               else if(data_request.caso === -1 && data_request.fossil.length > 1){
                 debug("counts case 2: sin fosil")
                 // query = queries.basicAnalysis.getSourceFossil
-                query = queries.basicAnalysis.getCountsBioFossil
+                query_bio = queries.basicAnalysis.getCountsBioFossil
               }
               else{
                 debug("counts case 3: tiempo y posible fosil")
                 // query = queries.basicAnalysis.getSourceTime  
-                query = queries.basicAnalysis.getCountsBioTime
+                query_bio = queries.basicAnalysis.getCountsBioTime
               }
 
 
@@ -123,7 +125,7 @@ exports.getBasicInfo = function(req, res, next) {
 
                   data_request["res_celda_snib_tb"] = "grid_geojson_" + data_request.grid_resolution + "km_aoi"
 
-                  return t.any(query, data_request)  
+                  return t.any(query_bio, data_request)  
 
                 })
 
@@ -138,12 +140,15 @@ exports.getBasicInfo = function(req, res, next) {
                 // Se obtiene todas las celdas para mandar valor de apriori o mapa de probabildiad
                 if(data_request.apriori === true || data_request.mapa_prob === true){
 
-                  debug("obteniendo todas las celdas, analisis con apriori o mapa de probabilidad")
+                  debug("obteniendo todas las celdas, analisis con apriori o mapa de probabilidad - hasBios:true - hasRaster:false")
 
                   return t.one(queries.basicAnalysis.getAllGridId, data_request).then(data => {
 
+                    debug("obteniendo counts BIO - hasBios:true - hasRaster:false")
+                    // debug(data_request["where_config"] + " - hasBios:true - hasRaster:false")
+
                     data_request.all_cells = data
-                    return t.any(query, data_request)
+                    return t.any(query_bio, data_request)
 
                   })
 
@@ -152,7 +157,7 @@ exports.getBasicInfo = function(req, res, next) {
 
                   debug("analisis basico")
 
-                  return t.any(query, data_request)
+                  return t.any(query_bio, data_request)
                 }
                 
 
@@ -163,6 +168,8 @@ exports.getBasicInfo = function(req, res, next) {
 
       })
       .then(data => {
+
+        debug("RETURN BIO - hasBios:true - hasRaster:false")
 
         // debug(data)
 
@@ -248,17 +255,20 @@ exports.getBasicInfo = function(req, res, next) {
 
         }).then(resp => {
 
+
+            var query_abio;
+
             debug("N:" + resp.n)
             data_request["N"] = resp.n 
 
             // seleccion de caso para obtener datos de especie ibjetivo
             if(data_request.caso === -1 && data_request.fossil.length == 0){
               debug("counts case 1: basico")
-              query = queries.basicAnalysis.getCountsAbio
+              query_abio = queries.basicAnalysis.getCountsAbio
             }
             else{
               debug("counts case 2: fossil - time")
-              query = queries.basicAnalysis.getCountsAbioFossilTime
+              query_abio = queries.basicAnalysis.getCountsAbioFossilTime
             }
 
 
@@ -291,7 +301,7 @@ exports.getBasicInfo = function(req, res, next) {
 
                   data_request["res_celda_snib_tb"] = "grid_geojson_" + data_request.grid_resolution + "km_aoi"
 
-                  return t.any(query, data_request)  
+                  return t.any(query_abio, data_request)  
 
                 })
 
@@ -305,12 +315,15 @@ exports.getBasicInfo = function(req, res, next) {
                 // Se obtiene todas las celdas para mandar valor de apriori o mapa de probabildiad
                 if(data_request.apriori === true){
 
-                  debug("analisis con apriori")
+                  debug("obteniendo todas las celdas, analisis con apriori o mapa de probabilidad - hasBios:false - hasRaster:true")
 
                   return t.one(queries.basicAnalysis.getAllGridId, data_request).then(data => {
 
+                    debug("obteniendo counts ABIO - hasBios:false - hasRaster:true")
+                    // debug(data_request["where_config_raster"]  + " - hasBios:false - hasRaster:true")
+
                     data_request.all_cells = data
-                    return t.any(query, data_request)
+                    return t.any(query_abio, data_request)
 
                   })
 
@@ -319,7 +332,7 @@ exports.getBasicInfo = function(req, res, next) {
 
                   debug("analisis basico")
 
-                  return t.any(query, data_request)
+                  return t.any(query_abio, data_request)
                 }
 
               }  
@@ -330,6 +343,8 @@ exports.getBasicInfo = function(req, res, next) {
 
     })
     .then(data => {
+
+      debug("RETURN ABIO - hasBios:false - hasRaster:true")
 
         // debug(data)
 
@@ -397,6 +412,8 @@ exports.getBasicInfo = function(req, res, next) {
             debug("N:" + resp.n)
             data_request["N"] = resp.n 
 
+            var query
+
             // seleccion de caso para obtener datos de especie ibjetivo
             if(data_request.caso === -1 && data_request.fossil.length == 0){
               debug("counts case 1: basico")
@@ -457,10 +474,13 @@ exports.getBasicInfo = function(req, res, next) {
                 // Se obtiene todas las celdas para mandar valor de apriori o mapa de probabildiad
                 if(data_request.apriori === true){
 
-                  debug("analisis con apriori")
+                  debug("obteniendo todas las celdas, analisis con apriori o mapa de probabilidad - Caso: hasBios:true - hasRaster:true")
                   // debug('data_request: ' + data_request.where_config)
+                  // debug('data_request: ' + data_request.where_config_raster)
 
                   return t.one(queries.basicAnalysis.getAllGridId, data_request).then(data => {
+
+                    debug("obteniendo counts BOTH - hasBios:true - hasRaster:true")
 
                     data_request.all_cells = data
                     return t.any(query, data_request)
@@ -482,6 +502,8 @@ exports.getBasicInfo = function(req, res, next) {
 
     })
     .then(data => {
+
+      debug("RETURN BOTH - hasBios:true - hasRaster:true")
 
 
         // var apriori = 0
