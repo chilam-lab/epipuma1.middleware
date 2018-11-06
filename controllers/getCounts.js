@@ -39,7 +39,7 @@ exports.getBasicInfo = function(req, res, next) {
   debug('getBasicInfo')
 
   
-  var data_request = verb_utils.getRequestParams(req, true)
+  var data_request = verb_utils.getRequestParams(req, false)
 
   data_request["res_celda_snib_tb"] = "grid_geojson_" + data_request.grid_resolution + "km_aoi"
 
