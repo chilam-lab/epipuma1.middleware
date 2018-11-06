@@ -7,18 +7,23 @@ var bodyParser = require('body-parser')
 var debug = require('debug')
 var timeout = require('connect-timeout')
 var config = require('./config')
+var zlib = require('zlib')
 
+var compression = require('compression')
 var log = debug('snib-middleware:log')
 var error = debug('snib-middleware:error')
 var app = express()
 
+app.use(compression({filter:shouldCompress, level:zlib.Z_BEST_COMPRESSION}))
 app.use(cors())
 app.use(bodyParser.json())
 app.use(bodyParser.json({limit: '50mb'}))
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true, parameterLimit:50000}))
 //app.use(bodyParser.urlencoded({extended: true}))
 
-
+function shouldCompress (req, res) {
+  return compression.filter(req, res)
+}
 
 // app.use(timeout('240000')) //4min
 // app.use(haltOnTimedout);
