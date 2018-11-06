@@ -74,8 +74,12 @@ exports.getBasicInfo = function(req, res, next) {
 
           }).then(resp => {
 
-              debug("N:" + resp.n)
+              
               data_request["N"] = resp.n 
+              data_request["alpha"] = 1.0/resp.n 
+
+              debug("N:" + data_request["N"])
+              debug("alpha:" + data_request["alpha"])
 
               var query_bio;
 
@@ -258,11 +262,13 @@ exports.getBasicInfo = function(req, res, next) {
 
         }).then(resp => {
 
-
             var query_abio;
 
-            debug("N:" + resp.n)
-            data_request["N"] = resp.n 
+            data_request["N"] = resp.n
+            data_request["alpha"] = 1.0/resp.n 
+
+            debug("N:" + data_request["N"])
+            debug("alpha:" + data_request["alpha"])
 
             // seleccion de caso para obtener datos de especie ibjetivo
             if(data_request.caso === -1 && data_request.fossil.length == 0){
@@ -413,8 +419,11 @@ exports.getBasicInfo = function(req, res, next) {
 
         }).then(resp => {
 
-            debug("N:" + resp.n)
-            data_request["N"] = resp.n 
+            data_request["N"] = resp.n
+            data_request["alpha"] = 1.0/resp.n 
+
+            debug("N:" + data_request["N"])
+            debug("alpha:" + data_request["alpha"])
 
             var query
 

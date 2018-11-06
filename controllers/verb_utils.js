@@ -116,7 +116,7 @@ verb_utils.processBioFilters = function(tfilters_total, spid){
     whereVar = whereVar + ') '
   }
 
-  debug("bio whereVar:" + whereVar)
+  // debug("bio whereVar:" + whereVar)
   return whereVar
 }
 
@@ -206,7 +206,7 @@ verb_utils.processRasterFilters = function(tfilters_total){
 
   }
 
-  debug("raster whereVar:" + whereVar)
+  // debug("raster whereVar:" + whereVar)
   return whereVar
 }
 

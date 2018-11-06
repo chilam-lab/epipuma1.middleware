@@ -226,7 +226,7 @@ function getNodesNiche(req, res, next) {
 
     // debug(whereVarSource)
     // debug(whereVarTarget)
-    debug(alpha)
+    // debug(alpha)
 
     pool.any(queries.getNodesNiche.getNodesNicheBio_Bio, {
       N: N,
@@ -241,6 +241,7 @@ function getNodesNiche(req, res, next) {
       // where_config_target_raster: whereVarTargetRaster
     })
       .then(function (data) {
+        // debug(data)
         res.json({'data': data})
       })
       .catch(function (error) {

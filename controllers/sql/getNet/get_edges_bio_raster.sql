@@ -51,11 +51,20 @@ SELECT 	counts.source,
 		round( cast(  
 			get_epsilon(
 				--$<alpha>,
-				1/n_res.n,
+				1.0/n_res.n,
 				cast(counts.nj as integer), 
 				cast(counts.niyj as integer), 
 				cast(counts.ni as integer), 
 				cast(counts.n as integer)
-		)as numeric), 2)  as value
+		)as numeric), 2)  as value,
+		round( cast( ln(   
+			get_score(
+				1.0/n_res.n,
+				cast( counts.nj as integer),
+				cast(counts.niyj as integer), 
+				cast(counts.ni as integer), 
+				cast(counts.n as integer)
+			)
+		) as numeric), 2) as score
 FROM counts, n_res
 ORDER BY value desc;
