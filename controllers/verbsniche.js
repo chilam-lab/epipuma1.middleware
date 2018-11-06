@@ -534,14 +534,74 @@ exports.getToken = function (req, res, next) {
 
   debug('getToken')
 
-  var tipo = getParam(req, 'tipo')
-  var params = getParam(req, 'confparams')
+  // var tipo = getParam(req, 'tipo')
+  // var params = getParam(req, 'confparams')
+
+  var spid = getParam(req, 'id')
+  var label = getParam(req, 'label')
+  var val_process = getParam(req, 'val_process')
+  // var idtabla = getParam(req, 'idtabla')
+  var mapa_prob = getParam(req, 'mapa_prob')
+  var fossil = getParam(req, 'fossil')
+  var apriori = getParam(req, 'apriori')
+  var sfecha = getParam(req, 'sfecha')
+  var lim_inf = getParam(req, 'lim_inf')
+  var lim_sup = getParam(req, 'lim_sup')
+  var min_occ = getParam(req, 'min_occ')
+  var grid_res = getParam(req, 'grid_res')
+  var footprint_region = getParam(req, 'footprint_region')
+  var discardedFilterids = getParam(req, 'discardedFilterids',[])
+  var tfilters = verb_utils.getParam(req, 'tfilters',[])
+  var tipo = verb_utils.getParam(req, 'tipo')
 
 
-  pool.any(queries.getToken.setLinkValues, {
-    tipo_analisis: tipo,
-    params: params
+  var link_str = "";
+
+  link_str += "sp_data=" + JSON.stringify({"spid": parseInt(spid), "label":label}) + "&"
+  link_str += "chkVal=" + val_process + "&"
+  // link_str += "idtabla=" + idtabla + "&"
+  link_str += "chkPrb=" + mapa_prob + "&"
+  link_str += "chkFosil=" + fossil + "&"
+  link_str += "chkApr=" + apriori + "&"
+  link_str += "chkFec=" + sfecha + "&"
+  link_str += lim_inf === undefined ? "" : "minFec=" + lim_inf + "&"
+  link_str += lim_sup === undefined ? "" : "maxFec=" + lim_sup + "&"
+  link_str += "chkOcc=" + min_occ + "&"
+  link_str += "gridRes=" + grid_res + "&"
+  link_str += "region=" + footprint_region + "&"
+  link_str += "num_dpoints=" + discardedFilterids.length + "&"
+
+  discardedFilterids.forEach(function (item, index) {
+    var str_item = JSON.stringify({feature: { properties: { gridid: item}}});
+    if (index === 0) {
+        link_str += "deleteditem[" + index + "]=" + str_item;
+    } else {
+        link_str += "&deleteditem[" + index + "]=" + str_item;
+    }
   })
+  link_str += discardedFilterids.length > 0 ? "&" : ""
+
+  link_str += "num_filters=" + tfilters.length + "&"
+
+  tfilters.forEach(function (item, index) {
+
+      var str_item = JSON.stringify(item);
+
+      if (index == 0) {
+           link_str += "tfilters[" + index + "]=" + str_item;
+      } else {
+           link_str += "&tfilters[" + index + "]=" + str_item;
+      }
+
+   });
+
+   debug(link_str)
+           
+
+    pool.any(queries.getToken.setLinkValues, {
+      tipo_analisis: tipo,
+      params: link_str
+    })
         .then(function (data) {
           res.json({'data': data})
         })
@@ -1176,11 +1236,10 @@ exports.getEntListNiche = function (req, res, next) {
       debug(nivel)
       debug(str)
       debug(limite)
-      debug("columnas: " + columnas)
-      debug("res_celda_sp: " + res_celda_sp)
-      debug("val_tree: " + val_tree)
-
-      debug(pool)
+      // debug("columnas: " + columnas)
+      // debug("res_celda_sp: " + res_celda_sp)
+      // debug("val_tree: " + val_tree)
+      // debug(pool)
 
     pool.any(queries.getEntListNiche.getEntList, {
       str: str,
