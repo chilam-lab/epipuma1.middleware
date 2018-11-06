@@ -266,12 +266,16 @@ verb_utils.processDateRecords = function(lim_inf, lim_sup, sfecha){
  */
 verb_utils.processTitleGroup = function(groupid, tfilters){
 
+  debug("processTitleGroup")
+
   var title_valor = ''
 
   // debug("groupid: " + groupid)
   // debug(tfilters)
 
   if(groupid !== undefined) {
+
+    debug("con groupid")
 
     // group_item = 0 ->> root
     if (parseInt(tfilters[0].type) === 0) {
@@ -301,7 +305,11 @@ verb_utils.processTitleGroup = function(groupid, tfilters){
     //       'group_item': tfilters[0].group_item, 
     //       'is_parent':true })
     // }
-  } else if (tfilters[0].value) {
+  } 
+  else if (tfilters[0].value) {
+
+    debug("sin groupid")
+    // debug(tfilters)
 
     if (parseInt(tfilters[0].type) === 0) {
 
@@ -322,7 +330,7 @@ verb_utils.processTitleGroup = function(groupid, tfilters){
     }
   }
 		
-  // debug("title_valor: " + title_valor);
+  debug("title_valor: " + title_valor);
   return JSON.parse(title_valor)
 }
 
@@ -438,7 +446,7 @@ verb_utils.getRequestParams = function(req, verbose){
   data_request["with_data_score_decil"] = verb_utils.getParam(req, 'with_data_score_decil', "true");
 
   data_request["spid"] = parseInt(verb_utils.getParam(req, 'id'))
-  var tfilters = verb_utils.getParam(req, 'tfilters')
+  var tfilters = verb_utils.getParam(req, 'tfilters', undefined)
 
 
   var footprint_region = parseInt(verb_utils.getParam(req, 'footprint_region', verb_utils.region_mx))
@@ -489,29 +497,38 @@ verb_utils.getRequestParams = function(req, verbose){
   data_request["apriori"] = verb_utils.getParam(req, 'apriori', false) !== false ? true : false
   data_request["mapa_prob"] = verb_utils.getParam(req, 'mapa_prob', false) !== false ? true : false
   data_request["get_grid_species"] = verb_utils.getParam(req, 'get_grid_species', false)
-  
 
 
-  var groupid = verb_utils.getParam(req, 'groupid')
-  // debug("groupid: " + groupid !== undefined)
-  // debug("tfilters: " + tfilters !== undefined)
+  // debug("data_request 1")
+
+
+  var groupid = verb_utils.getParam(req, 'groupid', undefined)
+  debug("groupid: " + groupid)
+  debug(groupid !== undefined)
+  debug(tfilters !== undefined)
 
   if(groupid !== undefined || tfilters !== undefined){
     data_request["title_valor"] = verb_utils.processTitleGroup(groupid, tfilters)  
   }
+
+  // debug("data_request 2")
 
 
   data_request["discardedDeleted"] = verb_utils.getParam(req, 'discardedFilterids',[])
   data_request["caso"] = verb_utils.getTimeCase(fini, ffin, data_request.sfecha)
   data_request["filter_time"] = data_request.caso !== -1 ? true : false
 
-  if (data_request.hasBios === 'true' ) {
+  
+
+  if (data_request.hasBios === true ) {
     data_request["where_config"] = verb_utils.processBioFilters(tfilters, data_request.spid)
   }
 
-  if (data_request.hasRaster === 'true' ) {
+  if (data_request.hasRaster === true ) {
     data_request["where_config_raster"] = verb_utils.processRasterFilters(tfilters)
   }
+
+  
 
 
   data_request["alpha"] = verb_utils.alpha

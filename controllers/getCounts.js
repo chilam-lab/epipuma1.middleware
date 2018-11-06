@@ -39,17 +39,19 @@ exports.getBasicInfo = function(req, res, next) {
   debug('getBasicInfo')
 
   
-  var data_request = verb_utils.getRequestParams(req, false)
+  var data_request = verb_utils.getRequestParams(req, true)
 
   data_request["res_celda_snib_tb"] = "grid_geojson_" + data_request.grid_resolution + "km_aoi"
+
   // debug('region: ' + data_request.region)
   // debug('res_celda_snib_tb: ' + data_request.res_celda_snib_tb)
 
 
   //agregar iteraciones para el proceso de validacion
-
+  // debug(data_request.hasBios)
+  // debug(data_request.hasRaster)
   
-  if (data_request.hasBios === 'true' && data_request.hasRaster === 'false' ) {
+  if (data_request.hasBios === true && data_request.hasRaster === false ) {
 
     debug('hasBios:true - hasRaster:false')
 
@@ -207,9 +209,9 @@ exports.getBasicInfo = function(req, res, next) {
         // })
         
 
-        var data_freq = data_request.with_data_freq === "true" ? verb_utils.processDataForFreqSpecie(data) : []
-        var data_score_cell = data_request.with_data_score_cell === "true" ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob, data_request.all_cells) : []
-        var data_freq_cell = data_request.with_data_freq_cell === "true" ? verb_utils.processDataForFreqCell(data_score_cell) : []
+        var data_freq = data_request.with_data_freq === true ? verb_utils.processDataForFreqSpecie(data) : []
+        var data_score_cell = data_request.with_data_score_cell === true ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob, data_request.all_cells) : []
+        var data_freq_cell = data_request.with_data_freq_cell === true ? verb_utils.processDataForFreqCell(data_score_cell) : []
 
         // debug('hasBios:true - hasRaster:false')
         // debug(data)
@@ -228,17 +230,18 @@ exports.getBasicInfo = function(req, res, next) {
 
       })
       .catch(error => {
+          // imprime error en servidor
           debug(error)
 
           return res.json({
             ok: false,
-            error: error
+            error: "Error al ejecutar la petición"
           });
       });
 
   
   }
-  else if (data_request.hasBios === 'false' && data_request.hasRaster === 'true' ) {
+  else if (data_request.hasBios === false && data_request.hasRaster === true ) {
 
     debug('Caso: hasBios:false - hasRaster:true')
     // debug('grid_resolution: ' + data_request.grid_resolution)
@@ -369,9 +372,10 @@ exports.getBasicInfo = function(req, res, next) {
 
         }
 
-        var data_freq = data_request.with_data_freq === "true" ? verb_utils.processDataForFreqSpecie(data) : []
-        var data_score_cell = data_request.with_data_score_cell === "true" ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob, data_request.all_cells) : []
-        var data_freq_cell = data_request.with_data_freq_cell === "true" ? verb_utils.processDataForFreqCell(data_score_cell) : []
+
+        var data_freq = data_request.with_data_freq === true ? verb_utils.processDataForFreqSpecie(data) : []
+        var data_score_cell = data_request.with_data_score_cell === true ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob, data_request.all_cells) : []
+        var data_freq_cell = data_request.with_data_freq_cell === true ? verb_utils.processDataForFreqCell(data_score_cell) : []
 
         // debug('hasBios:false - hasRaster:true')
         // debug(data)
@@ -396,7 +400,7 @@ exports.getBasicInfo = function(req, res, next) {
 
 
   }
-  else if (data_request.hasBios === 'true' && data_request.hasRaster === 'true' ) {
+  else if (data_request.hasBios === true && data_request.hasRaster === true ) {
 
     debug('Caso: hasBios:true - hasRaster:true')
 
@@ -530,9 +534,9 @@ exports.getBasicInfo = function(req, res, next) {
 
         }
 
-        var data_freq = data_request.with_data_freq === "true" ? verb_utils.processDataForFreqSpecie(data) : []
-        var data_score_cell = data_request.with_data_score_cell === "true" ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob, data_request.all_cells) : []
-        var data_freq_cell = data_request.with_data_freq_cell === "true" ? verb_utils.processDataForFreqCell(data_score_cell) : []
+        var data_freq = data_request.with_data_freq === true ? verb_utils.processDataForFreqSpecie(data) : []
+        var data_score_cell = data_request.with_data_score_cell === true ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob, data_request.all_cells) : []
+        var data_freq_cell = data_request.with_data_freq_cell === true ? verb_utils.processDataForFreqCell(data_score_cell) : []
 
         // debug('hasBios:true - hasRaster:true')
         // debug(data)
@@ -561,7 +565,7 @@ exports.getBasicInfo = function(req, res, next) {
 
     return res.status(400).send({
         ok: false,
-        message: "Error en petición"});
+        message: "Error en petición, sin caso asignado"});
   }
 
 }
