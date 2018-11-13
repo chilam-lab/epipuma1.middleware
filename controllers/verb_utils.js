@@ -1203,6 +1203,11 @@ verb_utils.getMaxY = function (data,value) {
   return data.reduce((max, p) => parseFloat(p[value]) > parseFloat(max) ? parseFloat(p[value]) : parseFloat(max), parseFloat(data[0][value]));
 }
 
+verb_utils.parseHrtimeToSeconds = function(hrtime) {
+    var seconds = (hrtime[0] + (hrtime[1] / 1e9)).toFixed(3);
+    return seconds;
+}
+
 
 
 
