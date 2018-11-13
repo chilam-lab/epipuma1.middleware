@@ -1065,6 +1065,7 @@ exports.getGrididsNiche = function (req, res, next) {
 exports.getSpeciesNiche = function (req, res, next) {
 
       debug("getSpeciesNiche")
+      var startTime = process.hrtime();
 
       var spid              = parseInt(getParam(req, 'id'))
       var sfecha            = getParam(req, 'sfecha', false)
@@ -1088,7 +1089,7 @@ exports.getSpeciesNiche = function (req, res, next) {
       // debug(fecha_fin)
       // debug(footprint_region)
       
-      
+      debug('Antes de obtener N en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
 
       pool.task(t => {
 
@@ -1110,6 +1111,9 @@ exports.getSpeciesNiche = function (req, res, next) {
                 debug("res_celda_snib_tb: " + res_celda_snib_tb)
                 debug("lb_fosil: " + lb_fosil)
                 debug("footprint_region: " + footprint_region)
+
+                debug('Antes de ejecutar query en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
+
                 return pool.any(queries.getSpeciesNiche.getSpeciesSDR, {
                   spid: spid,
                   lim_inf: fecha_incio.format('YYYY'),
@@ -1131,6 +1135,9 @@ exports.getSpeciesNiche = function (req, res, next) {
                 debug("res_celda_snib_tb: " + res_celda_snib_tb)
                 debug("lb_fosil: " + lb_fosil)
                 debug("footprint_region: " + footprint_region)
+
+                debug('Antes de ejecutar query en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
+
                 return pool.any(queries.getSpeciesNiche.getSpeciesSD, {
                   spid: spid,
                   res_celda: res_celda,
@@ -1150,6 +1157,9 @@ exports.getSpeciesNiche = function (req, res, next) {
                 debug("res_celda_snib_tb: " + res_celda_snib_tb)
                 debug("lb_fosil: " + lb_fosil)
                 debug("footprint_region: " + footprint_region)
+
+                debug('Antes de ejecutar query en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
+
                 return pool.any(queries.getSpeciesNiche.getSpeciesR, {
                   spid: spid,
                   lim_inf: fecha_incio.format('YYYY'),
@@ -1171,6 +1181,9 @@ exports.getSpeciesNiche = function (req, res, next) {
                 debug("res_celda_snib_tb: " + res_celda_snib_tb)
                 debug("lb_fosil: " + lb_fosil)
                 debug("footprint_region: " + footprint_region)
+
+                debug('Antes de ejecutar query en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
+                
                 return pool.any(queries.getSpeciesNiche.getSpecies, {
                   spid: spid,
                   res_celda: res_celda,
@@ -1187,6 +1200,9 @@ exports.getSpeciesNiche = function (req, res, next) {
 
       })
       .then(data => {
+
+          debug('Query ejecutada, (antes de enviar respuesta) en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
+
           res.json({'data': data})
 
       })
@@ -1216,6 +1232,9 @@ exports.getSpeciesNiche = function (req, res, next) {
 
 exports.getEntListNiche = function (req, res, next) {
 
+    debug("getEntListNiche")
+    var startTime = process.hrtime();
+    
     var str       = getParam(req, 'searchStr')
     var has_limit = parseInt(getParam(req, 'limit', false))
     var source    = parseInt(getParam(req, 'source'))
@@ -1233,13 +1252,16 @@ exports.getEntListNiche = function (req, res, next) {
 
     var txt_limite = has_limit === false ? '' : 'limit ' + limite
 
-      debug(nivel)
-      debug(str)
-      debug(limite)
-      // debug("columnas: " + columnas)
-      // debug("res_celda_sp: " + res_celda_sp)
-      // debug("val_tree: " + val_tree)
-      // debug(pool)
+    debug("nivel: " + nivel)
+    debug("str: " + str)
+    debug("limite: " + limite)
+    debug("columnas: " + columnas)
+    // debug("res_celda_sp: " + res_celda_sp)
+    debug("val_tree: " + val_tree)
+    // debug(pool)
+
+
+    debug('Parsea datos, (antes de ejecutar query) en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
 
     pool.any(queries.getEntListNiche.getEntList, {
       str: str,
@@ -1253,7 +1275,12 @@ exports.getEntListNiche = function (req, res, next) {
       region: region
     })
     .then(function (data) {
+
+      debug('Query ejecutada, (antes de enviar respuesta) en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
+      
+      // debug("Respuesta query")
       // debug(data)
+
       res.json({'data': data})
     })
     .catch(function (error) {
