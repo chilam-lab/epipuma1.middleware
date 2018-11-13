@@ -39,7 +39,7 @@ exports.getBasicInfo = function(req, res, next) {
   debug('getBasicInfo')
 
   
-  var data_request = verb_utils.getRequestParams(req, false)
+  var data_request = verb_utils.getRequestParams(req, true)
 
   data_request["res_celda_snib_tb"] = "grid_geojson_" + data_request.grid_resolution + "km_aoi"
 
@@ -51,7 +51,7 @@ exports.getBasicInfo = function(req, res, next) {
   // debug(data_request.hasBios)
   // debug(data_request.hasRaster)
   
-  if (data_request.hasBios === true && data_request.hasRaster === false ) {
+  if ( data_request.hasBios == true && data_request.hasRaster == false  ) {
 
     debug('hasBios:true - hasRaster:false')
 
@@ -102,7 +102,7 @@ exports.getBasicInfo = function(req, res, next) {
 
 
               // debug("data_request.get_grid_species: " + data_request.get_grid_species)
-              if(data_request.get_grid_species !== false){
+              if( data_request.get_grid_species !== false){
 
                 debug("analisis en celda")
 
@@ -128,6 +128,8 @@ exports.getBasicInfo = function(req, res, next) {
 
                   data_request["cell_id"] = resp.gridid
                   debug("cell_id: " + data_request.cell_id)
+                  debug("where_config: " + data_request.where_config)
+
 
                   data_request["res_celda_snib_tb"] = "grid_geojson_" + data_request.grid_resolution + "km_aoi"
 
@@ -144,7 +146,7 @@ exports.getBasicInfo = function(req, res, next) {
 
 
                 // Se obtiene todas las celdas para mandar valor de apriori o mapa de probabildiad
-                if(data_request.apriori === true || data_request.mapa_prob === true){
+                if( (data_request.apriori === true || data_request.mapa_prob === true) || (data_request.apriori === "true" || data_request.mapa_prob === "true") ){
 
                   debug("obteniendo todas las celdas, analisis con apriori o mapa de probabilidad - hasBios:true - hasRaster:false")
 
@@ -245,7 +247,7 @@ exports.getBasicInfo = function(req, res, next) {
 
   
   }
-  else if (data_request.hasBios === false && data_request.hasRaster === true ) {
+  else if ( data_request.hasBios == false && data_request.hasRaster == true ) {
 
     debug('Caso: hasBios:false - hasRaster:true')
     // debug('grid_resolution: ' + data_request.grid_resolution)
@@ -406,7 +408,7 @@ exports.getBasicInfo = function(req, res, next) {
 
 
   }
-  else if (data_request.hasBios === true && data_request.hasRaster === true ) {
+  else if ( data_request.hasBios == true && data_request.hasRaster == true ) {
 
     debug('Caso: hasBios:true - hasRaster:true')
 
