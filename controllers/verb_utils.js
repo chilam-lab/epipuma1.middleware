@@ -492,8 +492,13 @@ verb_utils.getRequestParams = function(req, verbose){
 
 
   // variables bioticas, raster y apriori
-  data_request["hasBios"] = verb_utils.getParam(req, 'hasBios')
-  data_request["hasRaster"] = verb_utils.getParam(req, 'hasRaster')
+  var hasBios = verb_utils.getParam(req, 'hasBios') 
+  data_request["hasBios"] = (hasBios === "true" || hasBios === true) ? true : false
+
+  var hasRaster = verb_utils.getParam(req, 'hasRaster') 
+  data_request["hasRaster"] = (hasRaster === "true" || hasRaster === true) ? true : false
+
+
   data_request["apriori"] = verb_utils.getParam(req, 'apriori', false) !== false ? true : false
   data_request["mapa_prob"] = verb_utils.getParam(req, 'mapa_prob', false) !== false ? true : false
   data_request["get_grid_species"] = verb_utils.getParam(req, 'get_grid_species', false)
@@ -518,13 +523,13 @@ verb_utils.getRequestParams = function(req, verbose){
   data_request["caso"] = verb_utils.getTimeCase(fini, ffin, data_request.sfecha)
   data_request["filter_time"] = data_request.caso !== -1 ? true : false
 
-  
+  debug("bios: " + data_request.hasBios)
 
-  if (data_request.hasBios === true ) {
+  if ( data_request.hasBios == true ) {
     data_request["where_config"] = verb_utils.processBioFilters(tfilters, data_request.spid)
   }
 
-  if (data_request.hasRaster === true ) {
+  if (data_request.hasRaster == true  ) {
     data_request["where_config_raster"] = verb_utils.processRasterFilters(tfilters)
   }
 
