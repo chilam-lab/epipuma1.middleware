@@ -340,8 +340,8 @@ verb_utils.getRasterCategories = function(tfilters_total) {
     }	else if(tfilters_total[i].type == 0 && abio==false) {
       if(i>0) 
         categorias += '||'
-      categorias += 'bio01||bio02||bio03||bio04||bio05||bio06||bio07||bio08' +
-            '||bio09||bio10||bio11||bio12||bio13||bio14||bio15||bio16||bio17'+
+      categorias += 'bio1||bio2||bio3||bio4||bio5||bio6||bio7||bio8' +
+            '||bio9||bio10||bio11||bio12||bio13||bio14||bio15||bio16||bio17'+
             '||bio18||bio19'
       abio = true
     } else if(tfilters_total[i].type == 2 && topo==false) {
