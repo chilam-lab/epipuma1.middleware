@@ -533,10 +533,7 @@ verb_utils.getRequestParams = function(req, verbose){
     data_request["where_config_raster"] = verb_utils.processRasterFilters(tfilters)
   }
 
-  
-
-
-  data_request["alpha"] = verb_utils.alpha
+  data_request["alpha"] = verb_utils.getParam(req, 'alpha', undefined) 
 
   if(verbose){
     debug(data_request)
