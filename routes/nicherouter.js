@@ -13,6 +13,7 @@
 var router = require('express').Router()
 var getGeoRel = require('../controllers/getGeoRelNiche')
 var getCounts = require('../controllers/getCounts')
+var getCountsGroup = require('../controllers/getCountsGroup')
 var getFreqNiche = require('../controllers/getFreqNiche')
 var getCellScore = require('../controllers/getCellScoreNiche') 
 var getFreqCeldaNiche = require('../controllers/getFreqCeldaNiche') 
@@ -194,5 +195,22 @@ router.route('/counts')
   // .post(mdAtenticacion.validaToken, getCounts.getBasicInfo)
   .get(getCounts.getBasicInfo)
   .post(getCounts.getBasicInfo)
+
+
+
+/**
+ * Ruta que calcula los conteos, epsilon y score entre la especie objetivo y el grupo de variables elegidas. 
+ * @name get/bio_scores
+ * @function
+ * @memberof module:routes/nicherouter~nicheRouter
+ * @inner
+ * @param {string} path - Express path
+ * @param {callback} middleware - Express middleware.
+ */
+router.route('/countsByGroup')
+  // .get(mdAtenticacion.validaToken, getCounts.getBasicInfo)
+  // .post(mdAtenticacion.validaToken, getCounts.getBasicInfo)
+  .get(getCountsGroup.getGroupRequest)
+  .post(getCountsGroup.getGroupRequest)
 
 module.exports = router
