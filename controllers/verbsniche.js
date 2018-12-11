@@ -1431,6 +1431,46 @@ exports.getAvailableCountriesFootprint = function(req, res) {
 }
 
 
+/**
+* getAvailableCountriesFootprint
+*
+* Obtiene la el footprint_region del pais que estan disponibles en el sistema
+* 
+* @param {express.Request} req
+* @param {express.Response} res
+*
+*/
+exports.getIdFromName = function(req, res) {
+
+    debug("getIdFromName");
+
+    var spaceies_array = verb_utils.getParam(req, 'species', [])
+    var species_list = verb_utils.arrayToString(spaceies_array)
+    debug("species: " + species_list)
+
+    pool.any(queries.apiUtils.getIdFromName,{
+      species_list: species_list
+    })
+    .then(function (data) {
+      res.json({
+        'species': data,
+        ok: true
+      })
+    })
+    .catch(function (error) {
+      return res.json({
+        err: error,
+        ok: false,
+        message: "Error al procesar la query"
+      })
+    })
+
+}
+
+
+
+
+
 
 
 

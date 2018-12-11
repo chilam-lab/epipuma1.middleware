@@ -272,6 +272,11 @@ var queryProvider = {
     getAvailableCountriesFootprint : sqlPath('subAOI/getAvailableCountriesFootprint.sql') 
 
     
+  },
+  
+  apiUtils: {
+    getIdFromName: sqlPath("especie/getIdFromName.sql")
+
   }
 }
 
