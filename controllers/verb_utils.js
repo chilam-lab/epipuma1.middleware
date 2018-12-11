@@ -1207,5 +1207,69 @@ verb_utils.parseHrtimeToSeconds = function(hrtime) {
 
 
 
+verb_utils.arrayToString = function (species_array){
+
+  var species_list = ""
+
+  species_array.forEach(function(species, index) {
+    if(index === 0)
+      species_list += "'" + species + "'"
+    else
+      species_list += ",'" + species + "'"
+  });
+
+  return species_list
+
+}
+
+verb_utils.processTargetSpecies = function (species_array){
+
+  debug("processTargetSpecies")
+
+  var whereVar = ''
+
+  for (var i = 0; i < species_array.length; i++) {
+
+    species_array.forEach(function(species, index) {
+    
+    if(index === 0)
+        whereVar += " where spid = " + species + " "
+      else
+        whereVar += "or spid = " + species + " "
+    });
+
+  }
+    
+  return whereVar
+
+}
+
+
+verb_utils.getWhereClauseFromSpeciesArray = function (species_array){
+
+  debug("getWhereClauseFromSpeciesArray")
+
+  var whereVar = ''
+
+  species_array.forEach(function(species, index) {
+  
+    if(index === 0)
+      whereVar += " where spid = " + species + " "
+    else
+      whereVar += "or spid = " + species + " "
+
+  })
+    
+  return whereVar
+
+}
+
+
+
+
+
+
+
+
 
 module.exports = verb_utils

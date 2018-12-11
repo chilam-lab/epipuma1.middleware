@@ -47,39 +47,43 @@ exports.getGroupRequest = function(req, res, next) {
 
   var data_request = {};
 
-  data_request["name_source"] = source.name !== undefined ?  source.name : "Grupo Default"
-  debug("name_source: " + data_request.name_source)
-  
-  var whereclause_source = verb_utils.processBioFilters(source["filters"], null)
-  debug(whereclause_source)
-  data_request["whereclause_source"] = whereclause_source
-
-  var whereclause_target = verb_utils.processBioFilters(target["filters"], null)
-  debug(whereclause_target)
-  data_request["whereclause_target"] = whereclause_target
-
-  data_request["min_occ"] = verb_utils.getParam(req, 'min_occ', 1)
-
-
-  var grid_resolution = verb_utils.getParam(req, 'grid_res', 16)
+  var grid_resolution = verb_utils.getParam(req, 'grid_resolution', 16)
   data_request["grid_resolution"] = grid_resolution
   data_request["res_celda_sp"] = "cells_"+grid_resolution+"km" 
   data_request["res_celda_snib"] = "gridid_"+grid_resolution+"km" 
   // data_request["res_celda_snib_tb"] = "grid_"+grid_resolution+"km_aoi" 
   data_request["res_celda_snib_tb"] = "grid_geojson_" + data_request.grid_resolution + "km_aoi"
+  
+  data_request["min_occ"] = verb_utils.getParam(req, 'covariables_min_cells', 1)
 
-
-  var footprint_region = parseInt(verb_utils.getParam(req, 'footprint_region', verb_utils.region_mx))
+  var footprint_region = parseInt(verb_utils.getParam(req, 'world_region', verb_utils.region_mx))
   data_request["region"] = footprint_region
 
-  data_request["alpha"] = undefined
+  var target_label = verb_utils.getParam(req, 'target_label', "Grupo Default")
+  data_request["name_source"] = target_label
+  debug("name_source: " + data_request.name_source)
 
+  var target_species_list = verb_utils.getParam(req, 'target_species_list', []); 
+  var whereclause_source = verb_utils.getWhereClauseFromSpeciesArray(target_species_list)
+  // debug("whereclause_source: " + whereclause_source)
+  data_request["whereclause_source"] = whereclause_source
+
+
+  var covars = verb_utils.getParam(req, 'covariables', []); 
+  var first_covar_list = covars[0].species_list // TODO: Crear clausula where con todo el array de variables
+  // debug("first_covar_list: " + first_covar_list)
   
-  data_request["hasBiosSource"] = (source.hasBios === "true" || source.hasBios === true) ? true : false
-  data_request["hasRasterSource"] = (source.hasRaster === "true" || source.hasRaster === true) ? true : false
+  var whereclause_target = verb_utils.getWhereClauseFromSpeciesArray(first_covar_list)
+  // debug("whereclause_target: " + whereclause_target)
+  data_request["whereclause_target"] = whereclause_target
+  
+  data_request["alpha"] = undefined
+  
+  // data_request["hasBiosSource"] = (source.hasBios === "true" || source.hasBios === true) ? true : false
+  // data_request["hasRasterSource"] = (source.hasRaster === "true" || source.hasRaster === true) ? true : false
 
-  data_request["hasBiosTarget"] = (target.hasBios === "true" || target.hasBios === true) ? true : false
-  data_request["hasRasterTarget"] = (target.hasRaster === "true" || target.hasRaster === true) ? true : false
+  // data_request["hasBiosTarget"] = (target.hasBios === "true" || target.hasBios === true) ? true : false
+  // data_request["hasRasterTarget"] = (target.hasRaster === "true" || target.hasRaster === true) ? true : false
   
   
   // data_request["res_celda_snib_tb"] = "grid_geojson_" + data_request.grid_resolution + "km_aoi"
@@ -88,7 +92,7 @@ exports.getGroupRequest = function(req, res, next) {
 
 
   //agregar iteraciones para el proceso de validacion
-  debug(data_request)
+  // debug(data_request)
   // debug(data_request.hasRaster)
   
   // if ( data_request.hasBiosSource == true && data_request.hasRasterSource == false  ) {

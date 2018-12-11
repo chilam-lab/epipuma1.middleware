@@ -78,7 +78,7 @@ exports.getBasicInfo = function(req, res, next) {
               data_request["N"] = resp.n 
 
               debug("first alpha: " + data_request["alpha"])
-              data_request["alpha"] = data_request["alpha"] !== undefined ? data_request["alpha"] 1.0/resp.n
+              data_request["alpha"] = data_request["alpha"] !== undefined ? data_request["alpha"] : 1.0/resp.n
 
               debug("last alpha: " + data_request["alpha"])
 
