@@ -480,7 +480,7 @@ verb_utils.getRequestParams = function(req, verbose){
 
   // proceso de validación
   var val_process = verb_utils.getParam(req, 'val_process', false)
-  data_request["iterations"] = val_process === "true" ? verb_utils.iterations : 1
+  data_request["iterations"] = val_process === true ? verb_utils.iterations : 1
 
 
   var idtabla = verb_utils.getParam(req, 'idtabla')
@@ -1062,14 +1062,14 @@ verb_utils.processDataForFreqCell = function (data){
 verb_utils.processDataForFreqSpecie = function (data){
 
   var min_eps = d3.min(data.map(function(d) {return parseFloat(d.epsilon);}));
-  // debug("min_eps: " + min_eps)
+  debug("min_eps: " + min_eps)
   var max_eps = d3.max(data.map(function(d) {return parseFloat(d.epsilon);}));
-  // debug("max_eps: " + max_eps)
+  debug("max_eps: " + max_eps)
 
   var min_scr = d3.min(data.map(function(d) {return parseFloat(d.score);}));
-  // debug("min_scr: " + min_scr)  
+  debug("min_scr: " + min_scr)  
   var max_scr = d3.max(data.map(function(d) {return parseFloat(d.score);}));
-  // debug("max_scr: " + max_scr)
+  debug("max_scr: " + max_scr)
 
 
   var beans = d3.range(1,buckets+1,1);
@@ -1175,6 +1175,140 @@ verb_utils.generateFrequencyBeans = function (data_bucket, funcRange, paramType,
 
   return data_freq;
 }
+
+
+verb_utils.processValidationData = function (data_group){
+
+  var avgdata = {}
+  var data = []
+
+  var data_map = data_group.map(function(d) {return  d.data})
+
+  data_map.forEach(function(item){
+    data = data.concat(item)
+  })
+  // debug(data)
+  
+  
+  var cross_species = crossfilter(data)
+  cross_species.groupAll();
+
+  var spid_dimension = cross_species.dimension(function(d) { return parseFloat(d.spid); });
+  
+  var groupBySpid = spid_dimension.group().reduce(
+    function(item,add){
+      ++item.count
+      // item.spid = item.spid
+      item.reinovalido = add.reinovalido
+      item.phylumdivisionvalido = add.phylumdivisionvalido
+      item.clasevalida = add.clasevalida
+      item.ordenvalido = add.ordenvalido
+      item.familiavalida = add.familiavalida
+      item.generovalido = add.generovalido
+      item.especievalidabusqueda = add.especievalidabusqueda
+      item.cells = add.cells  //item.cells.concat(add.cells)
+      // item.nij += add.nij
+      // item.nj += add.nj
+      // item.ni += add.ni
+      // item.n += add.n
+      // item.epsilon = parseFloat(item.epsilon) + parseFloat(add.epsilon)
+      // item.score = parseFloat(item.score) + parseFloat(add.score)
+      item.nij = add.nij
+      item.nj = add.nj
+      item.ni = add.ni
+      item.n = add.n
+      item.epsilon = parseFloat(add.epsilon) 
+      item.score = parseFloat(add.score)
+      
+      return item
+    },
+    function(item,remove){
+      --item.count
+      // item.spid = item.spid
+      item.reinovalido = remove.reinovalido
+      item.phylumdivisionvalido = remove.phylumdivisionvalido
+      item.clasevalida = remove.clasevalida
+      item.ordenvalido = remove.ordenvalido
+      item.familiavalida = remove.familiavalida
+      item.generovalido = remove.generovalido
+      item.especievalidabusqueda = remove.especievalidabusqueda
+      item.cells = item.cells //remove.cells //
+      // item.nij -= remove.nij
+      // item.nj -= remove.nj
+      // item.ni -= remove.ni
+      // item.n -= remove.n
+      // item.epsilon =  parseFloat(item.epsilon) - parseFloat(remove.epsilon)
+      // item.score = parseFloat(item.score) - parseFloat(remove.score)
+      item.nij = item.nij
+      item.nj = item.nj
+      item.ni = item.ni
+      item.n = item.n
+      item.epsilon =  parseFloat(item.epsilon) 
+      item.score = parseFloat(item.score)
+      
+      return item
+    },
+    function(){
+      return {
+        count: 0,
+        // spid: 0,
+        cells: [],
+        reinovalido: "",
+        phylumdivisionvalido: "",
+        clasevalida: "",
+        ordenvalido: "",
+        familiavalida: "",
+        generovalido: "",
+        especievalidabusqueda: "",
+        // cells: [],
+        nij: 0,
+        nj: 0,
+        ni: 0,
+        n: 0,
+        epsilon: 0,
+        score: 0
+      }
+    }
+  )
+
+  
+
+  var reduce_data = groupBySpid.top(Infinity);
+
+
+  var data_result = []
+  for(var i=0; i<reduce_data.length; i++){
+      const entry = reduce_data[i];
+      data_result.push({
+        spid: entry["key"], 
+        reinovalido: entry["value"].reinovalido,
+        phylumdivisionvalido: entry["value"].phylumdivisionvalido,
+        clasevalida: entry["value"].clasevalida,
+        ordenvalido: entry["value"].ordenvalido,
+        familiavalida: entry["value"].familiavalida,
+        generovalido: entry["value"].generovalido,
+        especievalidabusqueda: entry["value"].especievalidabusqueda,
+        cells: entry["value"].cells, //entry["value"].cells.filter(function (item, pos) {return entry["value"].cells.indexOf(item) == pos}),
+        // nij: parseFloat((entry["value"].nij / entry["value"].count).toFixed(2)),
+        // nj: parseFloat((entry["value"].nj / entry["value"].count).toFixed(2)),
+        // ni: parseFloat((entry["value"].ni / entry["value"].count).toFixed(2)),
+        // n: parseFloat((entry["value"].n / entry["value"].count).toFixed(2)),
+        // epsilon: parseFloat((entry["value"].epsilon / entry["value"].count).toFixed(2)),
+        // score: parseFloat((entry["value"].score / entry["value"].count).toFixed(2))
+        // n: Math.floor(entry["value"].n / entry["value"].count),
+        nij: parseFloat((entry["value"].nij ).toFixed(2)),
+        nj: parseFloat((entry["value"].nj ).toFixed(2)),
+        ni: parseFloat((entry["value"].ni ).toFixed(2)),
+        n: parseFloat((entry["value"].n ).toFixed(2)),
+        epsilon: parseFloat((entry["value"].epsilon).toFixed(2)),
+        score: parseFloat((entry["value"].score).toFixed(2))
+      })
+  }
+
+  return data_result;
+}
+
+
 
 verb_utils.compare = function (a,b) {
   if (a.key < b.key)

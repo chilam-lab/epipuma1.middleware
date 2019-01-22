@@ -277,6 +277,12 @@ var queryProvider = {
   apiUtils: {
     getIdFromName: sqlPath("especie/getIdFromName.sql")
 
+  },
+
+  validationProcess: {
+    getSourceCells: sqlPath("getCells/get_source_cells_vp.sql"),
+    getTotalCells: sqlPath("getCells/get_total_cells_vp.sql")
+
   }
 }
 
