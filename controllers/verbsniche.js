@@ -1245,7 +1245,7 @@ exports.getEntListNiche = function (req, res, next) {
     var columnas  = verb_utils.getColumns(source, nivel)
 
     var grid_resolution = getParam(req, 'grid_res',16)
-    var res_celda_sp =  'cells_'+grid_resolution+'km'
+    var res_celda_sp =  'cells_'+grid_resolution+'km_'+region
     var res_celda_snib =  'gridid_'+grid_resolution+'km'
     var res_celda_snib_tb = 'grid_'+grid_resolution+'km_aoi'
     
