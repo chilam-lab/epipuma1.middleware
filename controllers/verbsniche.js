@@ -632,11 +632,12 @@ exports.getValidationTables = function (req, res, next) {
   var idtbl =  'tbl_' + new Date().getTime() //getParam(req, 'idtable')
   var iter = getParam(req, 'iterations',iterations)
 
+  var footprint_region = parseInt(getParam(req, 'footprint_region', default_region))
 
   var grid_resolution = verb_utils.getParam(req, 'grid_res',16)
   var res_celda_sp =  'cells_'+grid_resolution+'km'
-  var res_celda_snib =  'gridid_'+grid_resolution+'km'
-  var res_celda_snib_tb = 'grid_'+grid_resolution+'km_aoi'
+  // var res_celda_snib =  'gridid_'+grid_resolution+'km'
+  var res_celda_snib_tb = 'grid_geojson_'+grid_resolution+'km_aoi'
 
     // var res_celda_sp = verb_utils.getParam(req, 'res_celda_sp', 'cells_16km')
     // var res_celda_snib = verb_utils.getParam(req, 'res_celda_snib', 'gridid_16km')
@@ -648,8 +649,9 @@ exports.getValidationTables = function (req, res, next) {
     iterations: iter,
     idtbl: idtbl,
     res_celda_sp: res_celda_sp,
-    res_celda_snib: res_celda_snib,
-    res_celda_snib_tb: res_celda_snib_tb
+    // res_celda_snib: res_celda_snib,
+    res_celda_snib_tb: res_celda_snib_tb,
+    region: footprint_region
   })
         .then(function (data) {
 

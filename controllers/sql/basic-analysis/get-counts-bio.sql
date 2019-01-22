@@ -2,9 +2,9 @@ WITH temp_source as (
 	SELECT 
 		a.spid, 
 --		a.cells_16km_1 as cells,
-		a.${res_celda_sp:raw}_${region:raw} as cells,
+		(a.${res_celda_sp:raw}_${region:raw}-(${discardedDeleted:raw}::integer[]+${source_cells:raw}::integer[])) as cells,
 --		array_length(a.cells_16km_1, 1) as ni 
-		array_length(a.${res_celda_sp:raw}_${region:raw}, 1) as ni
+		array_length((a.${res_celda_sp:raw}_${region:raw}-(${discardedDeleted:raw}::integer[]+${source_cells:raw}::integer[])), 1) as ni
 	FROM sp_snib AS a
 	WHERE 
 		--a.spid = 27333
@@ -26,9 +26,9 @@ temp_target as (
 		a.generovalido, 
 		a.especievalidabusqueda, 
 --			a.cells_16km_1 as cells,
-		a.${res_celda_sp:raw}_${region:raw} as cells, 
+		(a.${res_celda_sp:raw}_${region:raw} - ${total_cells:raw}::integer[]) as cells, 
 --			array_length(a.cells_16km_1, 1) as ni
-		array_length(a.${res_celda_sp:raw}_${region:raw}, 1) as nj,
+		array_length( (a.${res_celda_sp:raw}_${region:raw} - ${total_cells:raw}::integer[]) , 1) as nj,
 		0 as tipo
 	FROM sp_snib AS a
 --	where a.clasevalida = 'Reptilia'
@@ -64,7 +64,7 @@ SELECT 	temp_target.spid,
 		icount(temp_source.cells & temp_target.cells) AS nij,
 		temp_target.nj AS nj,
 		temp_source.ni AS ni,
-		${N} as n,
+		${N} - icount( ${discardedDeleted:raw}::integer[] +  ${total_cells:raw}::integer[] + ${source_cells:raw}::integer[] ) as n,
 		--9873 as n,
 		round( cast( 
 			get_epsilon(
@@ -73,7 +73,7 @@ SELECT 	temp_target.spid,
 				cast( temp_target.nj as integer),
 				cast( icount(temp_source.cells & temp_target.cells) as integer),
 				cast( temp_source.ni as integer),
-				cast( ${N} as integer)
+				cast( ${N} - icount( ${discardedDeleted:raw}::integer[] +  ${total_cells:raw}::integer[] + ${source_cells:raw}::integer[] ) as integer)
 				--cast( 9873 as integer)
 			)as numeric), 2)  as epsilon,
 		round( cast(  ln(   
@@ -83,7 +83,7 @@ SELECT 	temp_target.spid,
 				cast( temp_target.nj as integer),
 				cast( icount(temp_source.cells & temp_target.cells) as integer),
 				cast( temp_source.ni as integer),
-				cast( ${N} as integer)
+				cast( ${N} - icount( ${discardedDeleted:raw}::integer[] +  ${total_cells:raw}::integer[] + ${source_cells:raw}::integer[] ) as integer)
 				--cast( 9873 as integer)
 			)
 		) as numeric), 2) as score
