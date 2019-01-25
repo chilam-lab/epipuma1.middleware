@@ -283,7 +283,14 @@ var queryProvider = {
     getSourceCells: sqlPath("getCells/get_source_cells_vp.sql"),
     getTotalCells: sqlPath("getCells/get_total_cells_vp.sql")
 
+  },
+
+  countsTaxonGroups: {
+    targetGroup: sqlPath("taxons-group/get-counts-target.sql"),
+    covarBioGroup: sqlPath("taxons-group/get-counts-covar-bio.sql")
+
   }
+
 }
 
 module.exports = queryProvider
