@@ -1405,7 +1405,7 @@ verb_utils.getWhereClauseFromGroupTaxonArray = function (taxon_array){
 
   taxon_array.forEach ( function (taxon, index) {
     if (index === 0)
-      whereClause += " where " + taxon['taxon'] + " = '" + taxon['value'] + "'"
+      whereClause += " WHERE " + taxon['taxon'] + " = '" + taxon['value'] + "'"
     else  
       whereClause += " or " + taxon['taxon'] + " = '" + taxon['value'] + "'"
   })
@@ -1443,6 +1443,63 @@ verb_utils.getWhereClauseFromAllCovars = function (taxon_array){
 
   return whereClause
 
+}
+
+verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups) {
+  debug("getCovarGroupQueries")
+  
+  var query_covar
+  var where_covar
+  var size = covars_groups.length
+  var co = "SELECT group_name, cells, nj, 0 as tipo FROM "
+  var cov = ""
+
+  debug(size + " groups in niche analysis")
+
+  covars_groups.forEach( function (group, index) {
+
+    if(group['biotic']){
+
+      where_covar = verb_utils.getWhereClauseFromGroupTaxonArray(group['group_taxons'])
+
+      if( index === 0){
+
+        query_covar = queries.countsTaxonGroups.covarBioGroup.toString()
+
+        if(size === 1) {
+          query_covar = query_covar.toString().replace(/{groups}/g, "," + queries.countsTaxonGroups.getCountsCovars.toString())
+          query_covar = query_covar.toString().replace(/{groups}/g, co + group['group_name'])
+        } else {
+
+          cov = co + group['group_name']
+
+        }
+
+      } else if(index === size - 1){
+        
+        cov += " UNION " + co + group['group_name']
+        query_covar = query_covar.toString().replace(/{groups}/g, ", " + queries.countsTaxonGroups.covarBioGroup.toString())
+        query_covar = query_covar.toString().replace(/{groups}/g, ", " + queries.countsTaxonGroups.getCountsCovars.toString())
+        query_covar = query_covar.toString().replace(/{groups}/g, cov)
+
+      } else {
+
+        cov += " UNION " + co + group['group_name']
+        query_covar = query_covar.toString().replace(/{groups}/g, ", " + queries.countsTaxonGroups.covarBioGroup.toString())
+
+      }
+
+      query_covar = query_covar.toString().replace(/{group_name:raw}/g, group['group_name'])
+      query_covar = query_covar.toString().replace(/{res_celda_sp:raw}/g, data_request["res_celda_sp"])
+      query_covar = query_covar.toString().replace(/{where_covars:raw}/g, where_covar)
+       
+    } else {
+
+    }
+    
+  })
+  
+  return query_covar  
 }
 
 

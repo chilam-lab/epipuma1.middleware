@@ -7,10 +7,16 @@
 */
 var QueryFile = require('pg-promise').QueryFile
 var path = require('path')
+var fs = require('fs')
 
 function sqlPath (file) {
   var fullPath = path.join(__dirname, file)
   return QueryFile(fullPath)
+}
+
+function tmplPath (file) {
+  var fullPath = path.join(__dirname, file)
+  return fs.readFileSync(fullPath)
 }
 
 /* 
@@ -287,8 +293,9 @@ var queryProvider = {
 
   countsTaxonGroups: {
     targetGroup: sqlPath("taxons-group/get-counts-target.sql"),
-    covarBioGroup: sqlPath("taxons-group/get-counts-covar-bio.sql")
-
+    covarBioGroup: tmplPath("taxons-group/get-counts-covar-bio.tmpl"),
+    getCountsBase: sqlPath("taxons-group/get-counts-base.sql"),
+    getCountsCovars: tmplPath("taxons-group/get-counts-covars.tmpl")
   }
 
 }

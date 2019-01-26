@@ -7,7 +7,7 @@
 * @requires module:controllers/verb_utils
 * @requires module:controllers/sql/queryProvider
 **/
-var debug = require('debug')('verbs:getCounts')
+var debug = require('debug')('verbs:getCountsTaxonsGroup')
 var moment = require('moment')
 
 var verb_utils = require('./verb_utils')
@@ -47,10 +47,7 @@ exports.getTaxonsGroupRequest = function(req, res, next) {
   data_request["target_name"] = verb_utils.getParam(req, 'target_name', 'target_group')
   data_request["where_target"] = where_target
 
-  var covars_group = verb_utils.getParam(req, 'covariables_taxons', []); 
-  
-  //var whereclause_target = verb_utils.getWhereClauseFromSpeciesArray(first_covar_list)
-  //data_request["whereclause_target"] = whereclause_target
+  var covars_groups = verb_utils.getParam(req, 'covariables_taxons', []); 
   
   data_request["alpha"] = undefined
 
@@ -69,11 +66,19 @@ exports.getTaxonsGroupRequest = function(req, res, next) {
               data_request["alpha"] = data_request["alpha"] !== undefined ? data_request["alpha"] : 1.0/N
               debug("alpha:" + data_request["alpha"])
  
-              var query = queries.countsTaxonGroups.targetGroup 
+              var query = queries.countsTaxonGroups.getCountsBase
+              var query_1 = queries.countsTaxonGroups.targetGroup
+
+              data_request['groups'] = verb_utils.getCovarGroupQueries(queries, data_request, covars_groups)
+
+
+              //debug(data_request['groups'])
               return t.any(query, data_request)
 
             }).then(data => {
-              return res.json({"data":data})  
+
+              return res.json({"data":data})
+
             }).catch(error => {
                 debug(error)
                 return res.json({

@@ -9,10 +9,6 @@ WITH aux_target AS (
 		and a.spid is not null
 		and array_length(a.${res_celda_sp:raw}, 1) > 0
 		-- and array_length(a.cells_16km_1, 1) > 0
-	GROUP BY 
-			a.especievalidabusqueda,
-			-- a.cells_16km_1
-			a.${res_celda_sp:raw}
 )
 SELECT '${target_name:raw}' as target_name,
 	   array_agg(distinct a.cell) as cells,
