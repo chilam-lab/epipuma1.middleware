@@ -295,7 +295,9 @@ var queryProvider = {
     targetGroup: sqlPath("taxons-group/get-counts-target.sql"),
     covarBioGroup: tmplPath("taxons-group/get-counts-covar-bio.tmpl"),
     getCountsBase: sqlPath("taxons-group/get-counts-base.sql"),
-    getCountsCovars: tmplPath("taxons-group/get-counts-covars.tmpl")
+    getCountsCovars: tmplPath("taxons-group/get-counts-covars.tmpl"),
+    getCellsByGroupBio: tmplPath("taxons-group/get-cells-group-bio.tmpl"),
+    getCellsByGroupAbio: tmplPath("taxons-group/get-cells-group-abio.tmpl")
   }
 
 }

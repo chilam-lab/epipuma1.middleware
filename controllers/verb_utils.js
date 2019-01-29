@@ -1451,7 +1451,7 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
   var query_covar
   var where_covar
   var size = covars_groups.length
-  var co = "SELECT group_name, cells, nj, 0 as tipo FROM "
+  var co = queries.countsTaxonGroups.getCellsByGroupBio.toString()
   var cov = ""
 
   debug(size + " groups in niche analysis")
@@ -1499,6 +1499,7 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
     
   })
   
+  //debug(query_covar)
   return query_covar  
 }
 
