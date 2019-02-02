@@ -1452,7 +1452,9 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
   var where_covar
   var size = covars_groups.length
   var co = queries.countsTaxonGroups.getCellsByGroupBio.toString()
+  var coa =  queries.countsTaxonGroups.getCellsByGroupAbio.toString()
   var cov = ""
+  var cova = ""
 
   debug(size + " groups in niche analysis")
 
@@ -1495,11 +1497,44 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
        
     } else {
 
+      where_covar = verb_utils.getWhereClauseFromGroupTaxonArray(group['group_taxons'])
+
+      if (index === 0 ) {
+
+        query_covar = queries.countsTaxonGroups.covarAbioGroup.toString()
+
+        if(size === 1) {
+          query_covar = query_covar.toString().replace(/{groups}/g, "," + queries.countsTaxonGroups.getCountsCovars.toString())
+          query_covar = query_covar.toString().replace(/{groups}/g, coa + group['group_name'])
+        } else {
+
+          cova = coa + group['group_name']
+
+        }
+
+      } else if(index === size - 1){
+
+        cova += " UNION " + coa + group['group_name']
+        query_covar = query_covar.toString().replace(/{groups}/g, ", " + queries.countsTaxonGroups.covarAbioGroup.toString())
+        query_covar = query_covar.toString().replace(/{groups}/g, ", " + queries.countsTaxonGroups.getCountsCovars.toString())
+        query_covar = query_covar.toString().replace(/{groups}/g, cova)
+
+      }else {
+
+        cova += " UNION " + coa + group['group_name']
+        query_covar = query_covar.toString().replace(/{groups}/g, ", " + queries.countsTaxonGroups.covarAbioGroup.toString())
+
+      }
+
+      query_covar = query_covar.toString().replace(/{group_name:raw}/g, group['group_name'])
+      query_covar = query_covar.toString().replace(/{res_celda:raw}/g, data_request["res_celda"])
+      query_covar = query_covar.toString().replace(/{where_covars:raw}/g, where_covar)
+      query_covar = query_covar.toString().replace(/{region:raw}/g, data_request.region)
+      query_covar = query_covar.toString().replace(/{res_celda_snib_tb:raw}/g, data_request.res_celda_snib_tb)
     }
     
   })
   
-  //debug(query_covar)
   return query_covar  
 }
 

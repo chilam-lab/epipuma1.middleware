@@ -9,6 +9,7 @@
 **/
 var debug = require('debug')('verbs:getCountsTaxonsGroup')
 var moment = require('moment')
+var pgp = require('pg-promise')
 
 var verb_utils = require('./verb_utils')
 var queries = require('./sql/queryProvider')
@@ -33,13 +34,16 @@ exports.getTaxonsGroupRequest = function(req, res, next) {
 
   var data_request = {};
   var data_target = {};
+  var str_query = '';
 
   var grid_resolution = verb_utils.getParam(req, 'grid_resolution', 16)
   var region = parseInt(verb_utils.getParam(req, 'world_region', verb_utils.region_mx))
 
+  data_request["region"] = region
+  data_request["res_celda"] = "cells_"+grid_resolution+"km"
   data_request["res_celda_sp"] = "cells_"+grid_resolution+"km_"+region 
   data_request["res_celda_snib"] = "gridid_"+grid_resolution+"km" 
-  data_request["res_celda_snib_tb"] = "grid_geojson_" + data_request.grid_resolution + "km_aoi"
+  data_request["res_celda_snib_tb"] = "grid_geojson_" + grid_resolution + "km_aoi"
   data_request["min_occ"] = verb_utils.getParam(req, 'covariables_min_cells', 1)
 
   var target_group = verb_utils.getParam(req, 'target_taxons', []); 
@@ -67,12 +71,12 @@ exports.getTaxonsGroupRequest = function(req, res, next) {
               debug("alpha:" + data_request["alpha"])
  
               var query = queries.countsTaxonGroups.getCountsBase
-              var query_1 = queries.countsTaxonGroups.targetGroup
-
+              
               data_request['groups'] = verb_utils.getCovarGroupQueries(queries, data_request, covars_groups)
 
+              //str_query = pgp.as.format(query.toString(), data_request)
+              //debug(str_query)
 
-              //debug(data_request['groups'])
               return t.any(query, data_request)
 
             }).then(data => {
