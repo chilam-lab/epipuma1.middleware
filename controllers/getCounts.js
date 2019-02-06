@@ -29,6 +29,7 @@ var request_counter = 0;
 var request_counter_map = d3.map([]);
 
 
+
 /**
  * Obtiene el score por celda agrupado por decil con apriori
  *
