@@ -790,9 +790,11 @@ verb_utils.processDataForCellId = function (data, apriori, mapa_prob, gridid){
 }
 
 
-verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, all_cells = []){
+verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, all_cells = [], isvalidation = false){
 
-  var cells_array = data.map(function(d) {return {cells: d.cells, score: parseFloat(d.score)}})
+  debug("isvalidation: " + isvalidation)
+  var cells_array = isvalidation ? data.map(function(d) {return {cells: d.cells_map, score: parseFloat(d.score)}}) : data.map(function(d) {return {cells: d.cells, score: parseFloat(d.score)}})
+  // var cells_array = data.map(function(d) {return {cells: d.cells_map, score: parseFloat(d.score)}})
   // debug(all_cells)
 
   var cells = []
@@ -1176,15 +1178,53 @@ verb_utils.generateFrequencyBeans = function (data_bucket, funcRange, paramType,
   return data_freq;
 }
 
+verb_utils.getValidationValues = function (data_group){
+
+  debug("getValidationValues")
+
+  data_group.forEach(function(item){
+    
+    var test_celss = item.test_cells
+    var num_deciles = 9
+
+    var min_scr = d3.min(item.data.map(function(d) {return parseFloat(d.score);}));
+    debug("min_scr: " + min_scr)  
+    var max_scr = d3.max(item.data.map(function(d) {return parseFloat(d.score);}));
+    debug("max_scr: " + max_scr)
+
+    var rango_deciles = d3.scale.quantile()
+        .domain([min_scr, max_scr])
+        .range(d3.range(num_deciles));
+
+    var limites = rango_deciles.quantiles()
+    debug(limites)
+
+    item.data.forEach(function(row){
+      row["decil"] = rango_deciles(row.score)+1
+    })
+    debug(item.data)
+
+  })
+
+
+
+}
+
 
 verb_utils.processValidationData = function (data_group){
 
   var avgdata = {}
   var data = []
 
+  // verb_utils.getValidationValues(data_group)
+
   var data_map = data_group.map(function(d) {return  d.data})
+  var test_cells = data_group.map(function(d) {return  d.test})
+
+  // debug(test_cells)
 
   data_map.forEach(function(item){
+    // debug(item)
     data = data.concat(item)
   })
   // debug(data)
@@ -1206,7 +1246,8 @@ verb_utils.processValidationData = function (data_group){
       item.familiavalida = add.familiavalida
       item.generovalido = add.generovalido
       item.especievalidabusqueda = add.especievalidabusqueda
-      item.cells = add.cells  //item.cells.concat(add.cells)
+      item.cells = add.cells
+      item.cells_map = item.cells_map.concat(add.cells) 
       // item.nij += add.nij
       // item.nj += add.nj
       // item.ni += add.ni
@@ -1233,6 +1274,7 @@ verb_utils.processValidationData = function (data_group){
       item.generovalido = remove.generovalido
       item.especievalidabusqueda = remove.especievalidabusqueda
       item.cells = item.cells //remove.cells //
+      item.cells_map = item.cells_map
       // item.nij -= remove.nij
       // item.nj -= remove.nj
       // item.ni -= remove.ni
@@ -1253,6 +1295,7 @@ verb_utils.processValidationData = function (data_group){
         count: 0,
         // spid: 0,
         cells: [],
+        cells_map: [],
         reinovalido: "",
         phylumdivisionvalido: "",
         clasevalida: "",
@@ -1289,6 +1332,7 @@ verb_utils.processValidationData = function (data_group){
         generovalido: entry["value"].generovalido,
         especievalidabusqueda: entry["value"].especievalidabusqueda,
         cells: entry["value"].cells, //entry["value"].cells.filter(function (item, pos) {return entry["value"].cells.indexOf(item) == pos}),
+        cells_map: entry["value"].cells_map,
         // nij: parseFloat((entry["value"].nij / entry["value"].count).toFixed(2)),
         // nj: parseFloat((entry["value"].nj / entry["value"].count).toFixed(2)),
         // ni: parseFloat((entry["value"].ni / entry["value"].count).toFixed(2)),

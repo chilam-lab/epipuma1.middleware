@@ -44,6 +44,8 @@ exports.getBasicInfo = function(req, res, next) {
   var data_request = verb_utils.getRequestParams(req, true)
 
   data_request["res_celda_snib_tb"] = "grid_geojson_" + data_request.grid_resolution + "km_aoi"
+  data_request["res_grid_tbl"] = "grid_" + data_request.grid_resolution + "km_aoi"
+  data_request["res_grid_column"] = "gridid_" + data_request.grid_resolution + "km"
 
   // debug('region: ' + data_request.region)
   // debug('res_celda_snib_tb: ' + data_request.res_celda_snib_tb)
@@ -424,7 +426,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req) {
         iter: (iter+1)
 
     })
-    .then(resp => {
+    .then(resp => { 
 
       // debug("iter TC: " + (iter+1))
       data_request["total_cells"] = resp.total_cells
@@ -435,13 +437,16 @@ function initialProcess(iter, total_iterations, data, res, json_response, req) {
       return t.one(query, {
 
         tbl_process: data_request.idtabla,
-        iter: (iter+1)
+        iter: (iter+1),
+        res_grid_tbl: data_request.res_grid_tbl,
+        res_grid_column: data_request.res_grid_column
 
       })
       .then(resp => {
 
-        // debug("iter SC: " + (iter+1))
-        data_request["source_cells"] = resp.source_cells
+        // debug(resp)
+        data_request["source_cells"] = resp.source_cells 
+        //resp.source_cells === undefined ? [] : resp[0].map(function(d) {return d.cell}) 
 
         // debug(data_request["source_cells"])
         // debug(data_request["total_cells"])
@@ -541,7 +546,8 @@ function initialProcess(iter, total_iterations, data, res, json_response, req) {
   })
   .then(data_iteration => {
 
-    var data_response = {iter: (iter+1),data: data_iteration}
+    // TODO: agregar valores necesarios para validacion del data_request
+    var data_response = {iter: (iter+1), data: data_iteration, test: data_request["total_cells"].concat(data_request["source_cells"])}
     json_response["data_response"] = json_response["data_response"] === undefined ? [data_response] : json_response["data_response"].concat(data_response)
 
     if(!request_counter_map.has(data_request["title_valor"].title)){
@@ -599,7 +605,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req) {
       // debug("with_data_freq: " + data_request.with_data_freq === true)
       debug("COMPUTE RESULT DATA FOR HISTOGRAMS")
       var data_freq = data_request.with_data_freq === true ? verb_utils.processDataForFreqSpecie(data) : []
-      var data_score_cell = data_request.with_data_score_cell === true ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob, data_request.all_cells) : []
+      var data_score_cell = data_request.with_data_score_cell === true ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob, data_request.all_cells, is_validation) : []
       var data_freq_cell = data_request.with_data_freq_cell === true ? verb_utils.processDataForFreqCell(data_score_cell) : []
 
 
