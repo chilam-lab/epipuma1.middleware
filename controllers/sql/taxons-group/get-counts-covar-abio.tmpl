@@ -1,0 +1,17 @@
+aux_{group_name:raw} as (
+	SELECT  a.{res_celda:raw} & b.cells as cells
+			-- a.cells_16km & b.cells as cells
+	FROM raster_bins AS a, {res_celda_snib_tb:raw} AS b
+	{where_covars:raw}
+		--WHERE a.layer = 'bio001'
+		and b.footprint_region = {region:raw}
+		--and b.footprint_region = 1	
+), {group_name:raw} AS (
+	SELECT '{group_name:raw}' as group_name,
+		   array_agg(distinct a.cell) as cells,
+		   array_length(array_agg(distinct a.cell),1) as nj
+	FROM (
+			select unnest(cells) as cell
+			FROM aux_{group_name:raw}
+		 ) as a
+){groups}

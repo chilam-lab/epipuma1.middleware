@@ -37,12 +37,12 @@
     "pg-promise": "^8.4.4"
   },
   "devDependencies": {
-    "eslint": "^4.19.1",
-    "jsdoc": "^3.4.3",
     "chai": "*",
     "chai-things": "*",
+    "eslint": "^4.19.1",
+    "jsdoc": "^3.4.3",
     "mocha": "~3.1.0",
-    "nodemon": "^1.11.0",
+    "nodemon": "^1.18.9",
     "pg-monitor": "^0.5.11",
     "should": "^13.1.0",
     "supertest": "~2.0.0",

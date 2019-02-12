@@ -1,0 +1,17 @@
+aux_{group_name:raw} as (
+	SELECT  {res_celda_sp:raw} as cells
+			-- a.cells_16km_1 as cells
+	FROM sp_snib
+	{where_covars:raw}
+		--WHERE a.clasevalida = 'Mammalia'
+		and array_length({res_celda_sp:raw}, 1) > 0 
+		-- and array_length(a.cells_16km_1, 1) > 0
+), {group_name:raw} AS (
+	SELECT '{group_name:raw}' as group_name,
+		   array_agg(distinct a.cell) as cells,
+		   array_length(array_agg(distinct a.cell),1) as nj
+	FROM (
+			select unnest(cells) as cell
+			FROM aux_{group_name:raw}
+		 ) as a
+){groups}
