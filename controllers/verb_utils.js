@@ -1399,46 +1399,27 @@ verb_utils.getWhereClauseFromSpeciesArray = function (species_array){
 }
 
 verb_utils.getWhereClauseFromGroupTaxonArray = function (taxon_array){
+
   debug("getWhereClauseFromGroupTaxonArray")
+
+  // mapeo de taxones
+  var taxon_rank_map = {
+                          kingdom : 'reinovalido', 
+                          phylum  : 'phylumdivisionvalido',
+                          class   : 'clasevalida',
+                          order   : 'ordenvalido',
+                          family  : 'familiavalida',
+                          genus   : 'generovalido',
+                          species : 'especievalidabusqueda'
+                       }
   
   var whereClause = ''
 
   taxon_array.forEach ( function (taxon, index) {
     if (index === 0)
-      whereClause += " WHERE " + taxon['taxon'] + " = '" + taxon['value'] + "'"
-    else  
-      whereClause += " or " + taxon['taxon'] + " = '" + taxon['value'] + "'"
-  })
-
-  return whereClause
-
-}
-
-verb_utils.getWhereClauseFromAllCovars = function (taxon_array){
-  debug("getWhereClauseFromAllCovars")
-  
-  var whereClause = ''
-  var taxonGroup = []
-
-  taxon_array.forEach ( function (group, index) {
-    if (index === 0) {
-      taxonGroup = group['group_taxons']
-      taxonGroup.forEach( function (taxon, index2) {
-        if (index2 === 0)
-          whereClause += " where " + taxon['taxon'] + " = '" + taxon['value'] + "'"
-        else
-          whereClause += " or " + taxon['taxon'] + " = '" + taxon['value'] + "'"
-      })
-    } else {
-      taxonGroup = group['group_taxons']
-      taxonGroup.forEach( function (taxon, index2) {
-        if (index2 === 0)
-          whereClause += " or " + taxon['taxon'] + " = '" + taxon['value'] + "'"
-        else
-          whereClause += " or " + taxon['taxon'] + " = '" + taxon['value'] + "'"
-      })
-    }  
-      
+      whereClause += " WHERE " + taxon_rank_map[taxon['taxon_rank']] + " = '" + taxon['value'] + "'"
+    else
+      whereClause += " or " + taxon_rank_map[taxon['taxon_rank']] + " = '" + taxon['value'] + "'"
   })
 
   return whereClause
