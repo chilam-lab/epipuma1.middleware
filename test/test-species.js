@@ -45,17 +45,14 @@ describe("Prueba petición variables abioticas, su contenido y su tamaño",funct
 
 	it("Árbol variables abioticas - DISPONIBLE", function(done){
 
-		supertest(server).post("/niche/especie")
-		.send({level : 0, qtype : "getRasterVariables", type: 1})
+		supertest(server).get("/niche/especie/getRasterVariables")
 		.expect("Content-type",/json/)
 		.expect(200)
 		.end(function(err, response){
 			response.statusCode.should.equal(200)
 			expect(response.body.data).to.not.equal(null)
-			expect(response.body.data).all.have.property("layer")
-			expect(response.body.data).all.have.property("label")
+			expect(response.body.data).all.have.property("fuente")
 			expect(response.body.data).all.have.property("type")
-			expect(response.body.data).to.have.length(19)
 			done();
 		})
 
