@@ -1404,18 +1404,23 @@ verb_utils.getWhereClauseFromGroupTaxonArray = function (taxon_array){
 
   // mapeo de taxones
   var taxon_rank_map = {
+                          // biotic
                           kingdom : 'reinovalido', 
                           phylum  : 'phylumdivisionvalido',
                           class   : 'clasevalida',
                           order   : 'ordenvalido',
                           family  : 'familiavalida',
                           genus   : 'generovalido',
-                          species : 'especievalidabusqueda'
+                          species : 'especievalidabusqueda',
+                          // abiotic
+                          type    : 'type',
+                          layer   : 'layer',
+                          bid     : 'bid'
                        }
   
   var whereClause = ''
-
   taxon_array.forEach ( function (taxon, index) {
+    //debug(taxon_rank_map[taxon['taxon_rank']], taxon['taxon_rank'])
     if (index === 0)
       whereClause += " WHERE " + taxon_rank_map[taxon['taxon_rank']] + " = '" + taxon['value'] + "'"
     else
