@@ -1491,23 +1491,23 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
 
         if(size === 1) {
           query_covar = query_covar.toString().replace(/{groups}/g, "," + queries.countsTaxonGroups.getCountsCovars.toString())
-          query_covar = query_covar.toString().replace(/{groups}/g, coa + group['group_name'])
+          query_covar = query_covar.toString().replace(/{groups}/g, co + group['group_name'])
         } else {
 
-          cova = coa + group['group_name']
+          cov = co + group['group_name']
 
         }
 
       } else if(index === size - 1){
 
-        cova += " UNION " + coa + group['group_name']
+        cov += " UNION " + co + group['group_name']
         query_covar = query_covar.toString().replace(/{groups}/g, ", " + queries.countsTaxonGroups.covarAbioGroup.toString())
         query_covar = query_covar.toString().replace(/{groups}/g, ", " + queries.countsTaxonGroups.getCountsCovars.toString())
-        query_covar = query_covar.toString().replace(/{groups}/g, cova)
+        query_covar = query_covar.toString().replace(/{groups}/g, cov)
 
       }else {
 
-        cova += " UNION " + coa + group['group_name']
+        cov += " UNION " + co + group['group_name']
         query_covar = query_covar.toString().replace(/{groups}/g, ", " + queries.countsTaxonGroups.covarAbioGroup.toString())
 
       }

@@ -74,8 +74,8 @@ exports.getTaxonsGroupRequest = function(req, res, next) {
               
               data_request['groups'] = verb_utils.getCovarGroupQueries(queries, data_request, covars_groups)
 
-              //debug(query)
-              //debug(data_request)
+              debug(query)
+              debug(data_request)
               return t.any(query, data_request)
 
             }).then(data => {
