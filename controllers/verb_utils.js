@@ -1580,46 +1580,32 @@ verb_utils.getWhereClauseFromSpeciesArray = function (species_array){
 }
 
 verb_utils.getWhereClauseFromGroupTaxonArray = function (taxon_array){
+
   debug("getWhereClauseFromGroupTaxonArray")
+
+  // mapeo de taxones
+  var taxon_rank_map = {
+                          // biotic
+                          kingdom : 'reinovalido', 
+                          phylum  : 'phylumdivisionvalido',
+                          class   : 'clasevalida',
+                          order   : 'ordenvalido',
+                          family  : 'familiavalida',
+                          genus   : 'generovalido',
+                          species : 'especievalidabusqueda',
+                          // abiotic
+                          type    : 'type',
+                          layer   : 'layer',
+                          bid     : 'bid'
+                       }
   
   var whereClause = ''
-
   taxon_array.forEach ( function (taxon, index) {
+    //debug(taxon_rank_map[taxon['taxon_rank']], taxon['taxon_rank'])
     if (index === 0)
-      whereClause += " WHERE " + taxon['taxon'] + " = '" + taxon['value'] + "'"
-    else  
-      whereClause += " or " + taxon['taxon'] + " = '" + taxon['value'] + "'"
-  })
-
-  return whereClause
-
-}
-
-verb_utils.getWhereClauseFromAllCovars = function (taxon_array){
-  debug("getWhereClauseFromAllCovars")
-  
-  var whereClause = ''
-  var taxonGroup = []
-
-  taxon_array.forEach ( function (group, index) {
-    if (index === 0) {
-      taxonGroup = group['group_taxons']
-      taxonGroup.forEach( function (taxon, index2) {
-        if (index2 === 0)
-          whereClause += " where " + taxon['taxon'] + " = '" + taxon['value'] + "'"
-        else
-          whereClause += " or " + taxon['taxon'] + " = '" + taxon['value'] + "'"
-      })
-    } else {
-      taxonGroup = group['group_taxons']
-      taxonGroup.forEach( function (taxon, index2) {
-        if (index2 === 0)
-          whereClause += " or " + taxon['taxon'] + " = '" + taxon['value'] + "'"
-        else
-          whereClause += " or " + taxon['taxon'] + " = '" + taxon['value'] + "'"
-      })
-    }  
-      
+      whereClause += " WHERE " + taxon_rank_map[taxon['taxon_rank']] + " = '" + taxon['value'] + "'"
+    else
+      whereClause += " or " + taxon_rank_map[taxon['taxon_rank']] + " = '" + taxon['value'] + "'"
   })
 
   return whereClause
@@ -1686,23 +1672,23 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
 
         if(size === 1) {
           query_covar = query_covar.toString().replace(/{groups}/g, "," + queries.countsTaxonGroups.getCountsCovars.toString())
-          query_covar = query_covar.toString().replace(/{groups}/g, coa + group['group_name'])
+          query_covar = query_covar.toString().replace(/{groups}/g, co + group['group_name'])
         } else {
 
-          cova = coa + group['group_name']
+          cov = co + group['group_name']
 
         }
 
       } else if(index === size - 1){
 
-        cova += " UNION " + coa + group['group_name']
+        cov += " UNION " + co + group['group_name']
         query_covar = query_covar.toString().replace(/{groups}/g, ", " + queries.countsTaxonGroups.covarAbioGroup.toString())
         query_covar = query_covar.toString().replace(/{groups}/g, ", " + queries.countsTaxonGroups.getCountsCovars.toString())
-        query_covar = query_covar.toString().replace(/{groups}/g, cova)
+        query_covar = query_covar.toString().replace(/{groups}/g, cov)
 
       }else {
 
-        cova += " UNION " + coa + group['group_name']
+        cov += " UNION " + co + group['group_name']
         query_covar = query_covar.toString().replace(/{groups}/g, ", " + queries.countsTaxonGroups.covarAbioGroup.toString())
 
       }

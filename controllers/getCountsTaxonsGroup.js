@@ -32,26 +32,26 @@ exports.getTaxonsGroupRequest = function(req, res, next) {
   
   debug('getCounsTaxonsGroupRequest')
 
-  var data_request = {};
-  var data_target = {};
-  var str_query = '';
+  var data_request = {}
+  var data_target = {}
+  var str_query = ''
 
   var grid_resolution = verb_utils.getParam(req, 'grid_resolution', 16)
-  var region = parseInt(verb_utils.getParam(req, 'world_region', verb_utils.region_mx))
+  var region = parseInt(verb_utils.getParam(req, 'region', verb_utils.region_mx))
 
   data_request["region"] = region
   data_request["res_celda"] = "cells_"+grid_resolution+"km"
   data_request["res_celda_sp"] = "cells_"+grid_resolution+"km_"+region 
   data_request["res_celda_snib"] = "gridid_"+grid_resolution+"km" 
   data_request["res_celda_snib_tb"] = "grid_geojson_" + grid_resolution + "km_aoi"
-  data_request["min_occ"] = verb_utils.getParam(req, 'covariables_min_cells', 1)
+  data_request["min_occ"] = verb_utils.getParam(req, 'min_cells', 1)
 
   var target_group = verb_utils.getParam(req, 'target_taxons', []); 
   var where_target = verb_utils.getWhereClauseFromGroupTaxonArray(target_group)
   data_request["target_name"] = verb_utils.getParam(req, 'target_name', 'target_group')
   data_request["where_target"] = where_target
 
-  var covars_groups = verb_utils.getParam(req, 'covariables_taxons', []); 
+  var covars_groups = verb_utils.getParam(req, 'covariables_taxons', []) 
   
   data_request["alpha"] = undefined
 
@@ -74,9 +74,8 @@ exports.getTaxonsGroupRequest = function(req, res, next) {
               
               data_request['groups'] = verb_utils.getCovarGroupQueries(queries, data_request, covars_groups)
 
-              //str_query = pgp.as.format(query.toString(), data_request)
-              //debug(str_query)
-
+              debug(query)
+              debug(data_request)
               return t.any(query, data_request)
 
             }).then(data => {
