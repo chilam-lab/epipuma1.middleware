@@ -792,7 +792,7 @@ verb_utils.processDataForCellId = function (data, apriori, mapa_prob, gridid){
 
 verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, all_cells = [], isvalidation = false){
 
-  debug("isvalidation: " + isvalidation)
+  // debug("isvalidation: " + isvalidation)
   var cells_array = isvalidation ? data.map(function(d) {return {cells: d.cells_map, score: parseFloat(d.score)}}) : data.map(function(d) {return {cells: d.cells, score: parseFloat(d.score)}})
   // var cells_array = data.map(function(d) {return {cells: d.cells_map, score: parseFloat(d.score)}})
   // debug(all_cells)
@@ -816,8 +816,8 @@ verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, all_cel
   var cell_score_array = [];
 
    var val_apriori = 0
-   debug("apriori: " + apriori)
-   debug("mapa_prob: " + mapa_prob)
+   // debug("apriori: " + apriori)
+   // debug("mapa_prob: " + mapa_prob)
 
    if(apriori || mapa_prob){
 
@@ -825,7 +825,7 @@ verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, all_cel
       // debug("n: " + data[0].n)
       // debug("aprior: " + Math.log(data[0].ni / (data[0].n- data[0].ni)) )
       val_apriori = parseFloat(Math.log(data[0].ni / (data[0].n- data[0].ni)).toFixed(3)) 
-      debug("val_apriori: " + val_apriori)
+      // debug("val_apriori: " + val_apriori)
    }
 
    for(var i=0; i<map_cell.length; i++){
@@ -1182,31 +1182,171 @@ verb_utils.getValidationValues = function (data_group){
 
   debug("getValidationValues")
 
-  data_group.forEach(function(item){
+  
+  var result_test_cells = []
+
+  // obteniendo el score de las celdas del conjunto test basado en los resultados del conjunto train
+  data_group.forEach(function(item, index){
+
+    // debug(item.data)
+    // debug(item.apriori)
+    // debug(item.mapa_prob)
+
+    // obteniendo el score por celda del conjunto de train
+    var apriori = item.apriori !== false && item.data[0].ni !== undefined ? true : false
+    var mapa_prob = item.mapa_prob !== false && item.data[0].ni !== undefined ? true : false
+    var train_cells = verb_utils.processDataForScoreCell(item.data, apriori, mapa_prob, [], false)
+    var temp_map = d3.map([])
+    train_cells.forEach(function(item){
+      temp_map.set(item.gridid, item.tscore)
+    })
     
-    var test_celss = item.test_cells
-    var num_deciles = 9
+    // obtiene el score por celda del conjunto de test
+    var temp_values = []
+    item.test_cells.forEach(function(cell_item){
+    
+      var temp_value = {}
+      temp_value.cell = cell_item
+
+      if(temp_map.has(cell_item)){
+        temp_value.score = temp_map.get(cell_item)
+      }
+      else{
+        temp_value.score = 0 
+      }
+      temp_values.push(temp_value)
+
+    })
+    
+    // obtiene los deciles para obtener las métricas basados en lso resultados del conjunto de test
+    var num_deciles = 11
 
     var min_scr = d3.min(item.data.map(function(d) {return parseFloat(d.score);}));
-    debug("min_scr: " + min_scr)  
+    // debug("min_scr: " + min_scr)  
     var max_scr = d3.max(item.data.map(function(d) {return parseFloat(d.score);}));
-    debug("max_scr: " + max_scr)
+    // debug("max_scr: " + max_scr)    
 
-    var rango_deciles = d3.scale.quantile()
+    var rango_deciles = d3.scaleQuantile()
         .domain([min_scr, max_scr])
-        .range(d3.range(num_deciles));
+        .range(d3.range(1,num_deciles));
 
     var limites = rango_deciles.quantiles()
-    debug(limites)
+    // debug(limites)
 
-    item.data.forEach(function(row){
-      row["decil"] = rango_deciles(row.score)+1
+    
+    var deciles = []
+    d3.range(1,num_deciles).forEach(function(decil){
+
+      var vp_temp = 0
+      var fn_temp = 0
+      var nulo_temp = 0
+      var recall_temp = 0
+
+      temp_values.forEach(function(row_value){
+        
+        // debug("decil: " + rango_deciles(row_value.score))
+        // debug("es VP:" + rango_deciles(row_value.score) > 9)
+        // debug("decil: " + decil)
+
+        if(rango_deciles(row_value.score) > decil){
+          vp_temp++
+        }
+        else if(row_value.score === 0){
+          nulo_temp++
+        }
+        else{
+          fn_temp++
+        }
+        
+      })
+
+      // debug("decil: " + decil)
+      // debug("vp_temp: " + vp_temp)
+      // debug("fn_temp: " + fn_temp)
+      // debug("nulo_temp: " + nulo_temp)
+      // debug("*****************")
+
+      var result_iter = {}
+      
+      result_iter.iter = index+1
+      result_iter.decil = decil
+      result_iter.vp = vp_temp
+      result_iter.fn = fn_temp
+      result_iter.nulo = nulo_temp
+      result_iter.recall = vp_temp/(vp_temp+fn_temp)
+
+      result_test_cells.push(result_iter)
+
+
     })
-    debug(item.data)
 
   })
 
+  // debug(result_test_cells)
 
+
+  var cross_cells = crossfilter(result_test_cells)
+  cross_cells.groupAll();
+
+  var decil_dimension = cross_cells.dimension(function(d) { return d.decil; });
+  
+  var groupByDecil = decil_dimension.group().reduce(
+    function(item,add){
+      ++item.count
+      
+      item.vp += add.vp
+      item.fn = item.fn + add.fn
+      item.nulo = item.nulo + add.nulo
+      item.recall = item.recall + add.recall
+      
+      return item
+    },
+    function(item,remove){
+      --item.count
+      
+      item.vp -= remove.vp
+      item.fn = item.fn - remove.fn
+      item.nulo = item.nulo - remove.nulo
+      item.recall = item.recall - remove.recall
+
+      return item
+    },
+    function(){
+      return {
+        count: 0,
+        vp: 0,
+        fn: 0,
+        nulo: 0,
+        recall: 0
+      }
+    }
+  )
+
+  var reduce_data = groupByDecil.top(Infinity);
+  // var score_cell_decil = groupByScoreCell.top(Infinity);
+  reduce_data.sort(verb_utils.compare_desc)
+
+
+
+  var data_result = []
+  for(var i=0; i<reduce_data.length; i++){
+      const entry = reduce_data[i];
+
+      // debug(entry["value"])
+
+      data_result.push({
+        decil: entry["key"],
+        vp: parseFloat((entry["value"].vp / entry["value"].count).toFixed(2)),
+        fn: parseFloat((entry["value"].fn / entry["value"].count).toFixed(2)),
+        nulo: parseFloat((entry["value"].nulo / entry["value"].count).toFixed(2)),
+        recall: parseFloat((entry["value"].recall / entry["value"].count).toFixed(2))
+        
+      })
+  }
+
+  debug(data_result)
+
+  return data_result
 
 }
 
@@ -1216,11 +1356,8 @@ verb_utils.processValidationData = function (data_group){
   var avgdata = {}
   var data = []
 
-  // verb_utils.getValidationValues(data_group)
-
   var data_map = data_group.map(function(d) {return  d.data})
-  var test_cells = data_group.map(function(d) {return  d.test})
-
+  // var test_cells = data_group.map(function(d) {return  d.test})
   // debug(test_cells)
 
   data_map.forEach(function(item){
