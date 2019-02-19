@@ -435,7 +435,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req) {
       // debug(query)
 
       return t.one(query, {
-
+      // return t.any(query, {
         tbl_process: data_request.idtabla,
         iter: (iter+1),
         res_grid_tbl: data_request.res_grid_tbl,
@@ -445,9 +445,12 @@ function initialProcess(iter, total_iterations, data, res, json_response, req) {
       .then(resp => {
 
         // debug(resp)
-        data_request["source_cells"] = resp.source_cells 
-        //resp.source_cells === undefined ? [] : resp[0].map(function(d) {return d.cell}) 
-
+        // debug("HOLA**********")
+        // debug(resp.map(function(d) {return d.spids}))
+        data_request["source_cells"] = resp.source_cells
+        // data_request["source_cells"] = data_request.idtabla === "" ? [] : resp.map(function(d) {return d.cell}) 
+        // data_request["test_cells"] = data_request.idtabla === "" ? [] : resp.map(function(d) {return {cell:d.cell, spids:d.spids, iter:iter+1} }) 
+        
         // debug(data_request["source_cells"])
         // debug(data_request["total_cells"])
 
@@ -513,7 +516,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req) {
             // Se obtiene todas las celdas para mandar valor de apriori o mapa de probabildiad
             if( (data_request.apriori === true || data_request.mapa_prob === true) || (data_request.apriori === "true" || data_request.mapa_prob === "true") ){
 
-              debug("obteniendo todas las celdas, analisis con apriori o mapa de probabilidad - hasBios:true - hasRaster:false")
+              // debug("obteniendo todas las celdas, analisis con apriori o mapa de probabilidad - hasBios:true - hasRaster:false")
 
               return t.one(queries.basicAnalysis.getAllGridId, data_request).then(data => {
 
@@ -547,7 +550,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req) {
   .then(data_iteration => {
 
     // TODO: agregar valores necesarios para validacion del data_request
-    var data_response = {iter: (iter+1), data: data_iteration, test: data_request["total_cells"].concat(data_request["source_cells"])}
+    var data_response = {iter: (iter+1), data: data_iteration, test_cells: data_request["source_cells"], apriori: data_request.apriori, mapa_prob: data_request.mapa_prob }
     json_response["data_response"] = json_response["data_response"] === undefined ? [data_response] : json_response["data_response"].concat(data_response)
 
     if(!request_counter_map.has(data_request["title_valor"].title)){
@@ -568,12 +571,14 @@ function initialProcess(iter, total_iterations, data, res, json_response, req) {
       request_counter_map.set(data_request["title_valor"].title, 0)
       
       debug("COUNT PROCESS FINISHED")
-      var data
+      var data = []
+      var validation_data = []
       var is_validation = false
 
       if(total_iterations !== 1){
         debug("PROCESS RESULTS FOR VALIDATION")
         data = verb_utils.processValidationData(json_response["data_response"])
+        validation_data = verb_utils.getValidationValues(json_response["data_response"])
         is_validation = true
       }
       else{
@@ -615,7 +620,8 @@ function initialProcess(iter, total_iterations, data, res, json_response, req) {
           data: data,
           data_freq: data_freq,
           data_score_cell: data_score_cell,
-          data_freq_cell: data_freq_cell
+          data_freq_cell: data_freq_cell,
+          validation_data: validation_data
         });
       
       
