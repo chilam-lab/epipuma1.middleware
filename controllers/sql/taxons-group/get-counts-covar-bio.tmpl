@@ -1,4 +1,4 @@
-aux_{group_name:raw} as (
+aux_{name:raw} as (
 	SELECT  {res_celda_sp:raw} as cells
 			-- a.cells_16km_1 as cells
 	FROM sp_snib
@@ -6,12 +6,12 @@ aux_{group_name:raw} as (
 		--WHERE a.clasevalida = 'Mammalia'
 		and array_length({res_celda_sp:raw}, 1) > 0 
 		-- and array_length(a.cells_16km_1, 1) > 0
-), {group_name:raw} AS (
-	SELECT '{group_name:raw}' as group_name,
+), {name:raw} AS (
+	SELECT '{name:raw}' as name,
 		   array_agg(distinct a.cell) as cells,
 		   array_length(array_agg(distinct a.cell),1) as nj
 	FROM (
 			select unnest(cells) as cell
-			FROM aux_{group_name:raw}
+			FROM aux_{name:raw}
 		 ) as a
 ){groups}
