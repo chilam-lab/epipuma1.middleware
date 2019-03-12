@@ -1221,6 +1221,186 @@ exports.getSpeciesNiche = function (req, res, next) {
 
 
 
+
+/**
+ *
+ * Servidor Niche: getSpeciesArrayNiche
+ *
+ * Obtiene las variables bioticas que coinciden a una cadena dada
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ *
+ */
+
+
+exports.getSpeciesArrayNiche = function (req, res, next) {
+
+      debug("getSpeciesArrayNiche")
+      var startTime = process.hrtime();
+
+      var spids             = getParam(req, 'spids')
+      var sfecha            = getParam(req, 'sfecha', false)
+      var sfosil            = getParam(req, 'sfosil', false)
+      var lb_fosil = sfosil === "false" || sfosil === false ? " and (ejemplarfosil <> 'SI' or ejemplarfosil is null) " : "";
+      var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+      var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+      var res_celda = getParam(req, 'res_celda', "gridid_16km")
+      var footprint_region    = parseInt(getParam(req, 'footprint_region',default_region))
+
+      var grid_resolution = getParam(req, 'grid_res',16)
+      var res_celda_sp =  "cells_"+grid_resolution+"km"   
+      var res_celda_snib =  "gridid_"+grid_resolution+"km" 
+      var res_celda_snib_tb = "grid_geojson_"+grid_resolution+"km_aoi" 
+
+      debug(spids)
+      debug(spids.toString())
+
+      // debug(sfecha)
+      // debug(sfosil)
+      debug(grid_resolution)
+      // debug(fecha_incio)
+      // debug(fecha_fin)
+      debug(footprint_region)
+      
+      debug('Antes de obtener N en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
+
+      pool.task(t => {
+
+      //     return t.one(queries.basicAnalysis.getN, {
+
+      //         grid_resolution: grid_resolution,
+      //         footprint_region: footprint_region
+
+      //     }).then(resp => {
+
+              // debug("id_country:" + resp.id_country)
+              // var region = resp.id_country
+
+              if( (parseInt(fecha_incio.format('YYYY')) != 1500 || parseInt(fecha_fin.format('YYYY')) != parseInt(moment().format('YYYY')) ) && sfecha === 'false'){
+                debug('CASO: rango y sin fecha')
+                // debug("res_celda: " + res_celda)
+                // debug("res_celda_sp: " + res_celda_sp)
+                // debug("res_celda_snib: " + res_celda_snib)
+                // debug("res_celda_snib_tb: " + res_celda_snib_tb)
+                // debug("lb_fosil: " + lb_fosil)
+                // debug("footprint_region: " + footprint_region)
+
+                debug('Antes de ejecutar query en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
+
+                return t.any(queries.getSpeciesNiche.getSpeciesSDR, {
+                  spids: spids,
+                  lim_inf: fecha_incio.format('YYYY'),
+                  lim_sup: fecha_fin.format('YYYY'),
+                  res_celda: res_celda,
+                  res_celda_sp: res_celda_sp,
+                  res_celda_snib: res_celda_snib,
+                  res_celda_snib_tb: res_celda_snib_tb,
+                  sfosil: lb_fosil,
+                  region: footprint_region
+                })
+                      
+              }
+              else if( parseInt(fecha_incio.format('YYYY')) == 1500 && parseInt(fecha_fin.format('YYYY')) == parseInt(moment().format('YYYY'))  && sfecha === 'false'){
+                debug('CASO: solo sin fecha')
+                // debug("res_celda: " + res_celda)
+                // debug("res_celda_sp: " + res_celda_sp)
+                // debug("res_celda_snib: " + res_celda_snib)
+                // debug("res_celda_snib_tb: " + res_celda_snib_tb)
+                // debug("lb_fosil: " + lb_fosil)
+                // debug("footprint_region: " + footprint_region)
+
+                debug('Antes de ejecutar query en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
+
+                return t.any(queries.getSpeciesNiche.getSpeciesSD, {
+                  spids: spids,
+                  res_celda: res_celda,
+                  res_celda_sp: res_celda_sp,
+                  res_celda_snib: res_celda_snib,
+                  res_celda_snib_tb: res_celda_snib_tb,
+                  sfosil: lb_fosil,
+                  region: footprint_region
+                })
+                      
+              }
+              else if( parseInt(fecha_incio.format('YYYY')) != 1500 || parseInt(fecha_fin.format('YYYY')) != parseInt(moment().format('YYYY')) ){
+                debug('CASO: solo rango')
+                // debug("res_celda: " + res_celda)
+                // debug("res_celda_sp: " + res_celda_sp)
+                // debug("res_celda_snib: " + res_celda_snib)
+                // debug("res_celda_snib_tb: " + res_celda_snib_tb)
+                // debug("lb_fosil: " + lb_fosil)
+                // debug("footprint_region: " + footprint_region)
+
+                debug('Antes de ejecutar query en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
+
+                return t.any(queries.getSpeciesNiche.getSpeciesR, {
+                  spids: spids,
+                  lim_inf: fecha_incio.format('YYYY'),
+                  lim_sup: fecha_fin.format('YYYY'),
+                  res_celda: res_celda,
+                  res_celda_sp: res_celda_sp,
+                  res_celda_snib: res_celda_snib,
+                  res_celda_snib_tb: res_celda_snib_tb,
+                  sfosil: lb_fosil,
+                  region: footprint_region
+                })
+                      
+              }
+              else{
+                debug('CASO: sin filtros')
+                // debug("res_celda: " + res_celda)
+                // debug("res_celda_sp: " + res_celda_sp)
+                // debug("res_celda_snib: " + res_celda_snib)
+                // debug("res_celda_snib_tb: " + res_celda_snib_tb)
+                // debug("lb_fosil: " + lb_fosil)
+                // debug("footprint_region: " + footprint_region)
+
+                debug('Antes de ejecutar query en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
+                
+                return t.any(queries.getSpeciesNiche.getSpeciesArray, {
+                  spids: spids.toString(),
+                  res_celda: res_celda,
+                  res_celda_sp: res_celda_sp,
+                  res_celda_snib: res_celda_snib,
+                  res_celda_snib_tb: res_celda_snib_tb,
+                  sfosil: lb_fosil,
+                  region: footprint_region
+                })
+                      
+              }
+
+          // })
+
+      })
+      .then(data => {
+
+          debug('Query ejecutada, (antes de enviar respuesta) en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
+
+          // debug(data)
+
+          res.json({'data': data})
+
+      })
+      .catch(error => {
+          debug(error)
+
+          return res.json({
+            ok: false,
+            error: error
+          });
+      });
+
+}
+
+
+
+
+
+
+
+
+
 /**
  *
  * Servidor Niche: getEntListNiche
