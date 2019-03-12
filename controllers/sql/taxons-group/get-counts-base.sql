@@ -18,7 +18,7 @@ WITH aux_target AS (
 		) as a
 ),${groups:raw}
 SELECT 	target.target_name as target_name,
-		covars.group_name as group_name,
+		covars.name as name,
 		covars.cells  as cells,
 		icount(target.cells & covars.cells) AS nij,
 		covars.nj AS nj,

@@ -47,11 +47,11 @@ exports.getTaxonsGroupRequest = function(req, res, next) {
   data_request["min_occ"] = verb_utils.getParam(req, 'min_cells', 1)
 
   var target_group = verb_utils.getParam(req, 'target_taxons', []); 
-  var where_target = verb_utils.getWhereClauseFromGroupTaxonArray(target_group)
+  var where_target = verb_utils.getWhereClauseFromGroupTaxonArray(target_group, true)
   data_request["target_name"] = verb_utils.getParam(req, 'target_name', 'target_group')
   data_request["where_target"] = where_target
 
-  var covars_groups = verb_utils.getParam(req, 'covariables_taxons', []) 
+  var covars_groups = verb_utils.getParam(req, 'covariables', []) 
   
   data_request["alpha"] = undefined
 
@@ -74,8 +74,8 @@ exports.getTaxonsGroupRequest = function(req, res, next) {
               
               data_request['groups'] = verb_utils.getCovarGroupQueries(queries, data_request, covars_groups)
 
-              debug(query)
-              debug(data_request)
+              //debug(query)
+              //debug(data_request)
               return t.any(query, data_request)
 
             }).then(data => {

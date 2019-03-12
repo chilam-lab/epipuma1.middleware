@@ -1579,10 +1579,14 @@ verb_utils.getWhereClauseFromSpeciesArray = function (species_array){
 
 }
 
-verb_utils.getWhereClauseFromGroupTaxonArray = function (taxon_array){
+verb_utils.getWhereClauseFromGroupTaxonArray = function (taxon_array, target){
 
   debug("getWhereClauseFromGroupTaxonArray")
 
+  if(target)
+    var key = 'taxon_rank'
+  else
+    var key='rank'
   // mapeo de taxones
   var taxon_rank_map = {
                           // biotic
@@ -1592,7 +1596,8 @@ verb_utils.getWhereClauseFromGroupTaxonArray = function (taxon_array){
                           order   : 'ordenvalido',
                           family  : 'familiavalida',
                           genus   : 'generovalido',
-                          species : 'especievalidabusqueda',
+                          species : ['generovalido', 'especieepiteto'],
+                          subspecies: ['generovalido', 'especieepiteto', 'nombreinfra'],
                           // abiotic
                           type    : 'type',
                           layer   : 'layer',
@@ -1601,11 +1606,33 @@ verb_utils.getWhereClauseFromGroupTaxonArray = function (taxon_array){
   
   var whereClause = ''
   taxon_array.forEach ( function (taxon, index) {
-    //debug(taxon_rank_map[taxon['taxon_rank']], taxon['taxon_rank'])
-    if (index === 0)
-      whereClause += " WHERE " + taxon_rank_map[taxon['taxon_rank']] + " = '" + taxon['value'] + "'"
-    else
-      whereClause += " or " + taxon_rank_map[taxon['taxon_rank']] + " = '" + taxon['value'] + "'"
+    //debug(taxon_rank_map[taxon[key]], taxon[key])
+    if (index === 0){
+      
+      if (taxon[key] === 'species') {
+        var value = taxon['value'].split(' ')
+        whereClause += " WHERE (" + taxon_rank_map[taxon[key]][0] + " = '" + value[0] + "' AND " + taxon_rank_map[taxon[key]][1] + " = '" + value[1] + "')"
+      } else if(taxon[key] === 'subspecies') {
+        var value = taxon['value'].split(' ')
+        whereClause += " WHERE (" + taxon_rank_map[taxon[key]][0] + " = '" + value[0] + "' AND " + taxon_rank_map[taxon[key]][1] + " = '" + value[1] + "' AND " + taxon_rank_map[taxon[key]][2] + " = '" + value[2] + "')"
+      } else {
+        whereClause += " WHERE " + taxon_rank_map[taxon[key]] + " = '" + taxon['value'] + "'"
+      }
+
+    } else{
+      
+      if (taxon[key] === 'species') {
+        var value = taxon['value'].split(' ')
+        whereClause += " or (" + taxon_rank_map[taxon[key]][0] + " = '" + value[0] + "' AND " + taxon_rank_map[taxon[key]][1] + " = '" + value[1] + "')"
+      } else if(taxon[key] === 'subspecies') {
+        var value = taxon['value'].split(' ')
+        whereClause += " or (" + taxon_rank_map[taxon[key]][0] + " = '" + value[0] + "' AND " + taxon_rank_map[taxon[key]][1] + " = '" + value[1] + "' AND " + taxon_rank_map[taxon[key]][2] + " = '" + value[2] + "')" 
+      } else {
+        whereClause += " or " + taxon_rank_map[taxon[key]] + " = '" + taxon['value'] + "'"
+      }
+
+    } 
+      
   })
 
   return whereClause
@@ -1629,7 +1656,7 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
 
     if(group['biotic']){
 
-      where_covar = verb_utils.getWhereClauseFromGroupTaxonArray(group['group_taxons'])
+      where_covar = verb_utils.getWhereClauseFromGroupTaxonArray(group['merge_vars'], false)
 
       if( index === 0){
 
@@ -1637,34 +1664,34 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
 
         if(size === 1) {
           query_covar = query_covar.toString().replace(/{groups}/g, "," + queries.countsTaxonGroups.getCountsCovars.toString())
-          query_covar = query_covar.toString().replace(/{groups}/g, co + group['group_name'])
+          query_covar = query_covar.toString().replace(/{groups}/g, co + group['name'])
         } else {
 
-          cov = co + group['group_name']
+          cov = co + group['name']
 
         }
 
       } else if(index === size - 1){
         
-        cov += " UNION " + co + group['group_name']
+        cov += " UNION " + co + group['name']
         query_covar = query_covar.toString().replace(/{groups}/g, ", " + queries.countsTaxonGroups.covarBioGroup.toString())
         query_covar = query_covar.toString().replace(/{groups}/g, ", " + queries.countsTaxonGroups.getCountsCovars.toString())
         query_covar = query_covar.toString().replace(/{groups}/g, cov)
 
       } else {
 
-        cov += " UNION " + co + group['group_name']
+        cov += " UNION " + co + group['name']
         query_covar = query_covar.toString().replace(/{groups}/g, ", " + queries.countsTaxonGroups.covarBioGroup.toString())
 
       }
 
-      query_covar = query_covar.toString().replace(/{group_name:raw}/g, group['group_name'])
+      query_covar = query_covar.toString().replace(/{name:raw}/g, group['name'])
       query_covar = query_covar.toString().replace(/{res_celda_sp:raw}/g, data_request["res_celda_sp"])
       query_covar = query_covar.toString().replace(/{where_covars:raw}/g, where_covar)
        
     } else {
 
-      where_covar = verb_utils.getWhereClauseFromGroupTaxonArray(group['group_taxons'])
+      where_covar = verb_utils.getWhereClauseFromGroupTaxonArray(group['merge_vars'], false)
 
       if (index === 0 ) {
 
@@ -1672,28 +1699,28 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
 
         if(size === 1) {
           query_covar = query_covar.toString().replace(/{groups}/g, "," + queries.countsTaxonGroups.getCountsCovars.toString())
-          query_covar = query_covar.toString().replace(/{groups}/g, co + group['group_name'])
+          query_covar = query_covar.toString().replace(/{groups}/g, co + group['name'])
         } else {
 
-          cov = co + group['group_name']
+          cov = co + group['name']
 
         }
 
       } else if(index === size - 1){
 
-        cov += " UNION " + co + group['group_name']
+        cov += " UNION " + co + group['name']
         query_covar = query_covar.toString().replace(/{groups}/g, ", " + queries.countsTaxonGroups.covarAbioGroup.toString())
         query_covar = query_covar.toString().replace(/{groups}/g, ", " + queries.countsTaxonGroups.getCountsCovars.toString())
         query_covar = query_covar.toString().replace(/{groups}/g, cov)
 
       }else {
 
-        cov += " UNION " + co + group['group_name']
+        cov += " UNION " + co + group['name']
         query_covar = query_covar.toString().replace(/{groups}/g, ", " + queries.countsTaxonGroups.covarAbioGroup.toString())
 
       }
 
-      query_covar = query_covar.toString().replace(/{group_name:raw}/g, group['group_name'])
+      query_covar = query_covar.toString().replace(/{name:raw}/g, group['name'])
       query_covar = query_covar.toString().replace(/{res_celda:raw}/g, data_request["res_celda"])
       query_covar = query_covar.toString().replace(/{where_covars:raw}/g, where_covar)
       query_covar = query_covar.toString().replace(/{region:raw}/g, data_request.region)
