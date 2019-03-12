@@ -105,6 +105,7 @@ var queryProvider = {
   },
   getSpeciesNiche: {
     getSpecies: sqlPath('especie/getSpecies.sql'),
+    getSpeciesArray: sqlPath('especie/getSpeciesArray.sql'),
     getSpeciesSD: sqlPath('especie/getSpecies_sdate.sql'),
     getSpeciesR: sqlPath('especie/getSpecies_range.sql'),
     getSpeciesSDR: sqlPath('especie/getSpecies_sdr.sql')
