@@ -1398,6 +1398,87 @@ exports.getSpeciesArrayNiche = function (req, res, next) {
 
 
 
+/**
+ *
+ * Servidor Niche: getEntListByTaxonNiche
+ *
+ * Obtiene las variables bioticas que coinciden a una cadena dada en la estrutura genero, epiteto y nombreinfra
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ *
+ */
+
+exports.getEntListByTaxonNiche = function (req, res, next) {
+
+    debug("getEntListByTaxonNiche")
+    var startTime = process.hrtime();
+    
+    var str       = getParam(req, 'searchStr')
+    var has_limit = parseInt(getParam(req, 'limit', false))
+    var source    = parseInt(getParam(req, 'source'))
+    var region    = parseInt(getParam(req, 'footprint_region',default_region))
+    var nivel     = getParam(req, 'nivel', min_taxon_name)
+    var columnas  = verb_utils.getColumns(source, nivel)
+
+    var grid_resolution = getParam(req, 'grid_res',16)
+    var res_celda_sp =  'cells_'+grid_resolution+'km_'+region
+    var res_celda_snib =  'gridid_'+grid_resolution+'km'
+    var res_celda_snib_tb = 'grid_'+grid_resolution+'km_aoi'
+    
+    res_celda_sp = (source == 1) ? res_celda_sp : 'array[]::int[]'
+    var val_tree = (source == 1) ? ' and icount('+res_celda_sp+') > 0 ' : ''
+
+    var txt_limite = has_limit === false ? '' : 'limit ' + limite
+
+    debug("nivel: " + nivel)
+    debug("str: " + str)
+    debug("limite: " + limite)
+    debug("columnas: " + columnas)
+    // debug("res_celda_sp: " + res_celda_sp)
+    debug("val_tree: " + val_tree)
+    // debug(pool)
+
+    var streTerms = str.split(" ");
+    var genero = streTerms[0]
+    var epiteto = streTerms.length > 1 ? "or lower(especieepiteto) like lower('"+streTerms[1]+"%')"  : ""
+    var infra = streTerms.length > 2 ? "or lower(nombreinfra) like lower('"+streTerms[2]+"%')"  : ""
+
+
+    debug('Parsea datos, (antes de ejecutar query) en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
+
+    pool.any(queries.getEntListNiche.getEntListByTaxon, {
+      genero: genero,
+      epiteto: epiteto,
+      infra: infra,
+      columnas: columnas,
+      nivel: nivel,
+      res_celda_sp: res_celda_sp,
+      res_celda_snib: res_celda_snib,
+      res_celda_snib_tb: res_celda_snib_tb,
+      val_tree: val_tree,
+      limite: txt_limite,
+      region: region
+    })
+    .then(function (data) {
+
+      debug('Query ejecutada, (antes de enviar respuesta) en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
+      
+      // debug("Respuesta query")
+      // debug(data)
+
+      res.json({'data': data})
+    })
+    .catch(function (error) {
+      debug(error)
+      next(error)
+    })
+
+}
+
+
+
+
 
 
 
