@@ -40,6 +40,10 @@ router.route('/especie/getEntList')
   .get(verbsCtrl.getEntListNiche)
   .post(verbsCtrl.getEntListNiche)
 
+router.route('/especie/getEntListByTaxon')
+  .get(verbsCtrl.getEntListByTaxonNiche)
+  .post(verbsCtrl.getEntListByTaxonNiche)
+
 router.route('/especie/getToken')
   .get(verbsCtrl.getToken)
   .post(verbsCtrl.getToken)
