@@ -89,7 +89,8 @@ verb_utils.processBioFilters = function(tfilters_total, spid){
   var filter_disj = ''
   if(spid) {
     // spid esta presente en la tabla snib y sp_snib
-    filter_disj = 'spid <> ' + spid + ' and '
+    // filter_disj = 'spid <> ' + spid + ' and '
+    filter_disj = 'spid not in (' + spid + ') and '
   }
 
   for (var i = 0; i < tfilters.length; i++) {
@@ -342,10 +343,16 @@ verb_utils.processTitleGroup = function(groupid, tfilters){
  * @param {string} nivel - Taxonomic level 
  * @returns {string} Raw SQL column names 
  */
-verb_utils.getColumns = function(issource, nivel) {
+verb_utils.getColumns = function(issource, nivel, verbo = "getEntList") {
   if(issource == 1) {
-    return 'spid, reinovalido, phylumdivisionvalido, clasevalida, ' + 
-          'ordenvalido, familiavalida, generovalido, especievalidabusqueda'
+    if(verbo === "getEntList"){
+      return 'spid, reinovalido, phylumdivisionvalido, clasevalida, ' + 
+          'ordenvalido, familiavalida, generovalido, especievalidabusqueda'  
+    }
+    else{
+      return 'spid, reinovalido, phylumdivisionvalido, clasevalida, ' + 
+          'ordenvalido, familiavalida'  
+    }
   } else {
     return 'distinct ' + nivel + ' '
   }
@@ -445,7 +452,8 @@ verb_utils.getRequestParams = function(req, verbose){
   data_request["with_data_freq_cell"] = verb_utils.getParam(req, 'with_data_freq_cell', "true");
   data_request["with_data_score_decil"] = verb_utils.getParam(req, 'with_data_score_decil', "true");
 
-  data_request["spid"] = parseInt(verb_utils.getParam(req, 'id'))
+  // data_request["spid"] = parseInt(verb_utils.getParam(req, 'id'))
+  data_request["spid"] = verb_utils.getParam(req, 'id', []).toString()
   var tfilters = verb_utils.getParam(req, 'tfilters', undefined)
 
 

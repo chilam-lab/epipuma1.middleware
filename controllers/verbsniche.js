@@ -1413,13 +1413,16 @@ exports.getEntListByTaxonNiche = function (req, res, next) {
 
     debug("getEntListByTaxonNiche")
     var startTime = process.hrtime();
+
+    var col_epiteto = "especieepiteto"
+    var col_infra = "nombreinfra"
     
     var str       = getParam(req, 'searchStr')
     var has_limit = parseInt(getParam(req, 'limit', false))
     var source    = parseInt(getParam(req, 'source'))
     var region    = parseInt(getParam(req, 'footprint_region',default_region))
     var nivel     = getParam(req, 'nivel', min_taxon_name)
-    var columnas  = verb_utils.getColumns(source, nivel)
+    var columnas  = verb_utils.getColumns(source, nivel, "getEntListByTaxonNiche")
 
     var grid_resolution = getParam(req, 'grid_res',16)
     var res_celda_sp =  'cells_'+grid_resolution+'km_'+region
@@ -1437,12 +1440,18 @@ exports.getEntListByTaxonNiche = function (req, res, next) {
     debug("columnas: " + columnas)
     // debug("res_celda_sp: " + res_celda_sp)
     debug("val_tree: " + val_tree)
-    // debug(pool)
+    
 
-    var streTerms = str.split(" ");
+    var streTerms = str.trim().split(" ");
+    debug(streTerms)
+    debug(streTerms.length)
+
     var genero = streTerms[0]
-    var epiteto = streTerms.length > 1 ? "or lower(especieepiteto) like lower('"+streTerms[1]+"%')"  : ""
-    var infra = streTerms.length > 2 ? "or lower(nombreinfra) like lower('"+streTerms[2]+"%')"  : ""
+    var epiteto = streTerms.length > 1 ? "and lower("+col_epiteto+") like lower('"+streTerms[1]+"%')"  : ""
+    var infra = streTerms.length > 2 ? "and lower("+nombreinfra+") like lower('"+streTerms[2]+"%')"  : ""
+
+    debug("epiteto:" + epiteto)
+    debug("infra:" + infra)
 
 
     debug('Parsea datos, (antes de ejecutar query) en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
