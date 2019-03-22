@@ -1398,6 +1398,48 @@ verb_utils.getWhereClauseFromSpeciesArray = function (species_array){
 
 }
 
+verb_utils.getWhereClauseFilter = function(fosil, date, lim_inf, lim_sup, cells, gridid){
+  
+  debug("getWhereClauseFilter")  
+
+  var c = false
+  var whereClause = 'WHERE '
+
+  if(!fosil){
+    whereClause += "ejemplarfosil <> 'SI' "
+    c = true
+  }
+
+
+  if(date) {
+
+    if(c)
+      whereClause += 'AND '
+
+    whereClause += 'aniocolecta >= ' + lim_inf + ' AND  aniocolecta <= ' + lim_sup + ' '
+    c = true
+  }
+
+  cells.forEach( function(cell, index)  {
+    
+    if(c)
+      whereClause += 'AND '
+    
+    whereClause += gridid + ' <> ' + cell + ' ' 
+    c = true
+  })
+
+  if(c)
+    whereClause += 'AND '
+
+  whereClause += gridid + ' is not null '
+  whereClause += 'AND aniocolecta is not null '
+
+  debug(whereClause)
+  return whereClause   
+
+}
+
 verb_utils.getWhereClauseFromGroupTaxonArray = function (taxon_array, target){
 
   debug("getWhereClauseFromGroupTaxonArray")

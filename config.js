@@ -9,8 +9,7 @@ config.db.password = process.env.DBPWD
 config.db.host = process.env.DBHOST
 config.db.port = process.env.DBPORT
 config.db.application_name = 'expressMiddleware'
-config.port = process.env.PORT*
-
+config.port = process.env.PORT
 
 // Configure pool of connections
 config.db.poolSize = 10
