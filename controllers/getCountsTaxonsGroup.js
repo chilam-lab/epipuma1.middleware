@@ -38,6 +38,11 @@ exports.getTaxonsGroupRequest = function(req, res, next) {
 
   var grid_resolution = verb_utils.getParam(req, 'grid_resolution', 16)
   var region = parseInt(verb_utils.getParam(req, 'region', verb_utils.region_mx))
+  var fosil = verb_utils.getParam(req, 'fosil', true)
+  var date  = verb_utils.getParam(req, 'date', true)
+  var lim_inf = verb_utils.getParam(req, 'lim_inf', null)
+  var lim_sup = verb_utils.getParam(req, 'lim_sup', null)
+  var cells = verb_utils.getParam(req, 'excluded_cells', [])
 
   data_request["region"] = region
   data_request["res_celda"] = "cells_"+grid_resolution+"km"
@@ -45,6 +50,7 @@ exports.getTaxonsGroupRequest = function(req, res, next) {
   data_request["res_celda_snib"] = "gridid_"+grid_resolution+"km" 
   data_request["res_celda_snib_tb"] = "grid_geojson_" + grid_resolution + "km_aoi"
   data_request["min_occ"] = verb_utils.getParam(req, 'min_cells', 1)
+  data_request["where_filter"] = verb_utils.getWhereClauseFilter(fosil, date, lim_inf, lim_sup, cells, data_request["res_celda_snib"])
 
   var target_group = verb_utils.getParam(req, 'target_taxons', []); 
   var where_target = verb_utils.getWhereClauseFromGroupTaxonArray(target_group, true)
