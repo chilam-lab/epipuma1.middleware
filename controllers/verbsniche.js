@@ -1254,14 +1254,14 @@ exports.getSpeciesArrayNiche = function (req, res, next) {
       var res_celda_snib_tb = "grid_geojson_"+grid_resolution+"km_aoi" 
 
       debug(spids)
-      debug(spids.toString())
+      // debug(spids.toString())
 
       // debug(sfecha)
       // debug(sfosil)
-      debug(grid_resolution)
+      // debug(grid_resolution)
       // debug(fecha_incio)
       // debug(fecha_fin)
-      debug(footprint_region)
+      // debug(footprint_region)
       
       debug('Antes de obtener N en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
 
@@ -1288,8 +1288,8 @@ exports.getSpeciesArrayNiche = function (req, res, next) {
 
                 debug('Antes de ejecutar query en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
 
-                return t.any(queries.getSpeciesNiche.getSpeciesSDR, {
-                  spids: spids,
+                return t.any(queries.getSpeciesNiche.getSpeciesArraySDR, {
+                  spids: spids.toString(),
                   lim_inf: fecha_incio.format('YYYY'),
                   lim_sup: fecha_fin.format('YYYY'),
                   res_celda: res_celda,
@@ -1312,8 +1312,10 @@ exports.getSpeciesArrayNiche = function (req, res, next) {
 
                 debug('Antes de ejecutar query en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
 
-                return t.any(queries.getSpeciesNiche.getSpeciesSD, {
-                  spids: spids,
+                
+                //return t.any(queries.getSpeciesNiche.getSpeciesSD, {
+                return t.any(queries.getSpeciesNiche.getSpeciesArraySD, {
+                  spids: spids.toString(),
                   res_celda: res_celda,
                   res_celda_sp: res_celda_sp,
                   res_celda_snib: res_celda_snib,
@@ -1334,8 +1336,8 @@ exports.getSpeciesArrayNiche = function (req, res, next) {
 
                 debug('Antes de ejecutar query en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
 
-                return t.any(queries.getSpeciesNiche.getSpeciesR, {
-                  spids: spids,
+                return t.any(queries.getSpeciesNiche.getSpeciesArrayR, {
+                  spids: spids.toString(),
                   lim_inf: fecha_incio.format('YYYY'),
                   lim_sup: fecha_fin.format('YYYY'),
                   res_celda: res_celda,
@@ -1413,13 +1415,16 @@ exports.getEntListByTaxonNiche = function (req, res, next) {
 
     debug("getEntListByTaxonNiche")
     var startTime = process.hrtime();
+
+    var col_epiteto = "especieepiteto"
+    var col_infra = "nombreinfra"
     
     var str       = getParam(req, 'searchStr')
     var has_limit = parseInt(getParam(req, 'limit', false))
     var source    = parseInt(getParam(req, 'source'))
     var region    = parseInt(getParam(req, 'footprint_region',default_region))
     var nivel     = getParam(req, 'nivel', min_taxon_name)
-    var columnas  = verb_utils.getColumns(source, nivel)
+    var columnas  = verb_utils.getColumns(source, nivel, "getEntListByTaxonNiche")
 
     var grid_resolution = getParam(req, 'grid_res',16)
     var res_celda_sp =  'cells_'+grid_resolution+'km_'+region
@@ -1437,12 +1442,18 @@ exports.getEntListByTaxonNiche = function (req, res, next) {
     debug("columnas: " + columnas)
     // debug("res_celda_sp: " + res_celda_sp)
     debug("val_tree: " + val_tree)
-    // debug(pool)
+    
 
-    var streTerms = str.split(" ");
+    var streTerms = str.trim().split(" ");
+    debug(streTerms)
+    debug(streTerms.length)
+
     var genero = streTerms[0]
-    var epiteto = streTerms.length > 1 ? "or lower(especieepiteto) like lower('"+streTerms[1]+"%')"  : ""
-    var infra = streTerms.length > 2 ? "or lower(nombreinfra) like lower('"+streTerms[2]+"%')"  : ""
+    var epiteto = streTerms.length > 1 ? "and lower("+col_epiteto+") like lower('"+streTerms[1]+"%')"  : ""
+    var infra = streTerms.length > 2 ? "and lower("+nombreinfra+") like lower('"+streTerms[2]+"%')"  : ""
+
+    debug("epiteto:" + epiteto)
+    debug("infra:" + infra)
 
 
     debug('Parsea datos, (antes de ejecutar query) en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');

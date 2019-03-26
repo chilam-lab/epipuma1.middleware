@@ -1,6 +1,7 @@
 with temp_source as (
 	SELECT 
-		a.spid, 
+		--a.spid, 
+		array_agg(distinct a.spid) as spid,
 		-- array_agg(distinct a.${res_celda_snib:raw}) as cells, 
 		array_agg(distinct a.${res_celda_snib:raw} ) - ${discardedDeleted:raw}::integer[]+${source_cells:raw}::integer[] as cells, 
 		-- icount(array_agg(distinct a.${res_celda_snib:raw})) as ni
@@ -15,10 +16,11 @@ with temp_source as (
 		) AS b
 	ON a.gid = b.gid
 	WHERE 
-		a.spid = ${spid} ${fossil:raw}
+		a.spid in (${spid:raw})  ${fossil:raw}
 		and a.especievalidabusqueda <> ''
-		and ${spid} is not null
-	group by a.spid
+		and a.spid is not null
+	group by true
+	-- a.spid
 ),
 temp_target as (
 	SELECT  
@@ -90,6 +92,6 @@ SELECT 	temp_target.spid,
 		) as numeric), 2) as score
 FROM temp_source,temp_target
 where 
-temp_target.spid <> ${spid}
+temp_target.spid not in (${spid:raw})
 and icount(temp_target.cells) >= ${min_occ}
 order by epsilon desc;
