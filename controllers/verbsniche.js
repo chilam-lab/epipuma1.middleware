@@ -1254,14 +1254,14 @@ exports.getSpeciesArrayNiche = function (req, res, next) {
       var res_celda_snib_tb = "grid_geojson_"+grid_resolution+"km_aoi" 
 
       debug(spids)
-      debug(spids.toString())
+      // debug(spids.toString())
 
       // debug(sfecha)
       // debug(sfosil)
-      debug(grid_resolution)
+      // debug(grid_resolution)
       // debug(fecha_incio)
       // debug(fecha_fin)
-      debug(footprint_region)
+      // debug(footprint_region)
       
       debug('Antes de obtener N en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
 
@@ -1288,8 +1288,8 @@ exports.getSpeciesArrayNiche = function (req, res, next) {
 
                 debug('Antes de ejecutar query en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
 
-                return t.any(queries.getSpeciesNiche.getSpeciesSDR, {
-                  spids: spids,
+                return t.any(queries.getSpeciesNiche.getSpeciesArraySDR, {
+                  spids: spids.toString(),
                   lim_inf: fecha_incio.format('YYYY'),
                   lim_sup: fecha_fin.format('YYYY'),
                   res_celda: res_celda,
@@ -1312,8 +1312,10 @@ exports.getSpeciesArrayNiche = function (req, res, next) {
 
                 debug('Antes de ejecutar query en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
 
-                return t.any(queries.getSpeciesNiche.getSpeciesSD, {
-                  spids: spids,
+                
+                //return t.any(queries.getSpeciesNiche.getSpeciesSD, {
+                return t.any(queries.getSpeciesNiche.getSpeciesArraySD, {
+                  spids: spids.toString(),
                   res_celda: res_celda,
                   res_celda_sp: res_celda_sp,
                   res_celda_snib: res_celda_snib,
@@ -1334,8 +1336,8 @@ exports.getSpeciesArrayNiche = function (req, res, next) {
 
                 debug('Antes de ejecutar query en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
 
-                return t.any(queries.getSpeciesNiche.getSpeciesR, {
-                  spids: spids,
+                return t.any(queries.getSpeciesNiche.getSpeciesArrayR, {
+                  spids: spids.toString(),
                   lim_inf: fecha_incio.format('YYYY'),
                   lim_sup: fecha_fin.format('YYYY'),
                   res_celda: res_celda,

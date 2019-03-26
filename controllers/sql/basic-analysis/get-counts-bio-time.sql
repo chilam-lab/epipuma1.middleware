@@ -41,6 +41,7 @@ WITH temp_source as (
 		and a.especievalidabusqueda <> ''
 		--and 27333 is not NULL
 		--and ${spid} is not null
+		--and a.spid is not null
 	group by true 
 	--a.spid
 ),
@@ -118,6 +119,6 @@ SELECT 	temp_target.spid,
 		) as numeric), 2) as score
 FROM temp_source,temp_target
 where 
-temp_target.spid is not (${spid:raw}) 
+temp_target.spid not in (${spid:raw})
 and icount(temp_target.cells) >= ${min_occ}
 order by epsilon desc;

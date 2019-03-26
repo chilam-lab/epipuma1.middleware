@@ -7,7 +7,8 @@ WITH cells_region AS (
 ),  
 temp_source as (
 	SELECT 
-		a.spid, 
+		-- a.spid, 
+		array_agg(distinct a.spid) as spid,
 		--array_agg(distinct a.gridid_16km ) as cells,
 		-- array_agg(distinct a.${res_celda_snib:raw}) as cells, 
 		array_agg(distinct a.${res_celda_snib:raw}) - (${discardedDeleted:raw}::integer[]+${source_cells:raw}::integer[])  as cells, 
@@ -24,11 +25,35 @@ temp_source as (
 	ON a.gid = b.gid
 	WHERE 
 		--a.spid = 27333
-		a.spid = ${spid} ${fossil:raw}
+		a.spid in (${spid:raw}) ${fossil:raw}
+		and 
+			(case when ${caso} = 1 
+				  then 
+						aniocolecta <> 9999
+				  when ${caso} = 2 
+				  then
+						aniocolecta >= cast( ${lim_inf}  as integer)
+						and 
+						aniocolecta <= cast( ${lim_sup} as integer)
+				  else
+				  		(
+							(
+							aniocolecta >= cast( ${lim_inf}  as integer)
+							and 
+							aniocolecta <= cast( ${lim_sup}  as integer)
+							)
+							or aniocolecta = 9999
+						)
+			end) = true
 		and a.especievalidabusqueda <> ''
-		--and 27333 is not NULL
-		and ${spid} is not null
-	GROUP BY a.spid
+		and a.spid is not null
+	group by true 
+	-- WHERE 
+	-- 	--a.spid = 27333
+	-- 	a.spid in (${spid:raw})  ${fossil:raw}
+	-- 	and a.especievalidabusqueda <> ''
+	-- 	and a.spid is not null
+	-- GROUP BY true
 ),
 temp_target as (
 	SELECT  
@@ -96,6 +121,6 @@ SELECT 	temp_target.spid,
 		) as numeric), 2) as score
 FROM temp_source,temp_target
 where 
-temp_target.spid <> ${spid}
+temp_target.spid not in (${spid:raw}) 
 and icount(temp_target.cells) >= ${min_occ}
 order by epsilon desc;
