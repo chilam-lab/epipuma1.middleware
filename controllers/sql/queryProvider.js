@@ -83,7 +83,8 @@ var queryProvider = {
     setLinkValues: sqlPath('especie/set_link_values.sql')
   },
   getValidationTables: {
-    createTables: sqlPath('especie/get_validation_tables.sql')
+    createTables: sqlPath('especie/get_validation_tables.sql'),
+    createGroupTables: sqlPath('especie/get_group_validation_tables.sql')
   },
   processValidationTables: {
     processTables: sqlPath('especie/process_validation_tables.sql')
