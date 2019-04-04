@@ -56,7 +56,7 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   data_request["min_occ"] = verb_utils.getParam(req, 'min_cells', 1)
   data_request["where_filter"] = verb_utils.getWhereClauseFilter(fosil, date, lim_inf, lim_sup, cells, data_request["res_celda_snib"])
 
-  var target_group = verb_utils.getParam(req, 'target_taxons', []); 
+  var target_group = verb_utils.getParam(req, 'target_taxons', []) 
   var where_target = verb_utils.getWhereClauseFromGroupTaxonArray(target_group, true)
   data_request["target_name"] = verb_utils.getParam(req, 'target_name', 'target_group')
   data_request["where_target"] = where_target
@@ -69,9 +69,10 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   data_request["get_grid_species"] = verb_utils.getParam(req, 'get_grid_species', false)
   data_request["apriori"] = verb_utils.getParam(req, 'apriori', false)
   data_request["mapa_prob"] = verb_utils.getParam(req, 'mapa_prob', false)
-  data_request["longitud"] = verb_utils.getParam(req, 'longitud', 0)
-  data_request["latitud"] = verb_utils.getParam(req, 'latitud', 0)
-
+  data_request["long"] = verb_utils.getParam(req, 'longitud', 0)
+  data_request["lat"] = verb_utils.getParam(req, 'latitud', 0)
+  data_request["title_valor"] = {'title': data_request["target_name"]}
+  
   var NIterations = verb_utils.getParam(req, 'iterations', iterations)
   var iter = 0
   var json_response = {}
@@ -145,15 +146,21 @@ function initialProcess(iter, total_iterations, data, res, json_response, req) {
 
         debug("analisis en celda")
 
-        debug("lat: " + data_request.latitud)
-        debug("long: " + data_request.longitud)
+        debug("long: " + data_request.long)
+        debug("lat: " + data_request.lat)
 
-        return t.one(queries.basicAnalysis.getGridIdByLatLong, data_request).then(resp => {
+        data_temp = {
+          'res_celda_snib'    : data_request.res_celda_snib, 
+          'res_celda_snib_tb' : data_request.res_grid_tbl,
+          'long'              : data_request.long,
+          'lat'               : data_request.lat
+        }
+
+        return t.one(queries.basicAnalysis.getGridIdByLatLong, data_temp).then(resp => {
 
               data_request["cell_id"] = resp.gridid
               debug("cell_id: " + data_request.cell_id)
-              debug("where_config: " + data_request.where_config)
-
+              
               return t.any(query_analysis, data_request)  
 
         })
@@ -164,8 +171,8 @@ function initialProcess(iter, total_iterations, data, res, json_response, req) {
 
          data_request["cell_id"] = 0
 
-         debug(JSON.parse(data_request.apriori))
-         debug(JSON.parse(data_request.mapa_prob))
+         //debug(JSON.parse(data_request.apriori))
+         //debug(JSON.parse(data_request.mapa_prob))
          if(JSON.parse(data_request.apriori) === true || JSON.parse(data_request.mapa_prob) === true) {
 
 
@@ -180,8 +187,8 @@ function initialProcess(iter, total_iterations, data, res, json_response, req) {
          } else {
 
           debug("analisis basico")
-          debug(query)
-          debug(data_request)
+          //debug(query)
+          //debug(data_request)
           return t.any(query_analysis, data_request)
 
          }
@@ -194,6 +201,8 @@ function initialProcess(iter, total_iterations, data, res, json_response, req) {
     })
 
   }).then(data_iteration => {
+
+      //debug(data_iteration)
 
       var data_response = {iter: (iter+1), data: data_iteration, test_cells: data_request["source_cells"], apriori: data_request.apriori, mapa_prob: data_request.mapa_prob }
       json_response["data_response"] = json_response["data_response"] === undefined ? [data_response] : json_response["data_response"].concat(data_response)
@@ -223,7 +232,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req) {
 
         if(total_iterations !== 1){
           debug("PROCESS RESULTS FOR VALIDATION")
-          data = verb_utils.processValidationData(json_response["data_response"])
+          data = verb_utils.processGroupValidationData(json_response["data_response"])
           validation_data = verb_utils.getValidationValues(json_response["data_response"])
           is_validation = true
         } else{
@@ -248,8 +257,11 @@ function initialProcess(iter, total_iterations, data, res, json_response, req) {
 
           cell_id = data_request.cell_id
           debug("cell_id last: " + cell_id)
-          data = verb_utils.processDataForCellId(data, apriori, mapa_prob, cell_id)
+          data = verb_utils.processGroupDataForCellId(data, apriori, mapa_prob, cell_id)
 
+          //debug('.........................................................')
+          //debug(data)
+          //debug('.........................................................')
         }
 
         debug("COMPUTE RESULT DATA FOR HISTOGRAMS")
