@@ -46,6 +46,7 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   var lim_sup = verb_utils.getParam(req, 'lim_sup', null)
   var cells = verb_utils.getParam(req, 'excluded_cells', [])
 
+  data_request["excluded_cells"] = cells
   data_request["region"] = region
   data_request["grid_resolution"] = grid_resolution
   data_request["res_celda"] = "cells_"+grid_resolution+"km"
@@ -57,12 +58,11 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   data_request["where_filter"] = verb_utils.getWhereClauseFilter(fosil, date, lim_inf, lim_sup, cells, data_request["res_celda_snib"])
 
   var target_group = verb_utils.getParam(req, 'target_taxons', []) 
-  var where_target = verb_utils.getWhereClauseFromGroupTaxonArray(target_group, true)
   data_request["target_name"] = verb_utils.getParam(req, 'target_name', 'target_group')
-  data_request["where_target"] = where_target
+  data_request["where_target"] = verb_utils.getWhereClauseFromGroupTaxonArray(target_group, true)
 
   var covars_groups = verb_utils.getParam(req, 'covariables', []) 
-  data_request['groups'] = verb_utils.getCovarGroupQueries(queries, data_request, covars_groups)
+  //data_request['groups'] = verb_utils.getCovarGroupQueries(queries, data_request, covars_groups)
 
   data_request["alpha"] = undefined
   data_request["idtabla"] = verb_utils.getParam(req, 'idtabla', "")
@@ -72,7 +72,10 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   data_request["long"] = verb_utils.getParam(req, 'longitud', 0)
   data_request["lat"] = verb_utils.getParam(req, 'latitud', 0)
   data_request["title_valor"] = {'title': data_request["target_name"]}
-  
+  data_request["with_data_freq"] = verb_utils.getParam(req, 'with_data_freq', false)
+  data_request["with_data_score_cell"] = verb_utils.getParam(req, 'with_data_score_cell', false)
+  data_request["with_data_freq_cell"] = verb_utils.getParam(req, 'with_data_freq_cell', false)
+   
   var NIterations = verb_utils.getParam(req, 'iterations', iterations)
   var iter = 0
   var json_response = {}
@@ -80,14 +83,14 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
 
   for(var iter = 0; iter<NIterations; iter++){
 
-    initialProcess(iter, NIterations, data_request, res, json_response, req)
+    initialProcess(iter, NIterations, data_request, res, json_response, req, covars_groups)
 
   }
 
 }
 
 
-function initialProcess(iter, total_iterations, data, res, json_response, req) {
+function initialProcess(iter, total_iterations, data, res, json_response, req, covars_groups) {
 
   debug('initialProcess')
   debug('iter:' + (iter + 1))
@@ -141,6 +144,14 @@ function initialProcess(iter, total_iterations, data, res, json_response, req) {
 
        // se genera query
        var query_analysis = queries.countsTaxonGroups.getCountsBase
+       //data_request["where_filter"] = verb_utils.getWhereClauseFilter(fosil, date, lim_inf, lim_sup, cells, data_request["res_celda_snib"])
+       //data_request["where_target"] = verb_utils.getWhereClauseFromGroupTaxonArray(target_group, true)
+       data_request['groups'] = verb_utils.getCovarGroupQueries(queries, data_request, covars_groups)
+
+       //debug("DEBUGGGGGGGGGGGG")
+       //const query1 = pgp.as.format(query_analysis, data_request)
+       //debug(query1)
+       //debug("DEBUGGGGGGGGGGGG")
 
        if( data_request["get_grid_species"] !== false ) {
 
@@ -202,6 +213,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req) {
 
   }).then(data_iteration => {
 
+      //debug("DEBUGGGGGGGGGGGG ")
       //debug(data_iteration)
 
       var data_response = {iter: (iter+1), data: data_iteration, test_cells: data_request["source_cells"], apriori: data_request.apriori, mapa_prob: data_request.mapa_prob }
@@ -258,16 +270,16 @@ function initialProcess(iter, total_iterations, data, res, json_response, req) {
           cell_id = data_request.cell_id
           debug("cell_id last: " + cell_id)
           data = verb_utils.processGroupDataForCellId(data, apriori, mapa_prob, cell_id)
-
-          //debug('.........................................................')
-          //debug(data)
-          //debug('.........................................................')
         }
 
         debug("COMPUTE RESULT DATA FOR HISTOGRAMS")
         var data_freq = data_request.with_data_freq === true ? verb_utils.processDataForFreqSpecie(data) : []
         var data_score_cell = data_request.with_data_score_cell === true ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob, data_request.all_cells, is_validation) : []
         var data_freq_cell = data_request.with_data_freq_cell === true ? verb_utils.processDataForFreqCell(data_score_cell) : []
+
+        //debug('.........................................................')
+        //debug(data)
+        //debug('.........................................................')
 
         res.json({
             ok: true,

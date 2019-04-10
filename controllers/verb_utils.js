@@ -1831,9 +1831,11 @@ verb_utils.getWhereClauseFromSpeciesArray = function (species_array){
 
 }
 
-verb_utils.getWhereClauseFilter = function(fosil, date, lim_inf, lim_sup, cells, gridid){
+verb_utils.getWhereClauseFilter = function(fosil, date, lim_inf, lim_sup, cells, gridid, footprint_region){
   
   debug("getWhereClauseFilter")  
+
+
 
   var c = false
   var whereClause = 'WHERE '
@@ -1868,7 +1870,7 @@ verb_utils.getWhereClauseFilter = function(fosil, date, lim_inf, lim_sup, cells,
   whereClause += gridid + ' is not null '
   whereClause += 'AND aniocolecta is not null '
 
-  debug(whereClause)
+  //debug(whereClause)
   return whereClause   
 
 }
@@ -1982,6 +1984,8 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
       query_covar = query_covar.toString().replace(/{name:raw}/g, group['name'])
       query_covar = query_covar.toString().replace(/{res_celda_sp:raw}/g, data_request["res_celda_sp"])
       query_covar = query_covar.toString().replace(/{where_covars:raw}/g, where_covar)
+      query_covar = query_covar.toString().replace(/{excluded_cells:raw}/g, data_request["excluded_cells"].toString())
+      query_covar = query_covar.toString().replace(/{total_cells:raw}/g, data_request["total_cells"].toString())
        
     } else {
 
@@ -2019,10 +2023,14 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
       query_covar = query_covar.toString().replace(/{where_covars:raw}/g, where_covar)
       query_covar = query_covar.toString().replace(/{region:raw}/g, data_request.region)
       query_covar = query_covar.toString().replace(/{res_celda_snib_tb:raw}/g, data_request.res_celda_snib_tb)
+      query_covar = query_covar.toString().replace(/{excluded_cells:raw}/g, data_request["excluded_cells"].toString())
+      query_covar = query_covar.toString().replace(/{total_cells:raw}/g, data_request["total_cells"].toString())
+
     }
     
   })
   
+  //debug(query_covar)
   return query_covar  
 }
 

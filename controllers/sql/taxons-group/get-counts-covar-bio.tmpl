@@ -1,5 +1,5 @@
 aux_{name:raw} as (
-	SELECT  {res_celda_sp:raw} as cells
+	SELECT ( {res_celda_sp:raw} - ( '{ {total_cells:raw} }'::integer[]) ) as cells
 			-- a.cells_16km_1 as cells
 	FROM sp_snib
 	{where_covars:raw}
