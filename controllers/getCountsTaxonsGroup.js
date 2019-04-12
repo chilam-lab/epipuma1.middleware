@@ -147,12 +147,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
        //data_request["where_filter"] = verb_utils.getWhereClauseFilter(fosil, date, lim_inf, lim_sup, cells, data_request["res_celda_snib"])
        //data_request["where_target"] = verb_utils.getWhereClauseFromGroupTaxonArray(target_group, true)
        data_request['groups'] = verb_utils.getCovarGroupQueries(queries, data_request, covars_groups)
-
-       //debug("DEBUGGGGGGGGGGGG")
-       //const query1 = pgp.as.format(query_analysis, data_request)
-       //debug(query1)
-       //debug("DEBUGGGGGGGGGGGG")
-
+       
        if( data_request["get_grid_species"] !== false ) {
 
         debug("analisis en celda")
@@ -198,8 +193,8 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
          } else {
 
           debug("analisis basico")
-          //debug(query)
-          //debug(data_request)
+          //const query1 = pgp.as.format(query_analysis, data_request)
+          //debug(query1)
           return t.any(query_analysis, data_request)
 
          }
@@ -212,9 +207,6 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
     })
 
   }).then(data_iteration => {
-
-      //debug("DEBUGGGGGGGGGGGG ")
-      //debug(data_iteration)
 
       var data_response = {iter: (iter+1), data: data_iteration, test_cells: data_request["source_cells"], apriori: data_request.apriori, mapa_prob: data_request.mapa_prob }
       json_response["data_response"] = json_response["data_response"] === undefined ? [data_response] : json_response["data_response"].concat(data_response)

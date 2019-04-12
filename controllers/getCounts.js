@@ -207,9 +207,6 @@ function initialProcess(iter, total_iterations, data, res, json_response, req) {
   })
   .then(data_iteration => {
     
-    //debug("DEBUGGGGGGGGGGGG ")
-    //debug(data_iteration)
-
     // TODO: agregar valores necesarios para validacion del data_request
     var data_response = {iter: (iter+1), data: data_iteration, test_cells: data_request["source_cells"], apriori: data_request.apriori, mapa_prob: data_request.mapa_prob }
     json_response["data_response"] = json_response["data_response"] === undefined ? [data_response] : json_response["data_response"].concat(data_response)

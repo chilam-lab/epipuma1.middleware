@@ -1981,11 +1981,13 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
 
       }
 
+      //debug(data_request["total_cells"])
+
       query_covar = query_covar.toString().replace(/{name:raw}/g, group['name'])
       query_covar = query_covar.toString().replace(/{res_celda_sp:raw}/g, data_request["res_celda_sp"])
       query_covar = query_covar.toString().replace(/{where_covars:raw}/g, where_covar)
       query_covar = query_covar.toString().replace(/{excluded_cells:raw}/g, data_request["excluded_cells"].toString())
-      query_covar = query_covar.toString().replace(/{total_cells:raw}/g, data_request["total_cells"].toString())
+      query_covar = query_covar.toString().replace(/{total_cells:raw}/g, data_request["total_cells"])
        
     } else {
 
@@ -2024,7 +2026,7 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
       query_covar = query_covar.toString().replace(/{region:raw}/g, data_request.region)
       query_covar = query_covar.toString().replace(/{res_celda_snib_tb:raw}/g, data_request.res_celda_snib_tb)
       query_covar = query_covar.toString().replace(/{excluded_cells:raw}/g, data_request["excluded_cells"].toString())
-      query_covar = query_covar.toString().replace(/{total_cells:raw}/g, data_request["total_cells"].toString())
+      query_covar = query_covar.toString().replace(/{total_cells:raw}/g, data_request["total_cells"])
 
     }
     
