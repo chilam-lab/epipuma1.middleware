@@ -1831,48 +1831,37 @@ verb_utils.getWhereClauseFromSpeciesArray = function (species_array){
 
 }
 
-verb_utils.getWhereClauseFilter = function(fosil, date, lim_inf, lim_sup, cells, gridid, footprint_region){
+verb_utils.getWhereClauseFilter = function(fosil, date, lim_inf, lim_sup, cells, gridid, footprint_region, gid){
   
   debug("getWhereClauseFilter")  
 
+  var whereClause = 'WHERE ('
 
-
-  var c = false
-  var whereClause = 'WHERE '
+  gid.forEach(function(gid, index){
+    if(index === 0)
+      whereClause += 'gid = ' + gid + ' '
+    else 
+      whereClause += 'OR gid = ' + gid + ' '
+  })
+  whereClause += ') '
 
   if(!fosil){
-    whereClause += "ejemplarfosil <> 'SI' "
-    c = true
+    whereClause += "AND ejemplarfosil <> 'SI' "
   }
-
 
   if(date) {
-
-    if(c)
-      whereClause += 'AND '
-
-    whereClause += 'aniocolecta >= ' + lim_inf + ' AND  aniocolecta <= ' + lim_sup + ' '
-    c = true
+    whereClause += 'AND aniocolecta >= ' + lim_inf + ' AND  aniocolecta <= ' + lim_sup + ' '
   }
 
-  cells.forEach( function(cell, index)  {
-    
-    if(c)
-      whereClause += 'AND '
-    
-    whereClause += gridid + ' <> ' + cell + ' ' 
-    c = true
+  cells.forEach(function(cell, index){
+    whereClause += 'AND ' + gridid + ' <> ' + cell + ' ' 
   })
 
-  if(c)
-    whereClause += 'AND '
+  whereClause += 'AND ' + gridid + ' is not null '
+  //whereClause += 'AND aniocolecta is not null '
 
-  whereClause += gridid + ' is not null '
-  whereClause += 'AND aniocolecta is not null '
-
-  //debug(whereClause)
+  debug(whereClause)
   return whereClause   
-
 }
 
 verb_utils.getWhereClauseFromGroupTaxonArray = function (taxon_array, target){

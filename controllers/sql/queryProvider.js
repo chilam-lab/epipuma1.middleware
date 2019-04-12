@@ -279,9 +279,10 @@ var queryProvider = {
   },
 
   subaoi: {
-    getSubAOI : sqlPath('subAOI/getSubAOI.sql'), 
-    getAvailableCountries : sqlPath('subAOI/getAvailableCountries.sql'),
-    getAvailableCountriesFootprint : sqlPath('subAOI/getAvailableCountriesFootprint.sql') 
+    getSubAOI: sqlPath('sub-aoi/get-sub-aoi.sql'), 
+    getAvailableCountries: sqlPath('sub-aoi/get-available-countries.sql'),
+    getAvailableCountriesFootprint: sqlPath('sub-aoi/get-available-countries-footprint.sql'),
+    getCountriesRegion: sqlPath('sub-aoi/get-countries-region.sql')
 
     
   },

@@ -55,7 +55,6 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   data_request["res_celda_snib_tb"] = "grid_geojson_" + grid_resolution + "km_aoi"
   data_request["res_grid_tbl"] = "grid_" + data_request.grid_resolution + "km_aoi"
   data_request["min_occ"] = verb_utils.getParam(req, 'min_cells', 1)
-  data_request["where_filter"] = verb_utils.getWhereClauseFilter(fosil, date, lim_inf, lim_sup, cells, data_request["res_celda_snib"])
 
   var target_group = verb_utils.getParam(req, 'target_taxons', []) 
   data_request["target_name"] = verb_utils.getParam(req, 'target_name', 'target_group')
@@ -80,12 +79,25 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   var iter = 0
   var json_response = {}
 
+  pool.task(t => {
 
-  for(var iter = 0; iter<NIterations; iter++){
+    var query = queries.subaoi.getCountriesRegion  
 
-    initialProcess(iter, NIterations, data_request, res, json_response, req, covars_groups)
+    return t.one(query, data_request).then(resp => {
 
-  }
+      data_request["gid"] = resp.gid
+      //debug(data_request["gid"])
+      data_request["where_filter"] = verb_utils.getWhereClauseFilter(fosil, date, lim_inf, lim_sup, cells, data_request["res_celda_snib"], data_request["region"], data_request["gid"])
+      
+      for(var iter = 0; iter<NIterations; iter++){
+
+        initialProcess(iter, NIterations, data_request, res, json_response, req, covars_groups)
+
+      }
+
+    })
+
+  })
 
 }
 
@@ -199,8 +211,6 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
          }
 
-
-
        }
 
 
@@ -268,10 +278,6 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
         var data_freq = data_request.with_data_freq === true ? verb_utils.processDataForFreqSpecie(data) : []
         var data_score_cell = data_request.with_data_score_cell === true ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob, data_request.all_cells, is_validation) : []
         var data_freq_cell = data_request.with_data_freq_cell === true ? verb_utils.processDataForFreqCell(data_score_cell) : []
-
-        //debug('.........................................................')
-        //debug(data)
-        //debug('.........................................................')
 
         res.json({
             ok: true,
