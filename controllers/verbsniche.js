@@ -668,6 +668,59 @@ exports.getValidationTables = function (req, res, next) {
 
 }
 
+/**
+*
+* Servidor Niche: getValidationTables
+*
+*
+* @param {express.Request} req
+* @param {express.Response} res
+*
+*/
+exports.getGroupValidationTables = function (req, res, next) {
+
+  debug('getValidationTables')
+
+  var target_group = verb_utils.getParam(req, 'target_taxons', [])
+  var filter = verb_utils.getWhereClauseFromGroupTaxonArray(target_group, true).replace('WHERE', '')
+  filter = filter.replace(new RegExp("\'", 'g'), "\'\'")
+  var iter = getParam(req, 'iter')
+  debug(filter)
+  var idtbl =  'tbl_' + new Date().getTime() //getParam(req, 'idtable')
+  //var idtbl =  't01'
+
+  debug(idtbl)
+  var iter = getParam(req, 'iterations',iterations)
+
+  var footprint_region = parseInt(getParam(req, 'footprint_region', default_region))
+
+  var grid_resolution = verb_utils.getParam(req, 'grid_res',16)
+  var res_celda_sp =  'cells_'+grid_resolution+'km'
+  var res_celda_snib_tb = 'grid_geojson_'+grid_resolution+'km_aoi'
+
+  pool.any(queries.getValidationTables.createGroupTables, {
+    filter: filter,
+    iterations: iter,
+    idtbl: idtbl,
+    res_celda_sp: res_celda_sp,
+    res_celda_snib_tb: res_celda_snib_tb,
+    region: footprint_region
+  })
+        .then(function (data) {
+
+          var item = data[0]
+          item['tblname'] = idtbl
+          debug(data)
+
+          res.json({'data': data})
+        })
+        .catch(function (error) {
+          debug(error)
+          next(error)
+        })
+
+}
+
 
 
 /**

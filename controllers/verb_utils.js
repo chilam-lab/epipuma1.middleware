@@ -704,6 +704,97 @@ verb_utils.processDataForScoreDecilTable = function (data_cell, decil_selected){
 
 }
 
+verb_utils.processGroupDataForCellId = function (data, apriori, mapa_prob, gridid) {
+
+  debug("processGroupDataForCellId") 
+  //debug(data)
+  
+  var info_incell = {}
+  var val_apriori = 0
+  var val_mapa_prob = 0
+  var groups_incell = []
+  var tscore = 0
+  var positives = 0
+  var negatives = 0
+  var bios = 0
+  var raster = 0
+  var hasbio = false
+  var hasraster = false
+
+  debug("apriori: " + apriori)
+  debug("mapa_prob: " + mapa_prob)
+
+  if(apriori || mapa_prob){
+
+    val_apriori = parseFloat(Math.log(data[0].ni / (data[0].n- data[0].ni)).toFixed(2)) 
+    info_incell.apriori = val_apriori
+
+    debug("val_apriori: " + val_apriori)
+  }  
+
+  var groups = data.map(function(d) {
+    if(d.cells.indexOf(gridid) !== -1){
+      
+      var type = d.tipo === 0 ? "bio" : "raster"
+
+      if(type === "bio") 
+        hasbio = true
+      else
+        hasraster = true
+      
+      return {
+        score: parseFloat(d.score), group: d.name, type: type
+      }
+
+    }
+  })
+
+
+  groups.forEach(function (item, index){
+    if(item){
+
+      bios = item.type === "bio" ? bios+1 : bios
+      raster = item.type === "raster" ? raster+1 : raster
+      positives = item.score >= 0 ? positives+1 : positives
+      negatives = item.score < 0 ? negatives+1 : negatives
+
+      groups_incell.push({name:item.group, score: item.score, type: item.type})
+      tscore = tscore + item.score  
+
+    }
+  })
+
+  info_incell.tscore = parseFloat((tscore).toFixed(2));
+  info_incell.bios = bios;
+  info_incell.raster = raster;
+  info_incell.positives = positives;
+  info_incell.negatives = negatives;
+  info_incell.groups = groups_incell;
+  info_incell.hasbio = hasbio;
+  info_incell.hasraster = hasraster;
+
+  if(mapa_prob){
+
+    if(tscore <= verb_utils.minscore){
+      tscore = 0
+    }
+    else if(tscore >= verb_utils.maxscore){
+      tscore = 1 
+    } else{
+      var fscore = tscore+val_apriori
+      val_mapa_prob = Math.exp(fscore) /  (1+Math.exp(fscore))
+    }
+
+    info_incell.mapa_prob = parseFloat((val_mapa_prob*100).toFixed(2))
+    debug("mapa_prob: " + val_mapa_prob)
+  }
+
+  //debug(info_incell)
+
+  return info_incell
+
+}
+
 verb_utils.processDataForCellId = function (data, apriori, mapa_prob, gridid){
 
   var info_incell = {}
@@ -800,11 +891,13 @@ verb_utils.processDataForCellId = function (data, apriori, mapa_prob, gridid){
 
 verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, all_cells = [], isvalidation = false){
 
+  debug("processDataForScoreCell")
   // debug("isvalidation: " + isvalidation)
   var cells_array = isvalidation ? data.map(function(d) {return {cells: d.cells_map, score: parseFloat(d.score)}}) : data.map(function(d) {return {cells: d.cells, score: parseFloat(d.score)}})
   // var cells_array = data.map(function(d) {return {cells: d.cells_map, score: parseFloat(d.score)}})
-  // debug(all_cells)
 
+
+  // se obtiene cada celda con su score
   var cells = []
   cells_array.forEach(function (item, index){
     item.cells.forEach(function (cell_item, index){
@@ -1186,11 +1279,67 @@ verb_utils.generateFrequencyBeans = function (data_bucket, funcRange, paramType,
   return data_freq;
 }
 
+verb_utils.getGroupValidationValues = function(data_group) {
+
+  debug("getGroupValidationValues")
+
+  var result_test_cells = []
+
+  data_group.forEach(function(item, index) {
+    
+    var apriori = item.apriori !== false && item.data[0].ni !== undefined ? true : false
+    var mapa_prob = item.mapa_prob !== false && item.data[0].ni !== undefined ? true : false
+    var train_cells = verb_utils.processDataForScoreCell(item.data, apriori, mapa_prob, [], false)
+    var temp_map = d3.map([])
+    
+    train_cells.forEach(function(item){
+      temp_map.set(item.gridid, item.tscore)
+    })
+    
+    // obtiene el score por celda del conjunto de test
+    var temp_values = []
+    item.test_cells.forEach(function(cell_item){
+    
+      var temp_value = {}
+      temp_value.cell = cell_item
+
+      if(temp_map.has(cell_item)){
+        temp_value.score = temp_map.get(cell_item)
+      }
+      else{
+        temp_value.score = 0 
+      }
+      temp_values.push(temp_value)
+
+    })
+
+    //debug(item)
+
+    // obtiene los deciles para obtener las métricas basados en lso resultados del conjunto de test
+    var num_deciles = 11
+
+    var min_scr = d3.min(item.data.map(function(d) {return parseFloat(d.score);}));
+    // debug("min_scr: " + min_scr)  
+    
+    var max_scr = d3.max(item.data.map(function(d) {return parseFloat(d.score);}));
+    // debug("max_scr: " + max_scr)    
+    
+  })
+
+  //debug('............................................')
+  //debug()
+  //debug('............................................')  
+
+
+  return null
+}
+
 verb_utils.getValidationValues = function (data_group){
 
   debug("getValidationValues")
 
-  
+  //debug(data_group)
+
   var result_test_cells = []
 
   // obteniendo el score de las celdas del conjunto test basado en los resultados del conjunto train
@@ -1358,8 +1507,103 @@ verb_utils.getValidationValues = function (data_group){
 
 }
 
+verb_utils.processGroupValidationData = function(data_group) {
+
+  debug("processGroupValidationData")
+  
+  var avgdata = []
+  var data = []
+
+  var data_map = data_group.map(function(d) {return  d.data})
+
+
+  data_map.forEach(function(item) {
+    
+    data = data.concat(item)
+
+  })
+  
+  //debug(data)
+  
+  var cross_group = crossfilter(data)
+  cross_group.groupAll()
+  //debug(cross_group)
+
+  var name_dimension = cross_group.dimension(function(d) { return d.name; })  
+
+  var group_by_name = name_dimension.group().reduce(
+    function(item, add){
+      ++item.count
+      item.cells = add.cells
+      item.cells_map = item.cells_map.concat(add.cells) 
+      item.nij = add.nij
+      item.nj = add.nj
+      item.ni = add.ni
+      item.n = add.n
+      item.epsilon = parseFloat(add.epsilon) 
+      item.score = parseFloat(add.score)
+      item.tipo = add.tipo
+      return item
+    },
+    function(item,remove){
+      --item.count
+      item.cells = item.cells //remove.cells //
+      item.cells_map = item.cells_map
+      item.nij = item.nij
+      item.nj = item.nj
+      item.ni = item.ni
+      item.n = item.n
+      item.epsilon =  parseFloat(item.epsilon) 
+      item.score = parseFloat(item.score)
+      item.tipo = item.tipo
+      return item
+    },
+    function(){
+      return {
+        count: 0,
+        cells: [],
+        cells_map: [],
+        nij: 0,
+        nj: 0,
+        ni: 0,
+        n: 0,
+        epsilon: 0,
+        score: 0,
+        tipo: 0
+      }
+    }
+  )
+
+  var reduced_data = group_by_name.top(Infinity);
+
+  var data_result = []
+
+  for(var i=0; i<reduced_data.length; i++){
+      var entry = reduced_data[i];
+      data_result.push({
+        name: entry["key"], 
+        cells: entry["value"].cells,
+        cells_map: entry["value"].cells_map,
+        nij: parseFloat((entry["value"].nij ).toFixed(2)),
+        nj: parseFloat((entry["value"].nj ).toFixed(2)),
+        ni: parseFloat((entry["value"].ni ).toFixed(2)),
+        n: parseFloat((entry["value"].n ).toFixed(2)),
+        epsilon: parseFloat((entry["value"].epsilon).toFixed(2)),
+        score: parseFloat((entry["value"].score).toFixed(2)),
+        tipo: entry["value"].tipo
+      })
+  }
+
+  //debug('............................................')
+  //debug(data_result)
+  //debug('............................................')
+
+  return data_result
+}
 
 verb_utils.processValidationData = function (data_group){
+
+  debug("processValidationData")
 
   var avgdata = {}
   var data = []
@@ -1587,46 +1831,37 @@ verb_utils.getWhereClauseFromSpeciesArray = function (species_array){
 
 }
 
-verb_utils.getWhereClauseFilter = function(fosil, date, lim_inf, lim_sup, cells, gridid){
+verb_utils.getWhereClauseFilter = function(fosil, date, lim_inf, lim_sup, cells, gridid, footprint_region, gid){
   
   debug("getWhereClauseFilter")  
 
-  var c = false
-  var whereClause = 'WHERE '
+  var whereClause = 'WHERE ('
+
+  gid.forEach(function(gid, index){
+    if(index === 0)
+      whereClause += 'gid = ' + gid + ' '
+    else 
+      whereClause += 'OR gid = ' + gid + ' '
+  })
+  whereClause += ') '
 
   if(!fosil){
-    whereClause += "ejemplarfosil <> 'SI' "
-    c = true
+    whereClause += "AND ejemplarfosil <> 'SI' "
   }
-
 
   if(date) {
-
-    if(c)
-      whereClause += 'AND '
-
-    whereClause += 'aniocolecta >= ' + lim_inf + ' AND  aniocolecta <= ' + lim_sup + ' '
-    c = true
+    whereClause += 'AND aniocolecta >= ' + lim_inf + ' AND  aniocolecta <= ' + lim_sup + ' '
   }
 
-  cells.forEach( function(cell, index)  {
-    
-    if(c)
-      whereClause += 'AND '
-    
-    whereClause += gridid + ' <> ' + cell + ' ' 
-    c = true
+  cells.forEach(function(cell, index){
+    whereClause += 'AND ' + gridid + ' <> ' + cell + ' ' 
   })
 
-  if(c)
-    whereClause += 'AND '
-
-  whereClause += gridid + ' is not null '
-  whereClause += 'AND aniocolecta is not null '
+  whereClause += 'AND ' + gridid + ' is not null '
+  //whereClause += 'AND aniocolecta is not null '
 
   debug(whereClause)
   return whereClause   
-
 }
 
 verb_utils.getWhereClauseFromGroupTaxonArray = function (taxon_array, target){
@@ -1735,9 +1970,13 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
 
       }
 
+      //debug(data_request["total_cells"])
+
       query_covar = query_covar.toString().replace(/{name:raw}/g, group['name'])
       query_covar = query_covar.toString().replace(/{res_celda_sp:raw}/g, data_request["res_celda_sp"])
       query_covar = query_covar.toString().replace(/{where_covars:raw}/g, where_covar)
+      query_covar = query_covar.toString().replace(/{excluded_cells:raw}/g, data_request["excluded_cells"].toString())
+      query_covar = query_covar.toString().replace(/{total_cells:raw}/g, data_request["total_cells"])
        
     } else {
 
@@ -1749,23 +1988,23 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
 
         if(size === 1) {
           query_covar = query_covar.toString().replace(/{groups}/g, "," + queries.countsTaxonGroups.getCountsCovars.toString())
-          query_covar = query_covar.toString().replace(/{groups}/g, co + group['name'])
+          query_covar = query_covar.toString().replace(/{groups}/g, coa + group['name'])
         } else {
 
-          cov = co + group['name']
+          cov = coa + group['name']
 
         }
 
       } else if(index === size - 1){
 
-        cov += " UNION " + co + group['name']
+        cov += " UNION " + coa + group['name']
         query_covar = query_covar.toString().replace(/{groups}/g, ", " + queries.countsTaxonGroups.covarAbioGroup.toString())
         query_covar = query_covar.toString().replace(/{groups}/g, ", " + queries.countsTaxonGroups.getCountsCovars.toString())
         query_covar = query_covar.toString().replace(/{groups}/g, cov)
 
       }else {
 
-        cov += " UNION " + co + group['name']
+        cov += " UNION " + coa + group['name']
         query_covar = query_covar.toString().replace(/{groups}/g, ", " + queries.countsTaxonGroups.covarAbioGroup.toString())
 
       }
@@ -1775,10 +2014,14 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
       query_covar = query_covar.toString().replace(/{where_covars:raw}/g, where_covar)
       query_covar = query_covar.toString().replace(/{region:raw}/g, data_request.region)
       query_covar = query_covar.toString().replace(/{res_celda_snib_tb:raw}/g, data_request.res_celda_snib_tb)
+      query_covar = query_covar.toString().replace(/{excluded_cells:raw}/g, data_request["excluded_cells"].toString())
+      query_covar = query_covar.toString().replace(/{total_cells:raw}/g, data_request["total_cells"])
+
     }
     
   })
   
+  //debug(query_covar)
   return query_covar  
 }
 

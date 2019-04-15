@@ -1,5 +1,6 @@
 aux_{name:raw} as (
-	SELECT  a.{res_celda:raw} & b.cells as cells
+	SELECT  ((a.{res_celda:raw} & b.cells) - ({excluded_cells:raw} ::integer[] +
+				{source_cells:raw} ::integer[])) as cells
 			-- a.cells_16km & b.cells as cells
 	FROM raster_bins AS a, {res_celda_snib_tb:raw} AS b
 	{where_covars:raw}

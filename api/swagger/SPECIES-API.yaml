@@ -467,3 +467,18 @@ paths:
         - url: 'http://species.conabio.gob.mx'
     servers:
       - url: 'http://species.conabio.gob.mx'
+  /api-db-dev/niche/especie/getAvailableCountriesFootprint:
+    get:
+      description: Auto generated using Swagger Inspector
+      responses:
+        '200':
+          description: Auto generated using Swagger Inspector
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+              examples: {}
+      servers:
+        - url: 'http://species.conabio.gob.mx'
+    servers:
+      - url: 'http://species.conabio.gob.mx'

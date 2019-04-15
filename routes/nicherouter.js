@@ -217,7 +217,7 @@ router.route('/countsByGroup')
 router.route('/countsTaxonsGroup')
   // .get(mdAtenticacion.validaToken, getCounts.getBasicInfo)
   // .post(mdAtenticacion.validaToken, getCounts.getBasicInfo)
-  .get(getCountsTaxonsGroup.getTaxonsGroupRequest)
-  .post(getCountsTaxonsGroup.getTaxonsGroupRequest)
+  .get(getCountsTaxonsGroup.getTaxonsGroupRequestV2)
+  .post(getCountsTaxonsGroup.getTaxonsGroupRequestV2)
 
 module.exports = router
