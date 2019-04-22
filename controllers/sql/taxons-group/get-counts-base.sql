@@ -1,5 +1,5 @@
 WITH aux_target AS (
-	SELECT DISTINCT b.${res_celda_snib:raw} AS cell
+	SELECT DISTINCT b.${res_celda_snib:raw} AS cells
 	FROM snib AS b
 	JOIN 
 		(
@@ -16,8 +16,8 @@ WITH aux_target AS (
 	${where_filter:raw}
 ), target AS (
 	SELECT '${target_name:raw}' as target_name,
-	   array_agg(distinct a.cell) as cells,
-	   array_length(array_agg(distinct a.cell),1) as ni
+	   (array_agg(a.cells) - (${excluded_cells:raw}::integer[] + ${source_cells:raw}::integer[])) as cells,
+	   array_length(array_agg(a.cells) - (${excluded_cells:raw}::integer[] + ${source_cells:raw}::integer[]),1) as ni
 	FROM aux_target as a
 ),${groups:raw}
 SELECT 	target.target_name as target_name,
@@ -27,7 +27,7 @@ SELECT 	target.target_name as target_name,
 		covars.nj AS nj,
 		target.ni AS ni,
 		covars.tipo,
-		${N} as n,
+		${N} - icount( ${excluded_cells:raw} ::integer[] +  ${total_cells:raw} ::integer[] + ${source_cells:raw}::integer[] ) as n,
 		--9873 as n,
 		round( cast( 
 			get_epsilon(
@@ -36,7 +36,7 @@ SELECT 	target.target_name as target_name,
 				cast( covars.nj as integer),
 				cast( icount(target.cells & covars.cells) as integer),
 				cast( target.ni as integer),
-				cast( ${N} as integer)
+				cast( ${N} - icount( ${excluded_cells:raw} ::integer[] +  ${total_cells:raw} ::integer[] + ${source_cells:raw}::integer[] ) as integer)
 				--cast( 9873 as integer)
 			)as numeric), 2)  as epsilon,
 		round( cast(  ln(   
@@ -46,7 +46,7 @@ SELECT 	target.target_name as target_name,
 				cast( covars.nj as integer),
 				cast( icount(target.cells & covars.cells) as integer),
 				cast( target.ni as integer),
-				cast( ${N} as integer)
+				cast( ${N} - icount( ${excluded_cells:raw} ::integer[] +  ${total_cells:raw} ::integer[] + ${source_cells:raw}::integer[] ) as integer)
 				--cast( 9873 as integer)
 			)
 		) as numeric), 2) as score
