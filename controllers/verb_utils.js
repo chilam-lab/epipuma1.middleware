@@ -13,6 +13,9 @@ var pgp = require('pg-promise')()
 var config = require('../config')
 var crossfilter = require('crossfilter')
 var d3 = require('d3')
+var map_taxon = new Map()
+
+
 // var pool= pgp(config.db)
 
 /**
@@ -36,6 +39,21 @@ deciles = 10
 verb_utils.region_mx = 1
 verb_utils.min_occ = 5
 verb_utils.type_taxon = 0
+
+map_taxon.set("reino", "reinovalido");
+map_taxon.set("kingdom", "reinovalido");
+map_taxon.set("phylum", "phylumdivisionvalido");
+map_taxon.set("clase", "clasevalida");
+map_taxon.set("class", "clasevalida");
+map_taxon.set("orden", "ordenvalido");
+map_taxon.set("order", "ordenvalido");
+map_taxon.set("familia", "familiavalida");
+map_taxon.set("family", "familiavalida");
+map_taxon.set("genero", "generovalido");
+map_taxon.set("genus", "generovalido");
+map_taxon.set("especie", "especievalidabusqueda");
+map_taxon.set("species", "especievalidabusqueda");
+
 
 
 
@@ -793,6 +811,28 @@ verb_utils.processDataForCellId = function (data, apriori, mapa_prob, gridid){
 
   // debug(info_incell)
   return info_incell;
+
+
+}
+
+
+verb_utils.procesaTaxones = function(array_taxines){
+
+  var where_clause = ""
+
+  array_taxines.forEach(function (item, index){
+
+      if(index === 0)
+        where_clause += map_taxon.get(item.taxon.toLowerCase()) + " = '" + item.value + "' "
+      else
+        where_clause += " OR " + map_taxon.get(item.taxon.toLowerCase()) + " = '" + item.value + "' "
+    
+  })
+
+  debug(where_clause)
+
+  return where_clause
+
 
 
 }

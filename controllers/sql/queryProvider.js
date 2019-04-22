@@ -111,7 +111,9 @@ var queryProvider = {
     getSpeciesR: sqlPath('especie/getSpecies_range.sql'),
     getSpeciesArrayR: sqlPath('especie/getSpeciesArray_range.sql'),
     getSpeciesSDR: sqlPath('especie/getSpecies_sdr.sql'),
-    getSpeciesArraySDR: sqlPath('especie/getSpeciesArray_sdr.sql')
+    getSpeciesArraySDR: sqlPath('especie/getSpeciesArray_sdr.sql'),
+    getSpeciesTaxonArray: sqlPath('especie/getSpeciesTaxonArray.sql')
+
   },
   getEntListNiche: {
     getEntList: sqlPath('especie/getEntList.sql'),

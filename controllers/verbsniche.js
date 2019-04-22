@@ -537,7 +537,7 @@ exports.getToken = function (req, res, next) {
   // var tipo = getParam(req, 'tipo')
   // var params = getParam(req, 'confparams')
 
-  var spid = getParam(req, 'id')
+  var spid = getParam(req, 'id', [])
   var label = getParam(req, 'label')
   var val_process = getParam(req, 'val_process')
   // var idtabla = getParam(req, 'idtabla')
@@ -557,7 +557,7 @@ exports.getToken = function (req, res, next) {
 
   var link_str = "";
 
-  link_str += "sp_data=" + JSON.stringify({"spid": parseInt(spid), "label":label}) + "&"
+  link_str += "sp_data=" + JSON.stringify({"spid": spid.toString(), "label":label}) + "&"
   link_str += "chkVal=" + val_process + "&"
   // link_str += "idtabla=" + idtabla + "&"
   link_str += "chkPrb=" + mapa_prob + "&"
@@ -1396,6 +1396,173 @@ exports.getSpeciesArrayNiche = function (req, res, next) {
 }
 
 
+/**
+ *
+ * Servidor Niche: getSpeciesTaxonNiche
+ *
+ * Obtiene las ocurrencias bioticas que coinciden con taxones recibidos
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ *
+ */
+
+
+exports.getSpeciesTaxonNiche = function (req, res, next) {
+
+      debug("getSpeciesTaxonNiche")
+      var startTime = process.hrtime();
+
+      var taxones           = getParam(req, 'taxones', [])
+      var sfecha            = getParam(req, 'sfecha', false)
+      var sfosil            = getParam(req, 'sfosil', false)
+      var lb_fosil = sfosil === "false" || sfosil === false ? " and (ejemplarfosil <> 'SI' or ejemplarfosil is null) " : "";
+      var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+      var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+      var res_celda = getParam(req, 'res_celda', "gridid_16km")
+      var footprint_region    = parseInt(getParam(req, 'footprint_region',default_region))
+
+      var grid_resolution = getParam(req, 'grid_res',16)
+      var res_celda_sp =  "cells_"+grid_resolution+"km"   
+      var res_celda_snib =  "gridid_"+grid_resolution+"km" 
+      var res_celda_snib_tb = "grid_geojson_"+grid_resolution+"km_aoi" 
+
+      debug(taxones)
+      var str_taxones = verb_utils.procesaTaxones(taxones);
+      // debug(str_taxones)
+
+      // debug(spids.toString())
+
+      // debug(sfecha)
+      // debug(sfosil)
+      // debug(grid_resolution)
+      // debug(fecha_incio)
+      // debug(fecha_fin)
+      // debug(footprint_region)
+      
+      debug('Antes de obtener N en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
+
+      pool.task(t => {
+
+          // if( (parseInt(fecha_incio.format('YYYY')) != 1500 || parseInt(fecha_fin.format('YYYY')) != parseInt(moment().format('YYYY')) ) && sfecha === 'false'){
+          //   debug('CASO: rango y sin fecha')
+          //   // debug("res_celda: " + res_celda)
+          //   // debug("res_celda_sp: " + res_celda_sp)
+          //   // debug("res_celda_snib: " + res_celda_snib)
+          //   // debug("res_celda_snib_tb: " + res_celda_snib_tb)
+          //   // debug("lb_fosil: " + lb_fosil)
+          //   // debug("footprint_region: " + footprint_region)
+
+          //   debug('Antes de ejecutar query en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
+
+          //   return t.any(queries.getSpeciesNiche.getSpeciesArraySDR, {
+          //     spids: spids.toString(),
+          //     lim_inf: fecha_incio.format('YYYY'),
+          //     lim_sup: fecha_fin.format('YYYY'),
+          //     res_celda: res_celda,
+          //     res_celda_sp: res_celda_sp,
+          //     res_celda_snib: res_celda_snib,
+          //     res_celda_snib_tb: res_celda_snib_tb,
+          //     sfosil: lb_fosil,
+          //     region: footprint_region
+          //   })
+                  
+          // }
+          // else if( parseInt(fecha_incio.format('YYYY')) == 1500 && parseInt(fecha_fin.format('YYYY')) == parseInt(moment().format('YYYY'))  && sfecha === 'false'){
+          //   debug('CASO: solo sin fecha')
+          //   // debug("res_celda: " + res_celda)
+          //   // debug("res_celda_sp: " + res_celda_sp)
+          //   // debug("res_celda_snib: " + res_celda_snib)
+          //   // debug("res_celda_snib_tb: " + res_celda_snib_tb)
+          //   // debug("lb_fosil: " + lb_fosil)
+          //   // debug("footprint_region: " + footprint_region)
+
+          //   debug('Antes de ejecutar query en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
+
+            
+          //   //return t.any(queries.getSpeciesNiche.getSpeciesSD, {
+          //   return t.any(queries.getSpeciesNiche.getSpeciesArraySD, {
+          //     spids: spids.toString(),
+          //     res_celda: res_celda,
+          //     res_celda_sp: res_celda_sp,
+          //     res_celda_snib: res_celda_snib,
+          //     res_celda_snib_tb: res_celda_snib_tb,
+          //     sfosil: lb_fosil,
+          //     region: footprint_region
+          //   })
+                  
+          // }
+          // else if( parseInt(fecha_incio.format('YYYY')) != 1500 || parseInt(fecha_fin.format('YYYY')) != parseInt(moment().format('YYYY')) ){
+          //   debug('CASO: solo rango')
+          //   // debug("res_celda: " + res_celda)
+          //   // debug("res_celda_sp: " + res_celda_sp)
+          //   // debug("res_celda_snib: " + res_celda_snib)
+          //   // debug("res_celda_snib_tb: " + res_celda_snib_tb)
+          //   // debug("lb_fosil: " + lb_fosil)
+          //   // debug("footprint_region: " + footprint_region)
+
+          //   debug('Antes de ejecutar query en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
+
+          //   return t.any(queries.getSpeciesNiche.getSpeciesArrayR, {
+          //     spids: spids.toString(),
+          //     lim_inf: fecha_incio.format('YYYY'),
+          //     lim_sup: fecha_fin.format('YYYY'),
+          //     res_celda: res_celda,
+          //     res_celda_sp: res_celda_sp,
+          //     res_celda_snib: res_celda_snib,
+          //     res_celda_snib_tb: res_celda_snib_tb,
+          //     sfosil: lb_fosil,
+          //     region: footprint_region
+          //   })
+                  
+          // }
+          // else{
+            debug('CASO: sin filtros')
+            // debug("res_celda: " + res_celda)
+            // debug("res_celda_sp: " + res_celda_sp)
+            // debug("res_celda_snib: " + res_celda_snib)
+            // debug("res_celda_snib_tb: " + res_celda_snib_tb)
+            // debug("lb_fosil: " + lb_fosil)
+            // debug("footprint_region: " + footprint_region)
+
+            debug('Antes de ejecutar query en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
+            
+            return t.any(queries.getSpeciesNiche.getSpeciesTaxonArray, {
+              taxones: str_taxones,
+              res_celda: res_celda,
+              res_celda_sp: res_celda_sp,
+              res_celda_snib: res_celda_snib,
+              res_celda_snib_tb: res_celda_snib_tb,
+              sfosil: lb_fosil,
+              region: footprint_region
+            })
+                  
+          // }
+
+          
+
+      })
+      .then(data => {
+
+          debug('Query ejecutada, (antes de enviar respuesta) en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
+
+          // debug(data)
+
+          res.json({'data': data})
+
+      })
+      .catch(error => {
+          debug(error)
+
+          return res.json({
+            ok: false,
+            error: error
+          });
+      });
+
+}
+
+
 
 
 
@@ -1421,6 +1588,7 @@ exports.getEntListByTaxonNiche = function (req, res, next) {
     
     var str       = getParam(req, 'searchStr')
     var has_limit = parseInt(getParam(req, 'limit', false))
+    has_limit = false // se elimina limite en autocomplete
     var source    = parseInt(getParam(req, 'source'))
     var region    = parseInt(getParam(req, 'footprint_region',default_region))
     var nivel     = getParam(req, 'nivel', min_taxon_name)

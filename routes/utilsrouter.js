@@ -110,6 +110,10 @@ router.route('/especie/getSpeciesArray')
   .get(verbsCtrl.getSpeciesArrayNiche)
   .post(verbsCtrl.getSpeciesArrayNiche)
 
+router.route('/especie/getSpeciesTaxon')
+  .get(verbsCtrl.getSpeciesTaxonNiche)
+  .post(verbsCtrl.getSpeciesTaxonNiche)
+
 
 router.route('/especie/getSubAOI')
   .post(verbsCtrl.getSubAOI)

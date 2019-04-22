@@ -198,6 +198,13 @@ router.route('/counts')
   .post(getCounts.getBasicInfo)
 
 
+router.route('/countsTemp')
+  // .get(mdAtenticacion.validaToken, getCounts.getBasicInfo)
+  // .post(mdAtenticacion.validaToken, getCounts.getBasicInfo)
+  .get(getCounts.getBasicInfoTemp)
+  .post(getCounts.getBasicInfoTemp)
+
+
 
 /**
  * Ruta que calcula los conteos, epsilon y score entre la especie objetivo y el grupo de variables elegidas. 
