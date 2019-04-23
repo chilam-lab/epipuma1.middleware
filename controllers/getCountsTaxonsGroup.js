@@ -38,12 +38,12 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   var data_target = {}
   var str_query = ''
 
-  var grid_resolution = verb_utils.getParam(req, 'grid_resolution', 16)
+  var grid_resolution = parseInt(verb_utils.getParam(req, 'grid_resolution', 16)) 
   var region = parseInt(verb_utils.getParam(req, 'region', verb_utils.region_mx))
   var fosil = verb_utils.getParam(req, 'fosil', true)
   var date  = verb_utils.getParam(req, 'date', true)
-  var lim_inf = verb_utils.getParam(req, 'lim_inf', null)
-  var lim_sup = verb_utils.getParam(req, 'lim_sup', null)
+  var lim_inf = verb_utils.getParam(req, 'lim_inf', 1500)
+  var lim_sup = verb_utils.getParam(req, 'lim_sup', 2020)
   var cells = verb_utils.getParam(req, 'excluded_cells', [])
 
   data_request["excluded_cells"] = cells
@@ -61,6 +61,7 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   data_request["where_target"] = verb_utils.getWhereClauseFromGroupTaxonArray(target_group, true)
 
   var covars_groups = verb_utils.getParam(req, 'covariables', []) 
+  // debug(covars_groups)
   //data_request['groups'] = verb_utils.getCovarGroupQueries(queries, data_request, covars_groups)
 
   data_request["alpha"] = undefined
@@ -71,9 +72,10 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   data_request["long"] = verb_utils.getParam(req, 'longitud', 0)
   data_request["lat"] = verb_utils.getParam(req, 'latitud', 0)
   data_request["title_valor"] = {'title': data_request["target_name"]}
-  data_request["with_data_freq"] = verb_utils.getParam(req, 'with_data_freq', false)
-  data_request["with_data_score_cell"] = verb_utils.getParam(req, 'with_data_score_cell', false)
-  data_request["with_data_freq_cell"] = verb_utils.getParam(req, 'with_data_freq_cell', false)
+  data_request["with_data_freq"] = verb_utils.getParam(req, 'with_data_freq', true)
+  data_request["with_data_score_cell"] = verb_utils.getParam(req, 'with_data_score_cell', true)
+  data_request["with_data_freq_cell"] = verb_utils.getParam(req, 'with_data_freq_cell', true)
+
    
   var NIterations = verb_utils.getParam(req, 'iterations', iterations)
   var iter = 0
@@ -108,7 +110,8 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
   debug('iter:' + (iter + 1))
 
   var data_request = JSON.parse(JSON.stringify(data))
-  //debug(data_request)
+  
+  debug(data_request)
 
   pool.task(t => {
 
@@ -207,6 +210,9 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
           debug("analisis basico")
           //const query1 = pgp.as.format(query_analysis, data_request)
           //debug(query1)
+          // debug(query_analysis)
+          // debug(data_request)
+
           return t.any(query_analysis, data_request)
 
          }
@@ -217,6 +223,8 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
     })
 
   }).then(data_iteration => {
+
+    debug(data_iteration)
 
       var data_response = {iter: (iter+1), data: data_iteration, test_cells: data_request["source_cells"], apriori: data_request.apriori, mapa_prob: data_request.mapa_prob }
       json_response["data_response"] = json_response["data_response"] === undefined ? [data_response] : json_response["data_response"].concat(data_response)
