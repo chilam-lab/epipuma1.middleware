@@ -60,6 +60,9 @@ router.route('/especie/getValidationTables')
   .get(verbsCtrl.getValidationTables)
   .post(verbsCtrl.getValidationTables)
 
+router.route('/especie/getGroupValidationTables')
+  .post(verbsCtrl.getGroupValidationTables)
+
 router.route('/especie/processValidationTables')
   .get(verbsCtrl.processValidationTables)
   .post(verbsCtrl.processValidationTables)
@@ -109,6 +112,10 @@ router.route('/especie/getSpecies')
 router.route('/especie/getSpeciesArray')
   .get(verbsCtrl.getSpeciesArrayNiche)
   .post(verbsCtrl.getSpeciesArrayNiche)
+
+router.route('/especie/getSpeciesTaxon')
+  .get(verbsCtrl.getSpeciesTaxonNiche)
+  .post(verbsCtrl.getSpeciesTaxonNiche)
 
 
 router.route('/especie/getSubAOI')

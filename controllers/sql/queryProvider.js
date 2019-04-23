@@ -83,7 +83,8 @@ var queryProvider = {
     setLinkValues: sqlPath('especie/set_link_values.sql')
   },
   getValidationTables: {
-    createTables: sqlPath('especie/get_validation_tables.sql')
+    createTables: sqlPath('especie/get_validation_tables.sql'),
+    createGroupTables: sqlPath('especie/get_group_validation_tables.sql')
   },
   processValidationTables: {
     processTables: sqlPath('especie/process_validation_tables.sql')
@@ -111,7 +112,9 @@ var queryProvider = {
     getSpeciesR: sqlPath('especie/getSpecies_range.sql'),
     getSpeciesArrayR: sqlPath('especie/getSpeciesArray_range.sql'),
     getSpeciesSDR: sqlPath('especie/getSpecies_sdr.sql'),
-    getSpeciesArraySDR: sqlPath('especie/getSpeciesArray_sdr.sql')
+    getSpeciesArraySDR: sqlPath('especie/getSpeciesArray_sdr.sql'),
+    getSpeciesTaxonArray: sqlPath('especie/getSpeciesTaxonArray.sql')
+
   },
   getEntListNiche: {
     getEntList: sqlPath('especie/getEntList.sql'),
@@ -278,9 +281,10 @@ var queryProvider = {
   },
 
   subaoi: {
-    getSubAOI : sqlPath('subAOI/getSubAOI.sql'), 
-    getAvailableCountries : sqlPath('subAOI/getAvailableCountries.sql'),
-    getAvailableCountriesFootprint : sqlPath('subAOI/getAvailableCountriesFootprint.sql') 
+    getSubAOI: sqlPath('sub-aoi/get-sub-aoi.sql'), 
+    getAvailableCountries: sqlPath('sub-aoi/get-available-countries.sql'),
+    getAvailableCountriesFootprint: sqlPath('sub-aoi/get-available-countries-footprint.sql'),
+    getCountriesRegion: sqlPath('sub-aoi/get-countries-region.sql')
 
     
   },

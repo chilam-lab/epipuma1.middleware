@@ -27,6 +27,55 @@ var max_score = verb_utils.maxscore
 var min_score = verb_utils.minscore
 var request_counter = 0;
 var request_counter_map = d3.map([]);
+var pgp = require('pg-promise')
+
+
+/**
+ * Obtiene el score por celda agrupado por decil con apriori
+ *
+ * @function
+ * @param {express.Request} req - Express request object
+ * @param {express.Response} res - Express response object 
+ * @param {function} next - Express next middleware function
+ */
+exports.getBasicInfoTemp = function(req, res, next) {
+  
+  debug('getBasicInfoTemp')
+
+  var data_request = verb_utils.getRequestParams(req, true)
+
+  data_request["res_celda_snib_tb"] = "grid_geojson_" + data_request.grid_resolution + "km_aoi"
+  data_request["res_grid_tbl"] = "grid_" + data_request.grid_resolution + "km_aoi"
+  data_request["res_grid_column"] = "gridid_" + data_request.grid_resolution + "km"
+
+  // debug('region: ' + data_request.region)
+  // debug('res_celda_snib_tb: ' + data_request.res_celda_snib_tb)
+
+  var data_georel = [];
+  var iter = 0;
+  var promises = []
+  var json_response = {}
+
+  for(var iter = 0; iter<data_request.iterations; iter++){
+
+    // debug("iteration:" + (iter+1))
+    initialProcessTemp(iter, data_request.iterations, data_request, res, json_response, req)
+
+  }
+
+}
+
+function initialProcessTemp(iter, total_iterations, data, res, json_response, req) {
+
+
+}
+
+
+
+
+
+
+
 
 
 /**
@@ -75,7 +124,6 @@ function initialProcess(iter, total_iterations, data, res, json_response, req) {
   pool.task(t => {
 
     var query = data_request.idtabla === "" ? "select array[]::integer[] as total_cells" : queries.validationProcess.getTotalCells
-    // debug(query)
 
     return t.one(query, {
 
@@ -84,7 +132,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req) {
 
     })
     .then(resp => { 
-
+      
       // debug("iter TC: " + (iter+1))
       data_request["total_cells"] = resp.total_cells
 
@@ -162,8 +210,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req) {
 
             })
 
-          }
-          else{
+          } else {
 
             debug("analisis general")
 
@@ -185,10 +232,12 @@ function initialProcess(iter, total_iterations, data, res, json_response, req) {
 
               })
 
-            }
-            else{
+            } else{
 
               debug("analisis basico")
+
+              //const query = pgp.as.format(case_query, data_request)
+              //debug(query)
 
               return t.any(case_query, data_request)
             }
@@ -205,7 +254,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req) {
 
   })
   .then(data_iteration => {
-
+    
     // TODO: agregar valores necesarios para validacion del data_request
     var data_response = {iter: (iter+1), data: data_iteration, test_cells: data_request["source_cells"], apriori: data_request.apriori, mapa_prob: data_request.mapa_prob }
     json_response["data_response"] = json_response["data_response"] === undefined ? [data_response] : json_response["data_response"].concat(data_response)
@@ -237,8 +286,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req) {
         data = verb_utils.processValidationData(json_response["data_response"])
         validation_data = verb_utils.getValidationValues(json_response["data_response"])
         is_validation = true
-      }
-      else{
+      } else{
         data = data_iteration
         is_validation = false
       }

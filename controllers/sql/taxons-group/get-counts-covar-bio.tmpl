@@ -1,5 +1,5 @@
 aux_{name:raw} as (
-	SELECT  {res_celda_sp:raw} as cells
+	SELECT unnest({res_celda_sp:raw}) as cell
 			-- a.cells_16km_1 as cells
 	FROM sp_snib
 	{where_covars:raw}
@@ -8,10 +8,10 @@ aux_{name:raw} as (
 		-- and array_length(a.cells_16km_1, 1) > 0
 ), {name:raw} AS (
 	SELECT '{name:raw}' as name,
-		   array_agg(distinct a.cell) as cells,
-		   array_length(array_agg(distinct a.cell),1) as nj
+		   array_agg(distinct a.cell) - array[ {total_cells:raw} ]::integer[] as cells,
+		   array_length((array_agg(distinct a.cell) - array[ {total_cells:raw} ]::integer[]) ,1) as nj
 	FROM (
-			select unnest(cells) as cell
+			select cell
 			FROM aux_{name:raw}
 		 ) as a
 ){groups}
