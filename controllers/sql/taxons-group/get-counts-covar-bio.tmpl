@@ -1,17 +1,21 @@
 aux_{name:raw} as (
-	SELECT unnest({res_celda_sp:raw}) as cell
-			-- a.cells_16km_1 as cells
+	SELECT DISTINCT unnest({res_celda_sp:raw}) as cell,
+			-- a.cells_16km_1 as cell,
+			{fields:raw}
+			-- a.generovalido as level
 	FROM sp_snib
 	{where_covars:raw}
 		--WHERE a.clasevalida = 'Mammalia'
 		and array_length({res_celda_sp:raw}, 1) > 0 
 		-- and array_length(a.cells_16km_1, 1) > 0
 ), {name:raw} AS (
-	SELECT '{name:raw}' as name,
-		   array_agg(distinct a.cell) - array[ {total_cells:raw} ]::integer[] as cells,
-		   array_length((array_agg(distinct a.cell) - array[ {total_cells:raw} ]::integer[]) ,1) as nj
+	SELECT array_agg(distinct a.cell) - array[ {total_cells:raw} ]::integer[] as cells,
+		   array_length((array_agg(distinct a.cell) - array[ {total_cells:raw} ]::integer[]) ,1) as nj,
+		   {fields:raw}
 	FROM (
-			select cell
+			select cell,
+				  {fields:raw}
 			FROM aux_{name:raw}
 		 ) as a
+	GROUP BY {group_fields:raw}
 ){groups}

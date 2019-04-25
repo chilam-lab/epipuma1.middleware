@@ -75,7 +75,6 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   data_request["with_data_freq"] = verb_utils.getParam(req, 'with_data_freq', true)
   data_request["with_data_score_cell"] = verb_utils.getParam(req, 'with_data_score_cell', true)
   data_request["with_data_freq_cell"] = verb_utils.getParam(req, 'with_data_freq_cell', true)
-
    
   var NIterations = verb_utils.getParam(req, 'iterations', iterations)
   var iter = 0
