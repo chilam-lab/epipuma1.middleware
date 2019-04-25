@@ -1514,26 +1514,57 @@ verb_utils.processGroupValidationData = function(data_group) {
   var avgdata = []
   var data = []
 
+  data_group.forEach(function(item){
+
+    item['data'].forEach(function(element){
+
+      element.tempid = element.reinovalido + " " +
+                          element.phylumdivisionvalido + " " +
+                          element.clasevalida + " " +
+                          element.ordenvalido + " " +
+                          element.familiavalida + " " +
+                          element.generovalido + " " +
+                          element.especieepiteto + " " +
+                          element.nombreinfra + " " +
+                          element.type + " " +
+                          element.layer + " " +
+                          element.bid
+      //debug(element)
+    })
+    
+  })
+
   var data_map = data_group.map(function(d) {return  d.data})
 
 
   data_map.forEach(function(item) {
-    
+
     data = data.concat(item)
 
   })
-  
-  //debug(data)
-  
+
   var cross_group = crossfilter(data)
   cross_group.groupAll()
   //debug(cross_group)
 
-  var name_dimension = cross_group.dimension(function(d) { return d.name; })  
+  //var name_dimension = cross_group.dimension(function(d) { return d.name; })  
+  var name_dimension = cross_group.dimension(function(d) { return  d.tempid;})
+
 
   var group_by_name = name_dimension.group().reduce(
     function(item, add){
       ++item.count
+      item.reinovalido = add.reinovalido
+      item.phylumdivisionvalido = add.phylumdivisionvalido
+      item.clasevalida = add.clasevalida
+      item.ordenvalido = add.ordenvalido
+      item.familiavalida = add.familiavalida
+      item.generovalido = add.generovalido
+      item.especieepiteto = add.especieepiteto
+      item.nombreinfra = add.nombreinfra
+      item.type = add.type
+      item.layer = add.layer
+      item.bid = add.bid
       item.cells = add.cells
       item.cells_map = item.cells_map.concat(add.cells) 
       item.nij = add.nij
@@ -1547,6 +1578,17 @@ verb_utils.processGroupValidationData = function(data_group) {
     },
     function(item,remove){
       --item.count
+      item.reinovalido = remove.reinovalido
+      item.phylumdivisionvalido = remove.phylumdivisionvalido
+      item.clasevalida = remove.clasevalida
+      item.ordenvalido = remove.ordenvalido
+      item.familiavalida = remove.familiavalida
+      item.generovalido = remove.generovalido
+      item.especieepiteto = remove.especieepiteto
+      item.nombreinfra = remove.nombreinfra
+      item.type = remove.type
+      item.layer = remove.layer
+      item.bid = remove.bid
       item.cells = item.cells //remove.cells //
       item.cells_map = item.cells_map
       item.nij = item.nij
@@ -1561,6 +1603,17 @@ verb_utils.processGroupValidationData = function(data_group) {
     function(){
       return {
         count: 0,
+        reinovalido: "",
+        phylumdivisionvalido: "",
+        clasevalida: "",
+        ordenvalido: "",
+        familiavalida: "",
+        generovalido: "",
+        especieepiteto: "",
+        nombreinfra:"",
+        type:"",
+        layer:"",
+        bid:"",
         cells: [],
         cells_map: [],
         nij: 0,
@@ -1579,9 +1632,19 @@ verb_utils.processGroupValidationData = function(data_group) {
   var data_result = []
 
   for(var i=0; i<reduced_data.length; i++){
-      var entry = reduced_data[i];
+      var entry = reduced_data[i]
       data_result.push({
-        name: entry["key"], 
+        reinovalido: entry["value"].reinovalido,
+        phylumdivisionvalido: entry["value"].phylumdivisionvalido,
+        clasevalida: entry["value"].clasevalida,
+        ordenvalido: entry["value"].ordenvalido,
+        familiavalida: entry["value"].familiavalida,
+        generovalido: entry["value"].generovalido,
+        especieepiteto: entry["value"].especieepiteto,
+        nombreinfra: entry["value"].nombreinfra,
+        type: entry["value"].type,
+        layer: entry["value"].layer,
+        bid: entry["value"].bid, 
         cells: entry["value"].cells,
         cells_map: entry["value"].cells_map,
         nij: parseFloat((entry["value"].nij ).toFixed(2)),
@@ -1864,6 +1927,230 @@ verb_utils.getWhereClauseFilter = function(fosil, date, lim_inf, lim_sup, cells,
   return whereClause   
 }
 
+verb_utils.getFieldsFromLevel = function (level) {
+
+  debug("getGroupByFromGroupTaxonArray")
+
+  var fields = ""
+  var biotic = true
+  var notyet = true
+
+  var taxon_map = {
+                    // biotic
+                    kingdom : 'reinovalido', 
+                    phylum  : 'phylumdivisionvalido',
+                    class   : 'clasevalida',
+                    order   : 'ordenvalido',
+                    family  : 'familiavalida',
+                    genus   : 'generovalido',
+                    species : ['generovalido', 'especieepiteto'],
+                    subspecies: ['generovalido', 'especieepiteto', 'nombreinfra']
+                  }
+
+  var rank_map = {
+                    // abiotic
+                    type    : 'type',
+                    layer   : 'layer',
+                    bid     : 'bid'
+                }
+
+  if (level === 'type' || level === 'layer' || level === 'bid')
+    biotic = false
+
+  for (var key in taxon_map) {
+
+    if (biotic && notyet) {
+
+      if (level === key) {
+
+        if (key === 'kingdom') {
+
+          notyet = false
+          fields += taxon_map[key]
+
+        } else if(key === 'species') {
+
+          notyet = false
+          fields += ", " + taxon_map[key][1]           
+
+        } else if(key === 'subspecies') {
+
+          notyet = false
+          fields += ", " + taxon_map[key][2]
+
+        } else {
+
+          notyet = false
+          fields += ", " + taxon_map[key]
+        
+        }
+      
+      } else {
+
+        if (key === 'kingdom'){
+
+          fields += taxon_map[key]
+
+        } else if (key === 'species'){
+
+          fields += ", "  + taxon_map[key][1]          
+
+        } else if(key === 'subspecies') {
+
+          fields += ", " + taxon_map[key][2]
+
+        } else {
+
+          fields += ", " + taxon_map[key] 
+        
+        }
+
+      }
+
+    } else {
+
+      if (key === 'kingdom')
+        fields += "'' AS " + taxon_map[key]
+      else if(key === 'species')
+        fields += ", '' AS " + taxon_map[key][1]
+      else if(key === 'subspecies')
+        fields += ", '' AS " + taxon_map[key][2]        
+      else
+        fields += ", '' AS " + taxon_map[key]
+
+    }
+
+    //debug(fields)
+
+  }
+
+  for (var key in rank_map) {
+
+    if (!biotic && notyet) {
+
+      if (level === key) {
+
+          notyet = false
+          fields += ", " + rank_map[key]
+
+      } else {
+
+          fields += ", " + rank_map[key] 
+
+      }
+
+    } else {
+
+        fields += ", '' AS " + rank_map[key]
+
+    }
+
+    //debug(fields)    
+
+  }
+
+  debug("fields =" + fields)
+  return fields
+
+}
+
+verb_utils.getGroupFieldsFromLevel = function (level) {
+
+  debug("getGroupByFromGroupTaxonArray")
+
+  var group_fields = ""
+  var biotic = true
+  var notyet = true
+
+  var taxon_map = {
+                    // biotic
+                    kingdom : 'reinovalido', 
+                    phylum  : 'phylumdivisionvalido',
+                    class   : 'clasevalida',
+                    order   : 'ordenvalido',
+                    family  : 'familiavalida',
+                    genus   : 'generovalido',
+                    species : ['generovalido', 'especieepiteto'],
+                    subspecies: ['generovalido', 'especieepiteto', 'nombreinfra'],
+                      
+                  }
+
+  var rank_map = {
+
+                    // abiotic
+                    type    : 'type',
+                    layer   : 'layer',
+                    bid     : 'bid'
+
+                  }
+
+  if (level === 'type' || level === 'layer' || level === 'bid')
+    biotic = false
+
+
+  if (biotic) {
+    
+    for (var key in taxon_map) {
+
+      if (level === key) {
+
+        if(level === "kingdom")
+          group_fields += taxon_map[key]
+        else if(level === "species")
+          group_fields += ", " + taxon_map[key][1] 
+        else if(level === "subspecies")
+          group_fields += ", " + taxon_map[key][2]
+        else
+          group_fields += ", " + taxon_map[key]
+
+        break
+
+      } else {
+        
+        if(key === "kingdom")
+          group_fields += taxon_map[key]
+        else if(key === "species")
+          group_fields += ", " + taxon_map[key][1]
+        else if(key === "subspecies")
+          group_fields += ", " + taxon_map[key][2]
+        else
+          group_fields += ", " + taxon_map[key]        
+
+      }
+
+    }
+
+  } else {
+
+    for (var key in rank_map) {
+
+      if (key === level) {
+
+        if(key === "type")
+          group_fields += rank_map[key]
+        else
+          group_fields += ", " + rank_map[key]
+        break
+
+      } else {
+
+        if(key === "type")
+          group_fields += rank_map[key]
+        else
+          group_fields += ", " + rank_map[key]
+
+      }
+
+    }
+
+  }
+
+
+  debug("group fields ="  + group_fields)
+  return group_fields
+
+}
+
 verb_utils.getWhereClauseFromGroupTaxonArray = function (taxon_array, target){
 
   debug("getWhereClauseFromGroupTaxonArray")
@@ -1925,10 +2212,13 @@ verb_utils.getWhereClauseFromGroupTaxonArray = function (taxon_array, target){
 }
 
 verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups) {
+  
   debug("getCovarGroupQueries")
   
   var query_covar
   var where_covar
+  var group_fields
+  var fields
   var size = covars_groups.length
   var co = queries.countsTaxonGroups.getCellsByGroupBio.toString()
   var coa =  queries.countsTaxonGroups.getCellsByGroupAbio.toString()
@@ -1942,6 +2232,9 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
     if(group['biotic']){
 
       where_covar = verb_utils.getWhereClauseFromGroupTaxonArray(group['merge_vars'], false)
+      //debug("level = " + group['merge_vars'][0]['level'])
+      group_fields = verb_utils.getGroupFieldsFromLevel(group['merge_vars'][0]['level']) 
+      fields = verb_utils.getFieldsFromLevel(group['merge_vars'][0]['level'])
 
       if( index === 0){
 
@@ -1971,7 +2264,8 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
       }
 
       //debug(data_request["total_cells"])
-
+      query_covar = query_covar.toString().replace(/{fields:raw}/g, fields)
+      query_covar = query_covar.toString().replace(/{group_fields:raw}/g, group_fields)
       query_covar = query_covar.toString().replace(/{name:raw}/g, group['name'])
       query_covar = query_covar.toString().replace(/{res_celda_sp:raw}/g, data_request["res_celda_sp"])
       query_covar = query_covar.toString().replace(/{where_covars:raw}/g, where_covar)
@@ -1981,6 +2275,8 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
     } else {
 
       where_covar = verb_utils.getWhereClauseFromGroupTaxonArray(group['merge_vars'], false)
+      group_fields = verb_utils.getGroupFieldsFromLevel(group['merge_vars'][0]['level']) 
+      fields = verb_utils.getFieldsFromLevel(group['merge_vars'][0]['level'])
 
       if (index === 0 ) {
 
@@ -2009,6 +2305,8 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
 
       }
 
+      query_covar = query_covar.toString().replace(/{fields:raw}/g, fields)
+      query_covar = query_covar.toString().replace(/{group_fields:raw}/g, group_fields)
       query_covar = query_covar.toString().replace(/{name:raw}/g, group['name'])
       query_covar = query_covar.toString().replace(/{res_celda:raw}/g, data_request["res_celda"])
       query_covar = query_covar.toString().replace(/{where_covars:raw}/g, where_covar)

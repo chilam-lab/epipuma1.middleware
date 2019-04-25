@@ -71,9 +71,9 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   data_request["long"] = verb_utils.getParam(req, 'longitud', 0)
   data_request["lat"] = verb_utils.getParam(req, 'latitud', 0)
   data_request["title_valor"] = {'title': data_request["target_name"]}
-  data_request["with_data_freq"] = verb_utils.getParam(req, 'with_data_freq', false)
-  data_request["with_data_score_cell"] = verb_utils.getParam(req, 'with_data_score_cell', false)
-  data_request["with_data_freq_cell"] = verb_utils.getParam(req, 'with_data_freq_cell', false)
+  data_request["with_data_freq"] = verb_utils.getParam(req, 'with_data_freq', true)
+  data_request["with_data_score_cell"] = verb_utils.getParam(req, 'with_data_score_cell', true)
+  data_request["with_data_freq_cell"] = verb_utils.getParam(req, 'with_data_freq_cell', true)
    
   var NIterations = verb_utils.getParam(req, 'iterations', iterations)
   var iter = 0
@@ -205,8 +205,8 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
          } else {
 
           debug("analisis basico")
-          //const query1 = pgp.as.format(query_analysis, data_request)
-          //debug(query1)
+          const query1 = pgp.as.format(query_analysis, data_request)
+          debug(query1)
           return t.any(query_analysis, data_request)
 
          }
