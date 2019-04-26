@@ -1,0 +1,19 @@
+WITH aux_{label:raw} AS (
+	{query:raw}	
+), {label:raw} AS (
+	SELECT
+		cells,
+		{biotic:raw} AS biotic,
+		reinovalido, 
+		phylumdivisionvalido,
+		clasevalida,
+		ordenvalido,
+	    familiavalida,
+	    generovalido, 
+	    especieepiteto,
+	    nombreinfra,
+		type,
+		layer,
+	    bid
+	FROM aux_{label:raw}
+)

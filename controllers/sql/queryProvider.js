@@ -308,6 +308,13 @@ var queryProvider = {
     getCountsCovars: tmplPath("taxons-group/get-counts-covars.tmpl"),
     getCellsByGroupBio: tmplPath("taxons-group/get-cells-group-bio.tmpl"),
     getCellsByGroupAbio: tmplPath("taxons-group/get-cells-group-abio.tmpl")
+  },
+
+  taxonsGroupNodes:{
+    getNodesBase: sqlPath("nodes-taxons-group/get-nodes-base.sql"),
+    nodesSource: tmplPath("nodes-taxons-group/nodes-source.tmpl"),
+    nodesBio: tmplPath("nodes-taxons-group/nodes-bio.tmpl"),
+    nodesAbio: tmplPath("nodes-taxons-group/nodes-abio.tmpl")
   }
 
 }
