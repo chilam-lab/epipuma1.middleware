@@ -23,7 +23,9 @@ exports.getTaxonsGroupNodes = function(req, res) {
   	var biotic_target = verb_utils.getParam(req, 'biotic_target', true)
 
   	// Defining useful variables
-	var region_cells  =  "cells_" + grid_res + "km_" + footprint_region   
+	var region_cells  =  "cells_" + grid_res + "km_" + footprint_region
+	var res_cells =  "cells_" + grid_res + "km"
+	var res_views = "grid_geojson_" + grid_res + "km_aoi"  
 	var gridid =  "gridid_" + grid_res + "km" 
 	var min_ep      = 0.0
   	var max_edges   = 1000
@@ -38,13 +40,15 @@ exports.getTaxonsGroupNodes = function(req, res) {
 
   	pool.task(t => {
 
+  		// Creating queries
 	    var query = queries.taxonsGroupNodes.getNodesBase
-	    var source_query = verb_utils.getCommunityAnalysisQuery(queries, region_cells, source, biotic_source, false)
-	    var target_query = verb_utils.getCommunityAnalysisQuery(queries, region_cells, target, biotic_target, true).slice(5)
+	    var source_query = verb_utils.getCommunityAnalysisQuery(queries, res_cells, region_cells, res_views, source, biotic_source, false)
+	    var target_query = verb_utils.getCommunityAnalysisQuery(queries, res_cells, region_cells, res_views, target, biotic_target, true ).slice(5)
 
 	    //const query1 = pgp.as.format(query, {source: source_query, target: target_query})
         //debug(query1)
 
+        // Executing queries
 	    return t.any(query, {
 
 	    	source: source_query,
@@ -64,6 +68,7 @@ exports.getTaxonsGroupNodes = function(req, res) {
 	    	res.json({
 	    	
 	    		"ok":false,
+	    		"message": "error has ocurred!",
 	    		"error": error
 
 	    	})

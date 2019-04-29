@@ -2363,7 +2363,7 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
   return query_covar  
 }
 
-verb_utils.getCommunityAnalysisQuery = function(queries, region_cells, source, biotic, is_target){
+verb_utils.getCommunityAnalysisQuery = function(queries, res_cells, region_cells, res_views, source, biotic, is_target){
 
   debug("getCommunityAnalysisQuery")
 
@@ -2394,6 +2394,19 @@ verb_utils.getCommunityAnalysisQuery = function(queries, region_cells, source, b
       q = q.toString().replace(/{group_fields:raw}/g, group_fields)
 
     } else {
+
+      level = taxon["level"]
+      q = queries.taxonsGroupNodes.nodesAbio
+      fields = verb_utils.getFieldsFromLevel(level)
+      group_fields = verb_utils.getGroupFieldsFromLevel(level)
+      where = verb_utils.getWhereClauseFromGroupTaxonArray([taxon], false)
+    
+      q = q.toString().replace(/{fields:raw}/g, fields)
+      q = q.toString().replace(/{res_cells:raw}/g, res_cells)
+      q = q.toString().replace(/{res_views:raw}/g, res_views)
+      q = q.toString().replace(/{where_filter:raw}/g, where)
+      q = q.toString().replace(/{level:raw}/g, level)
+      q = q.toString().replace(/{group_fields:raw}/g, group_fields)
 
     }
 
