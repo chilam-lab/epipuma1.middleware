@@ -2251,6 +2251,65 @@ verb_utils.getWhereClauseFromGroupTaxonArray = function (taxon_array, target){
 
 }
 
+
+verb_utils.getExcludeTargetWhereClause = function (taxon_array) {
+
+  debug("getExcludeTargetWhereClause")
+
+  var key = 'taxon_rank'
+  // mapeo de taxones
+  var taxon_rank_map = {
+                          // biotic
+                          kingdom : 'reinovalido', 
+                          phylum  : 'phylumdivisionvalido',
+                          class   : 'clasevalida',
+                          order   : 'ordenvalido',
+                          family  : 'familiavalida',
+                          genus   : 'generovalido',
+                          species : ['generovalido', 'especieepiteto'],
+                          subspecies: ['generovalido', 'especieepiteto', 'nombreinfra'],
+                          // abiotic
+                          type    : 'type',
+                          layer   : 'layer',
+                          bid     : 'bid'
+                       }
+  
+  var whereClause = ''
+  taxon_array.forEach ( function (taxon, index) {
+    //debug(taxon_rank_map[taxon[key]], taxon[key])
+    if (index === 0){
+      
+      if (taxon[key] === 'species') {
+        var value = taxon['value'].split(' ')
+        whereClause += " AND (" + taxon_rank_map[taxon[key]][0] + " <> '" + value[0] + "' AND " + taxon_rank_map[taxon[key]][1] + " <> '" + value[1] + "')"
+      } else if(taxon[key] === 'subspecies') {
+        var value = taxon['value'].split(' ')
+        whereClause += " AND (" + taxon_rank_map[taxon[key]][0] + "<> '" + value[0] + "' AND " + taxon_rank_map[taxon[key]][1] + " <> '" + value[1] + "' AND " + taxon_rank_map[taxon[key]][2] + " <> '" + value[2] + "')"
+      } else {
+        whereClause += " AND " + taxon_rank_map[taxon[key]] + " <> '" + taxon['value'] + "'"
+      }
+
+    } else{
+      
+      if (taxon[key] === 'species') {
+        var value = taxon['value'].split(' ')
+        whereClause += " AND (" + taxon_rank_map[taxon[key]][0] + " <> '" + value[0] + "' AND " + taxon_rank_map[taxon[key]][1] + " <> '" + value[1] + "')"
+      } else if(taxon[key] === 'subspecies') {
+        var value = taxon['value'].split(' ')
+        whereClause += " AND (" + taxon_rank_map[taxon[key]][0] + " <> '" + value[0] + "' AND " + taxon_rank_map[taxon[key]][1] + " <> '" + value[1] + "' AND " + taxon_rank_map[taxon[key]][2] + " <> '" + value[2] + "')" 
+      } else {
+        whereClause += " AND " + taxon_rank_map[taxon[key]] + " <> '" + taxon['value'] + "'"
+      }
+
+    } 
+      
+  })
+
+  return whereClause
+
+
+}
+
 verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups) {
   
   debug("getCovarGroupQueries")
@@ -2311,6 +2370,7 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
       query_covar = query_covar.toString().replace(/{where_covars:raw}/g, where_covar)
       query_covar = query_covar.toString().replace(/{excluded_cells:raw}/g, data_request["excluded_cells"].toString())
       query_covar = query_covar.toString().replace(/{total_cells:raw}/g, data_request["total_cells"])
+      query_covar = query_covar.toString().replace(/{where_exclude_target:raw}/g, data_request["where_exclude_target"])
        
     } else {
 
