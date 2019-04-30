@@ -208,7 +208,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
           debug("analisis basico")
           //const query1 = pgp.as.format(query_analysis, data_request)
-          //debug(query1)
+         //debug(query1)
           // debug(query_analysis)
           // debug(data_request)
 
@@ -223,7 +223,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
   }).then(data_iteration => {
 
-    debug(data_iteration)
+      //debug(data_iteration)
 
       var data_response = {iter: (iter+1), data: data_iteration, test_cells: data_request["source_cells"], apriori: data_request.apriori, mapa_prob: data_request.mapa_prob }
       json_response["data_response"] = json_response["data_response"] === undefined ? [data_response] : json_response["data_response"].concat(data_response)
