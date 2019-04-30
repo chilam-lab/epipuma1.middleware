@@ -209,10 +209,10 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
          } else {
 
           debug("analisis basico")
-         //const query1 = pgp.as.format(query_analysis, data_request)
-         //debug(query1)
-         //debug(query_analysis)
-         //debug(data_request)
+          //const query1 = pgp.as.format(query_analysis, data_request)
+          //debug(query1)
+          //debug(query_analysis)
+          //debug(data_request)
 
           return t.any(query_analysis, data_request)
 

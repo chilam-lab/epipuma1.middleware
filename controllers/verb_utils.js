@@ -1605,6 +1605,8 @@ verb_utils.processGroupValidationData = function(data_group) {
       item.type = add.type
       item.layer = add.layer
       item.bid = add.bid
+      item.icat = add.icat
+      item.tag =  add.tag
       item.cells = add.cells
       item.cells_map = item.cells_map.concat(add.cells) 
       item.nij = add.nij
@@ -1629,6 +1631,8 @@ verb_utils.processGroupValidationData = function(data_group) {
       item.type = remove.type
       item.layer = remove.layer
       item.bid = remove.bid
+      item.icat = remove.icat
+      item.tag = remove.tag
       item.cells = item.cells //remove.cells //
       item.cells_map = item.cells_map
       item.nij = item.nij
@@ -1654,6 +1658,8 @@ verb_utils.processGroupValidationData = function(data_group) {
         type:"",
         layer:"",
         bid:"",
+        icat:"",
+        tag:"",
         cells: [],
         cells_map: [],
         nij: 0,
@@ -1685,6 +1691,8 @@ verb_utils.processGroupValidationData = function(data_group) {
         type: entry["value"].type,
         layer: entry["value"].layer,
         bid: entry["value"].bid, 
+        icat: entry["value"].icat,
+        tag: entry["value"].tag,
         cells: entry["value"].cells,
         cells_map: entry["value"].cells_map,
         nij: parseFloat((entry["value"].nij ).toFixed(2)),
@@ -2073,6 +2081,7 @@ verb_utils.getFieldsFromLevel = function (level) {
           notyet = false
           fields += ", " + rank_map[key]
 
+
       } else {
 
           fields += ", " + rank_map[key] 
@@ -2088,6 +2097,11 @@ verb_utils.getFieldsFromLevel = function (level) {
     //debug(fields)    
 
   }
+
+  if (level === 'bid')
+    fields  += ", icat, tag "
+  else 
+    fields  += ", '' AS icat, '' AS tag "
 
   debug("fields =" + fields)
   return fields
@@ -2182,6 +2196,9 @@ verb_utils.getGroupFieldsFromLevel = function (level) {
       }
 
     }
+
+   if(level === 'bid')
+        group_fields += ", icat, tag "
 
   }
 
