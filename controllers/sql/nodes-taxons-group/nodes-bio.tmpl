@@ -1,0 +1,16 @@
+WITH aux AS (
+	SELECT DISTINCT 
+		{fields:raw},
+		UNNEST({region_cells:raw}) AS cell
+	FROM sp_snib
+	{where_filter:raw}
+)
+SELECT 
+	array_agg(distinct a.cell) AS cells,
+	{fields:raw}
+FROM (
+		SELECT cell,
+				{fields:raw}
+		FROM aux 
+	) AS a
+GROUP BY {group_fields:raw}

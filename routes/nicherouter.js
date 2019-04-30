@@ -15,6 +15,8 @@ var getGeoRel = require('../controllers/getGeoRelNiche')
 var getCounts = require('../controllers/getCounts')
 var getCountsGroup = require('../controllers/getCountsGroup')
 var getCountsTaxonsGroup = require('../controllers/getCountsTaxonsGroup')
+var getTaxonsGroupNodes = require('../controllers/getTaxonsGroupNodes')
+var getTaxonsGroupEdges = require('../controllers/getTaxonsGroupEdges')
 var getFreqNiche = require('../controllers/getFreqNiche')
 var getCellScore = require('../controllers/getCellScoreNiche') 
 var getFreqCeldaNiche = require('../controllers/getFreqCeldaNiche') 
@@ -226,5 +228,13 @@ router.route('/countsTaxonsGroup')
   // .post(mdAtenticacion.validaToken, getCounts.getBasicInfo)
   .get(getCountsTaxonsGroup.getTaxonsGroupRequestV2)
   .post(getCountsTaxonsGroup.getTaxonsGroupRequestV2)
+
+router.route('/getTaxonsGroupNodes')
+  .get(getTaxonsGroupNodes.getTaxonsGroupNodes)
+  .post(getTaxonsGroupNodes.getTaxonsGroupNodes)
+
+router.route('/getTaxonsGroupEdges')
+  .get(getTaxonsGroupEdges.getTaxonsGroupEdges)
+  .post(getTaxonsGroupEdges.getTaxonsGroupEdges)
 
 module.exports = router

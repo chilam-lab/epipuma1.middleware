@@ -2363,11 +2363,66 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
   return query_covar  
 }
 
+verb_utils.getCommunityAnalysisQuery = function(queries, region, res_cells, region_cells, res_views, source, biotic, is_target){
 
+  debug("getCommunityAnalysisQuery")
 
+  var query = queries.taxonsGroupNodes.nodesSource
+  var q_aux = ""
+  var q = ""
+  var fields
+  var group_fields
+  var level
+  var tipo = biotic ? 1 : 0
+  var where
+  var label = is_target ? 'target' : 'source'
 
+  source.forEach( function (taxon, index) {
 
+    if (biotic){
+      
+      level = taxon["level"]
+      q = queries.taxonsGroupNodes.nodesBio
+      fields = verb_utils.getFieldsFromLevel(level)
+      group_fields = verb_utils.getGroupFieldsFromLevel(level)
+      where = verb_utils.getWhereClauseFromGroupTaxonArray([taxon], false)
+    
+      q = q.toString().replace(/{fields:raw}/g, fields)
+      q = q.toString().replace(/{region_cells:raw}/g, region_cells)
+      q = q.toString().replace(/{where_filter:raw}/g, where)
+      q = q.toString().replace(/{level:raw}/g, level)
+      q = q.toString().replace(/{group_fields:raw}/g, group_fields)
 
+    } else {
 
+      level = taxon["level"]
+      q = queries.taxonsGroupNodes.nodesAbio
+      fields = verb_utils.getFieldsFromLevel(level)
+      group_fields = verb_utils.getGroupFieldsFromLevel(level)
+      where = verb_utils.getWhereClauseFromGroupTaxonArray([taxon], false)
+    
+      q = q.toString().replace(/{fields:raw}/g, fields)
+      q = q.toString().replace(/{region:raw}/g, region)
+      q = q.toString().replace(/{res_cells:raw}/g, res_cells)
+      q = q.toString().replace(/{res_views:raw}/g, res_views)
+      q = q.toString().replace(/{where_filter:raw}/g, where)
+      q = q.toString().replace(/{level:raw}/g, level)
+      q = q.toString().replace(/{group_fields:raw}/g, group_fields)
+
+    }
+
+    q_aux += q
+    if (index > 0)
+      q_aux += " UNION "
+
+  })
+
+  query = query.toString().replace(/{label:raw}/g, label)
+  query = query.toString().replace(/{query:raw}/g, q_aux)
+  query = query.toString().replace(/{biotic:raw}/g, tipo)
+
+  //debug(query)
+  return query
+}
 
 module.exports = verb_utils
