@@ -314,8 +314,9 @@ var queryProvider = {
     getNodesBase: sqlPath("nodes-taxons-group/get-nodes-base.sql"),
     nodesSource: tmplPath("nodes-taxons-group/nodes-source.tmpl"),
     nodesBio: tmplPath("nodes-taxons-group/nodes-bio.tmpl"),
-    nodesAbio: tmplPath("nodes-taxons-group/nodes-abio.tmpl")
-  }
+    nodesAbio: tmplPath("nodes-taxons-group/nodes-abio.tmpl"),
+    getEdgesBase: sqlPath("nodes-taxons-group/get-edges-base.sql")
+  },
 
 }
 

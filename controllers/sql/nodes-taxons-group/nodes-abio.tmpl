@@ -4,6 +4,7 @@ WITH aux AS (
 		UNNEST({res_cells:raw} & b.cells) AS cell
 	FROM raster_bins AS a, {res_views:raw} AS b
 	{where_filter:raw}
+	AND b.footprint_region={region:raw}
 )
 SELECT 
 	array_agg(distinct a.cell) AS cells,

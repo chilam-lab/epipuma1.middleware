@@ -1,20 +1,18 @@
-var debug = require('debug')('verbs:getNodesNiche')
+var debug = require('debug')('verbs:getEdgesNiche')
 var pgp = require('pg-promise')
+
 
 var verb_utils = require('./verb_utils')
 var queries = require('./sql/queryProvider')
-
-var pool = verb_utils.pool 
-var N = verb_utils.N 
+var pool = verb_utils.pool
 var alpha = verb_utils.alpha
-var default_region = verb_utils.region_mx
+var N = verb_utils.N
 
-exports.getTaxonsGroupNodes = function(req, res) {
+exports.getTaxonsGroupEdges = function (req, res) {
 
-	debug("getTaxonsGroupNodes")
+	debug("getEdgesTaxonsGroup")
 
-	// Getting parameters
-	var min_occ = verb_utils.getParam(req, 'min_occ', 1)
+	var min_occ = verb_utils.getParam(req, 'min_occ', 5)
   	var grid_res = verb_utils.getParam(req, 'grid_res', 16)
   	var footprint_region = verb_utils.getParam(req, 'region', 1) 
   	var source = verb_utils.getParam(req, 'source', [])
@@ -41,18 +39,21 @@ exports.getTaxonsGroupNodes = function(req, res) {
   	pool.task(t => {
 
   		// Creating queries
-	    var query = queries.taxonsGroupNodes.getNodesBase
+	    var query = queries.taxonsGroupNodes.getEdgesBase
 	    var source_query = verb_utils.getCommunityAnalysisQuery(queries, footprint_region, res_cells, region_cells, res_views, source, biotic_source, false)
 	    var target_query = verb_utils.getCommunityAnalysisQuery(queries, footprint_region, res_cells, region_cells, res_views, target, biotic_target, true ).slice(5)
 
-	    //const query1 = pgp.as.format(query, {source: source_query, target: target_query})
+	    //const query1 = pgp.as.format(query, {source: source_query, target: target_query, res_views: res_views, region: footprint_region, min_occ: min_occ})
         //debug(query1)
 
         // Executing queries
 	    return t.any(query, {
 
 	    	source: source_query,
-	    	target: target_query
+	    	target: target_query,
+	    	res_views: res_views,
+	    	region: footprint_region,
+	    	min_occ: min_occ
 
 	    }).then(resp => {
     		
@@ -75,6 +76,8 @@ exports.getTaxonsGroupNodes = function(req, res) {
 
 	    })
 
-  	})
+	})
 
 }
+
+
