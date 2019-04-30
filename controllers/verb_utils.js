@@ -1205,14 +1205,14 @@ verb_utils.processDataForFreqCell = function (data){
 verb_utils.processDataForFreqSpecie = function (data){
 
   var min_eps = d3.min(data.map(function(d) {return parseFloat(d.epsilon);}));
-  debug("min_eps: " + min_eps)
+  // debug("min_eps: " + min_eps)
   var max_eps = d3.max(data.map(function(d) {return parseFloat(d.epsilon);}));
-  debug("max_eps: " + max_eps)
+  // debug("max_eps: " + max_eps)
 
   var min_scr = d3.min(data.map(function(d) {return parseFloat(d.score);}));
-  debug("min_scr: " + min_scr)  
+  // debug("min_scr: " + min_scr)  
   var max_scr = d3.max(data.map(function(d) {return parseFloat(d.score);}));
-  debug("max_scr: " + max_scr)
+  // debug("max_scr: " + max_scr)
 
 
   var beans = d3.range(1,buckets+1,1);
