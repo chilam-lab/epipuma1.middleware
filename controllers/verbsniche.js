@@ -1742,8 +1742,9 @@ exports.getEntListNiche = function (req, res, next) {
     var res_celda_snib =  'gridid_'+grid_resolution+'km'
     var res_celda_snib_tb = 'grid_'+grid_resolution+'km_aoi'
     
-    res_celda_sp = (source == 1) ? res_celda_sp : 'array[]::int[]'
-    var val_tree = (source == 1) ? ' and icount('+res_celda_sp+') > 0 ' : ''
+    // res_celda_sp = (source == 1) ? res_celda_sp : 'array[]::int[]'
+    // var val_tree = (source == 1) ? ' and icount('+res_celda_sp+') > 0 ' : ''
+    var val_tree = ' and icount('+res_celda_sp+') > 0 '
 
     var txt_limite = has_limit === false ? '' : 'limit ' + limite
 

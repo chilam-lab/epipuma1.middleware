@@ -75,7 +75,6 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   data_request["with_data_freq"] = verb_utils.getParam(req, 'with_data_freq', true)
   data_request["with_data_score_cell"] = verb_utils.getParam(req, 'with_data_score_cell', true)
   data_request["with_data_freq_cell"] = verb_utils.getParam(req, 'with_data_freq_cell', true)
-
    
   var NIterations = verb_utils.getParam(req, 'iterations', iterations)
   var iter = 0
@@ -90,6 +89,8 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
       data_request["gid"] = resp.gid
       //debug(data_request["gid"])
       data_request["where_filter"] = verb_utils.getWhereClauseFilter(fosil, date, lim_inf, lim_sup, cells, data_request["res_celda_snib"], data_request["region"], data_request["gid"])
+
+      // debug("filter: " + data_request["where_filter"])
       
       for(var iter = 0; iter<NIterations; iter++){
 
@@ -111,7 +112,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
   var data_request = JSON.parse(JSON.stringify(data))
   
-  debug(data_request)
+  // debug(data_request)
 
   pool.task(t => {
 
@@ -209,7 +210,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
           debug("analisis basico")
           //const query1 = pgp.as.format(query_analysis, data_request)
-          //debug(query1)
+         //debug(query1)
           // debug(query_analysis)
           // debug(data_request)
 
@@ -223,8 +224,6 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
     })
 
   }).then(data_iteration => {
-
-    debug(data_iteration)
 
       var data_response = {iter: (iter+1), data: data_iteration, test_cells: data_request["source_cells"], apriori: data_request.apriori, mapa_prob: data_request.mapa_prob }
       json_response["data_response"] = json_response["data_response"] === undefined ? [data_response] : json_response["data_response"].concat(data_response)
