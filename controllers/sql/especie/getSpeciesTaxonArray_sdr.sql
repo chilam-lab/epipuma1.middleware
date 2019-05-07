@@ -1,5 +1,5 @@
 with spid_occ as (
-	select 
+	SELECT 
 		-- icount(array_agg(distinct gridid_16km)) as occ
 		icount(array_agg(distinct a.$<res_celda_snib:raw>)) as occ
 	FROM snib AS a
@@ -13,7 +13,6 @@ with spid_occ as (
 	ON a.gid = b.gid
 	WHERE 	
 		$<taxones:raw> AND
-		--snib.spid = 27333 and
 		a.reinovalido <> '' and
 		a.phylumdivisionvalido <> '' and
 		a.clasevalida <> '' and
@@ -21,19 +20,20 @@ with spid_occ as (
 		a.familiavalida <> '' and
 		a.generovalido <> '' and
 		a.especievalidabusqueda <> '' and
-		-- a.especieepiteto <> '' and
 		--gridid_16km is not null
 		$<res_celda_snib:raw> is not null
 		$<sfosil:raw> 
 		--and (ejemplarfosil <> 'SI' or ejemplarfosil is null)
-	--GROUP BY a.spid
+		--and cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)>= cast( $<lim_inf:raw>  as integer)
+		and a.aniocolecta >= cast( $<lim_inf:raw>  as integer)
+		and a.aniocolecta <= cast( $<lim_sup:raw>  as integer)
+		--cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)<= cast( $<lim_sup:raw>  as integer)
 	GROUP BY true
+	--spid
 )
 SELECT DISTINCT st_asgeojson(a.the_geom) as json_geom, 
-				--gridid_16km as gridid,
 				a.$<res_celda_snib:raw> as gridid,
 				a.urlejemplar, 
-				a.especievalidabusqueda as especie,
 				--fechacolecta,
 				a.aniocolecta,
 				(SELECT sum(occ) FROM spid_occ) as occ
@@ -46,7 +46,7 @@ JOIN (
 	WHERE footprint_region=${region}
 	) AS b
 ON a.gid = b.gid
-WHERE 	
+WHERE
 	$<taxones:raw> AND
 	a.reinovalido <> '' and
 	a.phylumdivisionvalido <> '' and
@@ -55,8 +55,12 @@ WHERE
 	a.familiavalida <> '' and
 	a.generovalido <> '' and
 	a.especievalidabusqueda <> '' and
-	-- a.especieepiteto <> '' and
 	--gridid_16km is not null
-	$<res_celda_snib:raw> is not null
+	a.$<res_celda_snib:raw> is not null
 	$<sfosil:raw> 
 	--and (ejemplarfosil <> 'SI' or ejemplarfosil is null)
+	and a.aniocolecta >= cast( $<lim_inf:raw>  as integer)
+	--and cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)>= cast( $<lim_inf:raw>  as integer)
+	and 
+	--cast( NULLIF((regexp_split_to_array(fechacolecta, '-'))[1], '')  as integer)<= cast( $<lim_sup:raw>  as integer)  
+	a.aniocolecta <= cast( $<lim_sup:raw>  as integer)	
