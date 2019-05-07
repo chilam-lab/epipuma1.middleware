@@ -1,6 +1,6 @@
 with spid_occ as (
-	select 
-		-- icount(array_agg(distinct gridid_16km)) as occ
+	SELECT 
+		--icount(array_agg(distinct gridid_16km)) as occ
 		icount(array_agg(distinct a.$<res_celda_snib:raw>)) as occ
 	FROM snib AS a
 	JOIN (
@@ -22,19 +22,19 @@ with spid_occ as (
 		a.generovalido <> '' and
 		a.especievalidabusqueda <> '' and
 		-- a.especieepiteto <> '' and
+		a.aniocolecta is not null and aniocolecta <> 9999 and
 		--gridid_16km is not null
 		$<res_celda_snib:raw> is not null
 		$<sfosil:raw> 
 		--and (ejemplarfosil <> 'SI' or ejemplarfosil is null)
 	--GROUP BY a.spid
 	GROUP BY true
+	-- a.spid
 )
 SELECT DISTINCT st_asgeojson(a.the_geom) as json_geom, 
+				a.$<res_celda:raw> as gridid,
 				--gridid_16km as gridid,
-				a.$<res_celda_snib:raw> as gridid,
-				a.urlejemplar, 
-				a.especievalidabusqueda as especie,
-				--fechacolecta,
+				a.urlejemplar,
 				a.aniocolecta,
 				(SELECT sum(occ) FROM spid_occ) as occ
 FROM snib AS a
@@ -47,16 +47,19 @@ JOIN (
 	) AS b
 ON a.gid = b.gid
 WHERE 	
-	$<taxones:raw> AND
-	a.reinovalido <> '' and
-	a.phylumdivisionvalido <> '' and
-	a.clasevalida <> '' and
-	a.ordenvalido <> '' and
-	a.familiavalida <> '' and
-	a.generovalido <> '' and
-	a.especievalidabusqueda <> '' and
-	-- a.especieepiteto <> '' and
-	--gridid_16km is not null
-	$<res_celda_snib:raw> is not null
-	$<sfosil:raw> 
-	--and (ejemplarfosil <> 'SI' or ejemplarfosil is null)
+		$<taxones:raw> AND
+		a.reinovalido <> '' and
+		a.phylumdivisionvalido <> '' and
+		a.clasevalida <> '' and
+		a.ordenvalido <> '' and
+		a.familiavalida <> '' and
+		a.generovalido <> '' and
+		a.especievalidabusqueda <> '' and
+		-- a.especieepiteto <> '' and
+		a.aniocolecta is not null and aniocolecta <> 9999 and
+		--gridid_16km is not null
+		$<res_celda_snib:raw> is not null
+		$<sfosil:raw> 
+		--and (ejemplarfosil <> 'SI' or ejemplarfosil is null)
+		
+		

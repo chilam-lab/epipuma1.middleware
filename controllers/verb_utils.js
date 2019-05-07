@@ -32,7 +32,7 @@ verb_utils.alpha = 1/10000 // Deprecated: Ahora se obtiene el valor dentro del s
 verb_utils.maxscore = 700 // Valor para realizar el calculo de probabilidad de epsilon
 verb_utils.minscore = -700
 verb_utils.limite = 15 // numero de elemntos mostrados en autocomplete de especie
-verb_utils.min_taxon_name = 'especievalidabusqueda' // nombre de columna del valor minimo taxonomico en base de datos
+verb_utils.min_taxon_name = 'especieepiteto' // nombre de columna del valor minimo taxonomico en base de datos
 verb_utils.max_taxon_name = 'reinovalido' // nombre de columna del valor maximo taxonomico en base de datos
 buckets = 20
 deciles = 10
@@ -362,7 +362,7 @@ verb_utils.processTitleGroup = function(groupid, tfilters){
  * @returns {string} Raw SQL column names 
  */
 verb_utils.getColumns = function(issource, nivel, verbo = "getEntList") {
-  if(issource == 1) {
+  if(issource === 1) {
     if(verbo === "getEntList"){
       return 'spid, reinovalido, phylumdivisionvalido, clasevalida, ' + 
           'ordenvalido, familiavalida, generovalido, especievalidabusqueda'  
@@ -372,7 +372,15 @@ verb_utils.getColumns = function(issource, nivel, verbo = "getEntList") {
           'ordenvalido, familiavalida'  
     }
   } else {
-    return 'distinct ' + nivel + ' '
+    if(nivel === "especieepiteto"){
+      debug("nivel especieepiteto")
+      
+      return "distinct (generovalido || ' ' || especieepiteto) as especieepiteto"
+    }  
+    else{
+      return 'distinct ' + nivel + ' '  
+    }
+    
   }
 }
 

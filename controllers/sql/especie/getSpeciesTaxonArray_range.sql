@@ -1,5 +1,5 @@
 with spid_occ as (
-	select 
+	SELECT
 		-- icount(array_agg(distinct gridid_16km)) as occ
 		icount(array_agg(distinct a.$<res_celda_snib:raw>)) as occ
 	FROM snib AS a
@@ -13,7 +13,6 @@ with spid_occ as (
 	ON a.gid = b.gid
 	WHERE 	
 		$<taxones:raw> AND
-		--snib.spid = 27333 and
 		a.reinovalido <> '' and
 		a.phylumdivisionvalido <> '' and
 		a.clasevalida <> '' and
@@ -21,20 +20,24 @@ with spid_occ as (
 		a.familiavalida <> '' and
 		a.generovalido <> '' and
 		a.especievalidabusqueda <> '' and
-		-- a.especieepiteto <> '' and
 		--gridid_16km is not null
 		$<res_celda_snib:raw> is not null
 		$<sfosil:raw> 
 		--and (ejemplarfosil <> 'SI' or ejemplarfosil is null)
-	--GROUP BY a.spid
+		and 
+		(
+			(
+				aniocolecta >= cast($<lim_inf:raw>  as integer) 
+				and 
+				aniocolecta <= cast( $<lim_sup:raw>  as integer)
+			) 
+			or aniocolecta = 9999
+		)
 	GROUP BY true
 )
 SELECT DISTINCT st_asgeojson(a.the_geom) as json_geom, 
-				--gridid_16km as gridid,
-				a.$<res_celda_snib:raw> as gridid,
-				a.urlejemplar, 
-				a.especievalidabusqueda as especie,
-				--fechacolecta,
+				$<res_celda_snib:raw> as gridid, 
+				a.urlejemplar,
 				a.aniocolecta,
 				(SELECT sum(occ) FROM spid_occ) as occ
 FROM snib AS a
@@ -46,7 +49,7 @@ JOIN (
 	WHERE footprint_region=${region}
 	) AS b
 ON a.gid = b.gid
-WHERE 	
+WHERE
 	$<taxones:raw> AND
 	a.reinovalido <> '' and
 	a.phylumdivisionvalido <> '' and
@@ -55,8 +58,16 @@ WHERE
 	a.familiavalida <> '' and
 	a.generovalido <> '' and
 	a.especievalidabusqueda <> '' and
-	-- a.especieepiteto <> '' and
 	--gridid_16km is not null
 	$<res_celda_snib:raw> is not null
 	$<sfosil:raw> 
 	--and (ejemplarfosil <> 'SI' or ejemplarfosil is null)
+	and 
+	(
+		(
+			aniocolecta>= cast( $<lim_inf:raw>  as integer) 
+			and 
+			aniocolecta<= cast( $<lim_sup:raw>  as integer)
+		) 
+		or aniocolecta = 9999 
+	)

@@ -1,16 +1,17 @@
 SELECT DISTINCT 
-		a.$<taxon:raw> as name,
+		$<ad_param:raw> as name,
 		--phylumdivisionvalido as name,
 		count(*) spp 
-FROM sp_snib AS a
+FROM sp_snib
 WHERE 
-	a.$<taxon:raw> <> ''
-	--a.phylumdivisionvalido <> ''
-	AND a.$<parent_taxon:raw> = $<parent_valor>
-	--and a.reinovalido = 'Animalia'
-	AND a.especievalidabusqueda <> ''
-	AND array_length(a.cells_64km_$<region:raw>, 1) > 0 
---group by a.phylumdivisionvalido 
---order by a.phylumdivisionvalido
-GROUP BY a.$<taxon:raw> 
-ORDER BY a.$<taxon:raw>
+	$<taxon:raw> <> ''
+	--phylumdivisionvalido <> ''
+	AND $<parent_taxon:raw> = $<parent_valor>
+	--and reinovalido = 'Animalia'
+	-- AND especievalidabusqueda <> ''
+	AND especieepiteto <> ''
+	AND array_length(cells_64km_$<region:raw>, 1) > 0 
+--group by phylumdivisionvalido 
+--order by phylumdivisionvalido
+GROUP BY $<order_param:raw> 
+ORDER BY $<ad_param:raw>

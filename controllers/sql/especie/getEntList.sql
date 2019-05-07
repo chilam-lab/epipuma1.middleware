@@ -11,6 +11,7 @@ from sp_snib
 where   
 		--lower(clasevalida) like lower('Ma%')
 		lower($(nivel:raw)) like lower($<str>||'%')
+		$<ad_param:raw>
 		$<val_tree:raw>
 		--and icount($<res_celda_sp:raw>) > 0
 $<limite:raw>
