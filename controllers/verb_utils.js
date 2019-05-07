@@ -2440,63 +2440,125 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
   return query_covar  
 }
 
-verb_utils.getCommunityAnalysisQuery = function(queries, region, res_cells, region_cells, res_views, source, biotic, is_target){
+verb_utils.getCommunityAnalysisQuery = function(queries, region, res_cells, region_cells, res_views, source, is_target){
 
   debug("getCommunityAnalysisQuery")
 
   var query = queries.taxonsGroupNodes.nodesSource
   var q_aux = ""
+  var q_select = ""
   var q = ""
   var fields
   var group_fields
   var level
-  var tipo = biotic ? 1 : 0
   var where
   var label = is_target ? 'target' : 'source'
 
   source.forEach( function (taxon, index) {
 
-    if (biotic){
+    if (taxon["biotic"]){
       
-      level = taxon["level"]
-      q = queries.taxonsGroupNodes.nodesBio
-      fields = verb_utils.getFieldsFromLevel(level)
-      group_fields = verb_utils.getGroupFieldsFromLevel(level)
-      where = verb_utils.getWhereClauseFromGroupTaxonArray([taxon], false)
+      if(index === 0) {
+        level = taxon["level"]
+        q = queries.taxonsGroupNodes.nodesBio
+        fields = verb_utils.getFieldsFromLevel(level)
+        group_fields = verb_utils.getGroupFieldsFromLevel(level)
+        where = verb_utils.getWhereClauseFromGroupTaxonArray([taxon], false)
+        
+        q = q.toString().replace(/{index:raw}/g, index)
+        q = q.toString().replace(/{fields:raw}/g, fields)
+        q = q.toString().replace(/{biotic:raw}/g, 'true')
+        q = q.toString().replace(/{region_cells:raw}/g, region_cells)
+        q = q.toString().replace(/{where_filter:raw}/g, where)
+        q = q.toString().replace(/{level:raw}/g, level)
+        q = q.toString().replace(/{group_fields:raw}/g, group_fields)
+
+      } else {
+
+        q_aux    =  queries.taxonsGroupNodes.covarBio
+        q_select = " UNION " + queries.taxonsGroupNodes.selectNodes
+        
+        level = taxon["level"]
+        fields = verb_utils.getFieldsFromLevel(level)
+        group_fields = verb_utils.getGroupFieldsFromLevel(level)
+        where = verb_utils.getWhereClauseFromGroupTaxonArray([taxon], false)
+        
+        q_aux = q_aux.toString().replace(/{index:raw}/g, index)
+        q_aux = q_aux.toString().replace(/{biotic:raw}/g, 'true')
+        q_aux = q_aux.toString().replace(/{fields:raw}/g, fields)
+        q_aux = q_aux.toString().replace(/{region_cells:raw}/g, region_cells)
+        q_aux = q_aux.toString().replace(/{where_filter:raw}/g, where)
     
-      q = q.toString().replace(/{fields:raw}/g, fields)
-      q = q.toString().replace(/{region_cells:raw}/g, region_cells)
-      q = q.toString().replace(/{where_filter:raw}/g, where)
-      q = q.toString().replace(/{level:raw}/g, level)
-      q = q.toString().replace(/{group_fields:raw}/g, group_fields)
+        q_select = q_select.toString().replace(/{index:raw}/g, index)
+        q_select = q_select.toString().replace(/{fields:raw}/g, fields)
+        q_select = q_select.toString().replace(/{group_fields:raw}/g, group_fields)
+
+        q = q.toString().replace(/{aux:raw}/g, q_aux + ' {aux:raw}')
+        q = q.toString().replace(/{union:raw}/g, q_select + ' {union:raw}')
+
+      }
 
     } else {
 
-      level = taxon["level"]
-      q = queries.taxonsGroupNodes.nodesAbio
-      fields = verb_utils.getFieldsFromLevel(level)
-      group_fields = verb_utils.getGroupFieldsFromLevel(level)
-      where = verb_utils.getWhereClauseFromGroupTaxonArray([taxon], false)
-    
-      q = q.toString().replace(/{fields:raw}/g, fields)
-      q = q.toString().replace(/{region:raw}/g, region)
-      q = q.toString().replace(/{res_cells:raw}/g, res_cells)
-      q = q.toString().replace(/{res_views:raw}/g, res_views)
-      q = q.toString().replace(/{where_filter:raw}/g, where)
-      q = q.toString().replace(/{level:raw}/g, level)
-      q = q.toString().replace(/{group_fields:raw}/g, group_fields)
+      if(index === 0) {
+
+        level = taxon["level"]
+        q = queries.taxonsGroupNodes.nodesAbio
+        fields = verb_utils.getFieldsFromLevel(level)
+        group_fields = verb_utils.getGroupFieldsFromLevel(level)
+        where = verb_utils.getWhereClauseFromGroupTaxonArray([taxon], false)
+        
+        q = q.toString().replace(/{index:raw}/g, index)
+        q = q.toString().replace(/{fields:raw}/g, fields)
+        q = q.toString().replace(/{biotic:raw}/g, 'false')
+        q = q.toString().replace(/{region:raw}/g, region)
+        q = q.toString().replace(/{res_cells:raw}/g, res_cells)
+        q = q.toString().replace(/{res_views:raw}/g, res_views)
+        q = q.toString().replace(/{where_filter:raw}/g, where)
+        q = q.toString().replace(/{level:raw}/g, level)
+        q = q.toString().replace(/{group_fields:raw}/g, group_fields)
+
+      } else {
+
+        q_aux    = queries.taxonsGroupNodes.covarAbio
+        q_select = " UNION " + queries.taxonsGroupNodes.selectNodes
+        
+        level = taxon["level"]
+        fields = verb_utils.getFieldsFromLevel(level)
+        group_fields = verb_utils.getGroupFieldsFromLevel(level)
+        where = verb_utils.getWhereClauseFromGroupTaxonArray([taxon], false)
+        
+        q_aux = q_aux.toString().replace(/{index:raw}/g, index)
+        q_aux = q_aux.toString().replace(/{biotic:raw}/g, 'false')
+        q_aux = q_aux.toString().replace(/{fields:raw}/g, fields)
+        q_aux = q_aux.toString().replace(/{res_cells:raw}/g, res_cells)
+        q_aux = q_aux.toString().replace(/{res_views:raw}/g, res_views)
+        q_aux = q_aux.toString().replace(/{where_filter:raw}/g, where)
+        q_aux = q_aux.toString().replace(/{region:raw}/g, region)
+
+        q_select = q_select.toString().replace(/{index:raw}/g, index)
+        q_select = q_select.toString().replace(/{fields:raw}/g, fields)
+        q_select = q_select.toString().replace(/{group_fields:raw}/g, group_fields)
+        q_select = q_select.toString().replace(/type/g, 'type::varchar')
+        q_select = q_select.toString().replace(/bid/g, 'bid::varchar')
+        q_select = q_select.toString().replace(/icat/g, 'icat::varchar')
+
+        //debug(q_aux)
+        //debug(q_select)
+
+        q = q.toString().replace(/{aux:raw}/g, q_aux + ' {aux:raw}')
+        q = q.toString().replace(/{union:raw}/g, q_select + ' {union:raw}')
+
+      }
 
     }
 
-    q_aux += q
-    if (index > 0)
-      q_aux += " UNION "
-
   })
-
+  
   query = query.toString().replace(/{label:raw}/g, label)
-  query = query.toString().replace(/{query:raw}/g, q_aux)
-  query = query.toString().replace(/{biotic:raw}/g, tipo)
+  query = query.toString().replace(/{query:raw}/g, q)
+  query = query.toString().replace(/{aux:raw}/g, '')
+  query = query.toString().replace(/{union:raw}/g, '')
 
   //debug(query)
   return query
