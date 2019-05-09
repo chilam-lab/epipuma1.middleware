@@ -1,0 +1,6 @@
+ aux_{index:raw} AS (
+	SELECT DISTINCT 
+		UNNEST({region_cells:raw}) AS gridid
+	FROM sp_snib
+	{where_filter:raw}
+)

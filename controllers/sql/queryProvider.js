@@ -318,7 +318,12 @@ var queryProvider = {
     getEdgesBase: sqlPath("nodes-taxons-group/get-edges-base.sql"),
     covarBio: tmplPath("nodes-taxons-group/covar-bio.tmpl"),
     covarAbio: tmplPath("nodes-taxons-group/covar-abio.tmpl"),
-    selectNodes : tmplPath("nodes-taxons-group/select-nodes.tmpl")
+    selectNodes : tmplPath("nodes-taxons-group/select-nodes.tmpl"),
+    getGroupCount: sqlPath("nodes-taxons-group/get-group-count-grid-id.sql"),
+    getCellsBio: tmplPath("nodes-taxons-group/get-cells-bio.tmpl"),
+    getCellsAbio: tmplPath("nodes-taxons-group/get-cells-abio.tmpl"),
+    selectCount: tmplPath("nodes-taxons-group/select-count.tmpl")
+
   },
 
 }

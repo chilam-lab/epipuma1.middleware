@@ -2322,6 +2322,7 @@ verb_utils.getExcludeTargetWhereClause = function (taxon_array) {
       
   })
 
+  debug(whereClause)
   return whereClause
 
 
