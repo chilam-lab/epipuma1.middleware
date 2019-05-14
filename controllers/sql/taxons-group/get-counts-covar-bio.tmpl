@@ -5,6 +5,7 @@ aux_{name:raw} as (
 			-- a.generovalido as level
 	FROM sp_snib
 	{where_covars:raw}
+	{where_exclude_target:raw}
 		--WHERE a.clasevalida = 'Mammalia'
 		and array_length({res_celda_sp:raw}, 1) > 0 
 		-- and array_length(a.cells_16km_1, 1) > 0

@@ -1,17 +1,22 @@
-WITH aux AS (
+WITH aux_{index:raw} AS (
 	SELECT DISTINCT 
+		{biotic:raw} AS biotic,
 		{fields:raw},
 		UNNEST({res_cells:raw} & b.cells) AS cell
 	FROM raster_bins AS a, {res_views:raw} AS b
 	{where_filter:raw}
 	AND b.footprint_region={region:raw}
-)
+) {aux:raw}
 SELECT 
+	biotic,
 	array_agg(distinct a.cell) AS cells,
 	{fields:raw}
 FROM (
-		SELECT cell,
-				{fields:raw}
-		FROM aux 
+		SELECT 
+			biotic,
+			cell,
+			{fields:raw}
+		FROM aux_{index:raw}
 	) AS a
-GROUP BY {group_fields:raw}
+GROUP BY biotic, {group_fields:raw}
+{union:raw}
