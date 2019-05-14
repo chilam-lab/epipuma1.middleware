@@ -59,9 +59,11 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   var target_group = verb_utils.getParam(req, 'target_taxons', []) 
   data_request["target_name"] = verb_utils.getParam(req, 'target_name', 'target_group')
   data_request["where_target"] = verb_utils.getWhereClauseFromGroupTaxonArray(target_group, true)
+  data_request["where_exclude_target"] = verb_utils.getExcludeTargetWhereClause(target_group)
+  //debug(data_request["where_exclude_target"])
 
   var covars_groups = verb_utils.getParam(req, 'covariables', []) 
-  // debug(covars_groups)
+  //debug(covars_groups)
   //data_request['groups'] = verb_utils.getCovarGroupQueries(queries, data_request, covars_groups)
 
   data_request["alpha"] = undefined
@@ -210,9 +212,9 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
           debug("analisis basico")
           //const query1 = pgp.as.format(query_analysis, data_request)
-         //debug(query1)
-          // debug(query_analysis)
-          // debug(data_request)
+          //debug(query1)
+          //debug(query_analysis)
+          //debug(data_request)
 
           return t.any(query_analysis, data_request)
 

@@ -1,0 +1,13 @@
+SELECT 
+	biotic,
+	array_agg(distinct a.cell) AS cells,
+	{fields:raw}
+FROM (
+		SELECT
+			biotic, 
+			cell,
+			{fields:raw}
+		FROM aux_{index:raw} 
+	) AS a
+GROUP BY biotic, {group_fields:raw}
+{union:raw}
