@@ -782,6 +782,8 @@ verb_utils.processGroupDataForCellId = function (data, apriori, mapa_prob, gridi
         type: d.type,
         layer: d.layer,
         bid: d.bid,
+        icat: d.icat,
+        tag: d.tag,
         tipo: type
       }
     }
@@ -808,6 +810,8 @@ verb_utils.processGroupDataForCellId = function (data, apriori, mapa_prob, gridi
                           type: item.type,
                           layer: item.layer,
                           bid: item.bid,
+                          icat: item.icat,
+                          tag: item.tag,
                           tipo: item.tipo
                         })
       tscore = tscore + item.score  
