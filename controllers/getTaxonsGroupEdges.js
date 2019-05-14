@@ -40,8 +40,8 @@ exports.getTaxonsGroupEdges = function (req, res) {
 
   		// Creating queries
 	    var query = queries.taxonsGroupNodes.getEdgesBase
-	    var source_query = verb_utils.getCommunityAnalysisQuery(queries, footprint_region, res_cells, region_cells, res_views, source, biotic_source, false)
-	    var target_query = verb_utils.getCommunityAnalysisQuery(queries, footprint_region, res_cells, region_cells, res_views, target, biotic_target, true ).slice(5)
+	    var source_query = verb_utils.getCommunityAnalysisQuery(queries, footprint_region, res_cells, region_cells, res_views, source, false)
+	    var target_query = verb_utils.getCommunityAnalysisQuery(queries, footprint_region, res_cells, region_cells, res_views, target, true ).slice(5)
 
 	    //const query1 = pgp.as.format(query, {source: source_query, target: target_query, res_views: res_views, region: footprint_region, min_occ: min_occ})
         //debug(query1)

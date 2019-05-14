@@ -5,6 +5,7 @@
 var debug = require('debug')('verbs:niche')
 var moment = require('moment')
 var verb_utils = require('./verb_utils')
+var pgp = require('pg-promise')()
 
 var queries = require('./sql/queryProvider.js')
 
@@ -1098,6 +1099,75 @@ exports.getCountGridid = function (req, res, next) {
     debug(error)
     next(error)
   })
+}
+
+exports.getGroupCountGridid = function (req, res) {
+  debug('getGroupCountGridid')
+
+  // catching parameters
+  var footprint_region = getParam(req, 'region', default_region)
+  var grid_res = getParam(req, 'grid_res', 16)
+  var nodes = getParam(req, 'nodes', [])
+
+  // defining necessary varaiables 
+  var region_cells = 'cells_' + grid_res + 'km_' + footprint_region
+  var res_view = 'gridid_geojson_' + grid_res + 'km_aoi'
+  var res_cells = 'cells_' + grid_res + 'km'
+  var where_clause = ''
+  var query = "" 
+  var q =''
+  var select = ''
+  
+  // getting all cells
+  nodes.forEach((group, index) => {
+
+    merge_vars = group['merge_vars']
+    debug(merge_vars)
+    where_clause = verb_utils.getWhereClauseFromGroupTaxonArray(merge_vars, false)
+
+    if (group['biotic']) {
+      
+      q += (index > 0 ? ", " : "WITH ") + queries.taxonsGroupNodes.getCellsBio
+      q = q.toString().replace(/{region_cells:raw}/g, region_cells)
+      q = q.toString().replace(/{where_filter:raw}/g, where_clause)
+
+    } else {
+
+      q += (index > 0 ? ", " : "WITH ") + queries.taxonsGroupNodes.getCellsBio
+      q = q.toString().replace(/{where_filter:raw}/g, where_clause)
+      q = q.toString().replace(/{res_cells:raw}/g, res_cells)
+      q = q.toString().replace(/{res_views:raw}/g, res_views)
+      q = q.toString().replace(/{region:raw}/g, region)
+
+    }
+    
+    select += (index > 0 ? "\n UNION \n" : "") + queries.taxonsGroupNodes.selectCount
+    q = q.toString().replace(/{index:raw}/g, index)
+    select = select.toString().replace(/{index:raw}/g, index)
+
+  })
+
+  query = queries.taxonsGroupNodes.getGroupCount
+
+  //const query1 = pgp.as.format(query, {aux: q, summary: select})
+  //debug(query1)
+
+  pool.any(query, {
+
+       aux: q,
+       summary: select
+    
+  }).then(function (data) {
+
+    res.json({"ok":true, "data": data})
+
+  }).catch(function (error) {
+      
+    res.json({"ok":true, "message": 'an error has ocurrred!', "error": error})
+
+  })
+
+
 }
 
 
