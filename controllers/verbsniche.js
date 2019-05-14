@@ -1112,7 +1112,7 @@ exports.getGroupCountGridid = function (req, res) {
 
     }
     
-    select += (index > 0 ? " UNION " : "") + queries.taxonsGroupNodes.selectCount
+    select += (index > 0 ? "\n UNION \n" : "") + queries.taxonsGroupNodes.selectCount
     q = q.toString().replace(/{index:raw}/g, index)
     select = select.toString().replace(/{index:raw}/g, index)
 
