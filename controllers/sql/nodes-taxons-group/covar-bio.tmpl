@@ -1,0 +1,6 @@
+SELECT DISTINCT 
+	{biotic:raw} AS biotic,
+	{fields:raw},
+	UNNEST({region_cells:raw}) AS cell
+FROM sp_snib
+{where_filter:raw}

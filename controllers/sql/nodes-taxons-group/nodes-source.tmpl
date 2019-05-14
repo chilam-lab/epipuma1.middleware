@@ -3,7 +3,7 @@ WITH aux_{label:raw} AS (
 ), {label:raw} AS (
 	SELECT
 		cells,
-		{biotic:raw} AS biotic,
+		biotic,
 		reinovalido, 
 		phylumdivisionvalido,
 		clasevalida,
@@ -14,6 +14,8 @@ WITH aux_{label:raw} AS (
 	    nombreinfra,
 		type::varchar,
 		layer,
-	    bid::varchar
+	    bid::varchar,
+	    tag,
+	    icat::varchar
 	FROM aux_{label:raw}
 )

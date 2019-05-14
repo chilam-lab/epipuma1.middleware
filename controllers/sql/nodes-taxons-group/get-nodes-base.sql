@@ -14,6 +14,8 @@ SELECT
 	source.type,
 	source.layer,
     source.bid,
+    source.tag,
+    source.icat,
 	array_length(source.cells, 1) AS occ
 FROM source
 UNION
@@ -31,5 +33,7 @@ SELECT
 	target.type,
 	target.layer,
     target.bid,
+    target.tag,
+    target.icat,
 	array_length(target.cells, 1) AS occ
 FROM target

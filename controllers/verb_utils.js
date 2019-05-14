@@ -1638,6 +1638,8 @@ verb_utils.processGroupValidationData = function(data_group) {
       item.type = add.type
       item.layer = add.layer
       item.bid = add.bid
+      item.icat = add.icat
+      item.tag =  add.tag
       item.cells = add.cells
       item.cells_map = item.cells_map.concat(add.cells) 
       item.nij = add.nij
@@ -1662,6 +1664,8 @@ verb_utils.processGroupValidationData = function(data_group) {
       item.type = remove.type
       item.layer = remove.layer
       item.bid = remove.bid
+      item.icat = remove.icat
+      item.tag = remove.tag
       item.cells = item.cells //remove.cells //
       item.cells_map = item.cells_map
       item.nij = item.nij
@@ -1687,6 +1691,8 @@ verb_utils.processGroupValidationData = function(data_group) {
         type:"",
         layer:"",
         bid:"",
+        icat:"",
+        tag:"",
         cells: [],
         cells_map: [],
         nij: 0,
@@ -1718,6 +1724,8 @@ verb_utils.processGroupValidationData = function(data_group) {
         type: entry["value"].type,
         layer: entry["value"].layer,
         bid: entry["value"].bid, 
+        icat: entry["value"].icat,
+        tag: entry["value"].tag,
         cells: entry["value"].cells,
         cells_map: entry["value"].cells_map,
         nij: parseFloat((entry["value"].nij ).toFixed(2)),
@@ -2106,6 +2114,7 @@ verb_utils.getFieldsFromLevel = function (level) {
           notyet = false
           fields += ", " + rank_map[key]
 
+
       } else {
 
           fields += ", " + rank_map[key] 
@@ -2121,6 +2130,11 @@ verb_utils.getFieldsFromLevel = function (level) {
     //debug(fields)    
 
   }
+
+  if (level === 'bid')
+    fields  += ", icat, tag "
+  else 
+    fields  += ", '' AS icat, '' AS tag "
 
   debug("fields =" + fields)
   return fields
@@ -2216,6 +2230,9 @@ verb_utils.getGroupFieldsFromLevel = function (level) {
 
     }
 
+   if(level === 'bid')
+        group_fields += ", icat, tag "
+
   }
 
 
@@ -2284,6 +2301,66 @@ verb_utils.getWhereClauseFromGroupTaxonArray = function (taxon_array, target){
 
 }
 
+
+verb_utils.getExcludeTargetWhereClause = function (taxon_array) {
+
+  debug("getExcludeTargetWhereClause")
+
+  var key = 'taxon_rank'
+  // mapeo de taxones
+  var taxon_rank_map = {
+                          // biotic
+                          kingdom : 'reinovalido', 
+                          phylum  : 'phylumdivisionvalido',
+                          class   : 'clasevalida',
+                          order   : 'ordenvalido',
+                          family  : 'familiavalida',
+                          genus   : 'generovalido',
+                          species : ['generovalido', 'especieepiteto'],
+                          subspecies: ['generovalido', 'especieepiteto', 'nombreinfra'],
+                          // abiotic
+                          type    : 'type',
+                          layer   : 'layer',
+                          bid     : 'bid'
+                       }
+  
+  var whereClause = ''
+  taxon_array.forEach ( function (taxon, index) {
+    //debug(taxon_rank_map[taxon[key]], taxon[key])
+    if (index === 0){
+      
+      if (taxon[key] === 'species') {
+        var value = taxon['value'].split(' ')
+        whereClause += " AND (" + taxon_rank_map[taxon[key]][0] + " <> '" + value[0] + "' AND " + taxon_rank_map[taxon[key]][1] + " <> '" + value[1] + "')"
+      } else if(taxon[key] === 'subspecies') {
+        var value = taxon['value'].split(' ')
+        whereClause += " AND (" + taxon_rank_map[taxon[key]][0] + "<> '" + value[0] + "' AND " + taxon_rank_map[taxon[key]][1] + " <> '" + value[1] + "' AND " + taxon_rank_map[taxon[key]][2] + " <> '" + value[2] + "')"
+      } else {
+        whereClause += " AND " + taxon_rank_map[taxon[key]] + " <> '" + taxon['value'] + "'"
+      }
+
+    } else{
+      
+      if (taxon[key] === 'species') {
+        var value = taxon['value'].split(' ')
+        whereClause += " AND (" + taxon_rank_map[taxon[key]][0] + " <> '" + value[0] + "' AND " + taxon_rank_map[taxon[key]][1] + " <> '" + value[1] + "')"
+      } else if(taxon[key] === 'subspecies') {
+        var value = taxon['value'].split(' ')
+        whereClause += " AND (" + taxon_rank_map[taxon[key]][0] + " <> '" + value[0] + "' AND " + taxon_rank_map[taxon[key]][1] + " <> '" + value[1] + "' AND " + taxon_rank_map[taxon[key]][2] + " <> '" + value[2] + "')" 
+      } else {
+        whereClause += " AND " + taxon_rank_map[taxon[key]] + " <> '" + taxon['value'] + "'"
+      }
+
+    } 
+      
+  })
+
+  debug(whereClause)
+  return whereClause
+
+
+}
+
 verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups) {
   
   debug("getCovarGroupQueries")
@@ -2344,6 +2421,7 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
       query_covar = query_covar.toString().replace(/{where_covars:raw}/g, where_covar)
       query_covar = query_covar.toString().replace(/{excluded_cells:raw}/g, data_request["excluded_cells"].toString())
       query_covar = query_covar.toString().replace(/{total_cells:raw}/g, data_request["total_cells"])
+      query_covar = query_covar.toString().replace(/{where_exclude_target:raw}/g, data_request["where_exclude_target"])
        
     } else {
 
@@ -2396,63 +2474,125 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
   return query_covar  
 }
 
-verb_utils.getCommunityAnalysisQuery = function(queries, region, res_cells, region_cells, res_views, source, biotic, is_target){
+verb_utils.getCommunityAnalysisQuery = function(queries, region, res_cells, region_cells, res_views, source, is_target){
 
   debug("getCommunityAnalysisQuery")
 
   var query = queries.taxonsGroupNodes.nodesSource
   var q_aux = ""
+  var q_select = ""
   var q = ""
   var fields
   var group_fields
   var level
-  var tipo = biotic ? 1 : 0
   var where
   var label = is_target ? 'target' : 'source'
 
   source.forEach( function (taxon, index) {
 
-    if (biotic){
+    if (taxon["biotic"]){
       
-      level = taxon["level"]
-      q = queries.taxonsGroupNodes.nodesBio
-      fields = verb_utils.getFieldsFromLevel(level)
-      group_fields = verb_utils.getGroupFieldsFromLevel(level)
-      where = verb_utils.getWhereClauseFromGroupTaxonArray([taxon], false)
+      if(index === 0) {
+        level = taxon["level"]
+        q = queries.taxonsGroupNodes.nodesBio
+        fields = verb_utils.getFieldsFromLevel(level)
+        group_fields = verb_utils.getGroupFieldsFromLevel(level)
+        where = verb_utils.getWhereClauseFromGroupTaxonArray([taxon], false)
+        
+        q = q.toString().replace(/{index:raw}/g, index)
+        q = q.toString().replace(/{fields:raw}/g, fields)
+        q = q.toString().replace(/{biotic:raw}/g, 'true')
+        q = q.toString().replace(/{region_cells:raw}/g, region_cells)
+        q = q.toString().replace(/{where_filter:raw}/g, where)
+        q = q.toString().replace(/{level:raw}/g, level)
+        q = q.toString().replace(/{group_fields:raw}/g, group_fields)
+
+      } else {
+
+        q_aux    =  queries.taxonsGroupNodes.covarBio
+        q_select = " UNION " + queries.taxonsGroupNodes.selectNodes
+        
+        level = taxon["level"]
+        fields = verb_utils.getFieldsFromLevel(level)
+        group_fields = verb_utils.getGroupFieldsFromLevel(level)
+        where = verb_utils.getWhereClauseFromGroupTaxonArray([taxon], false)
+        
+        q_aux = q_aux.toString().replace(/{index:raw}/g, index)
+        q_aux = q_aux.toString().replace(/{biotic:raw}/g, 'true')
+        q_aux = q_aux.toString().replace(/{fields:raw}/g, fields)
+        q_aux = q_aux.toString().replace(/{region_cells:raw}/g, region_cells)
+        q_aux = q_aux.toString().replace(/{where_filter:raw}/g, where)
     
-      q = q.toString().replace(/{fields:raw}/g, fields)
-      q = q.toString().replace(/{region_cells:raw}/g, region_cells)
-      q = q.toString().replace(/{where_filter:raw}/g, where)
-      q = q.toString().replace(/{level:raw}/g, level)
-      q = q.toString().replace(/{group_fields:raw}/g, group_fields)
+        q_select = q_select.toString().replace(/{index:raw}/g, index)
+        q_select = q_select.toString().replace(/{fields:raw}/g, fields)
+        q_select = q_select.toString().replace(/{group_fields:raw}/g, group_fields)
+
+        q = q.toString().replace(/{aux:raw}/g, q_aux + ' {aux:raw}')
+        q = q.toString().replace(/{union:raw}/g, q_select + ' {union:raw}')
+
+      }
 
     } else {
 
-      level = taxon["level"]
-      q = queries.taxonsGroupNodes.nodesAbio
-      fields = verb_utils.getFieldsFromLevel(level)
-      group_fields = verb_utils.getGroupFieldsFromLevel(level)
-      where = verb_utils.getWhereClauseFromGroupTaxonArray([taxon], false)
-    
-      q = q.toString().replace(/{fields:raw}/g, fields)
-      q = q.toString().replace(/{region:raw}/g, region)
-      q = q.toString().replace(/{res_cells:raw}/g, res_cells)
-      q = q.toString().replace(/{res_views:raw}/g, res_views)
-      q = q.toString().replace(/{where_filter:raw}/g, where)
-      q = q.toString().replace(/{level:raw}/g, level)
-      q = q.toString().replace(/{group_fields:raw}/g, group_fields)
+      if(index === 0) {
+
+        level = taxon["level"]
+        q = queries.taxonsGroupNodes.nodesAbio
+        fields = verb_utils.getFieldsFromLevel(level)
+        group_fields = verb_utils.getGroupFieldsFromLevel(level)
+        where = verb_utils.getWhereClauseFromGroupTaxonArray([taxon], false)
+        
+        q = q.toString().replace(/{index:raw}/g, index)
+        q = q.toString().replace(/{fields:raw}/g, fields)
+        q = q.toString().replace(/{biotic:raw}/g, 'false')
+        q = q.toString().replace(/{region:raw}/g, region)
+        q = q.toString().replace(/{res_cells:raw}/g, res_cells)
+        q = q.toString().replace(/{res_views:raw}/g, res_views)
+        q = q.toString().replace(/{where_filter:raw}/g, where)
+        q = q.toString().replace(/{level:raw}/g, level)
+        q = q.toString().replace(/{group_fields:raw}/g, group_fields)
+
+      } else {
+
+        q_aux    = queries.taxonsGroupNodes.covarAbio
+        q_select = " UNION " + queries.taxonsGroupNodes.selectNodes
+        
+        level = taxon["level"]
+        fields = verb_utils.getFieldsFromLevel(level)
+        group_fields = verb_utils.getGroupFieldsFromLevel(level)
+        where = verb_utils.getWhereClauseFromGroupTaxonArray([taxon], false)
+        
+        q_aux = q_aux.toString().replace(/{index:raw}/g, index)
+        q_aux = q_aux.toString().replace(/{biotic:raw}/g, 'false')
+        q_aux = q_aux.toString().replace(/{fields:raw}/g, fields)
+        q_aux = q_aux.toString().replace(/{res_cells:raw}/g, res_cells)
+        q_aux = q_aux.toString().replace(/{res_views:raw}/g, res_views)
+        q_aux = q_aux.toString().replace(/{where_filter:raw}/g, where)
+        q_aux = q_aux.toString().replace(/{region:raw}/g, region)
+
+        q_select = q_select.toString().replace(/{index:raw}/g, index)
+        q_select = q_select.toString().replace(/{fields:raw}/g, fields)
+        q_select = q_select.toString().replace(/{group_fields:raw}/g, group_fields)
+        q_select = q_select.toString().replace(/type/g, 'type::varchar')
+        q_select = q_select.toString().replace(/bid/g, 'bid::varchar')
+        q_select = q_select.toString().replace(/icat/g, 'icat::varchar')
+
+        //debug(q_aux)
+        //debug(q_select)
+
+        q = q.toString().replace(/{aux:raw}/g, q_aux + ' {aux:raw}')
+        q = q.toString().replace(/{union:raw}/g, q_select + ' {union:raw}')
+
+      }
 
     }
 
-    q_aux += q
-    if (index > 0)
-      q_aux += " UNION "
-
   })
-
+  
   query = query.toString().replace(/{label:raw}/g, label)
-  query = query.toString().replace(/{query:raw}/g, q_aux)
-  query = query.toString().replace(/{biotic:raw}/g, tipo)
+  query = query.toString().replace(/{query:raw}/g, q)
+  query = query.toString().replace(/{aux:raw}/g, '')
+  query = query.toString().replace(/{union:raw}/g, '')
 
   //debug(query)
   return query
