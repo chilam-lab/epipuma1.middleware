@@ -7,7 +7,7 @@
 */
 var verb_utils = {} 
 
-var debug = require('debug')('verbs:verbsUtils')
+var debug = require('debug')('')
 var moment = require('moment')
 var pgp = require('pg-promise')()
 var config = require('../config')
@@ -768,10 +768,22 @@ verb_utils.processGroupDataForCellId = function (data, apriori, mapa_prob, gridi
       else
         hasraster = true
       
+      //debug(d)
       return {
-        score: parseFloat(d.score), group: d.name, type: type
+        score: parseFloat(d.score),  
+        reinovalido: d.reinovalido, 
+        phylumdivisionvalido: d.phylumdivisionvalido,
+        clasevalida: d.clasevalida,
+        ordenvalido: d.ordenvalido,
+        familiavalida: d.familiavalida,
+        generovalido: d.generovalido,
+        especieepiteto: d.especieepiteto,
+        nombreinfra: d.nombreinfra,
+        type: d.type,
+        layer: d.layer,
+        bid: d.bid,
+        tipo: type
       }
-
     }
   })
 
@@ -784,7 +796,20 @@ verb_utils.processGroupDataForCellId = function (data, apriori, mapa_prob, gridi
       positives = item.score >= 0 ? positives+1 : positives
       negatives = item.score < 0 ? negatives+1 : negatives
 
-      groups_incell.push({name:item.group, score: item.score, type: item.type})
+      groups_incell.push({score: item.score, 
+                          reinovalido: item.reinovalido, 
+                          phylumdivisionvalido: item.phylumdivisionvalido,
+                          clasevalida: item.clasevalida,
+                          ordenvalido: item.ordenvalido,
+                          familiavalida: item.familiavalida,
+                          generovalido: item.generovalido,
+                          especieepiteto: item.especieepiteto,
+                          nombreinfra: item.nombreinfra,
+                          type: item.type,
+                          layer: item.layer,
+                          bid: item.bid,
+                          tipo: item.tipo
+                        })
       tscore = tscore + item.score  
 
     }
