@@ -319,6 +319,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req) {
       var data_freq_cell = data_request.with_data_freq_cell === true ? verb_utils.processDataForFreqCell(data_score_cell) : []
 
 
+      
       res.json({
           ok: true,
           // usuarioRequest: req.usuarioRequest,

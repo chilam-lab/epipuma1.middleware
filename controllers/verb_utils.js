@@ -1597,16 +1597,16 @@ verb_utils.processGroupValidationData = function(data_group) {
     item['data'].forEach(function(element){
 
       element.tempid = element.reinovalido + " " +
-                          element.phylumdivisionvalido + " " +
-                          element.clasevalida + " " +
-                          element.ordenvalido + " " +
-                          element.familiavalida + " " +
-                          element.generovalido + " " +
-                          element.especieepiteto + " " +
-                          element.nombreinfra + " " +
-                          element.type + " " +
-                          element.layer + " " +
-                          element.bid
+                      element.phylumdivisionvalido + " " +
+                      element.clasevalida + " " +
+                      element.ordenvalido + " " +
+                      element.familiavalida + " " +
+                      element.generovalido + " " +
+                      element.especieepiteto + " " +
+                      element.nombreinfra + " " +
+                      element.type + " " +
+                      element.layer + " " +
+                      element.bid
       //debug(element)
     })
     

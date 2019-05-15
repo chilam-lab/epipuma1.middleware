@@ -131,7 +131,17 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
       data_request["total_cells"] = resp.total_cells
 
       var query = data_request.idtabla === "" ? "select array[]::integer[] as source_cells" : queries.validationProcess.getSourceCells
-      // debug(query)
+      //debug(query)
+
+      /*const query1 = pgp.as.format(query, {
+      
+        tbl_process: data_request.idtabla,
+        iter: (iter+1),
+        res_grid_tbl: data_request.res_grid_tbl,
+        res_grid_column: data_request.res_celda_snib
+
+      })
+      debug(query1)*/
 
       return t.one(query, {
       
