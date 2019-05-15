@@ -778,6 +778,387 @@ paths:
         - url: 'http://species.conabio.gob.mx'
     servers:
       - url: 'http://species.conabio.gob.mx'
+
+  /api-db-dev/niche/countsTaxonsGroup:
+    post:
+      description: Obtiene analisis de nicho con el grupo de variables objetivo y los grupos de covariables dados.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                date:
+                  type: boolean
+                  description: Especifica si se incluyen registros solo con fecha
+                lim_inf:
+                  type: integer
+                  description: Limite inferior del rango de año 
+                lim_sup:
+                  type: integer
+                  description: Limite superior del rango de año 
+                with_data_freq:
+                  type: boolean
+                excluded_cells:
+                  type: array
+                  description: Ids de celdas excluidas para el análisis
+                  items:
+                    type: integer
+                fosil:
+                  type: boolean
+                  description: Especifica si se incluyen registros fósiles
+                idtabla:
+                  type: string
+                  description: Id de la tabla de validación 
+                idtime:
+                  type: number
+                  description: "Parámetro dado por el cliente, no es necesario"
+                apriori:
+                  type: boolean
+                  description: Especifica si se agrega el apriori
+                mapa_prob:
+                  type: boolean
+                  description: Especifica si se agrega el mapa de probabilidad
+                min_cells:
+                  type: integer
+                  description: Especifica el numero de celdas para considerar covariables
+                with_data_score_cell:
+                  type: boolean
+                with_data_freq_cell:
+                  type: boolean
+                get_grid_specie:
+                  type: boolean
+                  description: Especifica si el análisis es de selección por celda
+                region:
+                  type: integer
+                  description: Especifica el Id de la región de interés del análisis
+                grid_resolution:
+                  type: integer
+                  description: Especifica el tamaño de resolución de la malla
+                with_data_score_decil:
+                  type: boolean
+                target_name:
+                  type: string
+                  description: Nombre dado al grupo objetivo
+                longitud:
+                  type: number
+                  description: Parámetro  necesario solo en análisis por celda
+                latitud:
+                  type: number
+                  description: Parámetro  necesario solo en análisis por celda
+                target_taxons:
+                  type: array
+                  description: Arreglo para especificar el conjunto de variables que va a conformar el grupo objetivo
+                  items:
+                    type: object
+                    properties:
+                      taxon_rank: 
+                        type: string
+                        description: Se especifica el taxón 
+                      value: 
+                        type: string
+                        description: Se especifica el valor
+                covariables:
+                  type: array
+                  description: Arreglo para especificar los conjuntos de variables que van conformar los grupos de covariables
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        description: Nombre del grupo de covariables
+                      biotic:
+                        type: boolean
+                        description: Especifica si es biótico o abiótico
+                      merge_vars:
+                        type: array
+                        items: 
+                          type: object
+                          properties:
+                            rank:
+                              type: string
+                              description: Se especifica el taxón
+                            value:
+                              type: string
+                              description: Se especifica el valor
+                            level:
+                              type: string
+                              description: Se especifica el taxón de agrupamiento
+            examples:
+              '0':
+                value: |-
+                  target_taxons:
+                    - taxon_rank: species
+                      value: Aedes aegypti
+                  idtime: 1557853095248
+                  apriori: false
+                  mapa_prob: false
+                  min_cells: 5
+                  fosil: false
+                  date: false
+                  idtabla: tbl_1557853087247
+                  grid_resolution: 16
+                  region: 1
+                  get_grid_species: false
+                  with_data_score_cell: true
+                  with_data_freq: true
+                  with_data_freq_cell: true
+                  with_data_score_decil: false
+                  excluded_cells: []
+                  target_name: targetGroup
+                  covariables:
+                    - name: GpoBio1
+                      biotic: true
+                      merge_vars:
+                        - rank: order
+                          value: Didelphimorphia
+                          type: 0
+                          level: species
+                      group_item: 1
+                  
+      responses:
+        '200':
+          description: Calculo de epsilon y score para cada grupo de covariables.
+      servers:
+        - url: 'http://species.conabio.gob.mx'
+    servers:
+      - url: 'http://species.conabio.gob.mx'
+
+  /api-db-dev/niche/getTaxonsGroupNodes:
+    post:
+      description: Obtiene los nodos de analisis en comunidad con agrupamiento.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                source:
+                  description: Especifica el taxon y nivel de agrupamiento de los nodos fuente
+                  type: array
+                  items: 
+                    type: object
+                    properties:
+                      biotic: 
+                        description: Especifica si es biótico o abiótico 
+                        type: boolean
+                      rank: 
+                        description: Se especifica el taxón
+                        type: string
+                      value: 
+                        description: Se especifica el valor
+                        type: string
+                      level: 
+                        description: Se especifica el taxón de agrupamiento
+                        type: string
+                target:
+                  description: Especifica el taxon y nivel de agrupamiento de los nodos objetivo
+                  type: array
+                  items: 
+                    type: object
+                    properties:
+                      biotic: 
+                        description: Especifica si es biótico o abiótico 
+                        type: boolean
+                      rank: 
+                        description: Se especifica el taxón
+                        type: string
+                      value: 
+                        description: Se especifica el valor
+                        type: string
+                      level: 
+                        description: Se especifica el taxón de agrupamiento
+                        type: string
+                min_occ:
+                  description: Minimo de celdas ocupada por nodo para tomarse en cuenta
+                  type: integer
+                grid_res: 
+                  description: Especifica el tamaño de resolución de la malla
+                  type: integer
+                region:
+                  description: Especifica el Id de la región de interés del análisis
+                  type: integer
+            examples:
+              '0':
+                value: |-
+                  source:
+                    - biotic: true
+                      rank: species
+                      value: Lynx rufus
+                      level: species
+                    - biotic: false
+                      rank: layer
+                      value: bio020
+                      level: bid
+                  target:
+                    - biotic: false
+                      rank: type
+                      value: '1'
+                      level: bid
+                  min_occ: 5
+                  grid_res: '16'
+                  region: 1
+                  
+      responses:
+        '200':
+          description: Nodos.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+              examples: {}
+      servers:
+        - url: 'http://species.conabio.gob.mx'
+    servers:
+      - url: 'http://species.conabio.gob.mx'
+
+  /api-db-dev/niche/getTaxonsGroupEdges:
+    post:
+      description: Obtiene las aristas de un analisis de comunidad con agrupamiento.
+      requestBody:
+        content:
+          application/json:
+            schema: 
+              type: object
+              properties:
+                source:
+                  description: Especifica el taxon y nivel de agrupamiento de los nodos fuente
+                  type: array
+                  items: 
+                    type: object
+                    properties:
+                      biotic: 
+                        description: Especifica si es biótico o abiótico 
+                        type: boolean
+                      rank: 
+                        description: Se especifica el taxón
+                        type: string
+                      value: 
+                        description: Se especifica el valor
+                        type: string
+                      level: 
+                        description: Se especifica el taxón de agrupamiento
+                        type: string
+                target:
+                  type: array
+                  items: 
+                    type: object
+                    properties:
+                      biotic: 
+                        description: Especifica si es biótico o abiótico 
+                        type: boolean
+                      rank: 
+                        description: Se especifica el taxón
+                        type: string
+                      value: 
+                        description: Se especifica el valor
+                        type: string
+                      level: 
+                        description: Se especifica el taxón de agrupamiento
+                        type: string
+                min_occ:
+                  description: Minimo de celdas ocupada por nodo para tomarse en cuenta
+                  type: integer
+                grid_res: 
+                  description: Especifica el tamaño de resolución de la malla
+                  type: integer
+                region:
+                  description: Especifica el Id de la región de interés del análisis
+                  type: integer
+            examples:
+              '0':
+                value: |-
+                  source:
+                    - biotic: true
+                      rank: species
+                      value: Lynx rufus
+                      level: species
+                    - biotic: false
+                      rank: layer
+                      value: bio020
+                      level: bid
+                  target:
+                    - biotic: false
+                      rank: type
+                      value: '1'
+                      level: bid
+                  min_occ: 5
+                  grid_res: '16'
+                  region: 1
+                  
+      responses:
+        '200':
+          description: Aristas.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+              examples: {}
+      servers:
+        - url: 'http://species.conabio.gob.mx'
+    servers:
+      - url: 'http://species.conabio.gob.mx'
+
+  /api-db-dev/niche/getGroupCountGridid:
+    post:
+      description: Obtiene la distribucion (en celdas) de los nodos dados en la region de interes.
+      requestBody:
+        content:
+          application/json:
+            schema: 
+              type: object
+              properties:
+                nodes:
+                  description: Especifica los nodos para los que se requiere la distribucion.
+                  type: array
+                  items: 
+                    type: object
+                    properties:
+                      biotic: 
+                        description: Especifica si es biótico o abiótico 
+                        type: boolean
+                      merge_vars:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            rank: 
+                              description: Se especifica el taxón
+                              type: string
+                            value: 
+                              description: Se especifica el valor
+                              type: string
+                grid_res: 
+                  description: Especifica el tamaño de resolución de la malla
+                  type: integer
+                region:
+                  description: Especifica el Id de la región de interés del análisis
+                  type: integer
+            examples:
+              '0':
+                value: |-
+                  grid_res: 16
+                  region: 1
+                  nodes:
+                    - biotic: true
+                      merge_vars:
+                        - rank: class
+                          value: Mammalia
+                        - rank: kingdom
+                          value: Plantae
+      responses:
+        '200':
+          description: Lista de Ids de celdas con al menos una ocurrencia de algun nodo y conteo de distintos nodos en la celda.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+              examples: {}
+      servers:
+        - url: 'http://species.conabio.gob.mx'
+    servers:
+      - url: 'http://species.conabio.gob.mx'
+
   /api-db-dev/niche/especie/getToken:
     get:
       summary: Obtiene un token para analisis.
