@@ -241,7 +241,9 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
       
       }
 
-      debug("request_counter: " + request_counter_map.get(data_request["title_valor"].title) + " - title_valor: " + data_request["title_valor"].title)
+      debug("********* request_counter: " + request_counter_map.get(data_request["title_valor"].title) + " - title_valor: " + data_request["title_valor"].title)
+      debug("********* total_iterations: " + total_iterations)
+      debug("********* iter: " + iter)
     
     
       if(request_counter_map.get(data_request["title_valor"].title) === total_iterations){
@@ -287,6 +289,11 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
         var data_freq = data_request.with_data_freq === true ? verb_utils.processDataForFreqSpecie(data) : []
         var data_score_cell = data_request.with_data_score_cell === true ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob, data_request.all_cells, is_validation) : []
         var data_freq_cell = data_request.with_data_freq_cell === true ? verb_utils.processDataForFreqCell(data_score_cell) : []
+
+
+        debug("****** iter: " + iter)
+        debug(validation_data)
+
 
         res.json({
             ok: true,
