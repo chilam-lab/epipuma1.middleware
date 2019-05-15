@@ -1158,6 +1158,7 @@ verb_utils.processDataForScoreCellTable = function (data){
   // debug(map_cell[0]["value"])
 
  var cell_score_array = [];
+
  for(var i=0; i<map_cell.length; i++){
       const entry = map_cell[i];
       var len = entry["value"].spids.length;
@@ -1204,9 +1205,9 @@ verb_utils.processDataForFreqCell = function (data){
   //   debug("val_apriori: " + val_apriori)
   // }
 
-
   var min_scr = d3.min(data.map(function(d) {return parseFloat(d.tscore);}));
   // debug("min_score: " + min_scr)
+
   var max_scr = d3.max(data.map(function(d) {return parseFloat(d.tscore);}));
   // debug("min_score: " + max_scr)
 
@@ -1235,7 +1236,6 @@ verb_utils.processDataForFreqCell = function (data){
 
   return data_freq;
   
-
 }
 
 
@@ -1243,14 +1243,15 @@ verb_utils.processDataForFreqSpecie = function (data){
 
   var min_eps = d3.min(data.map(function(d) {return parseFloat(d.epsilon);}));
   // debug("min_eps: " + min_eps)
+
   var max_eps = d3.max(data.map(function(d) {return parseFloat(d.epsilon);}));
   // debug("max_eps: " + max_eps)
 
   var min_scr = d3.min(data.map(function(d) {return parseFloat(d.score);}));
-  // debug("min_scr: " + min_scr)  
+  // debug("min_scr: " + min_scr) 
+
   var max_scr = d3.max(data.map(function(d) {return parseFloat(d.score);}));
   // debug("max_scr: " + max_scr)
-
 
   var beans = d3.range(1,buckets+1,1);
   var epsRange = d3.scaleQuantile().domain([min_eps, max_eps]).range(beans);
@@ -1286,8 +1287,8 @@ verb_utils.processDataForFreqSpecie = function (data){
   data_freq = verb_utils.generateFrequencyBeans(data_scr, scrRange, "_score",  data_freq, buckets);
 
   // debug(data_freq);
-
   return data_freq;
+
 }
 
 
@@ -1596,16 +1597,16 @@ verb_utils.processGroupValidationData = function(data_group) {
     item['data'].forEach(function(element){
 
       element.tempid = element.reinovalido + " " +
-                          element.phylumdivisionvalido + " " +
-                          element.clasevalida + " " +
-                          element.ordenvalido + " " +
-                          element.familiavalida + " " +
-                          element.generovalido + " " +
-                          element.especieepiteto + " " +
-                          element.nombreinfra + " " +
-                          element.type + " " +
-                          element.layer + " " +
-                          element.bid
+                      element.phylumdivisionvalido + " " +
+                      element.clasevalida + " " +
+                      element.ordenvalido + " " +
+                      element.familiavalida + " " +
+                      element.generovalido + " " +
+                      element.especieepiteto + " " +
+                      element.nombreinfra + " " +
+                      element.type + " " +
+                      element.layer + " " +
+                      element.bid
       //debug(element)
     })
     

@@ -1579,8 +1579,22 @@ exports.getSpeciesTaxonNiche = function (req, res, next) {
       var res_celda_snib =  "gridid_"+grid_resolution+"km" 
       var res_celda_snib_tb = "grid_geojson_"+grid_resolution+"km_aoi" 
 
-      debug(taxones)
-      var str_taxones = verb_utils.procesaTaxones(taxones);
+      //debug(taxones)
+      //var str_taxones = verb_utils.procesaTaxones(taxones);
+
+
+      var array_taxon = []
+      var aux
+      taxones.forEach((taxon, index) => {
+        aux = {}
+        aux['taxon_rank'] = taxon['taxon']
+        aux['value'] = taxon['value']
+
+        array_taxon.push(aux)
+      })
+
+      var str_taxones = verb_utils.getWhereClauseFromGroupTaxonArray(array_taxon, true)
+      debug(str_taxones)
       // debug(str_taxones)
 
       // debug(spids.toString())
@@ -1591,6 +1605,16 @@ exports.getSpeciesTaxonNiche = function (req, res, next) {
       // debug(fecha_incio)
       // debug(fecha_fin)
       // debug(footprint_region)
+      /*const query1 = pgp.as.format(queries.getSpeciesNiche.getSpeciesTaxonArray, {
+              taxones: str_taxones,
+              res_celda: res_celda,
+              res_celda_sp: res_celda_sp,
+              res_celda_snib: res_celda_snib,
+              res_celda_snib_tb: res_celda_snib_tb,
+              sfosil: lb_fosil,
+              region: footprint_region
+            })
+      debug(query1)*/
       
       debug('Antes de obtener N en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
 
@@ -1709,8 +1733,8 @@ exports.getSpeciesTaxonNiche = function (req, res, next) {
           return res.json({
             ok: false,
             error: error
-          });
-      });
+          })
+      })
 
 }
 

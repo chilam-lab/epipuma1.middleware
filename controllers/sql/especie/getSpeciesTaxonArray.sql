@@ -1,4 +1,8 @@
-with spid_occ as (
+with spid_specie as (
+	SELECT spid 
+	FROM sp_snib
+	$<taxones:raw>
+), spid_occ as (
 	select 
 		-- icount(array_agg(distinct gridid_16km)) as occ
 		icount(array_agg(distinct a.$<res_celda_snib:raw>)) as occ
@@ -11,8 +15,9 @@ with spid_occ as (
 		WHERE footprint_region=${region}
 		) AS b
 	ON a.gid = b.gid
-	WHERE 	
-		$<taxones:raw> AND
+	JOIN spid_specie AS c
+	ON a.spid = c.spid
+	WHERE
 		--snib.spid = 27333 and
 		a.reinovalido <> '' and
 		a.phylumdivisionvalido <> '' and
@@ -46,8 +51,9 @@ JOIN (
 	WHERE footprint_region=${region}
 	) AS b
 ON a.gid = b.gid
-WHERE 	
-	$<taxones:raw> AND
+JOIN spid_specie AS c
+ON a.spid = c.spid
+WHERE
 	a.reinovalido <> '' and
 	a.phylumdivisionvalido <> '' and
 	a.clasevalida <> '' and

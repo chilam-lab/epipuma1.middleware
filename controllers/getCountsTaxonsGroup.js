@@ -131,7 +131,17 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
       data_request["total_cells"] = resp.total_cells
 
       var query = data_request.idtabla === "" ? "select array[]::integer[] as source_cells" : queries.validationProcess.getSourceCells
-      // debug(query)
+      //debug(query)
+
+      /*const query1 = pgp.as.format(query, {
+      
+        tbl_process: data_request.idtabla,
+        iter: (iter+1),
+        res_grid_tbl: data_request.res_grid_tbl,
+        res_grid_column: data_request.res_celda_snib
+
+      })
+      debug(query1)*/
 
       return t.one(query, {
       
@@ -241,7 +251,9 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
       
       }
 
-      debug("request_counter: " + request_counter_map.get(data_request["title_valor"].title) + " - title_valor: " + data_request["title_valor"].title)
+      debug("********* request_counter: " + request_counter_map.get(data_request["title_valor"].title) + " - title_valor: " + data_request["title_valor"].title)
+      debug("********* total_iterations: " + total_iterations)
+      debug("********* iter: " + iter)
     
     
       if(request_counter_map.get(data_request["title_valor"].title) === total_iterations){
@@ -287,6 +299,11 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
         var data_freq = data_request.with_data_freq === true ? verb_utils.processDataForFreqSpecie(data) : []
         var data_score_cell = data_request.with_data_score_cell === true ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob, data_request.all_cells, is_validation) : []
         var data_freq_cell = data_request.with_data_freq_cell === true ? verb_utils.processDataForFreqCell(data_score_cell) : []
+
+
+        debug("****** iter: " + iter)
+        debug(validation_data)
+
 
         res.json({
             ok: true,
