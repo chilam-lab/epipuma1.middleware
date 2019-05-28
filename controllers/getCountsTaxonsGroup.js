@@ -167,8 +167,12 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
        data_request["N"] = resp.n 
        data_request["alpha"] = data_request["alpha"] !== undefined ? data_request["alpha"] : 1.0/resp.n
 
-       debug("N:" + data_request["N"])
-       debug("alpha:" + data_request["alpha"])
+       // debug("------------")
+       // debug("N:" + data_request["N"])
+       // debug("alpha:" + data_request["alpha"])
+       // debug("source_cells:" + data_request["source_cells"].length)
+       // debug("total_cells:" + data_request["total_cells"].length)
+       // debug("------------")
 
        // se genera query
        var query_analysis = queries.countsTaxonGroups.getCountsBase
@@ -223,7 +227,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
           debug("analisis basico")
           //const query1 = pgp.as.format(query_analysis, data_request)
           //debug(query1)
-          //debug(query_analysis)
+          // debug(query_analysis)
           //debug(data_request)
 
           return t.any(query_analysis, data_request)
@@ -251,9 +255,9 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
       
       }
 
-      debug("********* request_counter: " + request_counter_map.get(data_request["title_valor"].title) + " - title_valor: " + data_request["title_valor"].title)
-      debug("********* total_iterations: " + total_iterations)
-      debug("********* iter: " + iter)
+      // debug("********* request_counter: " + request_counter_map.get(data_request["title_valor"].title) + " - title_valor: " + data_request["title_valor"].title)
+      // debug("********* total_iterations: " + total_iterations)
+      // debug("********* iter: " + iter)
     
     
       if(request_counter_map.get(data_request["title_valor"].title) === total_iterations){
@@ -267,8 +271,16 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
         if(total_iterations !== 1){
           debug("PROCESS RESULTS FOR VALIDATION")
+
+          var items = json_response["data_response"]
+          // debug(items[0].data[0])
+
           data = verb_utils.processGroupValidationData(json_response["data_response"])
+          // debug(data)
+
           validation_data = verb_utils.getValidationValues(json_response["data_response"])
+
+
           is_validation = true
         } else{
           data = data_iteration
@@ -301,8 +313,8 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
         var data_freq_cell = data_request.with_data_freq_cell === true ? verb_utils.processDataForFreqCell(data_score_cell) : []
 
 
-        debug("****** iter: " + iter)
-        debug(validation_data)
+        // debug("****** iter: " + iter)
+        // debug(validation_data)
 
 
         res.json({
