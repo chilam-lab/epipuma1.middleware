@@ -733,7 +733,7 @@ verb_utils.processDataForScoreDecilTable = function (data_cell, decil_selected){
 verb_utils.processGroupDataForCellId = function (data, apriori, mapa_prob, gridid) {
 
   debug("processGroupDataForCellId") 
-  //debug(data)
+  // debug(data)
   
   var info_incell = {}
   var val_apriori = 0
@@ -791,10 +791,13 @@ verb_utils.processGroupDataForCellId = function (data, apriori, mapa_prob, gridi
 
 
   groups.forEach(function (item, index){
+    
+    // debug(item)
+
     if(item){
 
-      bios = item.type === "bio" ? bios+1 : bios
-      raster = item.type === "raster" ? raster+1 : raster
+      bios = item.reinovalido != "" ? bios+1 : bios
+      raster = item.reinovalido == "" ? raster+1 : raster
       positives = item.score >= 0 ? positives+1 : positives
       negatives = item.score < 0 ? negatives+1 : negatives
 

@@ -43,6 +43,7 @@ with spid_specie as (
 SELECT DISTINCT st_asgeojson(a.the_geom) as json_geom, 
 				$<res_celda_snib:raw> as gridid, 
 				a.urlejemplar,
+				a.especievalidabusqueda as especie,
 				a.aniocolecta,
 				(SELECT sum(occ) FROM spid_occ) as occ
 FROM snib AS a
