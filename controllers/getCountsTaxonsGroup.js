@@ -314,7 +314,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
 
         // debug("****** iter: " + iter)
-        // debug(validation_data)
+        // debug(data)
 
 
         res.json({
