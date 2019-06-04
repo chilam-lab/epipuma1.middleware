@@ -2437,7 +2437,7 @@ verb_utils.getFieldsFromLevel = function (level) {
   else 
     fields  += ", '' AS icat, '' AS tag "
 
-  debug("fields =" + fields)
+  //debug("fields =" + fields)
   return fields
 
 }
@@ -2537,7 +2537,7 @@ verb_utils.getGroupFieldsFromLevel = function (level) {
   }
 
 
-  debug("group fields ="  + group_fields)
+  //debug("group fields ="  + group_fields)
   return group_fields
 
 }
@@ -2656,7 +2656,7 @@ verb_utils.getExcludeTargetWhereClause = function (taxon_array) {
       
   })
 
-  debug(whereClause)
+  //debug(whereClause)
   return whereClause
 
 
