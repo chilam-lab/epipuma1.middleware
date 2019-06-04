@@ -1,6 +1,6 @@
 aux_{name:raw} as (
-	SELECT  ((a.{res_celda:raw} & b.cells) - ({excluded_cells:raw} ::integer[] +
-				{source_cells:raw} ::integer[])) as cells
+	SELECT (a.{res_celda:raw} & b.cells) as cells,
+				{fields:raw}
 			-- a.cells_16km & b.cells as cells
 	FROM raster_bins AS a, {res_celda_snib_tb:raw} AS b
 	{where_covars:raw}
@@ -8,11 +8,13 @@ aux_{name:raw} as (
 		and b.footprint_region = {region:raw}
 		--and b.footprint_region = 1	
 ), {name:raw} AS (
-	SELECT '{name:raw}' as name,
-		   array_agg(distinct a.cell) as cells,
-		   array_length(array_agg(distinct a.cell),1) as nj
+	SELECT array_agg(distinct a.cell) as cells,
+		   array_length(array_agg(distinct a.cell),1) as nj,
+		   {fields:raw}
 	FROM (
-			select unnest(cells) as cell
+			select DISTINCT unnest(cells) as cell,
+			{fields:raw}
 			FROM aux_{name:raw}
 		 ) as a
+	GROUP BY {group_fields:raw}
 ){groups}

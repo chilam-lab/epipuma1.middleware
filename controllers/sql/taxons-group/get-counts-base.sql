@@ -21,7 +21,20 @@ WITH aux_target AS (
 	FROM aux_target as a
 ),${groups:raw}
 SELECT 	target.target_name as target_name,
-		covars.name as name,
+		covars.reinovalido, 
+		covars.phylumdivisionvalido,
+		covars.clasevalida,
+		covars.ordenvalido,
+        covars.familiavalida,
+        covars.generovalido, 
+        covars.especieepiteto,
+        covars.nombreinfra,
+		covars.type,
+		covars.layer,
+        covars.bid,
+        covars.icat,
+        covars.tag,
+		--covars.name as name,
 		covars.cells  as cells,
 		icount(target.cells & covars.cells) AS nij,
 		covars.nj AS nj,
@@ -51,6 +64,7 @@ SELECT 	target.target_name as target_name,
 			)
 		) as numeric), 2) as score
 FROM target,covars
-WHERE icount(covars.cells) >= 5
-	  --icount(covars.cells) >= ${min_occ}
+-- WHERE 
+	  -- icount(covars.cells) >= 5
+	  -- icount(covars.cells) >= ${min_occ}
 ORDER BY epsilon DESC;

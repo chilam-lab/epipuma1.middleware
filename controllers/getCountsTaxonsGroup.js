@@ -38,12 +38,12 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   var data_target = {}
   var str_query = ''
 
-  var grid_resolution = verb_utils.getParam(req, 'grid_resolution', 16)
+  var grid_resolution = parseInt(verb_utils.getParam(req, 'grid_resolution', 16)) 
   var region = parseInt(verb_utils.getParam(req, 'region', verb_utils.region_mx))
   var fosil = verb_utils.getParam(req, 'fosil', true)
   var date  = verb_utils.getParam(req, 'date', true)
-  var lim_inf = verb_utils.getParam(req, 'lim_inf', null)
-  var lim_sup = verb_utils.getParam(req, 'lim_sup', null)
+  var lim_inf = verb_utils.getParam(req, 'lim_inf', 1500)
+  var lim_sup = verb_utils.getParam(req, 'lim_sup', 2020)
   var cells = verb_utils.getParam(req, 'excluded_cells', [])
 
   data_request["excluded_cells"] = cells
@@ -59,8 +59,11 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   var target_group = verb_utils.getParam(req, 'target_taxons', []) 
   data_request["target_name"] = verb_utils.getParam(req, 'target_name', 'target_group')
   data_request["where_target"] = verb_utils.getWhereClauseFromGroupTaxonArray(target_group, true)
+  data_request["where_exclude_target"] = verb_utils.getExcludeTargetWhereClause(target_group)
+  //debug(data_request["where_exclude_target"])
 
   var covars_groups = verb_utils.getParam(req, 'covariables', []) 
+  //debug(covars_groups)
   //data_request['groups'] = verb_utils.getCovarGroupQueries(queries, data_request, covars_groups)
 
   data_request["alpha"] = undefined
@@ -71,9 +74,9 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   data_request["long"] = verb_utils.getParam(req, 'longitud', 0)
   data_request["lat"] = verb_utils.getParam(req, 'latitud', 0)
   data_request["title_valor"] = {'title': data_request["target_name"]}
-  data_request["with_data_freq"] = verb_utils.getParam(req, 'with_data_freq', false)
-  data_request["with_data_score_cell"] = verb_utils.getParam(req, 'with_data_score_cell', false)
-  data_request["with_data_freq_cell"] = verb_utils.getParam(req, 'with_data_freq_cell', false)
+  data_request["with_data_freq"] = verb_utils.getParam(req, 'with_data_freq', true)
+  data_request["with_data_score_cell"] = verb_utils.getParam(req, 'with_data_score_cell', true)
+  data_request["with_data_freq_cell"] = verb_utils.getParam(req, 'with_data_freq_cell', true)
    
   var NIterations = verb_utils.getParam(req, 'iterations', iterations)
   var iter = 0
@@ -88,6 +91,8 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
       data_request["gid"] = resp.gid
       //debug(data_request["gid"])
       data_request["where_filter"] = verb_utils.getWhereClauseFilter(fosil, date, lim_inf, lim_sup, cells, data_request["res_celda_snib"], data_request["region"], data_request["gid"])
+
+      // debug("filter: " + data_request["where_filter"])
       
       for(var iter = 0; iter<NIterations; iter++){
 
@@ -108,7 +113,8 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
   debug('iter:' + (iter + 1))
 
   var data_request = JSON.parse(JSON.stringify(data))
-  //debug(data_request)
+  
+  // debug(data_request)
 
   pool.task(t => {
 
@@ -125,7 +131,17 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
       data_request["total_cells"] = resp.total_cells
 
       var query = data_request.idtabla === "" ? "select array[]::integer[] as source_cells" : queries.validationProcess.getSourceCells
-      // debug(query)
+      //debug(query)
+
+      /*const query1 = pgp.as.format(query, {
+      
+        tbl_process: data_request.idtabla,
+        iter: (iter+1),
+        res_grid_tbl: data_request.res_grid_tbl,
+        res_grid_column: data_request.res_celda_snib
+
+      })
+      debug(query1)*/
 
       return t.one(query, {
       
@@ -151,8 +167,12 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
        data_request["N"] = resp.n 
        data_request["alpha"] = data_request["alpha"] !== undefined ? data_request["alpha"] : 1.0/resp.n
 
-       debug("N:" + data_request["N"])
-       debug("alpha:" + data_request["alpha"])
+       // debug("------------")
+       // debug("N:" + data_request["N"])
+       // debug("alpha:" + data_request["alpha"])
+       // debug("source_cells:" + data_request["source_cells"].length)
+       // debug("total_cells:" + data_request["total_cells"].length)
+       // debug("------------")
 
        // se genera query
        var query_analysis = queries.countsTaxonGroups.getCountsBase
@@ -207,6 +227,9 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
           debug("analisis basico")
           //const query1 = pgp.as.format(query_analysis, data_request)
           //debug(query1)
+          // debug(query_analysis)
+          //debug(data_request)
+
           return t.any(query_analysis, data_request)
 
          }
@@ -232,7 +255,9 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
       
       }
 
-      debug("request_counter: " + request_counter_map.get(data_request["title_valor"].title) + " - title_valor: " + data_request["title_valor"].title)
+      // debug("********* request_counter: " + request_counter_map.get(data_request["title_valor"].title) + " - title_valor: " + data_request["title_valor"].title)
+      // debug("********* total_iterations: " + total_iterations)
+      // debug("********* iter: " + iter)
     
     
       if(request_counter_map.get(data_request["title_valor"].title) === total_iterations){
@@ -246,8 +271,16 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
         if(total_iterations !== 1){
           debug("PROCESS RESULTS FOR VALIDATION")
+
+          var items = json_response["data_response"]
+          // debug(items[0].data[0])
+
           data = verb_utils.processGroupValidationData(json_response["data_response"])
+          // debug(data)
+
           validation_data = verb_utils.getValidationValues(json_response["data_response"])
+
+
           is_validation = true
         } else{
           data = data_iteration
@@ -278,6 +311,11 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
         var data_freq = data_request.with_data_freq === true ? verb_utils.processDataForFreqSpecie(data) : []
         var data_score_cell = data_request.with_data_score_cell === true ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob, data_request.all_cells, is_validation) : []
         var data_freq_cell = data_request.with_data_freq_cell === true ? verb_utils.processDataForFreqCell(data_score_cell) : []
+
+
+        // debug("****** iter: " + iter)
+        // debug(validation_data)
+
 
         res.json({
             ok: true,

@@ -112,7 +112,14 @@ var queryProvider = {
     getSpeciesR: sqlPath('especie/getSpecies_range.sql'),
     getSpeciesArrayR: sqlPath('especie/getSpeciesArray_range.sql'),
     getSpeciesSDR: sqlPath('especie/getSpecies_sdr.sql'),
-    getSpeciesArraySDR: sqlPath('especie/getSpeciesArray_sdr.sql')
+    getSpeciesArraySDR: sqlPath('especie/getSpeciesArray_sdr.sql'),
+    
+    getSpeciesTaxonArray: sqlPath('especie/getSpeciesTaxonArray.sql'),
+    getSpeciesTaxonArraySD: sqlPath('especie/getSpeciesTaxonArray_sdate.sql'),
+    getSpeciesTaxonArrayR: sqlPath('especie/getSpeciesTaxonArray_range.sql'),
+    getSpeciesTaxonArraySDR: sqlPath('especie/getSpeciesTaxonArray_sdr.sql')
+    
+
   },
   getEntListNiche: {
     getEntList: sqlPath('especie/getEntList.sql'),
@@ -306,7 +313,23 @@ var queryProvider = {
     getCountsCovars: tmplPath("taxons-group/get-counts-covars.tmpl"),
     getCellsByGroupBio: tmplPath("taxons-group/get-cells-group-bio.tmpl"),
     getCellsByGroupAbio: tmplPath("taxons-group/get-cells-group-abio.tmpl")
-  }
+  },
+
+  taxonsGroupNodes:{
+    getNodesBase: sqlPath("nodes-taxons-group/get-nodes-base.sql"),
+    nodesSource: tmplPath("nodes-taxons-group/nodes-source.tmpl"),
+    nodesBio: tmplPath("nodes-taxons-group/nodes-bio.tmpl"),
+    nodesAbio: tmplPath("nodes-taxons-group/nodes-abio.tmpl"),
+    getEdgesBase: sqlPath("nodes-taxons-group/get-edges-base.sql"),
+    covarBio: tmplPath("nodes-taxons-group/covar-bio.tmpl"),
+    covarAbio: tmplPath("nodes-taxons-group/covar-abio.tmpl"),
+    selectNodes : tmplPath("nodes-taxons-group/select-nodes.tmpl"),
+    getGroupCount: sqlPath("nodes-taxons-group/get-group-count-grid-id.sql"),
+    getCellsBio: tmplPath("nodes-taxons-group/get-cells-bio.tmpl"),
+    getCellsAbio: tmplPath("nodes-taxons-group/get-cells-abio.tmpl"),
+    selectCount: tmplPath("nodes-taxons-group/select-count.tmpl")
+
+  },
 
 }
 

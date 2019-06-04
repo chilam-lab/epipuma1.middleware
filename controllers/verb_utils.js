@@ -7,12 +7,15 @@
 */
 var verb_utils = {} 
 
-var debug = require('debug')('verbs:verbsUtils')
+var debug = require('debug')('verbs:verb_utils')
 var moment = require('moment')
 var pgp = require('pg-promise')()
 var config = require('../config')
 var crossfilter = require('crossfilter')
 var d3 = require('d3')
+var map_taxon = new Map()
+
+
 // var pool= pgp(config.db)
 
 /**
@@ -29,13 +32,28 @@ verb_utils.alpha = 1/10000 // Deprecated: Ahora se obtiene el valor dentro del s
 verb_utils.maxscore = 700 // Valor para realizar el calculo de probabilidad de epsilon
 verb_utils.minscore = -700
 verb_utils.limite = 15 // numero de elemntos mostrados en autocomplete de especie
-verb_utils.min_taxon_name = 'especievalidabusqueda' // nombre de columna del valor minimo taxonomico en base de datos
+verb_utils.min_taxon_name = 'especieepiteto' // nombre de columna del valor minimo taxonomico en base de datos
 verb_utils.max_taxon_name = 'reinovalido' // nombre de columna del valor maximo taxonomico en base de datos
 buckets = 20
 deciles = 10
 verb_utils.region_mx = 1
 verb_utils.min_occ = 5
 verb_utils.type_taxon = 0
+
+map_taxon.set("reino", "reinovalido");
+map_taxon.set("kingdom", "reinovalido");
+map_taxon.set("phylum", "phylumdivisionvalido");
+map_taxon.set("clase", "clasevalida");
+map_taxon.set("class", "clasevalida");
+map_taxon.set("orden", "ordenvalido");
+map_taxon.set("order", "ordenvalido");
+map_taxon.set("familia", "familiavalida");
+map_taxon.set("family", "familiavalida");
+map_taxon.set("genero", "generovalido");
+map_taxon.set("genus", "generovalido");
+map_taxon.set("especie", "especievalidabusqueda");
+map_taxon.set("species", "especievalidabusqueda");
+
 
 
 
@@ -344,7 +362,7 @@ verb_utils.processTitleGroup = function(groupid, tfilters){
  * @returns {string} Raw SQL column names 
  */
 verb_utils.getColumns = function(issource, nivel, verbo = "getEntList") {
-  if(issource == 1) {
+  if(issource === 1) {
     if(verbo === "getEntList"){
       return 'spid, reinovalido, phylumdivisionvalido, clasevalida, ' + 
           'ordenvalido, familiavalida, generovalido, especievalidabusqueda'  
@@ -354,7 +372,15 @@ verb_utils.getColumns = function(issource, nivel, verbo = "getEntList") {
           'ordenvalido, familiavalida'  
     }
   } else {
-    return 'distinct ' + nivel + ' '
+    if(nivel === "especieepiteto"){
+      debug("nivel especieepiteto")
+      
+      return "distinct (generovalido || ' ' || especieepiteto) as especieepiteto"
+    }  
+    else{
+      return 'distinct ' + nivel + ' '  
+    }
+    
   }
 }
 
@@ -707,7 +733,7 @@ verb_utils.processDataForScoreDecilTable = function (data_cell, decil_selected){
 verb_utils.processGroupDataForCellId = function (data, apriori, mapa_prob, gridid) {
 
   debug("processGroupDataForCellId") 
-  //debug(data)
+  // debug(data)
   
   var info_incell = {}
   var val_apriori = 0
@@ -742,23 +768,55 @@ verb_utils.processGroupDataForCellId = function (data, apriori, mapa_prob, gridi
       else
         hasraster = true
       
+      //debug(d)
       return {
-        score: parseFloat(d.score), group: d.name, type: type
+        score: parseFloat(d.score),  
+        reinovalido: d.reinovalido, 
+        phylumdivisionvalido: d.phylumdivisionvalido,
+        clasevalida: d.clasevalida,
+        ordenvalido: d.ordenvalido,
+        familiavalida: d.familiavalida,
+        generovalido: d.generovalido,
+        especieepiteto: d.especieepiteto,
+        nombreinfra: d.nombreinfra,
+        type: d.type,
+        layer: d.layer,
+        bid: d.bid,
+        icat: d.icat,
+        tag: d.tag,
+        tipo: type
       }
-
     }
   })
 
 
   groups.forEach(function (item, index){
+    
+    // debug(item)
+
     if(item){
 
-      bios = item.type === "bio" ? bios+1 : bios
-      raster = item.type === "raster" ? raster+1 : raster
+      bios = item.reinovalido != "" ? bios+1 : bios
+      raster = item.reinovalido == "" ? raster+1 : raster
       positives = item.score >= 0 ? positives+1 : positives
       negatives = item.score < 0 ? negatives+1 : negatives
 
-      groups_incell.push({name:item.group, score: item.score, type: item.type})
+      groups_incell.push({score: item.score, 
+                          reinovalido: item.reinovalido, 
+                          phylumdivisionvalido: item.phylumdivisionvalido,
+                          clasevalida: item.clasevalida,
+                          ordenvalido: item.ordenvalido,
+                          familiavalida: item.familiavalida,
+                          generovalido: item.generovalido,
+                          especieepiteto: item.especieepiteto,
+                          nombreinfra: item.nombreinfra,
+                          type: item.type,
+                          layer: item.layer,
+                          bid: item.bid,
+                          icat: item.icat,
+                          tag: item.tag,
+                          tipo: item.tipo
+                        })
       tscore = tscore + item.score  
 
     }
@@ -884,6 +942,28 @@ verb_utils.processDataForCellId = function (data, apriori, mapa_prob, gridid){
 
   // debug(info_incell)
   return info_incell;
+
+
+}
+
+
+verb_utils.procesaTaxones = function(array_taxines){
+
+  var where_clause = ""
+
+  array_taxines.forEach(function (item, index){
+
+      if(index === 0)
+        where_clause += map_taxon.get(item.taxon.toLowerCase()) + " = '" + item.value + "' "
+      else
+        where_clause += " OR " + map_taxon.get(item.taxon.toLowerCase()) + " = '" + item.value + "' "
+    
+  })
+
+  debug(where_clause)
+
+  return where_clause
+
 
 
 }
@@ -1081,6 +1161,7 @@ verb_utils.processDataForScoreCellTable = function (data){
   // debug(map_cell[0]["value"])
 
  var cell_score_array = [];
+
  for(var i=0; i<map_cell.length; i++){
       const entry = map_cell[i];
       var len = entry["value"].spids.length;
@@ -1127,9 +1208,9 @@ verb_utils.processDataForFreqCell = function (data){
   //   debug("val_apriori: " + val_apriori)
   // }
 
-
   var min_scr = d3.min(data.map(function(d) {return parseFloat(d.tscore);}));
   // debug("min_score: " + min_scr)
+
   var max_scr = d3.max(data.map(function(d) {return parseFloat(d.tscore);}));
   // debug("min_score: " + max_scr)
 
@@ -1158,22 +1239,24 @@ verb_utils.processDataForFreqCell = function (data){
 
   return data_freq;
   
-
 }
 
 
 verb_utils.processDataForFreqSpecie = function (data){
 
+  debug("processDataForFreqSpecie")
+
   var min_eps = d3.min(data.map(function(d) {return parseFloat(d.epsilon);}));
   debug("min_eps: " + min_eps)
+
   var max_eps = d3.max(data.map(function(d) {return parseFloat(d.epsilon);}));
   debug("max_eps: " + max_eps)
 
   var min_scr = d3.min(data.map(function(d) {return parseFloat(d.score);}));
-  debug("min_scr: " + min_scr)  
+  debug("min_scr: " + min_scr) 
+
   var max_scr = d3.max(data.map(function(d) {return parseFloat(d.score);}));
   debug("max_scr: " + max_scr)
-
 
   var beans = d3.range(1,buckets+1,1);
   var epsRange = d3.scaleQuantile().domain([min_eps, max_eps]).range(beans);
@@ -1209,8 +1292,8 @@ verb_utils.processDataForFreqSpecie = function (data){
   data_freq = verb_utils.generateFrequencyBeans(data_scr, scrRange, "_score",  data_freq, buckets);
 
   // debug(data_freq);
-
   return data_freq;
+
 }
 
 
@@ -1349,15 +1432,21 @@ verb_utils.getValidationValues = function (data_group){
     // debug(item.apriori)
     // debug(item.mapa_prob)
 
-    // obteniendo el score por celda del conjunto de train
+    // obteniendo el score por celda del conjunto de entrenamiento
     var apriori = item.apriori !== false && item.data[0].ni !== undefined ? true : false
     var mapa_prob = item.mapa_prob !== false && item.data[0].ni !== undefined ? true : false
     var train_cells = verb_utils.processDataForScoreCell(item.data, apriori, mapa_prob, [], false)
     var temp_map = d3.map([])
+
     train_cells.forEach(function(item){
       temp_map.set(item.gridid, item.tscore)
     })
     
+
+    // debug(item.data)
+    // debug(temp_map.values())
+    // debug(item.test_cells)
+
     // obtiene el score por celda del conjunto de test
     var temp_values = []
     item.test_cells.forEach(function(cell_item){
@@ -1369,30 +1458,71 @@ verb_utils.getValidationValues = function (data_group){
         temp_value.score = temp_map.get(cell_item)
       }
       else{
-        temp_value.score = 0 
+        temp_value.score = null 
       }
       temp_values.push(temp_value)
 
     })
+
+
+    var array = temp_map.values()
+    array.sort(function(a, b){return a-b})
+    // debug(array)
+
+    var len =  array.length;
+    // debug(len)
+
+    // se obtienen los limites de los deciles
+    var limites = []
+    limites.push(array[0])
+    limites.push(array[Math.floor(len*.1) - 1])
+    limites.push(array[Math.floor(len*.2) - 1])
+    limites.push(array[Math.floor(len*.3) - 1])
+    limites.push(array[Math.floor(len*.4) - 1])
+    limites.push(array[Math.floor(len*.5) - 1])
+    limites.push(array[Math.floor(len*.6) - 1])
+    limites.push(array[Math.floor(len*.7) - 1])
+    limites.push(array[Math.floor(len*.8) - 1])
+    limites.push(array[Math.floor(len*.9) - 1])
+    limites.push(array[Math.floor(len) - 1])
+    
+    // debug(array[Math.floor(len*.2) - 1])
     
     // obtiene los deciles para obtener las métricas basados en lso resultados del conjunto de test
     var num_deciles = 11
 
-    var min_scr = d3.min(item.data.map(function(d) {return parseFloat(d.score);}));
+    // debug(temp_map.values())
+    // debug(train_cells)
+
+    // var min_scr = d3.min(temp_map.values().map(function(d) {return parseFloat(d);}));
     // debug("min_scr: " + min_scr)  
-    var max_scr = d3.max(item.data.map(function(d) {return parseFloat(d.score);}));
+    // var max_scr = d3.max(temp_map.values().map(function(d) {return parseFloat(d);}));
     // debug("max_scr: " + max_scr)    
 
-    var rango_deciles = d3.scaleQuantile()
-        .domain([min_scr, max_scr])
-        .range(d3.range(1,num_deciles));
+    // var rango_deciles = d3.scaleQuantile()
+    //     .domain([min_scr, max_scr])
+    //     .range(d3.range(1,num_deciles))
 
-    var limites = rango_deciles.quantiles()
+    // var limites = [min_scr].concat(rango_deciles.quantiles()) 
+    // limites = limites.concat(max_scr)
+
+    // // var limites = rango_deciles.quantiles()
+
     // debug(limites)
+    // // debug(temp_values)
+    // // debug(d3.range(1,num_deciles))
+
+    // var max_scr_test = d3.max(temp_values.map(function(d) {return parseFloat(d.score);}));
+    // var min_scr_test = d3.min(temp_values.map(function(d) {return parseFloat(d.score);}));
+
+    // debug("max_scr_ TEST: " + max_scr_test)    
+    // debug("min_scr_ TEST: " + min_scr_test)    
+    // // debug("max_ TEST: " + rango_deciles(12))    
+    // // debug("min_ TEST: " + rango_deciles(220))    
 
     
     var deciles = []
-    d3.range(1,num_deciles).forEach(function(decil){
+    d3.range(1,num_deciles).forEach(function(decil, index){
 
       var vp_temp = 0
       var fn_temp = 0
@@ -1405,18 +1535,31 @@ verb_utils.getValidationValues = function (data_group){
         // debug("es VP:" + rango_deciles(row_value.score) > 9)
         // debug("decil: " + decil)
 
-        if(rango_deciles(row_value.score) > decil){
-          vp_temp++
-        }
-        else if(row_value.score === 0){
+
+        if(row_value.score === null){
           nulo_temp++
+        }
+        else if(row_value.score > limites[decil-1]){
+          vp_temp++
         }
         else{
           fn_temp++
         }
+
+        // if(rango_deciles(row_value.score) > decil){
+        //   vp_temp++
+        // }
+        // else if(row_value.score === 0){
+        //   nulo_temp++
+        // }
+        // else{
+        //   fn_temp++
+        // }
         
       })
 
+      // debug("*****************")
+      // debug("umbral: " + limites[decil-1])
       // debug("decil: " + decil)
       // debug("vp_temp: " + vp_temp)
       // debug("fn_temp: " + fn_temp)
@@ -1501,10 +1644,25 @@ verb_utils.getValidationValues = function (data_group){
       })
   }
 
-  debug(data_result)
+  // debug(data_result)
 
   return data_result
 
+}
+
+verb_utils.hashCode = function(str) {
+  return str.split('').reduce((prevHash, currVal) =>
+    (((prevHash << 5) - prevHash) + currVal.charCodeAt(0))|0, 0);
+}
+
+verb_utils.updateObj = function(arr) {
+  arr.forEach(function(el) {
+    var key = el.tempid;
+    obj[key] = obj[key] || { count: 0, total: 0, avg: 0 };
+    obj[key].count++;
+    obj[key].total += el.val;
+    obj[key].avg = obj[key].total / obj[key].count;
+  });
 }
 
 verb_utils.processGroupValidationData = function(data_group) {
@@ -1514,89 +1672,376 @@ verb_utils.processGroupValidationData = function(data_group) {
   var avgdata = []
   var data = []
 
+  data_group.forEach(function(item){
+
+    item['data'].forEach(function(element){
+
+      element.tempid = verb_utils.hashCode(element.reinovalido +
+                      element.phylumdivisionvalido + 
+                      element.clasevalida + 
+                      element.ordenvalido + 
+                      element.familiavalida + 
+                      element.generovalido + 
+                      element.especieepiteto + 
+                      element.nombreinfra +
+                      element.type + 
+                      element.layer + 
+                      element.bid)
+    })
+    
+  })
+
+  // debug(data_group[0])
+
   var data_map = data_group.map(function(d) {return  d.data})
 
+  // debug(data_map)
 
   data_map.forEach(function(item) {
-    
+
     data = data.concat(item)
 
   })
-  
-  //debug(data)
-  
-  var cross_group = crossfilter(data)
-  cross_group.groupAll()
-  //debug(cross_group)
 
-  var name_dimension = cross_group.dimension(function(d) { return d.name; })  
+  // data.forEach(function(item) {
 
-  var group_by_name = name_dimension.group().reduce(
-    function(item, add){
-      ++item.count
-      item.cells = add.cells
-      item.cells_map = item.cells_map.concat(add.cells) 
-      item.nij = add.nij
-      item.nj = add.nj
-      item.ni = add.ni
-      item.n = add.n
-      item.epsilon = parseFloat(add.epsilon) 
-      item.score = parseFloat(add.score)
-      item.tipo = add.tipo
-      return item
-    },
-    function(item,remove){
-      --item.count
-      item.cells = item.cells //remove.cells //
-      item.cells_map = item.cells_map
-      item.nij = item.nij
-      item.nj = item.nj
-      item.ni = item.ni
-      item.n = item.n
-      item.epsilon =  parseFloat(item.epsilon) 
-      item.score = parseFloat(item.score)
-      item.tipo = item.tipo
-      return item
-    },
-    function(){
-      return {
-        count: 0,
-        cells: [],
-        cells_map: [],
-        nij: 0,
-        nj: 0,
-        ni: 0,
-        n: 0,
-        epsilon: 0,
-        score: 0,
-        tipo: 0
-      }
+  //   // if(item.generovalido === "Lynx" && item.especieepiteto === "rufus"){
+  //   //   debug("----------")
+  //   //   debug("sp: " + item.generovalido + " " + item.especieepiteto )
+  //   //   debug("N: " + item.n)
+  //   //   debug("ni: " + item.ni)
+  //   //   debug("tempid: " + item.tempid)
+  //   //   debug("----------")
+  //   // }
+
+  //   // if(item.generovalido === "Tamandua" && item.especieepiteto === "tetradactyla"){
+  //   //   debug("----------")
+  //   //   debug("sp: " + item.generovalido + " " + item.especieepiteto )
+  //   //   debug("N: " + item.n)
+  //   //   debug("ni: " + item.ni)
+  //   //   debug("tempid: " + item.tempid)
+  //   //   debug("----------")
+  //   // }
+
+  //   // if(item.generovalido === "Microtus" && item.especieepiteto === "guatemalensis"){
+      
+  //   //   debug("----------")
+  //   //   debug("sp: " + item.generovalido + " " + item.especieepiteto )
+  //   //   debug("N: " + item.n)
+  //   //   debug("ni: " + item.ni)
+  //   //   debug("epsilon: " + item.epsilon)
+  //   //   debug("score: " + item.score)
+  //   //   debug("tempid: " + item.tempid)
+  //   //   debug("----------")
+  //   // }
+
+  //   // if(item.generovalido === "Glossophaga" && item.especieepiteto === "longirostris"){
+      
+  //   //   debug("----------")
+  //   //   debug("sp: " + item.generovalido + " " + item.especieepiteto )
+  //   //   debug("N: " + item.n)
+  //   //   debug("ni: " + item.ni)
+  //   //   debug("epsilon: " + item.epsilon)
+  //   //   debug("score: " + item.score)
+  //   //   debug("tempid: " + item.tempid)
+  //   //   debug("----------")
+  //   // }
+
+  // })
+
+
+
+  // debug(data)
+
+  var data_map = d3.map([])
+  var counter = 0;
+
+  // TODO: Esto no es una solución real
+  // var n_unica = data[0].n
+  // var ni_unica = data[0].ni
+
+  data.forEach(function (row_item, index){
+
+    if(!data_map.has(row_item.tempid)){
+      row_item.count = 1
+      row_item.cells_map = []
+      row_item.epsilon = row_item.epsilon === undefined || row_item.epsilon === null  ? 0 : parseFloat(row_item.epsilon) 
+      row_item.score = row_item.score === undefined || row_item.score === null ? 0 : parseFloat(row_item.score) 
+
+      // row_item.n = n_unica //row_item.n
+      // row_item.ni = ni_unica //row_item.ni
+      data_map.set(row_item.tempid,row_item)
     }
-  )
+    else{
+      
+      // ultima iteracion
+      // var item = data_map.get(row_item.tempid)
+      // item.n = n_unica //row_item.n
+      // item.ni = ni_unica //row_item.ni
 
-  var reduced_data = group_by_name.top(Infinity);
+      // item.nij = row_item.nij
+      // item.nj = row_item.nj
+      // item.epsilon = row_item.epsilon
+      // item.score = row_item.score
+      // item.cells = row_item.cells
 
-  var data_result = []
+      // item.cells_map = item.cells.concat(row_item.cells).filter(function (item_dep, pos) {return item.cells.indexOf(item_dep) == pos})
+      // // item.cells_map = row_item.cells
 
-  for(var i=0; i<reduced_data.length; i++){
-      var entry = reduced_data[i];
-      data_result.push({
-        name: entry["key"], 
-        cells: entry["value"].cells,
-        cells_map: entry["value"].cells_map,
-        nij: parseFloat((entry["value"].nij ).toFixed(2)),
-        nj: parseFloat((entry["value"].nj ).toFixed(2)),
-        ni: parseFloat((entry["value"].ni ).toFixed(2)),
-        n: parseFloat((entry["value"].n ).toFixed(2)),
-        epsilon: parseFloat((entry["value"].epsilon).toFixed(2)),
-        score: parseFloat((entry["value"].score).toFixed(2)),
-        tipo: entry["value"].tipo
-      })
-  }
+      // promedio (con n y ni variable) Varian por que existen especies que no estan en las 5 iteraciones, al promediar hacen variar la n y ni
+      var item = data_map.get(row_item.tempid)
+      item.n += row_item.n
+      item.ni += row_item.ni
+      item.nij += row_item.nij
+      item.nj += row_item.nj
+      item.epsilon += row_item.epsilon === undefined || row_item.epsilon === null  ? 0 : parseFloat(row_item.epsilon) 
+      item.score += row_item.score === undefined || row_item.score === null ? 0 : parseFloat(row_item.score) 
 
-  //debug('............................................')
-  //debug(data_result)
-  //debug('............................................')
+      item.cells = item.cells.concat(row_item.cells)
+      // item.cells_map = item.cells.filter(function (item_dep, pos) {return item.cells.indexOf(item_dep) == pos})
+      item.cells_map = item.cells.filter(function (item_dep, pos) {return item.cells.indexOf(item_dep) == pos})
+      // item.cells_map = item.cells
+
+      item.count++
+    }
+
+  })
+
+
+
+
+  // debug(data_map)
+  // debug(data_map.values()[0])
+
+  var data_result = data_map.values()
+
+
+
+  // var n_temp = data_result[0].n
+  // debug("n_temp: " + n_temp)
+
+  data_result.forEach(function (item, index){
+
+    // if(item.generovalido === "Microtus" && item.especieepiteto === "guatemalensis"){
+    //   debug("************")
+    //   debug("sp: " + item.generovalido + " " + item.especieepiteto )
+    //   debug("N: " + item.n)
+    //   debug("ni: " + item.ni)
+    //   debug("epsilon: " + item.epsilon)
+    //   debug("score: " + item.score)
+    //   debug("tempid: " + item.tempid)
+    //   debug("count: " + item.count)
+    //   debug("************")
+    // }
+
+    // debug(item.generovalido + " " + item.especieepiteto + ": " + item.epsilon)
+    // debug(item.generovalido + " " + item.especieepiteto + ": " + item.score)
+
+    // if(item.score === undefined || item.score === 0){
+    //   debug("************")
+    //   debug("sp: " + item.generovalido + " " + item.especieepiteto )
+    //   debug("N: " + item.n)
+    //   debug("ni: " + item.ni)
+    //   debug("epsilon: " + item.epsilon)
+    //   debug("score: " + item.score)
+    //   debug("tempid: " + item.tempid)
+    //   debug("count: " + item.count)
+    //   debug("************")
+    // }
+
+    // if(item.generovalido === "Lynx" && item.especieepiteto === "rufus"){
+    //   debug("************")
+    //   debug("sp: " + item.generovalido + " " + item.especieepiteto )
+    //   debug("N: " + item.n)
+    //   debug("ni: " + item.ni)
+    //   debug("tempid: " + item.tempid)
+    //   debug("count: " + item.count)
+    //   debug("************")
+    // }
+
+    // if(n_temp !== item.n){
+    //   debug("*** FALSE")
+    //   debug("sp: " + item.generovalido + " " + item.especieepiteto )
+    //   debug("Otra N: " + item.n)
+    // }
+
+    // debug(row_item.n + " - " + row_item.count)
+
+      item.n = parseFloat(item.n / item.count).toFixed(2) 
+      item.ni = parseFloat(item.ni / item.count) .toFixed(2)
+      item.nij = parseFloat(item.nij / item.count).toFixed(2) 
+      item.nj = parseFloat(item.nj / item.count) .toFixed(2)
+      item.epsilon = parseFloat(item.epsilon / item.count) .toFixed(2)
+      item.score = parseFloat(item.score / item.count) .toFixed(2)
+    
+  })
+
+  // debug(data_result[0])
+
+  // debug(data.map(function(d) {return  d.ni}))
+  // debug(data.map(function(d) {return  d.n}))
+
+  // var ns = data.map(function(d) {return  d.n})
+  // var n = ns[0]
+  // for(i=0;i<ns.length;i++){
+  //   if(ns[i] != n){
+  //     debug("*****TRUE")
+  //     debug(ns[i])
+  //     break;
+  //   }
+  // }
+
+  // var cross_group = crossfilter(data)
+  // cross_group.groupAll()
+  
+  // debug(cross_group)
+  // debug(verb_utils.hashCode("hola"))
+  // debug(verb_utils.hashCode("hola"))
+  // debug(verb_utils.hashCode("hola2"))
+  
+
+  //var name_dimension = cross_group.dimension(function(d) { return d.name; })  
+  // var name_dimension = cross_group.dimension(function(d) { return d.tempid;})
+
+
+  // var group_by_name = name_dimension.group().reduce(
+    
+  //   function(item, add){
+
+  //     // debug(item.ni)
+
+  //     ++item.count
+  //     item.reinovalido = add.reinovalido
+  //     item.phylumdivisionvalido = add.phylumdivisionvalido
+  //     item.clasevalida = add.clasevalida
+  //     item.ordenvalido = add.ordenvalido
+  //     item.familiavalida = add.familiavalida
+  //     item.generovalido = add.generovalido
+  //     item.especieepiteto = add.especieepiteto
+  //     item.nombreinfra = add.nombreinfra
+  //     item.type = add.type
+  //     item.layer = add.layer
+  //     item.bid = add.bid
+  //     item.icat = add.icat
+  //     item.tag =  add.tag
+
+  //     item.cells = add.cells
+  //     item.cells_map = item.cells_map.concat(add.cells) 
+
+  //     item.nij = item.nij + add.nij
+  //     item.nj = item.nj + add.nj
+      
+  //     item.ni = item.ni + add.ni
+  //     item.n = item.n + add.n
+
+  //     item.epsilon = parseFloat(add.epsilon) 
+  //     item.score = parseFloat(add.score)
+  //     item.tipo = add.tipo
+  //     return item
+  //   },
+  //   function(item,remove){
+  //     --item.count
+  //     item.reinovalido = remove.reinovalido
+  //     item.phylumdivisionvalido = remove.phylumdivisionvalido
+  //     item.clasevalida = remove.clasevalida
+  //     item.ordenvalido = remove.ordenvalido
+  //     item.familiavalida = remove.familiavalida
+  //     item.generovalido = remove.generovalido
+  //     item.especieepiteto = remove.especieepiteto
+  //     item.nombreinfra = remove.nombreinfra
+  //     item.type = remove.type
+  //     item.layer = remove.layer
+  //     item.bid = remove.bid
+  //     item.icat = remove.icat
+  //     item.tag = remove.tag
+      
+  //     item.cells = item.cells //remove.cells //
+  //     item.cells_map = item.cells_map
+
+  //     item.nij = item.nij - remove.nij
+  //     item.nj = item.nj - remove.nj
+      
+  //     item.ni = item.ni - remove.ni
+  //     item.n = item.n - remove.n
+
+  //     item.epsilon =  parseFloat(item.epsilon) 
+  //     item.score = parseFloat(item.score)
+  //     item.tipo = item.tipo
+  //     return item
+  //   },
+  //   function(){
+  //     return {
+  //       count: 0,
+  //       reinovalido: "",
+  //       phylumdivisionvalido: "",
+  //       clasevalida: "",
+  //       ordenvalido: "",
+  //       familiavalida: "",
+  //       generovalido: "",
+  //       especieepiteto: "",
+  //       nombreinfra:"",
+  //       type:"",
+  //       layer:"",
+  //       bid:"",
+  //       icat:"",
+  //       tag:"",
+  //       cells: [],
+  //       cells_map: [],
+  //       nij: 0,
+  //       nj: 0,
+  //       ni: 0,
+  //       n: 0,
+  //       epsilon: 0,
+  //       score: 0,
+  //       tipo: 0
+  //     }
+  //   }
+  // )
+
+  // var reduced_data = group_by_name.top(Infinity);
+
+  // var data_result = []
+
+  // for(var i=0; i<reduced_data.length; i++){
+  //     var entry = reduced_data[i]
+  //     var counter = parseInt(entry["value"].count)
+
+  //     // debug(entry["value"].ni)
+
+  //     data_result.push({
+  //       reinovalido: entry["value"].reinovalido,
+  //       phylumdivisionvalido: entry["value"].phylumdivisionvalido,
+  //       clasevalida: entry["value"].clasevalida,
+  //       ordenvalido: entry["value"].ordenvalido,
+  //       familiavalida: entry["value"].familiavalida,
+  //       generovalido: entry["value"].generovalido,
+  //       especieepiteto: entry["value"].especieepiteto,
+  //       nombreinfra: entry["value"].nombreinfra,
+  //       type: entry["value"].type,
+  //       layer: entry["value"].layer,
+  //       bid: entry["value"].bid, 
+  //       icat: entry["value"].icat,
+  //       tag: entry["value"].tag,
+        
+  //       cells: entry["value"].cells,
+  //       cells_map: entry["value"].cells_map,
+
+  //       nij: parseFloat((entry["value"].nij ).toFixed(2)),
+  //       nj: parseFloat((entry["value"].nj ).toFixed(2)),
+        
+  //       ni: parseFloat(parseInt(entry["value"].ni)/counter).toFixed(2),
+  //       n:  parseFloat(parseInt(entry["value"].n)/counter).toFixed(2),
+
+  //       epsilon: parseFloat((entry["value"].epsilon).toFixed(2)),
+  //       score: parseFloat((entry["value"].score).toFixed(2)),
+  //       tipo: entry["value"].tipo
+  //     })
+  // }
+
+  // debug('............................................')
+  // debug(data_result.map(function(d) {return  d.ni}))
+  // debug(data_result.map(function(d) {return  d.n}))
+  // debug('............................................')
 
   return data_result
 }
@@ -1864,6 +2309,239 @@ verb_utils.getWhereClauseFilter = function(fosil, date, lim_inf, lim_sup, cells,
   return whereClause   
 }
 
+verb_utils.getFieldsFromLevel = function (level) {
+
+  debug("getGroupByFromGroupTaxonArray")
+
+  var fields = ""
+  var biotic = true
+  var notyet = true
+
+  var taxon_map = {
+                    // biotic
+                    kingdom : 'reinovalido', 
+                    phylum  : 'phylumdivisionvalido',
+                    class   : 'clasevalida',
+                    order   : 'ordenvalido',
+                    family  : 'familiavalida',
+                    genus   : 'generovalido',
+                    species : ['generovalido', 'especieepiteto'],
+                    subspecies: ['generovalido', 'especieepiteto', 'nombreinfra']
+                  }
+
+  var rank_map = {
+                    // abiotic
+                    type    : 'type',
+                    layer   : 'layer',
+                    bid     : 'bid'
+                }
+
+  if (level === 'type' || level === 'layer' || level === 'bid')
+    biotic = false
+
+  for (var key in taxon_map) {
+
+    if (biotic && notyet) {
+
+      if (level === key) {
+
+        if (key === 'kingdom') {
+
+          notyet = false
+          fields += taxon_map[key]
+
+        } else if(key === 'species') {
+
+          notyet = false
+          fields += ", " + taxon_map[key][1]           
+
+        } else if(key === 'subspecies') {
+
+          notyet = false
+          fields += ", " + taxon_map[key][2]
+
+        } else {
+
+          notyet = false
+          fields += ", " + taxon_map[key]
+        
+        }
+      
+      } else {
+
+        if (key === 'kingdom'){
+
+          fields += taxon_map[key]
+
+        } else if (key === 'species'){
+
+          fields += ", "  + taxon_map[key][1]          
+
+        } else if(key === 'subspecies') {
+
+          fields += ", " + taxon_map[key][2]
+
+        } else {
+
+          fields += ", " + taxon_map[key] 
+        
+        }
+
+      }
+
+    } else {
+
+      if (key === 'kingdom')
+        fields += "'' AS " + taxon_map[key]
+      else if(key === 'species')
+        fields += ", '' AS " + taxon_map[key][1]
+      else if(key === 'subspecies')
+        fields += ", '' AS " + taxon_map[key][2]        
+      else
+        fields += ", '' AS " + taxon_map[key]
+
+    }
+
+    //debug(fields)
+
+  }
+
+  for (var key in rank_map) {
+
+    if (!biotic && notyet) {
+
+      if (level === key) {
+
+          notyet = false
+          fields += ", " + rank_map[key]
+
+
+      } else {
+
+          fields += ", " + rank_map[key] 
+
+      }
+
+    } else {
+
+        fields += ", '' AS " + rank_map[key]
+
+    }
+
+    //debug(fields)    
+
+  }
+
+  if (level === 'bid')
+    fields  += ", icat, tag "
+  else 
+    fields  += ", '' AS icat, '' AS tag "
+
+  debug("fields =" + fields)
+  return fields
+
+}
+
+verb_utils.getGroupFieldsFromLevel = function (level) {
+
+  debug("getGroupByFromGroupTaxonArray")
+
+  var group_fields = ""
+  var biotic = true
+  var notyet = true
+
+  var taxon_map = {
+                    // biotic
+                    kingdom : 'reinovalido', 
+                    phylum  : 'phylumdivisionvalido',
+                    class   : 'clasevalida',
+                    order   : 'ordenvalido',
+                    family  : 'familiavalida',
+                    genus   : 'generovalido',
+                    species : ['generovalido', 'especieepiteto'],
+                    subspecies: ['generovalido', 'especieepiteto', 'nombreinfra'],
+                      
+                  }
+
+  var rank_map = {
+
+                    // abiotic
+                    type    : 'type',
+                    layer   : 'layer',
+                    bid     : 'bid'
+
+                  }
+
+  if (level === 'type' || level === 'layer' || level === 'bid')
+    biotic = false
+
+
+  if (biotic) {
+    
+    for (var key in taxon_map) {
+
+      if (level === key) {
+
+        if(level === "kingdom")
+          group_fields += taxon_map[key]
+        else if(level === "species")
+          group_fields += ", " + taxon_map[key][1] 
+        else if(level === "subspecies")
+          group_fields += ", " + taxon_map[key][2]
+        else
+          group_fields += ", " + taxon_map[key]
+
+        break
+
+      } else {
+        
+        if(key === "kingdom")
+          group_fields += taxon_map[key]
+        else if(key === "species")
+          group_fields += ", " + taxon_map[key][1]
+        else if(key === "subspecies")
+          group_fields += ", " + taxon_map[key][2]
+        else
+          group_fields += ", " + taxon_map[key]        
+
+      }
+
+    }
+
+  } else {
+
+    for (var key in rank_map) {
+
+      if (key === level) {
+
+        if(key === "type")
+          group_fields += rank_map[key]
+        else
+          group_fields += ", " + rank_map[key]
+        break
+
+      } else {
+
+        if(key === "type")
+          group_fields += rank_map[key]
+        else
+          group_fields += ", " + rank_map[key]
+
+      }
+
+    }
+
+   if(level === 'bid')
+        group_fields += ", icat, tag "
+
+  }
+
+
+  debug("group fields ="  + group_fields)
+  return group_fields
+
+}
+
 verb_utils.getWhereClauseFromGroupTaxonArray = function (taxon_array, target){
 
   debug("getWhereClauseFromGroupTaxonArray")
@@ -1924,11 +2602,74 @@ verb_utils.getWhereClauseFromGroupTaxonArray = function (taxon_array, target){
 
 }
 
+
+verb_utils.getExcludeTargetWhereClause = function (taxon_array) {
+
+  debug("getExcludeTargetWhereClause")
+
+  var key = 'taxon_rank'
+  // mapeo de taxones
+  var taxon_rank_map = {
+                          // biotic
+                          kingdom : 'reinovalido', 
+                          phylum  : 'phylumdivisionvalido',
+                          class   : 'clasevalida',
+                          order   : 'ordenvalido',
+                          family  : 'familiavalida',
+                          genus   : 'generovalido',
+                          species : ['generovalido', 'especieepiteto'],
+                          subspecies: ['generovalido', 'especieepiteto', 'nombreinfra'],
+                          // abiotic
+                          type    : 'type',
+                          layer   : 'layer',
+                          bid     : 'bid'
+                       }
+  
+  var whereClause = ''
+  taxon_array.forEach ( function (taxon, index) {
+    //debug(taxon_rank_map[taxon[key]], taxon[key])
+    if (index === 0){
+      
+      if (taxon[key] === 'species') {
+        var value = taxon['value'].split(' ')
+        whereClause += " AND (" + taxon_rank_map[taxon[key]][0] + " <> '" + value[0] + "' AND " + taxon_rank_map[taxon[key]][1] + " <> '" + value[1] + "')"
+      } else if(taxon[key] === 'subspecies') {
+        var value = taxon['value'].split(' ')
+        whereClause += " AND (" + taxon_rank_map[taxon[key]][0] + "<> '" + value[0] + "' AND " + taxon_rank_map[taxon[key]][1] + " <> '" + value[1] + "' AND " + taxon_rank_map[taxon[key]][2] + " <> '" + value[2] + "')"
+      } else {
+        whereClause += " AND " + taxon_rank_map[taxon[key]] + " <> '" + taxon['value'] + "'"
+      }
+
+    } else{
+      
+      if (taxon[key] === 'species') {
+        var value = taxon['value'].split(' ')
+        whereClause += " AND (" + taxon_rank_map[taxon[key]][0] + " <> '" + value[0] + "' AND " + taxon_rank_map[taxon[key]][1] + " <> '" + value[1] + "')"
+      } else if(taxon[key] === 'subspecies') {
+        var value = taxon['value'].split(' ')
+        whereClause += " AND (" + taxon_rank_map[taxon[key]][0] + " <> '" + value[0] + "' AND " + taxon_rank_map[taxon[key]][1] + " <> '" + value[1] + "' AND " + taxon_rank_map[taxon[key]][2] + " <> '" + value[2] + "')" 
+      } else {
+        whereClause += " AND " + taxon_rank_map[taxon[key]] + " <> '" + taxon['value'] + "'"
+      }
+
+    } 
+      
+  })
+
+  debug(whereClause)
+  return whereClause
+
+
+}
+
 verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups) {
+  
   debug("getCovarGroupQueries")
   
   var query_covar
   var where_covar
+  var group_fields
+  var fields
   var size = covars_groups.length
   var co = queries.countsTaxonGroups.getCellsByGroupBio.toString()
   var coa =  queries.countsTaxonGroups.getCellsByGroupAbio.toString()
@@ -1942,6 +2683,9 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
     if(group['biotic']){
 
       where_covar = verb_utils.getWhereClauseFromGroupTaxonArray(group['merge_vars'], false)
+      //debug("level = " + group['merge_vars'][0]['level'])
+      group_fields = verb_utils.getGroupFieldsFromLevel(group['merge_vars'][0]['level']) 
+      fields = verb_utils.getFieldsFromLevel(group['merge_vars'][0]['level'])
 
       if( index === 0){
 
@@ -1971,16 +2715,20 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
       }
 
       //debug(data_request["total_cells"])
-
+      query_covar = query_covar.toString().replace(/{fields:raw}/g, fields)
+      query_covar = query_covar.toString().replace(/{group_fields:raw}/g, group_fields)
       query_covar = query_covar.toString().replace(/{name:raw}/g, group['name'])
       query_covar = query_covar.toString().replace(/{res_celda_sp:raw}/g, data_request["res_celda_sp"])
       query_covar = query_covar.toString().replace(/{where_covars:raw}/g, where_covar)
       query_covar = query_covar.toString().replace(/{excluded_cells:raw}/g, data_request["excluded_cells"].toString())
       query_covar = query_covar.toString().replace(/{total_cells:raw}/g, data_request["total_cells"])
+      query_covar = query_covar.toString().replace(/{where_exclude_target:raw}/g, data_request["where_exclude_target"])
        
     } else {
 
       where_covar = verb_utils.getWhereClauseFromGroupTaxonArray(group['merge_vars'], false)
+      group_fields = verb_utils.getGroupFieldsFromLevel(group['merge_vars'][0]['level']) 
+      fields = verb_utils.getFieldsFromLevel(group['merge_vars'][0]['level'])
 
       if (index === 0 ) {
 
@@ -2009,6 +2757,8 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
 
       }
 
+      query_covar = query_covar.toString().replace(/{fields:raw}/g, fields)
+      query_covar = query_covar.toString().replace(/{group_fields:raw}/g, group_fields)
       query_covar = query_covar.toString().replace(/{name:raw}/g, group['name'])
       query_covar = query_covar.toString().replace(/{res_celda:raw}/g, data_request["res_celda"])
       query_covar = query_covar.toString().replace(/{where_covars:raw}/g, where_covar)
@@ -2025,11 +2775,128 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
   return query_covar  
 }
 
+verb_utils.getCommunityAnalysisQuery = function(queries, region, res_cells, region_cells, res_views, source, is_target){
 
+  debug("getCommunityAnalysisQuery")
 
+  var query = queries.taxonsGroupNodes.nodesSource
+  var q_aux = ""
+  var q_select = ""
+  var q = ""
+  var fields
+  var group_fields
+  var level
+  var where
+  var label = is_target ? 'target' : 'source'
 
+  source.forEach( function (taxon, index) {
 
+    if (taxon["biotic"]){
+      
+      if(index === 0) {
+        level = taxon["level"]
+        q = queries.taxonsGroupNodes.nodesBio
+        fields = verb_utils.getFieldsFromLevel(level)
+        group_fields = verb_utils.getGroupFieldsFromLevel(level)
+        where = verb_utils.getWhereClauseFromGroupTaxonArray([taxon], false)
+        
+        q = q.toString().replace(/{index:raw}/g, index)
+        q = q.toString().replace(/{fields:raw}/g, fields)
+        q = q.toString().replace(/{biotic:raw}/g, 'true')
+        q = q.toString().replace(/{region_cells:raw}/g, region_cells)
+        q = q.toString().replace(/{where_filter:raw}/g, where)
+        q = q.toString().replace(/{level:raw}/g, level)
+        q = q.toString().replace(/{group_fields:raw}/g, group_fields)
 
+      } else {
 
+        q_aux    =  queries.taxonsGroupNodes.covarBio
+        q_select = " UNION " + queries.taxonsGroupNodes.selectNodes
+        
+        level = taxon["level"]
+        fields = verb_utils.getFieldsFromLevel(level)
+        group_fields = verb_utils.getGroupFieldsFromLevel(level)
+        where = verb_utils.getWhereClauseFromGroupTaxonArray([taxon], false)
+        
+        q_aux = q_aux.toString().replace(/{index:raw}/g, index)
+        q_aux = q_aux.toString().replace(/{biotic:raw}/g, 'true')
+        q_aux = q_aux.toString().replace(/{fields:raw}/g, fields)
+        q_aux = q_aux.toString().replace(/{region_cells:raw}/g, region_cells)
+        q_aux = q_aux.toString().replace(/{where_filter:raw}/g, where)
+    
+        q_select = q_select.toString().replace(/{index:raw}/g, index)
+        q_select = q_select.toString().replace(/{fields:raw}/g, fields)
+        q_select = q_select.toString().replace(/{group_fields:raw}/g, group_fields)
+
+        q = q.toString().replace(/{aux:raw}/g, q_aux + ' {aux:raw}')
+        q = q.toString().replace(/{union:raw}/g, q_select + ' {union:raw}')
+
+      }
+
+    } else {
+
+      if(index === 0) {
+
+        level = taxon["level"]
+        q = queries.taxonsGroupNodes.nodesAbio
+        fields = verb_utils.getFieldsFromLevel(level)
+        group_fields = verb_utils.getGroupFieldsFromLevel(level)
+        where = verb_utils.getWhereClauseFromGroupTaxonArray([taxon], false)
+        
+        q = q.toString().replace(/{index:raw}/g, index)
+        q = q.toString().replace(/{fields:raw}/g, fields)
+        q = q.toString().replace(/{biotic:raw}/g, 'false')
+        q = q.toString().replace(/{region:raw}/g, region)
+        q = q.toString().replace(/{res_cells:raw}/g, res_cells)
+        q = q.toString().replace(/{res_views:raw}/g, res_views)
+        q = q.toString().replace(/{where_filter:raw}/g, where)
+        q = q.toString().replace(/{level:raw}/g, level)
+        q = q.toString().replace(/{group_fields:raw}/g, group_fields)
+
+      } else {
+
+        q_aux    = queries.taxonsGroupNodes.covarAbio
+        q_select = " UNION " + queries.taxonsGroupNodes.selectNodes
+        
+        level = taxon["level"]
+        fields = verb_utils.getFieldsFromLevel(level)
+        group_fields = verb_utils.getGroupFieldsFromLevel(level)
+        where = verb_utils.getWhereClauseFromGroupTaxonArray([taxon], false)
+        
+        q_aux = q_aux.toString().replace(/{index:raw}/g, index)
+        q_aux = q_aux.toString().replace(/{biotic:raw}/g, 'false')
+        q_aux = q_aux.toString().replace(/{fields:raw}/g, fields)
+        q_aux = q_aux.toString().replace(/{res_cells:raw}/g, res_cells)
+        q_aux = q_aux.toString().replace(/{res_views:raw}/g, res_views)
+        q_aux = q_aux.toString().replace(/{where_filter:raw}/g, where)
+        q_aux = q_aux.toString().replace(/{region:raw}/g, region)
+
+        q_select = q_select.toString().replace(/{index:raw}/g, index)
+        q_select = q_select.toString().replace(/{fields:raw}/g, fields)
+        q_select = q_select.toString().replace(/{group_fields:raw}/g, group_fields)
+        q_select = q_select.toString().replace(/type/g, 'type::varchar')
+        q_select = q_select.toString().replace(/bid/g, 'bid::varchar')
+        q_select = q_select.toString().replace(/icat/g, 'icat::varchar')
+
+        //debug(q_aux)
+        //debug(q_select)
+
+        q = q.toString().replace(/{aux:raw}/g, q_aux + ' {aux:raw}')
+        q = q.toString().replace(/{union:raw}/g, q_select + ' {union:raw}')
+
+      }
+
+    }
+
+  })
+  
+  query = query.toString().replace(/{label:raw}/g, label)
+  query = query.toString().replace(/{query:raw}/g, q)
+  query = query.toString().replace(/{aux:raw}/g, '')
+  query = query.toString().replace(/{union:raw}/g, '')
+
+  //debug(query)
+  return query
+}
 
 module.exports = verb_utils

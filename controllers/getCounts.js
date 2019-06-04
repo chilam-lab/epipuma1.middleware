@@ -38,6 +38,54 @@ var pgp = require('pg-promise')
  * @param {express.Response} res - Express response object 
  * @param {function} next - Express next middleware function
  */
+exports.getBasicInfoTemp = function(req, res, next) {
+  
+  debug('getBasicInfoTemp')
+
+  var data_request = verb_utils.getRequestParams(req, true)
+
+  data_request["res_celda_snib_tb"] = "grid_geojson_" + data_request.grid_resolution + "km_aoi"
+  data_request["res_grid_tbl"] = "grid_" + data_request.grid_resolution + "km_aoi"
+  data_request["res_grid_column"] = "gridid_" + data_request.grid_resolution + "km"
+
+  // debug('region: ' + data_request.region)
+  // debug('res_celda_snib_tb: ' + data_request.res_celda_snib_tb)
+
+  var data_georel = [];
+  var iter = 0;
+  var promises = []
+  var json_response = {}
+
+  for(var iter = 0; iter<data_request.iterations; iter++){
+
+    // debug("iteration:" + (iter+1))
+    initialProcessTemp(iter, data_request.iterations, data_request, res, json_response, req)
+
+  }
+
+}
+
+function initialProcessTemp(iter, total_iterations, data, res, json_response, req) {
+
+
+}
+
+
+
+
+
+
+
+
+
+/**
+ * Obtiene el score por celda agrupado por decil con apriori
+ *
+ * @function
+ * @param {express.Request} req - Express request object
+ * @param {express.Response} res - Express response object 
+ * @param {function} next - Express next middleware function
+ */
 exports.getBasicInfo = function(req, res, next) {
   
   debug('getBasicInfo')
@@ -271,6 +319,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req) {
       var data_freq_cell = data_request.with_data_freq_cell === true ? verb_utils.processDataForFreqCell(data_score_cell) : []
 
 
+      
       res.json({
           ok: true,
           // usuarioRequest: req.usuarioRequest,
