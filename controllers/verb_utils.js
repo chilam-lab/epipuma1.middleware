@@ -2291,7 +2291,7 @@ verb_utils.getWhereClauseFilter = function(fosil, date, lim_inf, lim_sup, cells,
   whereClause += ') '
 
   if(!fosil){
-    whereClause += "AND ejemplarfosil <> 'SI' "
+    whereClause += "AND (ejemplarfosil <>'SI' OR ejemplarfosil is null) "
   }
 
   if(date) {
