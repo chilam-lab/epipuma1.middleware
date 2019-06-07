@@ -19,7 +19,6 @@ config.port = 8080
 // config.db.application_name = 'expressMiddleware'
 // config.port = process.env.PORT
 
-
 // Configure pool of connections
 config.db.poolSize = 10
 
