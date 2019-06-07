@@ -1668,10 +1668,9 @@ verb_utils.updateObj = function(arr) {
 verb_utils.processGroupValidationData = function(data_group) {
 
   debug("processGroupValidationData")
-  
-  var avgdata = []
-  var data = []
 
+  var data = []
+  
   data_group.forEach(function(item){
 
     item['data'].forEach(function(element){
@@ -1691,352 +1690,248 @@ verb_utils.processGroupValidationData = function(data_group) {
     
   })
 
-  // debug(data_group[0])
-
   var data_map = data_group.map(function(d) {return  d.data})
 
-  // debug(data_map)
-
   data_map.forEach(function(item) {
-
     data = data.concat(item)
-
   })
 
-  // data.forEach(function(item) {
 
-  //   // if(item.generovalido === "Lynx" && item.especieepiteto === "rufus"){
-  //   //   debug("----------")
-  //   //   debug("sp: " + item.generovalido + " " + item.especieepiteto )
-  //   //   debug("N: " + item.n)
-  //   //   debug("ni: " + item.ni)
-  //   //   debug("tempid: " + item.tempid)
-  //   //   debug("----------")
-  //   // }
+  /****** implementación con map ********/
 
-  //   // if(item.generovalido === "Tamandua" && item.especieepiteto === "tetradactyla"){
-  //   //   debug("----------")
-  //   //   debug("sp: " + item.generovalido + " " + item.especieepiteto )
-  //   //   debug("N: " + item.n)
-  //   //   debug("ni: " + item.ni)
-  //   //   debug("tempid: " + item.tempid)
-  //   //   debug("----------")
-  //   // }
+  // var data_map = d3.map([])
+  // var counter = 0;
 
-  //   // if(item.generovalido === "Microtus" && item.especieepiteto === "guatemalensis"){
+  // data.forEach(function (row_item, index){
+
+  //   if(!data_map.has(row_item.tempid)){
+  //     row_item.count = 1
+  //     row_item.cells_map = []
+  //     row_item.epsilon = row_item.epsilon === undefined || row_item.epsilon === null  ? 0 : parseFloat(row_item.epsilon) 
+  //     row_item.score = row_item.score === undefined || row_item.score === null ? 0 : parseFloat(row_item.score) 
+
+  //     data_map.set(row_item.tempid,row_item)
+  //   }
+  //   else{
       
-  //   //   debug("----------")
-  //   //   debug("sp: " + item.generovalido + " " + item.especieepiteto )
-  //   //   debug("N: " + item.n)
-  //   //   debug("ni: " + item.ni)
-  //   //   debug("epsilon: " + item.epsilon)
-  //   //   debug("score: " + item.score)
-  //   //   debug("tempid: " + item.tempid)
-  //   //   debug("----------")
-  //   // }
+  //     // promedio (con n y ni variable) Varian por que existen especies que no estan en las 5 iteraciones, al promediar hacen variar la n y ni
+  //     var item = data_map.get(row_item.tempid)
+  //     item.n += row_item.n
+  //     item.ni += row_item.ni
+  //     item.nij += row_item.nij
+  //     item.nj += row_item.nj
+  //     item.epsilon += row_item.epsilon === undefined || row_item.epsilon === null  ? 0 : parseFloat(row_item.epsilon) 
+  //     item.score += row_item.score === undefined || row_item.score === null ? 0 : parseFloat(row_item.score) 
 
-  //   // if(item.generovalido === "Glossophaga" && item.especieepiteto === "longirostris"){
-      
-  //   //   debug("----------")
-  //   //   debug("sp: " + item.generovalido + " " + item.especieepiteto )
-  //   //   debug("N: " + item.n)
-  //   //   debug("ni: " + item.ni)
-  //   //   debug("epsilon: " + item.epsilon)
-  //   //   debug("score: " + item.score)
-  //   //   debug("tempid: " + item.tempid)
-  //   //   debug("----------")
-  //   // }
+  //     item.cells = item.cells.concat(row_item.cells)
+  //     // item.cells_map = item.cells.filter(function (item_dep, pos) {return item.cells.indexOf(item_dep) == pos})
+  //     item.cells_map = item.cells.filter(function (item_dep, pos) {return item.cells.indexOf(item_dep) == pos})
+  //     // item.cells_map = item.cells
+
+  //     item.count++
+  //   }
 
   // })
 
-
-
-  // debug(data)
-
-  var data_map = d3.map([])
-  var counter = 0;
-
-  // TODO: Esto no es una solución real
-  // var n_unica = data[0].n
-  // var ni_unica = data[0].ni
-
-  data.forEach(function (row_item, index){
-
-    if(!data_map.has(row_item.tempid)){
-      row_item.count = 1
-      row_item.cells_map = []
-      row_item.epsilon = row_item.epsilon === undefined || row_item.epsilon === null  ? 0 : parseFloat(row_item.epsilon) 
-      row_item.score = row_item.score === undefined || row_item.score === null ? 0 : parseFloat(row_item.score) 
-
-      // row_item.n = n_unica //row_item.n
-      // row_item.ni = ni_unica //row_item.ni
-      data_map.set(row_item.tempid,row_item)
-    }
-    else{
-      
-      // ultima iteracion
-      // var item = data_map.get(row_item.tempid)
-      // item.n = n_unica //row_item.n
-      // item.ni = ni_unica //row_item.ni
-
-      // item.nij = row_item.nij
-      // item.nj = row_item.nj
-      // item.epsilon = row_item.epsilon
-      // item.score = row_item.score
-      // item.cells = row_item.cells
-
-      // item.cells_map = item.cells.concat(row_item.cells).filter(function (item_dep, pos) {return item.cells.indexOf(item_dep) == pos})
-      // // item.cells_map = row_item.cells
-
-      // promedio (con n y ni variable) Varian por que existen especies que no estan en las 5 iteraciones, al promediar hacen variar la n y ni
-      var item = data_map.get(row_item.tempid)
-      item.n += row_item.n
-      item.ni += row_item.ni
-      item.nij += row_item.nij
-      item.nj += row_item.nj
-      item.epsilon += row_item.epsilon === undefined || row_item.epsilon === null  ? 0 : parseFloat(row_item.epsilon) 
-      item.score += row_item.score === undefined || row_item.score === null ? 0 : parseFloat(row_item.score) 
-
-      item.cells = item.cells.concat(row_item.cells)
-      // item.cells_map = item.cells.filter(function (item_dep, pos) {return item.cells.indexOf(item_dep) == pos})
-      item.cells_map = item.cells.filter(function (item_dep, pos) {return item.cells.indexOf(item_dep) == pos})
-      // item.cells_map = item.cells
-
-      item.count++
-    }
-
-  })
-
-
-
-
-  // debug(data_map)
-  // debug(data_map.values()[0])
-
-  var data_result = data_map.values()
-
-
-
-  // var n_temp = data_result[0].n
-  // debug("n_temp: " + n_temp)
-
-  data_result.forEach(function (item, index){
-
-    // if(item.generovalido === "Microtus" && item.especieepiteto === "guatemalensis"){
-    //   debug("************")
-    //   debug("sp: " + item.generovalido + " " + item.especieepiteto )
-    //   debug("N: " + item.n)
-    //   debug("ni: " + item.ni)
-    //   debug("epsilon: " + item.epsilon)
-    //   debug("score: " + item.score)
-    //   debug("tempid: " + item.tempid)
-    //   debug("count: " + item.count)
-    //   debug("************")
-    // }
-
-    // debug(item.generovalido + " " + item.especieepiteto + ": " + item.epsilon)
-    // debug(item.generovalido + " " + item.especieepiteto + ": " + item.score)
-
-    // if(item.score === undefined || item.score === 0){
-    //   debug("************")
-    //   debug("sp: " + item.generovalido + " " + item.especieepiteto )
-    //   debug("N: " + item.n)
-    //   debug("ni: " + item.ni)
-    //   debug("epsilon: " + item.epsilon)
-    //   debug("score: " + item.score)
-    //   debug("tempid: " + item.tempid)
-    //   debug("count: " + item.count)
-    //   debug("************")
-    // }
-
-    // if(item.generovalido === "Lynx" && item.especieepiteto === "rufus"){
-    //   debug("************")
-    //   debug("sp: " + item.generovalido + " " + item.especieepiteto )
-    //   debug("N: " + item.n)
-    //   debug("ni: " + item.ni)
-    //   debug("tempid: " + item.tempid)
-    //   debug("count: " + item.count)
-    //   debug("************")
-    // }
-
-    // if(n_temp !== item.n){
-    //   debug("*** FALSE")
-    //   debug("sp: " + item.generovalido + " " + item.especieepiteto )
-    //   debug("Otra N: " + item.n)
-    // }
-
-    // debug(row_item.n + " - " + row_item.count)
-
-      item.n = parseFloat(item.n / item.count).toFixed(2) 
-      item.ni = parseFloat(item.ni / item.count) .toFixed(2)
-      item.nij = parseFloat(item.nij / item.count).toFixed(2) 
-      item.nj = parseFloat(item.nj / item.count) .toFixed(2)
-      item.epsilon = parseFloat(item.epsilon / item.count) .toFixed(2)
-      item.score = parseFloat(item.score / item.count) .toFixed(2)
-    
-  })
-
-  // debug(data_result[0])
-
-  // debug(data.map(function(d) {return  d.ni}))
-  // debug(data.map(function(d) {return  d.n}))
-
-  // var ns = data.map(function(d) {return  d.n})
-  // var n = ns[0]
-  // for(i=0;i<ns.length;i++){
-  //   if(ns[i] != n){
-  //     debug("*****TRUE")
-  //     debug(ns[i])
-  //     break;
-  //   }
-  // }
-
-  // var cross_group = crossfilter(data)
-  // cross_group.groupAll()
+  // var data_result = data_map.values()
   
-  // debug(cross_group)
-  // debug(verb_utils.hashCode("hola"))
-  // debug(verb_utils.hashCode("hola"))
-  // debug(verb_utils.hashCode("hola2"))
+  // data_result.forEach(function (item, index){
+
+  //   // if(item.generovalido === "Microtus" && item.especieepiteto === "guatemalensis"){
+  //   //   debug("************")
+  //   //   debug("sp: " + item.generovalido + " " + item.especieepiteto )
+  //   //   debug("N: " + item.n)
+  //   //   debug("ni: " + item.ni)
+  //   //   debug("epsilon: " + item.epsilon)
+  //   //   debug("score: " + item.score)
+  //   //   debug("tempid: " + item.tempid)
+  //   //   debug("count: " + item.count)
+  //   //   debug("************")
+  //   // }
+
+  //     item.n = parseFloat(item.n / item.count).toFixed(2) 
+  //     item.ni = parseFloat(item.ni / item.count) .toFixed(2)
+  //     item.nij = parseFloat(item.nij / item.count).toFixed(2) 
+  //     item.nj = parseFloat(item.nj / item.count) .toFixed(2)
+  //     item.epsilon = parseFloat(item.epsilon / item.count) .toFixed(2)
+  //     item.score = parseFloat(item.score / item.count) .toFixed(2)
+    
+  // })
+
+  /****** termina implementación con map ********/
+
+
+
+  /****** implementación con crossfilter ********/
+
+  
+  var cross_group = crossfilter(data)
+  cross_group.groupAll()
+  
+  // // debug(cross_group)
+  // // debug(verb_utils.hashCode("hola"))
+  // // debug(verb_utils.hashCode("hola"))
+  // // debug(verb_utils.hashCode("hola2"))
   
 
-  //var name_dimension = cross_group.dimension(function(d) { return d.name; })  
-  // var name_dimension = cross_group.dimension(function(d) { return d.tempid;})
+  // // var name_dimension = cross_group.dimension(function(d) { return d.name; })  
+  var name_dimension = cross_group.dimension(function(d) { return d.tempid;})
 
-
-  // var group_by_name = name_dimension.group().reduce(
+  var group_by_name = name_dimension.group().reduce(
     
-  //   function(item, add){
+    function(item, add){
 
-  //     // debug(item.ni)
+      ++item.count
 
-  //     ++item.count
-  //     item.reinovalido = add.reinovalido
-  //     item.phylumdivisionvalido = add.phylumdivisionvalido
-  //     item.clasevalida = add.clasevalida
-  //     item.ordenvalido = add.ordenvalido
-  //     item.familiavalida = add.familiavalida
-  //     item.generovalido = add.generovalido
-  //     item.especieepiteto = add.especieepiteto
-  //     item.nombreinfra = add.nombreinfra
-  //     item.type = add.type
-  //     item.layer = add.layer
-  //     item.bid = add.bid
-  //     item.icat = add.icat
-  //     item.tag =  add.tag
+      item.reinovalido = add.reinovalido
+      item.phylumdivisionvalido = add.phylumdivisionvalido
+      item.clasevalida = add.clasevalida
+      item.ordenvalido = add.ordenvalido
+      item.familiavalida = add.familiavalida
+      item.generovalido = add.generovalido
+      item.especieepiteto = add.especieepiteto
+      item.nombreinfra = add.nombreinfra
+      item.type = add.type
+      item.layer = add.layer
+      item.bid = add.bid
+      item.icat = add.icat
+      item.tag =  add.tag
 
-  //     item.cells = add.cells
-  //     item.cells_map = item.cells_map.concat(add.cells) 
+      item.cells = add.cells
+      item.cells_map = item.cells_map.concat(add.cells) 
 
-  //     item.nij = item.nij + add.nij
-  //     item.nj = item.nj + add.nj
+      item.nij += add.nij
+      item.nj += add.nj
       
-  //     item.ni = item.ni + add.ni
-  //     item.n = item.n + add.n
+      item.ni += add.ni
+      item.n += add.n
 
-  //     item.epsilon = parseFloat(add.epsilon) 
-  //     item.score = parseFloat(add.score)
-  //     item.tipo = add.tipo
-  //     return item
-  //   },
-  //   function(item,remove){
-  //     --item.count
-  //     item.reinovalido = remove.reinovalido
-  //     item.phylumdivisionvalido = remove.phylumdivisionvalido
-  //     item.clasevalida = remove.clasevalida
-  //     item.ordenvalido = remove.ordenvalido
-  //     item.familiavalida = remove.familiavalida
-  //     item.generovalido = remove.generovalido
-  //     item.especieepiteto = remove.especieepiteto
-  //     item.nombreinfra = remove.nombreinfra
-  //     item.type = remove.type
-  //     item.layer = remove.layer
-  //     item.bid = remove.bid
-  //     item.icat = remove.icat
-  //     item.tag = remove.tag
+      if(add.epsilon !== undefined && add.epsilon !== null){
+        item.epsilon += parseFloat(add.epsilon)
+        ++item.count_eps
+      }
       
-  //     item.cells = item.cells //remove.cells //
-  //     item.cells_map = item.cells_map
-
-  //     item.nij = item.nij - remove.nij
-  //     item.nj = item.nj - remove.nj
+      if(add.score !== undefined && add.score !== null){
+        item.score += parseFloat(add.score)
+        ++item.count_scr
+      }
       
-  //     item.ni = item.ni - remove.ni
-  //     item.n = item.n - remove.n
+      item.tipo = add.tipo
 
-  //     item.epsilon =  parseFloat(item.epsilon) 
-  //     item.score = parseFloat(item.score)
-  //     item.tipo = item.tipo
-  //     return item
-  //   },
-  //   function(){
-  //     return {
-  //       count: 0,
-  //       reinovalido: "",
-  //       phylumdivisionvalido: "",
-  //       clasevalida: "",
-  //       ordenvalido: "",
-  //       familiavalida: "",
-  //       generovalido: "",
-  //       especieepiteto: "",
-  //       nombreinfra:"",
-  //       type:"",
-  //       layer:"",
-  //       bid:"",
-  //       icat:"",
-  //       tag:"",
-  //       cells: [],
-  //       cells_map: [],
-  //       nij: 0,
-  //       nj: 0,
-  //       ni: 0,
-  //       n: 0,
-  //       epsilon: 0,
-  //       score: 0,
-  //       tipo: 0
-  //     }
-  //   }
-  // )
+      return item
+    },
+    function(item,remove){
+      --item.count
+      item.reinovalido = remove.reinovalido
+      item.phylumdivisionvalido = remove.phylumdivisionvalido
+      item.clasevalida = remove.clasevalida
+      item.ordenvalido = remove.ordenvalido
+      item.familiavalida = remove.familiavalida
+      item.generovalido = remove.generovalido
+      item.especieepiteto = remove.especieepiteto
+      item.nombreinfra = remove.nombreinfra
+      item.type = remove.type
+      item.layer = remove.layer
+      item.bid = remove.bid
+      item.icat = remove.icat
+      item.tag = remove.tag
+      
+      item.cells = item.cells //remove.cells //
+      item.cells_map = item.cells_map
 
-  // var reduced_data = group_by_name.top(Infinity);
+      item.nij -= remove.nij
+      item.nj -= remove.nj
+      
+      item.ni -= remove.ni
+      item.n -= remove.n
 
-  // var data_result = []
+      if(remove.epsilon !== undefined && remove.epsilon !== null){
+        item.epsilon -= parseFloat(remove.epsilon)
+        --item.count_eps
+      }
+      
+      if(remove.score !== undefined && remove.score !== null){
+        item.score -= parseFloat(remove.score)
+        --item.count_scr
+      }
+      
+      // item.epsilon -= parseFloat(remove.epsilon) 
+      // item.score -= parseFloat(remove.score) 
+      item.tipo = item.tipo
 
-  // for(var i=0; i<reduced_data.length; i++){
-  //     var entry = reduced_data[i]
-  //     var counter = parseInt(entry["value"].count)
+      return item
+    },
+    function(){
+      return {
+        count: 0,
+        count_eps: 0,
+        count_scr: 0,
+        reinovalido: "",
+        phylumdivisionvalido: "",
+        clasevalida: "",
+        ordenvalido: "",
+        familiavalida: "",
+        generovalido: "",
+        especieepiteto: "",
+        nombreinfra:"",
+        type:"",
+        layer:"",
+        bid:"",
+        icat:"",
+        tag:"",
+        cells: [],
+        cells_map: [],
+        nij: 0,
+        nj: 0,
+        ni: 0,
+        n: 0,
+        epsilon: 0,
+        score: 0,
+        tipo: 0
+      }
+    }
+  )
 
-  //     // debug(entry["value"].ni)
+  var reduced_data = group_by_name.top(Infinity);
 
-  //     data_result.push({
-  //       reinovalido: entry["value"].reinovalido,
-  //       phylumdivisionvalido: entry["value"].phylumdivisionvalido,
-  //       clasevalida: entry["value"].clasevalida,
-  //       ordenvalido: entry["value"].ordenvalido,
-  //       familiavalida: entry["value"].familiavalida,
-  //       generovalido: entry["value"].generovalido,
-  //       especieepiteto: entry["value"].especieepiteto,
-  //       nombreinfra: entry["value"].nombreinfra,
-  //       type: entry["value"].type,
-  //       layer: entry["value"].layer,
-  //       bid: entry["value"].bid, 
-  //       icat: entry["value"].icat,
-  //       tag: entry["value"].tag,
+  var data_result = []
+
+  for(var i=0; i<reduced_data.length; i++){
+      var entry = reduced_data[i]
+      var counter = parseInt(entry["value"].count)
+      var count_eps = parseInt(entry["value"].count_eps)
+      var count_scr = parseInt(entry["value"].count_scr)
+
+      data_result.push({
+        reinovalido: entry["value"].reinovalido,
+        phylumdivisionvalido: entry["value"].phylumdivisionvalido,
+        clasevalida: entry["value"].clasevalida,
+        ordenvalido: entry["value"].ordenvalido,
+        familiavalida: entry["value"].familiavalida,
+        generovalido: entry["value"].generovalido,
+        especieepiteto: entry["value"].especieepiteto,
+        nombreinfra: entry["value"].nombreinfra,
+        type: entry["value"].type,
+        layer: entry["value"].layer,
+        bid: entry["value"].bid, 
+        icat: entry["value"].icat,
+        tag: entry["value"].tag,
         
-  //       cells: entry["value"].cells,
-  //       cells_map: entry["value"].cells_map,
+        cells: entry["value"].cells,
+        cells_map: entry["value"].cells_map,
 
-  //       nij: parseFloat((entry["value"].nij ).toFixed(2)),
-  //       nj: parseFloat((entry["value"].nj ).toFixed(2)),
+        nij: parseFloat((entry["value"].nij/counter ).toFixed(2)),
+        nj: parseFloat((entry["value"].nj/counter ).toFixed(2)),
         
-  //       ni: parseFloat(parseInt(entry["value"].ni)/counter).toFixed(2),
-  //       n:  parseFloat(parseInt(entry["value"].n)/counter).toFixed(2),
+        ni: parseFloat(parseInt(entry["value"].ni)/counter).toFixed(2),
+        n:  parseFloat(parseInt(entry["value"].n)/counter).toFixed(2),
 
-  //       epsilon: parseFloat((entry["value"].epsilon).toFixed(2)),
-  //       score: parseFloat((entry["value"].score).toFixed(2)),
-  //       tipo: entry["value"].tipo
-  //     })
-  // }
+        epsilon: parseFloat((entry["value"].epsilon/count_eps).toFixed(2)),
+        score: parseFloat((entry["value"].score/count_scr).toFixed(2)),
+
+        tipo: entry["value"].tipo
+      })
+  }
 
   // debug('............................................')
   // debug(data_result.map(function(d) {return  d.ni}))

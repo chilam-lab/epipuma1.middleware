@@ -1,23 +1,16 @@
 // Configuration file for middleware
 var config = {}
 
-config.db = {}
-config.db.database = "niche_dev"
-config.db.user = "funny_darwin"
-config.db.password = "y8$IYL0XKCW7"
-config.db.host = "manati.conabio.gob.mx"
-config.db.port = 5432
-config.db.application_name = 'expressMiddleware'
-config.port = 8080
 
-// config.db = {}
-// config.db.database = process.env.DBNAME
-// config.db.user = process.env.DBUSER
-// config.db.password = process.env.DBPWD
-// config.db.host = process.env.DBHOST
-// config.db.port = process.env.DBPORT
-// config.db.application_name = 'expressMiddleware'
-// config.port = process.env.PORT
+config.db = {}
+config.db.database = process.env.DBNAME
+config.db.user = process.env.DBUSER
+config.db.password = process.env.DBPWD
+config.db.host = process.env.DBHOST
+config.db.port = process.env.DBPORT
+config.db.application_name = 'expressMiddleware'
+config.port = process.env.PORT
+
 
 // Configure pool of connections
 config.db.poolSize = 10
