@@ -11,7 +11,7 @@ regions AS (
 	FROM grid_geojson_64km_aoi
 )
 SELECT DISTINCT t1.footprint_region, 
-				(SELECT string_agg(t1.country::varchar, '; ') AS country FROM t1 WHERE t1.footprint_region = r.footprint_region),
+				(SELECT string_agg( distinct t1.country::varchar, '; ') AS country FROM t1 WHERE t1.footprint_region = r.footprint_region),
 				(SELECT t1.fgid FROM t1 WHERE t1.footprint_region = r.footprint_region LIMIT 1 )
 FROM regions AS r
 JOIN t1
