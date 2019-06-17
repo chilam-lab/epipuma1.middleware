@@ -61,7 +61,6 @@ describe("Prueba petición variables abioticas, su contenido y su tamaño",funct
 });
 
 
-
 describe("Prueba búsqueda de especies, su contenido y tipo de valor",function(){
 
 	it("Buscador de especies - DISPONIBLE", function(done){

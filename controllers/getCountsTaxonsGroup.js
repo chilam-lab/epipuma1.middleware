@@ -129,7 +129,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
     }).then(resp => { 
 
       data_request["total_cells"] = resp.total_cells
-
+      
       var query = data_request.idtabla === "" ? "select array[]::integer[] as source_cells" : queries.validationProcess.getSourceCells
       //debug(query)
 
@@ -153,7 +153,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
       }).then(resp => {
 
         data_request["source_cells"] = resp.source_cells
-
+        
         return t.one(queries.basicAnalysis.getN, {
 
               grid_resolution: data_request.grid_resolution,
@@ -166,7 +166,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
        data_request["N"] = resp.n 
        data_request["alpha"] = data_request["alpha"] !== undefined ? data_request["alpha"] : 1.0/resp.n
-
+       
        // debug("------------")
        // debug("N:" + data_request["N"])
        // debug("alpha:" + data_request["alpha"])
@@ -225,8 +225,8 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
          } else {
 
           debug("analisis basico")
-          const query1 = pgp.as.format(query_analysis, data_request)
-          debug(query1)
+          //const query1 = pgp.as.format(query_analysis, data_request)
+          //debug(query1)
           // debug(query_analysis)
           //debug(data_request)
 

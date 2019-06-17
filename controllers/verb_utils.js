@@ -975,7 +975,7 @@ verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, all_cel
   // debug("isvalidation: " + isvalidation)
   var cells_array = isvalidation ? data.map(function(d) {return {cells: d.cells_map, score: parseFloat(d.score)}}) : data.map(function(d) {return {cells: d.cells, score: parseFloat(d.score)}})
   // var cells_array = data.map(function(d) {return {cells: d.cells_map, score: parseFloat(d.score)}})
-
+  //debug(cells_array)
 
   // se obtiene cada celda con su score
   var cells = []
@@ -986,6 +986,7 @@ verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, all_cel
   })
   
   var cross_cells = crossfilter(cells)
+  //debug(cross_cells)
   
   cross_cells.groupAll();
   var cells_dimension = cross_cells.dimension(function(d) { return d.cell; });
@@ -1068,7 +1069,7 @@ verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, all_cel
     //   return b.tscore-a.tscore
     // });
 
-    
+    //debug(cell_score_array)
     return cell_score_array
       
 
@@ -1387,11 +1388,15 @@ verb_utils.getGroupValidationValues = function(data_group) {
       temp_value.cell = cell_item
 
       if(temp_map.has(cell_item)){
+
         temp_value.score = temp_map.get(cell_item)
-      }
-      else{
+
+      } else {
+
         temp_value.score = 0 
+
       }
+
       temp_values.push(temp_value)
 
     })
@@ -1421,7 +1426,7 @@ verb_utils.getValidationValues = function (data_group){
 
   debug("getValidationValues")
 
-  //debug(data_group)
+  //debug(data_group[0]['test_cells'])
 
   var result_test_cells = []
 
@@ -1486,6 +1491,7 @@ verb_utils.getValidationValues = function (data_group){
     limites.push(array[Math.floor(len*.9) - 1])
     limites.push(array[Math.floor(len) - 1])
     
+    debug(limites)
     // debug(array[Math.floor(len*.2) - 1])
     
     // obtiene los deciles para obtener las métricas basados en lso resultados del conjunto de test
@@ -1695,7 +1701,7 @@ verb_utils.processGroupValidationData = function(data_group) {
 
   var data_map = data_group.map(function(d) {return  d.data})
 
-  // debug(data_map)
+  //debug(data_map)
 
   data_map.forEach(function(item) {
 
@@ -1725,7 +1731,7 @@ verb_utils.processGroupValidationData = function(data_group) {
 
   //   // if(item.generovalido === "Microtus" && item.especieepiteto === "guatemalensis"){
       
-  //   //   debug("----------")
+  //   //   debug("-processGroupValidationData---------")
   //   //   debug("sp: " + item.generovalido + " " + item.especieepiteto )
   //   //   debug("N: " + item.n)
   //   //   debug("ni: " + item.ni)
