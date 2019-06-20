@@ -17,4 +17,5 @@ aux_{name:raw} as (
 			FROM aux_{name:raw}
 		 ) as a
 	GROUP BY {group_fields:raw}
+	HAVING icount(array_agg(distinct a.cell)) >= {min_occ:raw}
 ){groups}
