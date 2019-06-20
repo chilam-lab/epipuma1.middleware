@@ -705,7 +705,7 @@ exports.getGroupValidationTables = function (req, res, next) {
   var idtbl =  'tbl_' + new Date().getTime() //getParam(req, 'idtable')
   //var idtbl =  't01'
 
-  debug(idtbl)
+  //debug(idtbl)
   var iter = getParam(req, 'iterations',iterations)
 
   var footprint_region = parseInt(getParam(req, 'footprint_region', default_region))
@@ -713,6 +713,7 @@ exports.getGroupValidationTables = function (req, res, next) {
   var grid_resolution = verb_utils.getParam(req, 'grid_res',16)
   var res_celda_sp =  'cells_'+grid_resolution+'km'
   var res_celda_snib_tb = 'grid_geojson_'+grid_resolution+'km_aoi'
+  var res_grid_id = 'gridid_'+grid_resolution+'km'
 
   pool.any(queries.getValidationTables.createGroupTables, {
     filter: filter,
@@ -720,7 +721,8 @@ exports.getGroupValidationTables = function (req, res, next) {
     idtbl: idtbl,
     res_celda_sp: res_celda_sp,
     res_celda_snib_tb: res_celda_snib_tb,
-    region: footprint_region
+    region: footprint_region,
+    grid: res_grid_id
   })
         .then(function (data) {
 
