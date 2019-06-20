@@ -64,7 +64,7 @@ SELECT 	target.target_name as target_name,
 			)
 		) as numeric), 2) as score
 FROM target,covars
--- WHERE 
+WHERE 
 	  -- icount(covars.cells) >= 5
-	  -- icount(covars.cells) >= ${min_occ}
+icount(covars.cells) >= ${min_occ}
 ORDER BY epsilon DESC;
