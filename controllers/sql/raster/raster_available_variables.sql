@@ -1,6 +1,7 @@
 SELECT 
 	fuentes_bioclimaticas.fuente,
-	"type"
+	"type",
+	descripcion
 FROM raster_bins 
 	LEFT JOIN fuentes_bioclimaticas 
 	ON "type" = fuentes_bioclimaticas.id 
@@ -9,6 +10,7 @@ WHERE
 	--1 = ANY(fuentes_bioclimaticas.footprint_region)
 GROUP BY 
 	"type",
-	fuentes_bioclimaticas.fuente
+	fuentes_bioclimaticas.fuente,
+	descripcion
 ORDER BY
 	"type";
