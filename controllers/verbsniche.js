@@ -696,9 +696,13 @@ exports.getGroupValidationTables = function (req, res, next) {
 
   var target_group = verb_utils.getParam(req, 'target_taxons', [])
   var filter = verb_utils.getWhereClauseFromGroupTaxonArray(target_group, true).replace('WHERE', '')
+
   filter = filter.replace(new RegExp("\'", 'g'), "\'\'")
   var iter = getParam(req, 'iter')
-  debug(filter)
+  
+  // debug("filter:" + filter)
+
+
   var idtbl =  'tbl_' + new Date().getTime() //getParam(req, 'idtable')
   //var idtbl =  't01'
 
@@ -711,6 +715,7 @@ exports.getGroupValidationTables = function (req, res, next) {
   var res_celda_sp =  'cells_'+grid_resolution+'km'
   var res_celda_snib_tb = 'grid_geojson_'+grid_resolution+'km_aoi'
   var res_grid_id = 'gridid_'+grid_resolution+'km'
+
 
   pool.any(queries.getValidationTables.createGroupTables, {
     filter: filter,
@@ -725,6 +730,7 @@ exports.getGroupValidationTables = function (req, res, next) {
 
           var item = data[0]
           item['tblname'] = idtbl
+          
           debug(data)
 
           res.json({'data': data})
