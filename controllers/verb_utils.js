@@ -973,6 +973,7 @@ verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, all_cel
 
   debug("processDataForScoreCell")
   // debug("isvalidation: " + isvalidation)
+
   var cells_array = isvalidation ? data.map(function(d) {return {cells: d.cells_map, score: parseFloat(d.score)}}) : data.map(function(d) {return {cells: d.cells, score: parseFloat(d.score)}})
   // var cells_array = data.map(function(d) {return {cells: d.cells_map, score: parseFloat(d.score)}})
 
@@ -984,7 +985,7 @@ verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, all_cel
           cells.push({cell: cell_item, score: item.score})
     })
   })
-  
+
   var cross_cells = crossfilter(cells)
   
   cross_cells.groupAll();
