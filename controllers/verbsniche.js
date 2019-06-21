@@ -535,9 +535,6 @@ exports.getToken = function (req, res, next) {
 
   debug('getToken')
 
-  // var tipo = getParam(req, 'tipo')
-  // var params = getParam(req, 'confparams')
-
   var sfilters = verb_utils.getParam(req, 'sfilters',[])
   var val_process = getParam(req, 'val_process')
   // var idtabla = getParam(req, 'idtabla')
@@ -552,7 +549,7 @@ exports.getToken = function (req, res, next) {
   var footprint_region = getParam(req, 'footprint_region')
   var discardedFilterids = getParam(req, 'discardedFilterids',[])
   var tfilters = verb_utils.getParam(req, 'tfilters',[])
-  var tipo = verb_utils.getParam(req, 'tipo')
+  var tipo = verb_utils.getParam(req, 'tipo', 'nicho')
 
   var link_str = "";
 
@@ -1071,8 +1068,8 @@ exports.getCountGridid = function (req, res, next) {
   debug('getCountGridid')
 
   var columnas = ['gridid', 'conteo']
-  var spids = getParam(req, 'spids')
-  var isNicho = getParam(req, 'nicho')
+  var species = getParam(req, 'species', [])
+  var isNicho = getParam(req, 'nicho', false)
   var footprint_region = getParam(req, 'footprint_region', default_region)
 
   var grid_res = getParam(req, 'grid_res', 16)
@@ -1083,13 +1080,13 @@ exports.getCountGridid = function (req, res, next) {
   //debug(columnas)
   //debug(spids)
 
-  if (isNicho === 'true') {
+  if (isNicho === true) {
     columnas.push('spids')
     columnas.push('bioclim')
   }
 
   pool.any(queries.getCountGridid.getCount, {
-    spids: spids,
+    species: species,
     res_celda: res_celda,
     res_grid: res_grid,
     columns: columnas,
