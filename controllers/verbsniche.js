@@ -1113,7 +1113,7 @@ exports.getGroupCountGridid = function (req, res) {
 
   // defining necessary varaiables 
   var region_cells = 'cells_' + grid_res + 'km_' + footprint_region
-  var res_view = 'gridid_geojson_' + grid_res + 'km_aoi'
+  var res_views = 'grid_geojson_' + grid_res + 'km_aoi'
   var res_cells = 'cells_' + grid_res + 'km'
   var where_clause = ''
   var query = "" 
@@ -1127,25 +1127,28 @@ exports.getGroupCountGridid = function (req, res) {
     debug(merge_vars)
     where_clause = verb_utils.getWhereClauseFromGroupTaxonArray(merge_vars, false)
 
-    if (group['biotic']) {
+    if (group['biotic']) { 
       
       q += (index > 0 ? ", " : "WITH ") + queries.taxonsGroupNodes.getCellsBio
       q = q.toString().replace(/{region_cells:raw}/g, region_cells)
       q = q.toString().replace(/{where_filter:raw}/g, where_clause)
 
+
     } else {
 
-      q += (index > 0 ? ", " : "WITH ") + queries.taxonsGroupNodes.getCellsBio
+
+      q += (index > 0 ? ", " : "WITH ") + queries.taxonsGroupNodes.getCellsAbio
       q = q.toString().replace(/{where_filter:raw}/g, where_clause)
       q = q.toString().replace(/{res_cells:raw}/g, res_cells)
       q = q.toString().replace(/{res_views:raw}/g, res_views)
-      q = q.toString().replace(/{region:raw}/g, region)
+      q = q.toString().replace(/{region:raw}/g, footprint_region)
 
     }
     
     select += (index > 0 ? "\n UNION \n" : "") + queries.taxonsGroupNodes.selectCount
     q = q.toString().replace(/{index:raw}/g, index)
     select = select.toString().replace(/{index:raw}/g, index)
+
 
   })
 
