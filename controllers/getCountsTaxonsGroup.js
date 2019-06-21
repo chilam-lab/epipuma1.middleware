@@ -241,6 +241,9 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
   }).then(data_iteration => {
 
+
+      debug(data_iteration.length)
+
       var data_response = {iter: (iter+1), data: data_iteration, test_cells: data_request["source_cells"], apriori: data_request.apriori, mapa_prob: data_request.mapa_prob }
       json_response["data_response"] = json_response["data_response"] === undefined ? [data_response] : json_response["data_response"].concat(data_response)
 
