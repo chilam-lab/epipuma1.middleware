@@ -1,8 +1,8 @@
  aux_{index:raw} AS (
 	SELECT DISTINCT 
-		UNNEST(${res_cells:raw} & b.cells) AS gridid,
+		UNNEST({res_cells:raw} & b.cells) AS gridid,
 		'aux_{index:raw}' AS name
-	FROM raster_bins AS a, ${res_views:raw} AS b
-	${where_filter:raw}
-	AND b.footprint_region=${region:raw}
+	FROM raster_bins AS a, {res_views:raw} AS b
+	{where_filter:raw}
+	AND b.footprint_region={region:raw}
 )

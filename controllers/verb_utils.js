@@ -1690,12 +1690,14 @@ verb_utils.processGroupValidationData = function(data_group) {
     
   })
 
+  // P  se agrupan todos los array data_i en un solo array de arrays, esto es [data_1, data_2, data_3, data_4, data_5]
   var data_map = data_group.map(function(d) {return  d.data})
 
   data_map.forEach(function(item) {
     data = data.concat(item)
   })
 
+  // P data es un arreglo con los data_i concatenados
 
   /****** implementación con map ********/
 
@@ -1775,7 +1777,7 @@ verb_utils.processGroupValidationData = function(data_group) {
   
 
   // // var name_dimension = cross_group.dimension(function(d) { return d.name; })  
-  var name_dimension = cross_group.dimension(function(d) { return d.tempid;})
+  var name_dimension = cross_group.dimension(function(d) { return d.tempid})
 
   var group_by_name = name_dimension.group().reduce(
     
@@ -1895,6 +1897,8 @@ verb_utils.processGroupValidationData = function(data_group) {
   var reduced_data = group_by_name.top(Infinity);
 
   var data_result = []
+
+  debug('reduced ' + reduced_data.length)
 
   for(var i=0; i<reduced_data.length; i++){
       var entry = reduced_data[i]
