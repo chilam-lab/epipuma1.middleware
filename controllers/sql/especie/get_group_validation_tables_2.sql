@@ -1,0 +1,1 @@
+select createtemptabletaxonsgroupvalidation3('$<filter:raw>'::text, '$<grid:raw>'::text, '$<idtbl:raw>'::text, $<iterations>, '$<res_celda_sp:raw>', '$<res_celda_snib_tb:raw>', $<region>);
