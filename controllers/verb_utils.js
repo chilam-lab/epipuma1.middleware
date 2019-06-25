@@ -977,7 +977,6 @@ verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, all_cel
   var cells_array = isvalidation ? data.map(function(d) {return {cells: d.cells_map, score: parseFloat(d.score)}}) : data.map(function(d) {return {cells: d.cells, score: parseFloat(d.score)}})
   // var cells_array = data.map(function(d) {return {cells: d.cells_map, score: parseFloat(d.score)}})
 
-
   // se obtiene cada celda con su score
   var cells = []
   cells_array.forEach(function (item, index){
@@ -1705,6 +1704,27 @@ verb_utils.processGroupValidationData = function(data_group) {
     data = data.concat(item)
   })
 
+
+
+  /*var score_total = 0;
+  data.forEach(function(item){
+
+    item['cells'].forEach(function(cell){
+
+      if(cell == 56688) {
+
+
+        score_total += parseFloat(item['score']);
+        debug('iter ' + item['iter']+ ' score de variable ' + item['bid'] + ' ' + item['score'])
+      
+      }
+
+    })
+
+  })
+  debug("score_total " + score_total)*/
+
+  //debug('data ' + data.length/5)
   // P data es un arreglo con los data_i concatenados
 
   /****** implementación con map ********/
@@ -1808,6 +1828,8 @@ verb_utils.processGroupValidationData = function(data_group) {
       item.tag =  add.tag
 
       item.cells = add.cells
+
+
       item.cells_map = item.cells_map.concat(add.cells) 
 
       item.nij += add.nij
@@ -1949,6 +1971,13 @@ verb_utils.processGroupValidationData = function(data_group) {
   // debug(data_result.map(function(d) {return  d.ni}))
   // debug(data_result.map(function(d) {return  d.n}))
   // debug('............................................')
+
+  data_result.forEach(function(item) {
+
+    //debug('----------------> ' +  item['bid'])
+    item['cells_map'] = Array.from(new Set(item['cells_map']))
+
+  })
 
   return data_result
 }
