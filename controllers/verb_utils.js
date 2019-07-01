@@ -969,6 +969,36 @@ verb_utils.procesaTaxones = function(array_taxines){
 }
 
 
+verb_utils.processDataForScoreCellValidation = function (data, apriori, mapa_prob, all_cells = [], isvalidation = false){
+
+  debug("processDataForScoreCellValidation")
+
+  var cells_array = isvalidation ? data.map(function(d) {return {cells: d.cells_map, score: parseFloat(d.score)}}) : data.map(function(d) {return {cells: d.cells, score: parseFloat(d.score)}})
+
+  var df = d3.map([])
+
+  cells_array.forEach(function(obj) {
+
+    obj.cells.forEach(function(cell){
+
+      if(df.has(cell)){
+        df.set(cell, df.get(cell) + obj.score)
+      } else {
+        df.set(cell, obj.score)
+      }
+
+    })
+
+  })
+  training_cells = df.keys()
+  scored_training_cells = []
+  training_cells.forEach(function(cell) {
+    scored_training_cells.push({gridid: parseInt(cell), tscore:df.get(cell)})
+  })
+  //debug(scored_training_cells)
+  return scored_training_cells
+}
+
 verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, all_cells = [], isvalidation = false){
 
   debug("processDataForScoreCell")
@@ -981,7 +1011,9 @@ verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, all_cel
   var cells = []
   cells_array.forEach(function (item, index){
     item.cells.forEach(function (cell_item, index){
-          cells.push({cell: cell_item, score: item.score})
+      
+            
+      cells.push({cell: cell_item, score: item.score})
     })
   })
 
@@ -1429,7 +1461,7 @@ verb_utils.getValidationValues = function (data_group){
 
   var result_test_cells = []
 
-  // obteniendo el score de las celdas del conjunto test basado en los resultados del conjunto train
+  // obteniendo el score de las celdas del conjunto test basado en los resultados del conjunto de entrenamiento
   data_group.forEach(function(item, index){
 
     // debug(item.data)
@@ -1439,14 +1471,18 @@ verb_utils.getValidationValues = function (data_group){
     // obteniendo el score por celda del conjunto de entrenamiento
     var apriori = item.apriori !== false && item.data[0].ni !== undefined ? true : false
     var mapa_prob = item.mapa_prob !== false && item.data[0].ni !== undefined ? true : false
-    var train_cells = verb_utils.processDataForScoreCell(item.data, apriori, mapa_prob, [], false)
+    //var train_cells = verb_utils.processDataForScoreCell(item.data, apriori, mapa_prob, [], false)
+    var train_cells = verb_utils.processDataForScoreCellValidation(item.data, apriori, mapa_prob, [], false)
     var temp_map = d3.map([])
+
+    var repeated_cells = d3.map([])
 
     // Esta dejando el ultimo registro, no realiza un promedio del tscore de las celdas repetidas
     train_cells.forEach(function(item){
+
       temp_map.set(item.gridid, item.tscore)
+
     })
-    
 
     // debug(item.data)
     // debug(temp_map.values())
@@ -1461,8 +1497,7 @@ verb_utils.getValidationValues = function (data_group){
 
       if(temp_map.has(cell_item)){
         temp_value.score = temp_map.get(cell_item)
-      }
-      else{
+      } else {
         temp_value.score = null 
       }
       temp_values.push(temp_value)
@@ -1472,7 +1507,7 @@ verb_utils.getValidationValues = function (data_group){
 
     var array = temp_map.values()
     array.sort(function(a, b){return a-b})
-    // debug(array)
+    //debug(array)
 
     var len =  array.length;
     debug("min: " + d3.min(array))
@@ -1493,7 +1528,7 @@ verb_utils.getValidationValues = function (data_group){
     limites.push(array[Math.floor(len*.9) - 1])
     limites.push(array[Math.floor(len) - 1])
     
-    debug(limites)
+    //debug(limites)
     
     // obtiene los deciles para obtener las métricas basados en lso resultados del conjunto de test
     var num_deciles = 11
@@ -1517,7 +1552,6 @@ verb_utils.getValidationValues = function (data_group){
 
     // debug(limites)
     // // debug(temp_values)
-    debug(d3.range(1,num_deciles))
 
     // var max_scr_test = d3.max(temp_values.map(function(d) {return parseFloat(d.score);}));
     // var min_scr_test = d3.min(temp_values.map(function(d) {return parseFloat(d.score);}));
@@ -1525,8 +1559,10 @@ verb_utils.getValidationValues = function (data_group){
     // debug("max_scr_ TEST: " + max_scr_test)    
     // debug("min_scr_ TEST: " + min_scr_test)    
     // // debug("max_ TEST: " + rango_deciles(12))    
-    // // debug("min_ TEST: " + rango_deciles(220))    
-
+    // // debug("min_ TEST: " + rango_deciles(220))   
+    
+    //debug(item.iter) 
+    //debug(temp_values)
     
     var deciles = []
     d3.range(1,num_deciles).forEach(function(decil, index){
@@ -1540,16 +1576,17 @@ verb_utils.getValidationValues = function (data_group){
         
         // debug("decil: " + rango_deciles(row_value.score))
         // debug("es VP:" + rango_deciles(row_value.score) > 9)
-        // debug("decil: " + decil)
+        //debug("decil: " + decil)
 
 
         if(row_value.score === null){
           nulo_temp++
-        }
-        else if(row_value.score > limites[decil-1]){
+        } else if(row_value.score > limites[decil-1]){
+          /*if(decil == 10){
+            debug(row_value.cell, row_value.score, limites[decil-1])  
+          }*/
           vp_temp++
-        }
-        else{
+        } else{
           fn_temp++
         }
 
@@ -1575,7 +1612,7 @@ verb_utils.getValidationValues = function (data_group){
 
       var result_iter = {}
       
-      result_iter.iter = index+1
+      result_iter.iter = item.iter
       result_iter.decil = decil
       result_iter.vp = vp_temp
       result_iter.fn = fn_temp
