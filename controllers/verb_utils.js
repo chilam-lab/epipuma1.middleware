@@ -974,18 +974,59 @@ verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, all_cel
   debug("processDataForScoreCell")
   // debug("isvalidation: " + isvalidation)
 
-  var cells_array = isvalidation ? data.map(function(d) {return {cells: d.cells_map, score: parseFloat(d.score)}}) : data.map(function(d) {return {cells: d.cells, score: parseFloat(d.score)}})
-  // var cells_array = data.map(function(d) {return {cells: d.cells_map, score: parseFloat(d.score)}})
+  var cells_array = []
+  
+    cells_array = data.map(function(d) {
 
-  // se obtiene cada celda con su score
-  var cells = []
-  cells_array.forEach(function (item, index){
-    item.cells.forEach(function (cell_item, index){
-          cells.push({cell: cell_item, score: item.score})
+      var iditem = verb_utils.hashCode(d.reinovalido +
+                      d.phylumdivisionvalido + 
+                      d.clasevalida + 
+                      d.ordenvalido + 
+                      d.familiavalida + 
+                      d.generovalido + 
+                      d.especieepiteto + 
+                      d.nombreinfra +
+                      d.type + 
+                      d.layer + 
+                      d.bid)
+
+      if(isvalidation){
+        return {
+          id: iditem, cells: d.cells_map, score: parseFloat(d.score)
+        }  
+      }
+      else{
+        return {
+          id: iditem, cells: d.cells, score: parseFloat(d.score)
+        }  
+      }
+      
     })
+
+    
+  // se obtiene cada celda con su score
+  // var cells = []
+  var cell_map = d3.map([])
+
+  cells_array.forEach(function (item, index){
+
+    item.cells.forEach(function (cell_item, index){
+
+        var idsp = ""+item.id+cell_item
+        if(!cell_map.has(idsp)){
+          cell_map.set(idsp, {cell: cell_item, score: item.score})
+        }
+
+        // cells.push({cell: cell_item, score: item.score})
+    })
+
   })
 
-  var cross_cells = crossfilter(cells)
+  // debug("***** length CELLS MAP: " + cell_map.values().length)
+  // debug("***** length CELLS: " + cells.length)
+
+  // var cross_cells = crossfilter(cells)
+  var cross_cells = crossfilter(cell_map.values())
   
   cross_cells.groupAll();
   var cells_dimension = cross_cells.dimension(function(d) { return d.cell; });
@@ -1475,8 +1516,8 @@ verb_utils.getValidationValues = function (data_group){
     // debug(array)
 
     var len =  array.length;
-    debug("min: " + d3.min(array))
-    debug("max: " + d3.max(array))
+    // debug("min: " + d3.min(array))
+    // debug("max: " + d3.max(array))
     // debug(len)
 
     // se obtienen los limites de los deciles
@@ -1493,7 +1534,7 @@ verb_utils.getValidationValues = function (data_group){
     limites.push(array[Math.floor(len*.9) - 1])
     limites.push(array[Math.floor(len) - 1])
     
-    debug(limites)
+    // debug(limites)
     
     // obtiene los deciles para obtener las métricas basados en lso resultados del conjunto de test
     var num_deciles = 11
@@ -1517,7 +1558,7 @@ verb_utils.getValidationValues = function (data_group){
 
     // debug(limites)
     // // debug(temp_values)
-    debug(d3.range(1,num_deciles))
+    // debug(d3.range(1,num_deciles))
 
     // var max_scr_test = d3.max(temp_values.map(function(d) {return parseFloat(d.score);}));
     // var min_scr_test = d3.min(temp_values.map(function(d) {return parseFloat(d.score);}));
