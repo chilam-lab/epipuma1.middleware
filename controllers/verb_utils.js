@@ -1395,63 +1395,134 @@ verb_utils.generateFrequencyBeans = function (data_bucket, funcRange, paramType,
   return data_freq;
 }
 
-// verb_utils.getGroupValidationValues = function(data_group) {
 
-//   debug("getGroupValidationValues")
+verb_utils.get_target_cells = function(gridid, where_target, view, region, cells, queries) {
+  
+  debug("get_target_cells")
 
-//   var result_test_cells = []
+  var query = queries.getGridSpeciesNiche.getTargetCells
 
-//   data_group.forEach(function(item, index) {
+  return verb_utils.pool.one(query, {
+
+    gridid: gridid,
+    where_target: where_target.replace('WHERE', ''),
+    view: view,
+    region: region, 
+    cells: cells
+
+  }).then(resp => {
+
+    //debug(resp)
     
-//     var apriori = item.apriori !== false && item.data[0].ni !== undefined ? true : false
-//     var mapa_prob = item.mapa_prob !== false && item.data[0].ni !== undefined ? true : false
-//     var train_cells = verb_utils.processDataForScoreCell(item.data, apriori, mapa_prob, [], false)
-//     var temp_map = d3.map([])
+    return resp['target_cells']
     
-//     train_cells.forEach(function(item){
-//       // if(temp_map.has(item.gridid)){
-//       //   item.count += 1
-//       // }
-//       temp_map.set(item.gridid, item.tscore)
-//     })
-    
-//     // obtiene el score por celda del conjunto de test
-//     var temp_values = []
-//     item.test_cells.forEach(function(cell_item){
-    
-//       var temp_value = {}
-//       temp_value.cell = cell_item
+  })
+}
 
-//       if(temp_map.has(cell_item)){
-//         temp_value.score = temp_map.get(cell_item)
-//       }
-//       else{
-//         temp_value.score = 0 
-//       }
-//       temp_values.push(temp_value)
+ verb_utils.getValidationDataNoValidation = function (data, target_cells, gridid, where_target, view, region, cells, apriori, mapa_prob, queries) {
 
-//     })
+  debug("getValidationDataNoValidation")
 
-//     //debug(item)
+  var validation_data = []
 
-//     // obtiene los deciles para obtener las métricas basados en lso resultados del conjunto de test
-//     var num_deciles = 11
+  var train_cells = verb_utils.processDataForScoreCellValidation(data, apriori, mapa_prob, [], false)
+  var temp_map = d3.map([])
+  train_cells.forEach(function(obj){
 
-//     var min_scr = d3.min(item.data.map(function(d) {return parseFloat(d.score);}));
-//     // debug("min_scr: " + min_scr)  
-    
-//     var max_scr = d3.max(item.data.map(function(d) {return parseFloat(d.score);}));
-//     // debug("max_scr: " + max_scr)    
-    
-//   })
+    temp_map.set(obj.gridid, obj.tscore)
 
-//   //debug('............................................')
-//   //debug()
-//   //debug('............................................')  
+  })
+
+  var scored_target_cells = []        
+  target_cells.forEach(function(cell){
+
+    var scored_cell = {}
+    scored_cell.gridid = cell
+
+    if(temp_map.has(cell)){
+
+      scored_cell.score = temp_map.get(cell)
+
+    } else {
+
+      scored_cell.score = null
+
+    }
+
+    scored_target_cells.push(scored_cell)
+
+  })
+
+  var sorted_scores = temp_map.values()
+  sorted_scores.sort(function(a, b){return a-b})
+  var N = sorted_scores.length
+  var partition = []
+  var delta_N = N / 10
+  for (var i = 0; i < 10; i++){
+
+    if(i == 0 ) {
+      
+      partition.push(sorted_scores[0])
+
+    } else {
+
+      partition.push(sorted_scores[parseInt(delta_N*i) - 1])
+
+    }
+
+  }
+  partition.push(sorted_scores[N - 1])
+  partition = partition.reverse()
+  debug(partition)
+
+  var vp = []
+  var fn = []
+  var nulo = []
+
+  for (var i = 0; i < 10; i ++) {
+
+    vp.push(0)
+    fn.push(0)
+    nulo.push(0)
+
+    scored_target_cells.forEach(function(item) {
+
+      if(item.score != 'null'){
+
+        if (item.score > partition[i+1]){
+
+          vp[i] += 1
+
+        } else {
+
+          fn[i] += 1
+          
+        }
+
+      } else {
+
+        nulo[i] += 1 
+
+      }
+
+    })
 
 
-//   return null
-// }
+    validation_data.push({
+
+      decil: i+1,
+      vp: vp[i],
+      fn: fn[i],
+      nulo: nulo[i],
+      recall: vp[i] / (vp[i] + fn[i])
+
+    })
+
+  }
+
+  return validation_data  
+
+ }
 
 verb_utils.getValidationValues = function (data_group){
 

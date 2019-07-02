@@ -145,7 +145,9 @@ var queryProvider = {
 
     getGridSpeciesBioM: sqlPath('getGridSpecies/get_grid_species_BM.sql'),
     getGridSpeciesRaM: sqlPath('getGridSpecies/get_grid_species_RaM.sql'),
-    getGridSpeciesM: sqlPath('getGridSpecies/get_grid_species_M.sql')
+    getGridSpeciesM: sqlPath('getGridSpecies/get_grid_species_M.sql'),
+
+    getTargetCells: sqlPath('getGridSpecies/get_target_cells.sql'),
 
   },
   getGeoRelNiche: {
