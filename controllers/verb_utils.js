@@ -1041,9 +1041,13 @@ verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, all_cel
   cells_array.forEach(function (item, index){
 
     item.cells.forEach(function (cell_item, index){
-      
+      var idsp = ""+item.id+cell_item
+        if(!cell_map.has(idsp)){
+          cell_map.set(idsp, {cell: cell_item, score: item.score})
+        }
             
-      cells.push({cell: cell_item, score: item.score})
+      //cells.push({cell: cell_item, score: item.score})
+    
     })
 
   })
