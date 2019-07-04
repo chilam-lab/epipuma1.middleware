@@ -2862,7 +2862,7 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
   return query_covar  
 }
 
-verb_utils.getCommunityAnalysisQuery = function(queries, region, res_cells, region_cells, res_views, source, is_target){
+verb_utils.getCommunityAnalysisQuery = function(queries, region, res_cells, region_cells, res_views, source, is_target, where_bio_source, where_abio_source){
 
   debug("getCommunityAnalysisQuery")
 
@@ -2886,7 +2886,8 @@ verb_utils.getCommunityAnalysisQuery = function(queries, region, res_cells, regi
         fields = verb_utils.getFieldsFromLevel(level)
         group_fields = verb_utils.getGroupFieldsFromLevel(level)
         where = verb_utils.getWhereClauseFromGroupTaxonArray([taxon], false)
-        
+        where = where + ((is_target && where_bio_source !== '') ? (" AND NOT " + where_bio_source) : '')
+
         q = q.toString().replace(/{index:raw}/g, index)
         q = q.toString().replace(/{fields:raw}/g, fields)
         q = q.toString().replace(/{biotic:raw}/g, 'true')
@@ -2904,7 +2905,8 @@ verb_utils.getCommunityAnalysisQuery = function(queries, region, res_cells, regi
         fields = verb_utils.getFieldsFromLevel(level)
         group_fields = verb_utils.getGroupFieldsFromLevel(level)
         where = verb_utils.getWhereClauseFromGroupTaxonArray([taxon], false)
-        
+        where = where + ((is_target && where_abio_source !== '') ? (" AND NOT " + where_abio_source): '')
+
         q_aux = q_aux.toString().replace(/{index:raw}/g, index)
         q_aux = q_aux.toString().replace(/{biotic:raw}/g, 'true')
         q_aux = q_aux.toString().replace(/{fields:raw}/g, fields)

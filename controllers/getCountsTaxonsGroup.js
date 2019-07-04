@@ -60,7 +60,7 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   data_request["target_name"] = verb_utils.getParam(req, 'target_name', 'target_group')
   data_request["where_target"] = verb_utils.getWhereClauseFromGroupTaxonArray(target_group, true)
   data_request["where_exclude_target"] = verb_utils.getExcludeTargetWhereClause(target_group)
-  //debug(data_request["where_exclude_target"])
+  debug(target_group)
 
   var covars_groups = verb_utils.getParam(req, 'covariables', []) 
   //debug(covars_groups)
