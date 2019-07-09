@@ -1549,7 +1549,7 @@ verb_utils.get_target_cells = function(gridid, where_target, view, region, cells
 
     validation_data.push({
 
-      decil: i+1,
+      decil: 10 - i,
       vp: vp[i],
       fn: fn[i],
       nulo: nulo[i],
