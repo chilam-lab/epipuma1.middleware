@@ -4,7 +4,7 @@
   "description": "Middleware para consumir los datos del SNIB",
   "main": "server.js",
   "scripts": {
-    "start": "DEBUG=express:router,verbs:*,snib-middleware:* nodemon server.js",
+    "start": "DEBUG=express:router,verbs:*,snib-middleware:* nodemon --max-old-space-size=5000 server.js",
     "test": "DEBUG=verbs:*,snib-middleware:* mocha",
     "api-docs": "swagger-markdown -i api/swagger/swagger.yaml -o docs/api-docs.md",
     "lint": "eslint .",
