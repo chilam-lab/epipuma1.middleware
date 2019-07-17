@@ -2517,12 +2517,14 @@ verb_utils.getFieldsFromLevel = function (level) {
 
   }
 
-  if (level === 'bid')
-    fields  += ", icat, tag "
+  if (level === 'layer')
+    fields  += ", icat, layer, tag "
+  else if(level === 'bid')
+    fields  += ", icat, label, tag "
   else 
-    fields  += ", '' AS icat, '' AS tag "
+    fields  += ", '' AS icat, '' AS label, '' AS tag "
 
-  //debug("fields =" + fields)
+  //debug("fields === " + fields)
   return fields
 
 }
@@ -2616,8 +2618,10 @@ verb_utils.getGroupFieldsFromLevel = function (level) {
 
     }
 
-   if(level === 'bid')
-        group_fields += ", icat, tag "
+   if(level === 'layer')
+        group_fields += ", icat, layer, tag "
+  else if(level === 'bid')
+        group_fields  += ", icat, label, tag "
 
   }
 
@@ -2903,6 +2907,7 @@ verb_utils.getCommunityAnalysisQuery = function(queries, region, res_cells, regi
         
         level = taxon["level"]
         fields = verb_utils.getFieldsFromLevel(level)
+        debug("FIELDSSSS"  + fields)
         group_fields = verb_utils.getGroupFieldsFromLevel(level)
         where = verb_utils.getWhereClauseFromGroupTaxonArray([taxon], false)
         //where = where + ((is_target && where_abio_source !== '') //? (" AND NOT " + where_abio_source): '')
