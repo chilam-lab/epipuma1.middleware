@@ -15,60 +15,56 @@ with raster_cell as (
 ),
 source AS (
 	SELECT  spid,
-			$<res_celda:raw> AS cells 
+			array_intersection($<res_celda:raw>,
+				ARRAY(SELECT cells
+					FROM grid_geojson_$<resolution:raw>km_aoi
+					WHERE footprint_region = $<region:raw>
+				)
+			) AS cells 
 	FROM sp_snib 
 	--WHERE generovalido = 'Aedes'
 	$<where_config_source:raw>	 
 	and especievalidabusqueda <> ''
 	union
-	SELECT  spid,
-			array_agg(rc.cell) as cells 
-	FROM raster_cell as rc
-	--join grid_16km_aoi as gdkm
-	join $<res_celda_snib_tb:raw> as gdkm
-	--on rc.cell = gdkm.gridid_16km
-	on rc.cell = gdkm.$<res_celda_snib:raw>
-	join america
-	on st_intersects(america.geom, gdkm.small_geom)
-	where america.country = 'MEXICO'
-	group by spid 	 
-),
-raster_cell_target as (
-	SELECT 
-		case when strpos(label,'Precipit') = 0 then
-		(layer || ' ' || round(cast(split_part(split_part(tag,':',1),'.',1) as numeric)/10,2)  ||' ºC - ' || round(cast(split_part(split_part(tag,':',2),'.',1) as numeric)/10,2) || ' ºC')
-		else
-		(layer || ' ' || round(cast(split_part(split_part(tag,':',1),'.',1) as numeric),2)  ||' mm - ' || round(cast(split_part(split_part(tag,':',2),'.',1) as numeric),2) || ' mm')
-		end as especievalidabusqueda,
-	bid as spid,
-	unnest($<res_celda:raw>) as cell
-	--unnest(cells_16km) as cell
+	SELECT  bid as spid,
+			array_intersection($<res_celda:raw>,
+				ARRAY(SELECT cells
+					FROM grid_geojson_$<resolution:raw>km_aoi
+					WHERE footprint_region = $<region:raw>
+				)
+			) AS cells 
 	FROM raster_bins
 	$<where_config_target_raster:raw>
 	--where layer = 'bio1'
 ),
 target AS (
 	 SELECT  spid,
-			$<res_celda:raw> AS cells 
+			 array_intersection($<res_celda:raw>,
+				ARRAY(SELECT cells
+					FROM grid_geojson_$<resolution:raw>km_aoi
+					WHERE footprint_region = $<region:raw>
+				)
+			) AS cells 
 	FROM sp_snib 
 	--WHERE generovalido = 'Lutzomyia'
 	$<where_config_target:raw>	 
 	and especievalidabusqueda <> ''
 	union
-	SELECT  spid,
-			array_agg(rc.cell) as cells 
-	FROM raster_cell_target as rc
-	--join grid_16km_aoi as gdkm
-	join $<res_celda_snib_tb:raw> as gdkm
-	--on rc.cell = gdkm.gridid_16km
-	on rc.cell = gdkm.$<res_celda_snib:raw>
-	join america
-	on st_intersects(america.geom, gdkm.small_geom)
-	where america.country = 'MEXICO'
-	group by spid	  
+	SELECT  bid as spid,
+			array_intersection($<res_celda:raw>,
+				ARRAY(SELECT cells
+					FROM grid_geojson_$<resolution:raw>km_aoi
+					WHERE footprint_region = $<region:raw>
+				)
+			) AS cells 
+	FROM raster_bins
+	--where layer = 'bio01'
+	$<where_config_target_raster:raw>	  
 ),
 n_res AS (
-	SELECT count(*) AS n FROM $<res_celda_snib_tb:raw>
+	SELECT array_length(cells, 1) AS n
+	FROM grid_geojson_$<resolution:raw>km_aoi
+	WHERE footprint_region = $<region:raw>
 ),
 counts AS (
 	SELECT 	source.spid as source,
@@ -90,12 +86,20 @@ SELECT 	counts.source,
 		counts.n,
 		round( cast(  
 			get_epsilon(
-				--$<alpha>,
-				1/n_res.n,
+				1.0/n_res.n,
 				cast(counts.nj as integer), 
 				cast(counts.niyj as integer), 
 				cast(counts.ni as integer), 
 				cast(counts.n as integer)
-		)as numeric), 2)  as value
+		)as numeric), 2)  as value,
+		round( cast( ln(   
+			get_score(
+				1.0/n_res.n,
+				cast( counts.nj as integer),
+				cast(counts.niyj as integer), 
+				cast(counts.ni as integer), 
+				cast(counts.n as integer)
+			)
+		) as numeric), 2) as score
 FROM counts, n_res
 ORDER BY value desc;

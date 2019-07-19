@@ -1,0 +1,21 @@
+aux_{name:raw} as (
+	SELECT (a.{res_celda:raw} & b.cells) as cells,
+				{fields:raw}
+			-- a.cells_16km & b.cells as cells
+	FROM raster_bins AS a, {res_celda_snib_tb:raw} AS b
+	{where_covars:raw}
+		--WHERE a.layer = 'bio001'
+		and b.footprint_region = {region:raw}
+		--and b.footprint_region = 1	
+), {name:raw} AS (
+	SELECT array_agg(distinct a.cell)  - array[ {total_cells:raw} ]::integer[] as cells,
+		   array_length(array_agg(distinct a.cell)  - array[ {total_cells:raw} ]::integer[], 1) as nj,
+		   {fields:raw}
+	FROM (
+			select DISTINCT unnest(cells) as cell,
+			{fields:raw}
+			FROM aux_{name:raw}
+		 ) as a
+	GROUP BY {group_fields:raw}
+	HAVING icount(array_agg(distinct a.cell)) >= {min_occ:raw}
+){groups}

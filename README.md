@@ -1,82 +1,113 @@
 # SNIB Middleware
 
-Esta aplicación es responsable de crear el API necesaria para [SPECIES][sp].
+This NodeJS application provides the functionality needed by the [SPECIES][sp]
+plataform. SNIB Middleware is an API where all functionality of [SPECIES][sp]
+is implemented, so it is also consumable from another systems beside our
+application, e.g. Python or R.
 
-En `docs/api-doc.md` se puede consultar la documentación de la API.
+SNIB Middleware assumes that you have created a DB using
+[speciesDBBuild](https://bitbucket.org/conabio_c3/speciesdbbuild).
 
-## Instalación y uso
+## Installation
 
-La instalación requiere node versión 6. 
+SNIB Middleware requires [NodeJS][nodejs] version 6.x.
 
-En el caso de macOS, node se puede instalar mediante [brew][brew]. Para otros sistemas consultar la documentación en [Installing Node.js via package manage][node-package-managers].
+On MacOS, [NodeJS][nodejs] can be installed via [Brew][brew]. It is also
+possible to install [NodeJS][nodejs] on other systems, please see
+[Installing Node.js via package manager][node-package-managers].
 
-### Instalación con [brew][brew]
+### MacOS and [Brew][brew] installation
 
-Si node no está instalado:
+Open a terminal and run
 
-```
-  $ brew install node@6
-```
-
-Si node está instalado con una versión mayor:
-
-```
-  $ brew unlink node
-  $ brew install node@6
-  $ brew link node@6
+```x-sh
+$ brew install node@6
 ```
 
-Si `brew link node@6` no funciona, es posible que se requiera usar `--force` para crear la liga:
+If there is a prevoius [NodeJS][nodejs] installation execute the
+following commands in a Terminal
 
-```
-  $ brew link --force node@6
-```
-
-
-
-Clonar el repositorio
-
-```
-  $ git clone https://bitbucket.org/conabio_c3/snib-middleware.git
+```x-sh
+$ brew unlink node
+$ brew install node@6
+$ brew link node@6
 ```
 
-Para instalar la aplicación
+After a [NodeJS][nodejs] sucessful installation, clone the SNIB Middleware
+application repository
 
-```
-  $ cd snib-middleware
-  $ npm install
-```
-
-### Uso
-
-Una vez instalada. Hay que conifgurar la conexión a la base de datos en el archivo `config.js`, para hacer esto hay que configurar las variables de ambiente: DBNAME, DBPWD, DBUSER, DBPORT. Ejemplo en `bash`:
-
-```
-  $ export DBNAME=mi_db
+```x-sh
+$ git clone https://bitbucket.org/conabio_c3/snib-middleware.git
 ```
 
-Una vez configuradas.
+and install the application and its dependencies.
+
+```x-sh
+$ cd snib-middleware
+$ npm install
+```
+
+## Use
+
+Before to start using SNIB Middleware, we have to edit the `config.js` file.
+Open `config.js` on a text editor and write your connection information for
+the database
+
+```javascript
+config.db.database = myawesomedb
+config.db.user = admin
+config.db.password = admin123
+config.db.host = localhost
+config.db.port = 5352
+```
+
+or add the following variable to you environment:
+
+- DBNAME
+- DBUSER
+- DBPWD
+- DBHOST
+- DBPORT
+
+On MacOS we can do this in a Terminal as follows
+
+```x-sh
+$ export DBNAME=myawesomedb
+$ export DBUSER=admin
+$ export DBPWD=admin123
+$ export DBHOST=localhost
+$ export DBPORT=5352
+```
+
+After edit the `config.js` file, the application can be started executing
+
+```x-sh
+$ npm start
+```
+
+from a Terminal.
+
+By default SNIB Middleware runs on port 8080, so we can test if the Middleware
+is running from another terminal executing
 
 ```
-  $ npm start
+$ curl http://localhost:8080/niche/
 ```
 
-## Desarrollo
+To stop SNIB Middleware, press `CTRL+C` from the Terminal where it is running.
 
-Cuando se esté desarrollando nuevos endpoints para la API se recomienda 
-documentarlos en el archivo `api/swagger/swagger.yaml`, esto se 
-puede hacer con cualquier editor de texto o con el editor de [Swagger][swagger].
-Después de documentar el nuevo endpoint se puede usar el comando 
-`npm run api-docs` para generar el nuevo archivo de documentación
-del API y `npm run docs` para documentar los controladores. 
+## Contributing
 
-Se recomienda antes de hacer un push al repositorio correr el comando
-`npm run lint` para respetar la escritura del código.
+SNIB Middleware is an Open Source development AGPLV3 licensed. Therefore is
+open to contribution and adaptations.
 
-Se recomienda usar un debugger sobre `console.log`, en cada uno de los archivos
-de controladores deben de tener un debugger.
+Any change can be send to this repository via a pull request. Before create
+a pull request run the command `npm run lint` to verify lint your code.
 
-[sp]: http://species.conabio.gob.mx/ 
-[swagger]: http://swagger.io/
+Use of the `console.log` function is discourage, a module debugger is
+recommended.
+
+[sp]: http://species.conabio.gob.mx/
 [node-package-managers]: https://nodejs.org/en/download/package-manager/
 [brew]: https://brew.sh/
+[nodejs]: https://nodejs.org/en/

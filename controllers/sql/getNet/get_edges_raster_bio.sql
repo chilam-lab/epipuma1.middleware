@@ -1,14 +1,13 @@
 /*getGeoRel sin filtros*/
-with raster_cell as (
-	SELECT 
-		case when strpos(label,'Precipit') = 0 then
-		(layer || ' ' || round(cast(split_part(split_part(tag,':',1),'.',1) as numeric)/10,2)  ||' ºC - ' || round(cast(split_part(split_part(tag,':',2),'.',1) as numeric)/10,2) || ' ºC')
-		else
-		(layer || ' ' || round(cast(split_part(split_part(tag,':',1),'.',1) as numeric),2)  ||' mm - ' || round(cast(split_part(split_part(tag,':',2),'.',1) as numeric),2) || ' mm')
-		end as especievalidabusqueda,
-	bid as spid,
-	unnest($<res_celda:raw>) as cell
-	--unnest(cells_16km) as cell
+with source AS (
+	SELECT  bid as spid,
+			array_intersection($<res_celda:raw>,
+				ARRAY(SELECT cells
+					FROM grid_geojson_$<resolution:raw>km_aoi
+					WHERE footprint_region = $<region:raw>
+				)
+			) AS cells
+			--raster_bins.cells_16km AS cells 
 	FROM raster_bins
 	$<where_config_source_raster:raw>
 	--where layer = 'bio1'
@@ -28,7 +27,12 @@ source AS (
 ),
 target AS (
 	SELECT  spid,
-			$<res_celda:raw> AS cells
+			array_intersection($<res_celda:raw>,
+				ARRAY(SELECT cells
+					FROM grid_geojson_$<resolution:raw>km_aoi
+					WHERE footprint_region = $<region:raw>
+				)
+			) AS cells
 			--sp_snib.cells_16km as cells 
 	FROM sp_snib
 	--where clasevalida = 'Mammalia'
@@ -37,7 +41,9 @@ target AS (
 	and especievalidabusqueda <> ''
 ),
 n_res AS (
-	SELECT count(*) AS n FROM $<res_celda_snib_tb:raw>
+	SELECT array_length(cells, 1) AS n
+	FROM grid_geojson_$<resolution:raw>km_aoi
+	WHERE footprint_region = $<region:raw>
 ),
 counts AS (
 	SELECT 	source.spid as source,
@@ -60,11 +66,20 @@ SELECT 	counts.source,
 		round( cast(  
 			get_epsilon(
 				--$<alpha>,
-				1/n_res.n,
+				1.0/n_res.n,
 				cast(counts.nj as integer), 
 				cast(counts.niyj as integer), 
 				cast(counts.ni as integer), 
 				cast(counts.n as integer)
-		)as numeric), 2)  as value
+		)as numeric), 2)  as value,
+		round( cast( ln(   
+			get_score(
+				1.0/n_res.n,
+				cast( counts.nj as integer),
+				cast(counts.niyj as integer), 
+				cast(counts.ni as integer), 
+				cast(counts.n as integer)
+			)
+		) as numeric), 2) as score
 FROM counts, n_res
 ORDER BY value desc;

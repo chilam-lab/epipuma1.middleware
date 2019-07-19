@@ -7,10 +7,16 @@
 */
 var QueryFile = require('pg-promise').QueryFile
 var path = require('path')
+var fs = require('fs')
 
 function sqlPath (file) {
   var fullPath = path.join(__dirname, file)
   return QueryFile(fullPath)
+}
+
+function tmplPath (file) {
+  var fullPath = path.join(__dirname, file)
+  return fs.readFileSync(fullPath)
 }
 
 /* 
@@ -18,11 +24,7 @@ function sqlPath (file) {
  */
 var queryProvider = {
   grid: {
-    getIds: sqlPath('grid/get_ids.sql'),
-    grid64km: sqlPath('grids/grid_64km.sql'),
-    grid32km: sqlPath('grids/grid_32km.sql'),
-    grid16km: sqlPath('grids/grid_16km.sql'),
-    grid8km: sqlPath('grids/grid_8km.sql')
+    gridxxkm: sqlPath('grids/grid_xxkm.sql') 
   },
   layers: {
     getStatesMX: sqlPath('layers/get_states.sql')
@@ -81,7 +83,9 @@ var queryProvider = {
     setLinkValues: sqlPath('especie/set_link_values.sql')
   },
   getValidationTables: {
-    createTables: sqlPath('especie/get_validation_tables.sql')
+    createTables: sqlPath('especie/get_validation_tables.sql'),
+    createGroupTables: sqlPath('especie/get_group_validation_tables.sql'),
+    createGroupTables_2: sqlPath('especie/get_group_validation_tables_2.sql')
   },
   processValidationTables: {
     processTables: sqlPath('especie/process_validation_tables.sql')
@@ -94,17 +98,33 @@ var queryProvider = {
     getVariables: sqlPath('especie/get_variables.sql')
   },
   getRasterNiche: {
-    getRasterBios: sqlPath('raster/raster_bios.sql'),
-    getRasterIds: sqlPath('raster/raster_ids.sql')
+    getRasterAvailableVariables: sqlPath('raster/raster_available_variables.sql'),
+    getRasterVariableSelected: sqlPath('raster/raster_variable_selected.sql'),
+    getRasterVariableById: sqlPath('raster/raster_variable_by_id.sql'),
+    getAvailableVariables: sqlPath('raster/available_variables.sql')
+    
+    
   },
   getSpeciesNiche: {
     getSpecies: sqlPath('especie/getSpecies.sql'),
+    getSpeciesArray: sqlPath('especie/getSpeciesArray.sql'),
     getSpeciesSD: sqlPath('especie/getSpecies_sdate.sql'),
+    getSpeciesArraySD: sqlPath('especie/getSpeciesArray_sdate.sql'),
     getSpeciesR: sqlPath('especie/getSpecies_range.sql'),
-    getSpeciesSDR: sqlPath('especie/getSpecies_sdr.sql')
+    getSpeciesArrayR: sqlPath('especie/getSpeciesArray_range.sql'),
+    getSpeciesSDR: sqlPath('especie/getSpecies_sdr.sql'),
+    getSpeciesArraySDR: sqlPath('especie/getSpeciesArray_sdr.sql'),
+    
+    getSpeciesTaxonArray: sqlPath('especie/getSpeciesTaxonArray.sql'),
+    getSpeciesTaxonArraySD: sqlPath('especie/getSpeciesTaxonArray_sdate.sql'),
+    getSpeciesTaxonArrayR: sqlPath('especie/getSpeciesTaxonArray_range.sql'),
+    getSpeciesTaxonArraySDR: sqlPath('especie/getSpeciesTaxonArray_sdr.sql')
+    
+
   },
   getEntListNiche: {
-    getEntList: sqlPath('especie/getEntList.sql')
+    getEntList: sqlPath('especie/getEntList.sql'),
+    getEntListByTaxon: sqlPath('especie/getEntListByTaxon.sql')
   },
   getGrididsNiche: {
     getGridids: sqlPath('especie/getGridids.sql')
@@ -125,7 +145,9 @@ var queryProvider = {
 
     getGridSpeciesBioM: sqlPath('getGridSpecies/get_grid_species_BM.sql'),
     getGridSpeciesRaM: sqlPath('getGridSpecies/get_grid_species_RaM.sql'),
-    getGridSpeciesM: sqlPath('getGridSpecies/get_grid_species_M.sql')
+    getGridSpeciesM: sqlPath('getGridSpecies/get_grid_species_M.sql'),
+
+    getTargetCells: sqlPath('getGridSpecies/get_target_cells.sql'),
 
   },
   getGeoRelNiche: {
@@ -180,18 +202,34 @@ var queryProvider = {
 
   basicAnalysis:{
     getN: sqlPath("basic-analysis/get-n.sql"),
+    getAllGridId: sqlPath("basic-analysis/get-all-gridids.sql"),
+    getGridIdByLatLong: sqlPath("basic-analysis/getGridIdByLatLong.sql"),
+
+    getCountsBio: sqlPath("basic-analysis/get-counts-bio.sql"),
+    getCountsBioFossil: sqlPath("basic-analysis/get-counts-bio-fossil.sql"),
+    getCountsBioTime: sqlPath("basic-analysis/get-counts-bio-time.sql"),
+
+    getCountsAbio: sqlPath("basic-analysis/get-counts-abio.sql"),
+    // para variables climaticas no hay tiempo ni fosil, solo cambia el source de la tabla sp_snib a snib
+    getCountsAbioFossilTime: sqlPath("basic-analysis/get-counts-abio-fossil-time.sql"),     
+    
     getCounts: sqlPath("basic-analysis/get-counts.sql"),
     getCountsFossil: sqlPath("basic-analysis/get-counts-fossil.sql"),
     getCountsTime: sqlPath("basic-analysis/get-counts-time.sql"),
-    getSource: sqlPath("basic-analysis/get-source.sql"),
-    getSourceFossil: sqlPath("basic-analysis/get-source-fossil.sql"),
-    getSourceTime: sqlPath("basic-analysis/get-source-time.sql"),
-    getTarget: sqlPath("basic-analysis/get-target.sql"),
-    getTargetFossil: sqlPath("basic-analysis/get-target-fossil.sql"),
-    getTargetTime: sqlPath("basic-analysis/get-target-time.sql"),
-    getTarget: sqlPath("basic-analysis/get-target-ba.sql"),
-    getTargetFossil: sqlPath("basic-analysis/get-target-fossil-ba.sql"),
-    getTargetTime: sqlPath("basic-analysis/get-target-time-ba.sql")
+
+    getCountsGroupBio: sqlPath("basic-analysis/get-counts-group-bio.sql")
+
+    // getSource: sqlPath("basic-analysis/get-source.sql"),
+    // getSourceFossil: sqlPath("basic-analysis/get-source-fossil.sql"),
+    // getSourceTime: sqlPath("basic-analysis/get-source-time.sql"),
+
+    // getTarget: sqlPath("basic-analysis/get-target.sql"),
+    // getTargetFossil: sqlPath("basic-analysis/get-target-fossil.sql"),
+    // getTargetTime: sqlPath("basic-analysis/get-target-time.sql"),
+
+    // getTarget: sqlPath("basic-analysis/get-target-ba.sql"),
+    // getTargetFossil: sqlPath("basic-analysis/get-target-fossil-ba.sql"),
+    // getTargetTime: sqlPath("basic-analysis/get-target-time-ba.sql")
   },
 
 /************************************************************* VERBOS PARA REDES ******************************/
@@ -248,7 +286,54 @@ var queryProvider = {
 /************************************************************* VERBOS PARA OBTENER INFO DE TAXA ******************************/
   getGridScores: {
     forSpecies: sqlPath('getGridScores/get_grid_scores.sql')
-  }
+  },
+
+  subaoi: {
+    getSubAOI: sqlPath('sub-aoi/get-sub-aoi.sql'), 
+    getAvailableCountries: sqlPath('sub-aoi/get-available-countries.sql'),
+    getAvailableCountriesFootprint: sqlPath('sub-aoi/get-available-countries-footprint.sql'),
+    getCountriesRegion: sqlPath('sub-aoi/get-countries-region.sql')
+
+    
+  },
+  
+  apiUtils: {
+    getIdFromName: sqlPath("especie/getIdFromName.sql")
+
+  },
+
+  validationProcess: {
+    getSourceCells: sqlPath("getCells/get_source_cells_vp.sql"),
+    getTotalCells: sqlPath("getCells/get_total_cells_vp.sql")
+
+  },
+
+  countsTaxonGroups: {
+    targetGroup: sqlPath("taxons-group/get-counts-target.sql"),
+    covarBioGroup: tmplPath("taxons-group/get-counts-covar-bio.tmpl"),
+    covarAbioGroup: tmplPath("taxons-group/get-counts-covar-abio.tmpl"),
+    getCountsBase: sqlPath("taxons-group/get-counts-base.sql"),
+    getCountsCovars: tmplPath("taxons-group/get-counts-covars.tmpl"),
+    getCellsByGroupBio: tmplPath("taxons-group/get-cells-group-bio.tmpl"),
+    getCellsByGroupAbio: tmplPath("taxons-group/get-cells-group-abio.tmpl")
+  },
+
+  taxonsGroupNodes:{
+    getNodesBase: sqlPath("nodes-taxons-group/get-nodes-base.sql"),
+    nodesSource: tmplPath("nodes-taxons-group/nodes-source.tmpl"),
+    nodesBio: tmplPath("nodes-taxons-group/nodes-bio.tmpl"),
+    nodesAbio: tmplPath("nodes-taxons-group/nodes-abio.tmpl"),
+    getEdgesBase: sqlPath("nodes-taxons-group/get-edges-base.sql"),
+    covarBio: tmplPath("nodes-taxons-group/covar-bio.tmpl"),
+    covarAbio: tmplPath("nodes-taxons-group/covar-abio.tmpl"),
+    selectNodes : tmplPath("nodes-taxons-group/select-nodes.tmpl"),
+    getGroupCount: sqlPath("nodes-taxons-group/get-group-count-grid-id.sql"),
+    getCellsBio: tmplPath("nodes-taxons-group/get-cells-bio.tmpl"),
+    getCellsAbio: tmplPath("nodes-taxons-group/get-cells-abio.tmpl"),
+    selectCount: tmplPath("nodes-taxons-group/select-count.tmpl")
+
+  },
+
 }
 
 module.exports = queryProvider

@@ -12,6 +12,11 @@
  */
 var router = require('express').Router()
 var getGeoRel = require('../controllers/getGeoRelNiche')
+var getCounts = require('../controllers/getCounts')
+var getCountsGroup = require('../controllers/getCountsGroup')
+var getCountsTaxonsGroup = require('../controllers/getCountsTaxonsGroup')
+var getTaxonsGroupNodes = require('../controllers/getTaxonsGroupNodes')
+var getTaxonsGroupEdges = require('../controllers/getTaxonsGroupEdges')
 var getFreqNiche = require('../controllers/getFreqNiche')
 var getCellScore = require('../controllers/getCellScoreNiche') 
 var getFreqCeldaNiche = require('../controllers/getFreqCeldaNiche') 
@@ -20,7 +25,7 @@ var getScoreDecilMd = require('../controllers/getScoreDecilMd')
 var getGridSpeciesNiche = require('../controllers/getGridSpeciesNiche')
 var gridScores = require('../controllers/getGridScores') 
 var bioScores = require('../controllers/getBioScores') 
-var mdAtenticacion = require("../md-auth/autenticacion.js");
+var mdAtenticacion = require("../md-auth/autenticacion.js")
 
 
 /**
@@ -107,7 +112,7 @@ router.route('/getFreqCelda')
  * @param {string} path - Express path
  * @param {callback} middleware - Express middleware.
  */
-router.route('/getScoreDecil')
+router.route('/getScoreDecilOld')
   .get(getScoreDecilNiche.pipe)
   .post(getScoreDecilNiche.pipe)
 
@@ -122,9 +127,19 @@ router.route('/getScoreDecil')
  * @param {string} path - Express path
  * @param {callback} middleware - Express middleware.
  */
-router.route('/getScoreDecilMd')
-  .get(mdAtenticacion.validaToken, getScoreDecilMd.getScoreDecil)
-  .post(mdAtenticacion.validaToken, getScoreDecilMd.getScoreDecil)
+router.route('/getScoreDecil')
+  // .get(mdAtenticacion.validaToken, getScoreDecilMd.getScoreDecil)
+  // .post(mdAtenticacion.validaToken, getScoreDecilMd.getScoreDecil)
+  .get(getScoreDecilMd.getScoreDecil)
+  .post(getScoreDecilMd.getScoreDecil)
+
+
+
+router.route('/getScoreDecilTable')
+  // .get(mdAtenticacion.validaToken, getScoreDecilMd.getScoreDecil)
+  // .post(mdAtenticacion.validaToken, getScoreDecilMd.getScoreDecil)
+  .get(getScoreDecilMd.getScoreDecilTable)
+  .post(getScoreDecilMd.getScoreDecilTable)
 
 
 
@@ -167,5 +182,59 @@ router.route('/grid_scores')
 router.route('/bio_scores')
   .get(bioScores.pipe)
   .post(bioScores.pipe)
+
+
+/**
+ * Ruta que calcula los conteos, epsilon y score entre la especie objetivo y el grupo de variables elegidas. 
+ * @name get/bio_scores
+ * @function
+ * @memberof module:routes/nicherouter~nicheRouter
+ * @inner
+ * @param {string} path - Express path
+ * @param {callback} middleware - Express middleware.
+ */
+router.route('/counts')
+  // .get(mdAtenticacion.validaToken, getCounts.getBasicInfo)
+  // .post(mdAtenticacion.validaToken, getCounts.getBasicInfo)
+  .get(getCounts.getBasicInfo)
+  .post(getCounts.getBasicInfo)
+
+
+router.route('/countsTemp')
+  // .get(mdAtenticacion.validaToken, getCounts.getBasicInfo)
+  // .post(mdAtenticacion.validaToken, getCounts.getBasicInfo)
+  .get(getCounts.getBasicInfoTemp)
+  .post(getCounts.getBasicInfoTemp)
+
+
+
+/**
+ * Ruta que calcula los conteos, epsilon y score entre la especie objetivo y el grupo de variables elegidas. 
+ * @name get/bio_scores
+ * @function
+ * @memberof module:routes/nicherouter~nicheRouter
+ * @inner
+ * @param {string} path - Express path
+ * @param {callback} middleware - Express middleware.
+ */
+router.route('/countsByGroup')
+  // .get(mdAtenticacion.validaToken, getCounts.getBasicInfo)
+  // .post(mdAtenticacion.validaToken, getCounts.getBasicInfo)
+  .get(getCountsGroup.getGroupRequest)
+  .post(getCountsGroup.getGroupRequest)
+
+router.route('/countsTaxonsGroup')
+  // .get(mdAtenticacion.validaToken, getCounts.getBasicInfo)
+  // .post(mdAtenticacion.validaToken, getCounts.getBasicInfo)
+  .get(getCountsTaxonsGroup.getTaxonsGroupRequestV2)
+  .post(getCountsTaxonsGroup.getTaxonsGroupRequestV2)
+
+router.route('/getTaxonsGroupNodes')
+  .get(getTaxonsGroupNodes.getTaxonsGroupNodes)
+  .post(getTaxonsGroupNodes.getTaxonsGroupNodes)
+
+router.route('/getTaxonsGroupEdges')
+  .get(getTaxonsGroupEdges.getTaxonsGroupEdges)
+  .post(getTaxonsGroupEdges.getTaxonsGroupEdges)
 
 module.exports = router
