@@ -5,6 +5,7 @@
 var debug = require('debug')('verbs:niche')
 var moment = require('moment')
 var verb_utils = require('./verb_utils')
+var pgp = require('pg-promise')()
 
 var queries = require('./sql/queryProvider.js')
 
@@ -534,11 +535,7 @@ exports.getToken = function (req, res, next) {
 
   debug('getToken')
 
-  // var tipo = getParam(req, 'tipo')
-  // var params = getParam(req, 'confparams')
-
-  var spid = getParam(req, 'id')
-  var label = getParam(req, 'label')
+  var sfilters = verb_utils.getParam(req, 'sfilters',[])
   var val_process = getParam(req, 'val_process')
   // var idtabla = getParam(req, 'idtabla')
   var mapa_prob = getParam(req, 'mapa_prob')
@@ -552,12 +549,11 @@ exports.getToken = function (req, res, next) {
   var footprint_region = getParam(req, 'footprint_region')
   var discardedFilterids = getParam(req, 'discardedFilterids',[])
   var tfilters = verb_utils.getParam(req, 'tfilters',[])
-  var tipo = verb_utils.getParam(req, 'tipo')
-
+  var tipo = verb_utils.getParam(req, 'tipo', 'nicho')
 
   var link_str = "";
 
-  link_str += "sp_data=" + JSON.stringify({"spid": parseInt(spid), "label":label}) + "&"
+  // link_str += "sp_data=" + JSON.stringify({"spid": spid.toString(), "label":label}) + "&"
   link_str += "chkVal=" + val_process + "&"
   // link_str += "idtabla=" + idtabla + "&"
   link_str += "chkPrb=" + mapa_prob + "&"
@@ -581,6 +577,23 @@ exports.getToken = function (req, res, next) {
   })
   link_str += discardedFilterids.length > 0 ? "&" : ""
 
+
+  link_str += "num_sfilters=" + sfilters.length + "&"
+
+  sfilters.forEach(function (item, index) {
+
+      var str_item = JSON.stringify(item);
+
+      if (index == 0) {
+           link_str += "sfilters[" + index + "]=" + str_item;
+      } else {
+           link_str += "&sfilters[" + index + "]=" + str_item;
+      }
+
+   });
+
+  link_str += "&"
+
   link_str += "num_filters=" + tfilters.length + "&"
 
   tfilters.forEach(function (item, index) {
@@ -602,13 +615,13 @@ exports.getToken = function (req, res, next) {
       tipo_analisis: tipo,
       params: link_str
     })
-        .then(function (data) {
-          res.json({'data': data})
-        })
-        .catch(function (error) {
-          debug(error)
-          next(error)
-        })
+    .then(function (data) {
+      res.json({'data': data})
+    })
+    .catch(function (error) {
+      debug(error)
+      next(error)
+    })
 
 }
 
@@ -657,6 +670,67 @@ exports.getValidationTables = function (req, res, next) {
 
           var item = data[0]
           item['tblname'] = idtbl
+          debug(data)
+
+          res.json({'data': data})
+        })
+        .catch(function (error) {
+          debug(error)
+          next(error)
+        })
+
+}
+
+/**
+*
+* Servidor Niche: getValidationTables
+*
+*
+* @param {express.Request} req
+* @param {express.Response} res
+*
+*/
+exports.getGroupValidationTables = function (req, res, next) {
+
+  debug('getValidationTables')
+
+  var target_group = verb_utils.getParam(req, 'target_taxons', [])
+  var filter = verb_utils.getWhereClauseFromGroupTaxonArray(target_group, true).replace('WHERE', '')
+
+  filter = filter.replace(new RegExp("\'", 'g'), "\'\'")
+  var iter = getParam(req, 'iter')
+  
+  // debug("filter:" + filter)
+
+
+  var idtbl =  'tbl_' + new Date().getTime() //getParam(req, 'idtable')
+  //var idtbl =  't01'
+
+  //debug(idtbl)
+  var iter = getParam(req, 'iterations',iterations)
+
+  var footprint_region = parseInt(getParam(req, 'footprint_region', default_region))
+
+  var grid_resolution = verb_utils.getParam(req, 'grid_res',16)
+  var res_celda_sp =  'cells_'+grid_resolution+'km'
+  var res_celda_snib_tb = 'grid_geojson_'+grid_resolution+'km_aoi'
+  var res_grid_id = 'gridid_'+grid_resolution+'km'
+
+
+  pool.any(queries.getValidationTables.createGroupTables, {
+    filter: filter,
+    iterations: iter,
+    idtbl: idtbl,
+    res_celda_sp: res_celda_sp,
+    res_celda_snib_tb: res_celda_snib_tb,
+    region: footprint_region,
+    grid: res_grid_id
+  })
+        .then(function (data) {
+
+          var item = data[0]
+          item['tblname'] = idtbl
+          
           debug(data)
 
           res.json({'data': data})
@@ -815,7 +889,19 @@ exports.getVariablesNiche = function (req, res, next) {
   // de seleccionar las covariables
   var footprint_region = parseInt(getParam(req, 'footprint_region', default_region))
 
-  // debug(field)
+  var ad_param, order_param = "";
+  if(field === "especieepiteto"){
+    ad_param = " (generovalido || ' ' || especieepiteto) "
+    order_param = " generovalido, especieepiteto "
+  }
+  else{
+    ad_param = field
+    order_param = field
+  }
+
+  debug("field: " + field)
+  debug("ad_param: " + ad_param)
+  debug("order_param: " + order_param)
   // debug(parentfield)
   // debug(parentitem)
 
@@ -840,6 +926,8 @@ exports.getVariablesNiche = function (req, res, next) {
 
     pool.any(queries.getVariablesNiche.getVariables, {
       taxon: field,
+      ad_param: ad_param,
+      order_param: order_param,
       parent_taxon: parentfield,
       parent_valor: parentitem,
       region:footprint_region
@@ -986,8 +1074,8 @@ exports.getCountGridid = function (req, res, next) {
   debug('getCountGridid')
 
   var columnas = ['gridid', 'conteo']
-  var spids = getParam(req, 'spids')
-  var isNicho = getParam(req, 'nicho')
+  var species = getParam(req, 'species', [])
+  var isNicho = getParam(req, 'nicho', false)
   var footprint_region = getParam(req, 'footprint_region', default_region)
 
   var grid_res = getParam(req, 'grid_res', 16)
@@ -998,13 +1086,13 @@ exports.getCountGridid = function (req, res, next) {
   //debug(columnas)
   //debug(spids)
 
-  if (isNicho === 'true') {
+  if (isNicho === true) {
     columnas.push('spids')
     columnas.push('bioclim')
   }
 
   pool.any(queries.getCountGridid.getCount, {
-    spids: spids,
+    species: species,
     res_celda: res_celda,
     res_grid: res_grid,
     columns: columnas,
@@ -1016,6 +1104,78 @@ exports.getCountGridid = function (req, res, next) {
     debug(error)
     next(error)
   })
+}
+
+exports.getGroupCountGridid = function (req, res) {
+  debug('getGroupCountGridid')
+
+  // catching parameters
+  var footprint_region = getParam(req, 'region', default_region)
+  var grid_res = getParam(req, 'grid_res', 16)
+  var nodes = getParam(req, 'nodes', [])
+
+  // defining necessary varaiables 
+  var region_cells = 'cells_' + grid_res + 'km_' + footprint_region
+  var res_views = 'grid_geojson_' + grid_res + 'km_aoi'
+  var res_cells = 'cells_' + grid_res + 'km'
+  var where_clause = ''
+  var query = "" 
+  var q =''
+  var select = ''
+  
+  // getting all cells
+  nodes.forEach((group, index) => {
+
+    merge_vars = group['merge_vars']
+    debug(merge_vars)
+    where_clause = verb_utils.getWhereClauseFromGroupTaxonArray(merge_vars, false)
+
+    if (group['biotic']) { 
+      
+      q += (index > 0 ? ", " : "WITH ") + queries.taxonsGroupNodes.getCellsBio
+      q = q.toString().replace(/{region_cells:raw}/g, region_cells)
+      q = q.toString().replace(/{where_filter:raw}/g, where_clause)
+
+
+    } else {
+
+
+      q += (index > 0 ? ", " : "WITH ") + queries.taxonsGroupNodes.getCellsAbio
+      q = q.toString().replace(/{where_filter:raw}/g, where_clause)
+      q = q.toString().replace(/{res_cells:raw}/g, res_cells)
+      q = q.toString().replace(/{res_views:raw}/g, res_views)
+      q = q.toString().replace(/{region:raw}/g, footprint_region)
+
+    }
+    
+    select += (index > 0 ? "\n UNION \n" : "") + queries.taxonsGroupNodes.selectCount
+    q = q.toString().replace(/{index:raw}/g, index)
+    select = select.toString().replace(/{index:raw}/g, index)
+
+
+  })
+
+  query = queries.taxonsGroupNodes.getGroupCount
+
+  //const query1 = pgp.as.format(query, {aux: q, summary: select})
+  //debug(query1)
+
+  pool.any(query, {
+
+       aux: q,
+       summary: select
+    
+  }).then(function (data) {
+
+    res.json({"ok":true, "data": data})
+
+  }).catch(function (error) {
+      
+    res.json({"ok":true, "message": 'an error has ocurrred!', "error": error})
+
+  })
+
+
 }
 
 
@@ -1221,6 +1381,470 @@ exports.getSpeciesNiche = function (req, res, next) {
 
 
 
+
+/**
+ *
+ * Servidor Niche: getSpeciesArrayNiche
+ *
+ * Obtiene las variables bioticas que coinciden a una cadena dada
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ *
+ */
+
+
+exports.getSpeciesArrayNiche = function (req, res, next) {
+
+      debug("getSpeciesArrayNiche")
+      var startTime = process.hrtime();
+
+      var spids             = getParam(req, 'spids')
+      var sfecha            = getParam(req, 'sfecha', false)
+      var sfosil            = getParam(req, 'sfosil', false)
+      var lb_fosil = sfosil === "false" || sfosil === false ? " and (ejemplarfosil <> 'SI' or ejemplarfosil is null) " : "";
+      var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+      var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+      var res_celda = getParam(req, 'res_celda', "gridid_16km")
+      var footprint_region    = parseInt(getParam(req, 'footprint_region',default_region))
+
+      var grid_resolution = getParam(req, 'grid_res',16)
+      var res_celda_sp =  "cells_"+grid_resolution+"km"   
+      var res_celda_snib =  "gridid_"+grid_resolution+"km" 
+      var res_celda_snib_tb = "grid_geojson_"+grid_resolution+"km_aoi" 
+
+      debug(spids)
+      // debug(spids.toString())
+
+      // debug(sfecha)
+      // debug(sfosil)
+      // debug(grid_resolution)
+      // debug(fecha_incio)
+      // debug(fecha_fin)
+      // debug(footprint_region)
+      
+      debug('Antes de obtener N en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
+
+      pool.task(t => {
+
+      //     return t.one(queries.basicAnalysis.getN, {
+
+      //         grid_resolution: grid_resolution,
+      //         footprint_region: footprint_region
+
+      //     }).then(resp => {
+
+              // debug("id_country:" + resp.id_country)
+              // var region = resp.id_country
+
+              if( (parseInt(fecha_incio.format('YYYY')) != 1500 || parseInt(fecha_fin.format('YYYY')) != parseInt(moment().format('YYYY')) ) && sfecha === 'false'){
+                debug('CASO: rango y sin fecha')
+                // debug("res_celda: " + res_celda)
+                // debug("res_celda_sp: " + res_celda_sp)
+                // debug("res_celda_snib: " + res_celda_snib)
+                // debug("res_celda_snib_tb: " + res_celda_snib_tb)
+                // debug("lb_fosil: " + lb_fosil)
+                // debug("footprint_region: " + footprint_region)
+
+                debug('Antes de ejecutar query en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
+
+                return t.any(queries.getSpeciesNiche.getSpeciesArraySDR, {
+                  spids: spids.toString(),
+                  lim_inf: fecha_incio.format('YYYY'),
+                  lim_sup: fecha_fin.format('YYYY'),
+                  res_celda: res_celda,
+                  res_celda_sp: res_celda_sp,
+                  res_celda_snib: res_celda_snib,
+                  res_celda_snib_tb: res_celda_snib_tb,
+                  sfosil: lb_fosil,
+                  region: footprint_region
+                })
+                      
+              }
+              else if( parseInt(fecha_incio.format('YYYY')) == 1500 && parseInt(fecha_fin.format('YYYY')) == parseInt(moment().format('YYYY'))  && sfecha === 'false'){
+                debug('CASO: solo sin fecha')
+                // debug("res_celda: " + res_celda)
+                // debug("res_celda_sp: " + res_celda_sp)
+                // debug("res_celda_snib: " + res_celda_snib)
+                // debug("res_celda_snib_tb: " + res_celda_snib_tb)
+                // debug("lb_fosil: " + lb_fosil)
+                // debug("footprint_region: " + footprint_region)
+
+                debug('Antes de ejecutar query en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
+
+                
+                //return t.any(queries.getSpeciesNiche.getSpeciesSD, {
+                return t.any(queries.getSpeciesNiche.getSpeciesArraySD, {
+                  spids: spids.toString(),
+                  res_celda: res_celda,
+                  res_celda_sp: res_celda_sp,
+                  res_celda_snib: res_celda_snib,
+                  res_celda_snib_tb: res_celda_snib_tb,
+                  sfosil: lb_fosil,
+                  region: footprint_region
+                })
+                      
+              }
+              else if( parseInt(fecha_incio.format('YYYY')) != 1500 || parseInt(fecha_fin.format('YYYY')) != parseInt(moment().format('YYYY')) ){
+                debug('CASO: solo rango')
+                // debug("res_celda: " + res_celda)
+                // debug("res_celda_sp: " + res_celda_sp)
+                // debug("res_celda_snib: " + res_celda_snib)
+                // debug("res_celda_snib_tb: " + res_celda_snib_tb)
+                // debug("lb_fosil: " + lb_fosil)
+                // debug("footprint_region: " + footprint_region)
+
+                debug('Antes de ejecutar query en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
+
+                return t.any(queries.getSpeciesNiche.getSpeciesArrayR, {
+                  spids: spids.toString(),
+                  lim_inf: fecha_incio.format('YYYY'),
+                  lim_sup: fecha_fin.format('YYYY'),
+                  res_celda: res_celda,
+                  res_celda_sp: res_celda_sp,
+                  res_celda_snib: res_celda_snib,
+                  res_celda_snib_tb: res_celda_snib_tb,
+                  sfosil: lb_fosil,
+                  region: footprint_region
+                })
+                      
+              }
+              else{
+                debug('CASO: sin filtros')
+                // debug("res_celda: " + res_celda)
+                // debug("res_celda_sp: " + res_celda_sp)
+                // debug("res_celda_snib: " + res_celda_snib)
+                // debug("res_celda_snib_tb: " + res_celda_snib_tb)
+                // debug("lb_fosil: " + lb_fosil)
+                // debug("footprint_region: " + footprint_region)
+
+                debug('Antes de ejecutar query en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
+                
+                return t.any(queries.getSpeciesNiche.getSpeciesArray, {
+                  spids: spids.toString(),
+                  res_celda: res_celda,
+                  res_celda_sp: res_celda_sp,
+                  res_celda_snib: res_celda_snib,
+                  res_celda_snib_tb: res_celda_snib_tb,
+                  sfosil: lb_fosil,
+                  region: footprint_region
+                })
+                      
+              }
+
+          // })
+
+      })
+      .then(data => {
+
+          debug('Query ejecutada, (antes de enviar respuesta) en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
+
+          // debug(data)
+
+          res.json({'data': data})
+
+      })
+      .catch(error => {
+          debug(error)
+
+          return res.json({
+            ok: false,
+            error: error
+          });
+      });
+
+}
+
+
+/**
+ *
+ * Servidor Niche: getSpeciesTaxonNiche
+ *
+ * Obtiene las ocurrencias bioticas que coinciden con taxones recibidos
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ *
+ */
+
+
+exports.getSpeciesTaxonNiche = function (req, res, next) {
+
+      debug("getSpeciesTaxonNiche")
+      var startTime = process.hrtime();
+
+      var taxones           = getParam(req, 'taxones', [])
+      var sfecha            = getParam(req, 'sfecha', false)
+      var sfosil            = getParam(req, 'sfosil', false)
+      var lb_fosil = sfosil === "false" || sfosil === false ? " and (ejemplarfosil <> 'SI' or ejemplarfosil is null) " : "";
+      var fecha_incio       = moment(getParam(req, 'lim_inf', '1500'), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+      var fecha_fin         = moment(getParam(req, 'lim_sup', moment().format('YYYY-MM-DD') ), ['YYYY-MM-DD', 'YYYY-MM', 'YYYY'], 'es')
+      var res_celda = getParam(req, 'res_celda', "gridid_16km")
+      var footprint_region    = parseInt(getParam(req, 'footprint_region',default_region))
+
+      var grid_resolution = getParam(req, 'grid_res',16)
+      var res_celda_sp =  "cells_"+grid_resolution+"km"   
+      var res_celda_snib =  "gridid_"+grid_resolution+"km" 
+      var res_celda_snib_tb = "grid_geojson_"+grid_resolution+"km_aoi" 
+
+      //debug(taxones)
+      //var str_taxones = verb_utils.procesaTaxones(taxones);
+
+
+      var array_taxon = []
+      var aux
+      taxones.forEach((taxon, index) => {
+        aux = {}
+        aux['taxon_rank'] = taxon['taxon']
+        aux['value'] = taxon['value']
+
+        array_taxon.push(aux)
+      })
+
+      var str_taxones = verb_utils.getWhereClauseFromGroupTaxonArray(array_taxon, true)
+      debug(str_taxones)
+      // debug(str_taxones)
+
+      // debug(spids.toString())
+
+      // debug(sfecha)
+      // debug(sfosil)
+      // debug(grid_resolution)
+      // debug(fecha_incio)
+      // debug(fecha_fin)
+      // debug(footprint_region)
+      /*const query1 = pgp.as.format(queries.getSpeciesNiche.getSpeciesTaxonArray, {
+              taxones: str_taxones,
+              res_celda: res_celda,
+              res_celda_sp: res_celda_sp,
+              res_celda_snib: res_celda_snib,
+              res_celda_snib_tb: res_celda_snib_tb,
+              sfosil: lb_fosil,
+              region: footprint_region
+            })
+      debug(query1)*/
+      
+      debug('Antes de obtener N en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
+
+      pool.task(t => {
+
+          if( (parseInt(fecha_incio.format('YYYY')) != 1500 || parseInt(fecha_fin.format('YYYY')) != parseInt(moment().format('YYYY')) ) && sfecha === 'false'){
+            debug('CASO: rango y sin fecha')
+            // debug("res_celda: " + res_celda)
+            // debug("res_celda_sp: " + res_celda_sp)
+            // debug("res_celda_snib: " + res_celda_snib)
+            // debug("res_celda_snib_tb: " + res_celda_snib_tb)
+            // debug("lb_fosil: " + lb_fosil)
+            // debug("footprint_region: " + footprint_region)
+
+            debug('Antes de ejecutar query en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
+
+            return t.any(queries.getSpeciesNiche.getSpeciesTaxonArraySDR, {
+              taxones: str_taxones,
+              lim_inf: fecha_incio.format('YYYY'),
+              lim_sup: fecha_fin.format('YYYY'),
+              res_celda: res_celda,
+              res_celda_sp: res_celda_sp,
+              res_celda_snib: res_celda_snib,
+              res_celda_snib_tb: res_celda_snib_tb,
+              sfosil: lb_fosil,
+              region: footprint_region
+            })
+                  
+          }
+          else if( parseInt(fecha_incio.format('YYYY')) == 1500 && parseInt(fecha_fin.format('YYYY')) == parseInt(moment().format('YYYY'))  && sfecha === 'false'){
+            debug('CASO: solo sin fecha')
+            // debug("res_celda: " + res_celda)
+            // debug("res_celda_sp: " + res_celda_sp)
+            // debug("res_celda_snib: " + res_celda_snib)
+            // debug("res_celda_snib_tb: " + res_celda_snib_tb)
+            // debug("lb_fosil: " + lb_fosil)
+            // debug("footprint_region: " + footprint_region)
+
+            debug('Antes de ejecutar query en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
+
+            
+            //return t.any(queries.getSpeciesNiche.getSpeciesSD, {
+            return t.any(queries.getSpeciesNiche.getSpeciesTaxonArraySD, {
+              taxones: str_taxones,
+              res_celda: res_celda,
+              res_celda_sp: res_celda_sp,
+              res_celda_snib: res_celda_snib,
+              res_celda_snib_tb: res_celda_snib_tb,
+              sfosil: lb_fosil,
+              region: footprint_region
+            })
+                  
+          }
+          else if( parseInt(fecha_incio.format('YYYY')) != 1500 || parseInt(fecha_fin.format('YYYY')) != parseInt(moment().format('YYYY')) ){
+            debug('CASO: solo rango')
+            // debug("res_celda: " + res_celda)
+            // debug("res_celda_sp: " + res_celda_sp)
+            // debug("res_celda_snib: " + res_celda_snib)
+            // debug("res_celda_snib_tb: " + res_celda_snib_tb)
+            // debug("lb_fosil: " + lb_fosil)
+            // debug("footprint_region: " + footprint_region)
+
+            debug('Antes de ejecutar query en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
+
+            return t.any(queries.getSpeciesNiche.getSpeciesTaxonArrayR, {
+              taxones: str_taxones,
+              lim_inf: fecha_incio.format('YYYY'),
+              lim_sup: fecha_fin.format('YYYY'),
+              res_celda: res_celda,
+              res_celda_sp: res_celda_sp,
+              res_celda_snib: res_celda_snib,
+              res_celda_snib_tb: res_celda_snib_tb,
+              sfosil: lb_fosil,
+              region: footprint_region
+            })
+                  
+          }
+          else{
+            debug('CASO: sin filtros')
+            // debug("res_celda: " + res_celda)
+            // debug("res_celda_sp: " + res_celda_sp)
+            // debug("res_celda_snib: " + res_celda_snib)
+            // debug("res_celda_snib_tb: " + res_celda_snib_tb)
+            // debug("lb_fosil: " + lb_fosil)
+            // debug("footprint_region: " + footprint_region)
+
+            debug('Antes de ejecutar query en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
+            
+            return t.any(queries.getSpeciesNiche.getSpeciesTaxonArray, {
+              taxones: str_taxones,
+              res_celda: res_celda,
+              res_celda_sp: res_celda_sp,
+              res_celda_snib: res_celda_snib,
+              res_celda_snib_tb: res_celda_snib_tb,
+              sfosil: lb_fosil,
+              region: footprint_region
+            })
+                  
+          }
+
+          
+
+      })
+      .then(data => {
+
+          debug('Query ejecutada, (antes de enviar respuesta) en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
+
+          // debug(data)
+
+          res.json({'data': data})
+
+      })
+      .catch(error => {
+          debug(error)
+
+          return res.json({
+            ok: false,
+            error: error
+          })
+      })
+
+}
+
+
+
+
+
+
+/**
+ *
+ * Servidor Niche: getEntListByTaxonNiche
+ *
+ * Obtiene las variables bioticas que coinciden a una cadena dada en la estrutura genero, epiteto y nombreinfra
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ *
+ */
+
+exports.getEntListByTaxonNiche = function (req, res, next) {
+
+    debug("getEntListByTaxonNiche")
+    var startTime = process.hrtime();
+
+    var col_epiteto = "especieepiteto"
+    var col_infra = "nombreinfra"
+    
+    var str       = getParam(req, 'searchStr')
+    var has_limit = parseInt(getParam(req, 'limit', false))
+    has_limit = false // se elimina limite en autocomplete
+    var source    = parseInt(getParam(req, 'source'))
+    var region    = parseInt(getParam(req, 'footprint_region',default_region))
+    var nivel     = getParam(req, 'nivel', min_taxon_name)
+    var columnas  = verb_utils.getColumns(source, nivel, "getEntListByTaxonNiche")
+
+    var grid_resolution = getParam(req, 'grid_res',16)
+    var res_celda_sp =  'cells_'+grid_resolution+'km_'+region
+    var res_celda_snib =  'gridid_'+grid_resolution+'km'
+    var res_celda_snib_tb = 'grid_'+grid_resolution+'km_aoi'
+    
+    res_celda_sp = (source == 1) ? res_celda_sp : 'array[]::int[]'
+    var val_tree = (source == 1) ? ' and icount('+res_celda_sp+') > 0 ' : ''
+
+    var txt_limite = has_limit === false ? '' : 'limit ' + limite
+
+    debug("nivel: " + nivel)
+    debug("str: " + str)
+    debug("limite: " + limite)
+    debug("columnas: " + columnas)
+    // debug("res_celda_sp: " + res_celda_sp)
+    debug("val_tree: " + val_tree)
+    
+
+    var streTerms = str.trim().split(" ");
+    debug(streTerms)
+    debug(streTerms.length)
+
+    var genero = streTerms[0]
+    var epiteto = streTerms.length > 1 ? "and lower("+col_epiteto+") like lower('"+streTerms[1]+"%')"  : ""
+    var infra = streTerms.length > 2 ? "and lower("+nombreinfra+") like lower('"+streTerms[2]+"%')"  : ""
+
+    debug("epiteto:" + epiteto)
+    debug("infra:" + infra)
+
+
+    debug('Parsea datos, (antes de ejecutar query) en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
+
+    pool.any(queries.getEntListNiche.getEntListByTaxon, {
+      genero: genero,
+      epiteto: epiteto,
+      infra: infra,
+      columnas: columnas,
+      nivel: nivel,
+      res_celda_sp: res_celda_sp,
+      res_celda_snib: res_celda_snib,
+      res_celda_snib_tb: res_celda_snib_tb,
+      val_tree: val_tree,
+      limite: txt_limite,
+      region: region
+    })
+    .then(function (data) {
+
+      debug('Query ejecutada, (antes de enviar respuesta) en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
+      
+      // debug("Respuesta query")
+      // debug(data)
+
+      res.json({'data': data})
+    })
+    .catch(function (error) {
+      debug(error)
+      next(error)
+    })
+
+}
+
+
+
+
+
+
+
 /**
  *
  * Servidor Niche: getEntListNiche
@@ -1242,21 +1866,44 @@ exports.getEntListNiche = function (req, res, next) {
     var source    = parseInt(getParam(req, 'source'))
     var region    = parseInt(getParam(req, 'footprint_region',default_region))
     var nivel     = getParam(req, 'nivel', min_taxon_name)
-    var columnas  = verb_utils.getColumns(source, nivel)
-
+    
     var grid_resolution = getParam(req, 'grid_res',16)
     var res_celda_sp =  'cells_'+grid_resolution+'km_'+region
     var res_celda_snib =  'gridid_'+grid_resolution+'km'
     var res_celda_snib_tb = 'grid_'+grid_resolution+'km_aoi'
     
-    res_celda_sp = (source == 1) ? res_celda_sp : 'array[]::int[]'
-    var val_tree = (source == 1) ? ' and icount('+res_celda_sp+') > 0 ' : ''
+    // res_celda_sp = (source == 1) ? res_celda_sp : 'array[]::int[]'
+    // var val_tree = (source == 1) ? ' and icount('+res_celda_sp+') > 0 ' : ''
+    var val_tree = ' and icount('+res_celda_sp+') > 0 '
 
     var txt_limite = has_limit === false ? '' : 'limit ' + limite
 
+    
+    var terms, gen_lb, sp_lb
+    var ad_param = ""
+
+    var columnas  = verb_utils.getColumns(source, nivel)
+
+    // validación para tratar campo especieepiteto
+    if(nivel === "especieepiteto"){
+
+      nivel = "generovalido"
+      terms = str.split(" ")
+      if(terms.length>1){
+        gen_lb = terms[0]
+        sp_lb = terms[1]
+        ad_param = " and especieepiteto like lower('" + sp_lb + "%') "
+        str = gen_lb
+      }
+
+    }
+
+    
+
     debug("nivel: " + nivel)
     debug("str: " + str)
-    debug("limite: " + limite)
+    debug("ad_param: " + ad_param)
+    // debug("limite: " + limite)
     debug("columnas: " + columnas)
     // debug("res_celda_sp: " + res_celda_sp)
     debug("val_tree: " + val_tree)
@@ -1274,7 +1921,8 @@ exports.getEntListNiche = function (req, res, next) {
       res_celda_snib_tb: res_celda_snib_tb,
       val_tree: val_tree,
       limite: txt_limite,
-      region: region
+      region: region,
+      ad_param: ad_param
     })
     .then(function (data) {
 

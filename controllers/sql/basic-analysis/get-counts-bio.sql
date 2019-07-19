@@ -1,19 +1,23 @@
 WITH temp_source as (
-	SELECT 
-		a.spid, 
---		a.cells_16km_1 as cells,
-		(a.${res_celda_sp:raw}_${region:raw}-(${discardedDeleted:raw}::integer[]+${source_cells:raw}::integer[])) as cells,
---		array_length(a.cells_16km_1, 1) as ni 
-		array_length((a.${res_celda_sp:raw}_${region:raw}-(${discardedDeleted:raw}::integer[]+${source_cells:raw}::integer[])), 1) as ni
-	FROM sp_snib AS a
-	WHERE 
-		--a.spid = 27333
-		a.spid = ${spid}
-		and a.especievalidabusqueda <> ''
-		and a.spid is not null
-	GROUP BY a.spid,
---			a.cells_16km_1
-			a.${res_celda_sp:raw}_${region:raw}
+	select array_agg(distinct spid) as spid,
+ 		(array_agg(distinct cell)-(${discardedDeleted:raw}::integer[]+${source_cells:raw}::integer[])) as cells,
+ 		array_length( (array_agg(distinct cell)-(${discardedDeleted:raw}::integer[]+${source_cells:raw}::integer[])) ,1) as ni
+	from (
+		   SELECT 
+				a.spid, 
+				--unnest (a.cells_16km_1) as cell
+				unnest(a.${res_celda_sp:raw}_${region:raw}) as cell
+			FROM sp_snib AS a
+			WHERE 
+				--a.spid in (27333,27337) 
+				a.spid in (${spid:raw}) 
+				and a.especievalidabusqueda <> ''
+				and a.spid is not null
+	) as temp
+	GROUP by true 
+	--a.spid,
+	--a.cells_16km_1
+	--a.${res_celda_sp:raw}_${region:raw}
 ),
 temp_target as (
 	SELECT  
@@ -89,7 +93,7 @@ SELECT 	temp_target.spid,
 		) as numeric), 2) as score
 FROM temp_source,temp_target
 where 
-temp_target.spid <> ${spid}
+temp_target.spid not in (${spid:raw})
 --temp_target.spid <> 27333
 and icount(temp_target.cells) >= ${min_occ}
 --and icount(temp_target.cells) >= 5

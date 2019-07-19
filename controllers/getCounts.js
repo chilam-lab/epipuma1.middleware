@@ -27,6 +27,55 @@ var max_score = verb_utils.maxscore
 var min_score = verb_utils.minscore
 var request_counter = 0;
 var request_counter_map = d3.map([]);
+var pgp = require('pg-promise')
+
+
+
+/**
+ * Obtiene el score por celda agrupado por decil con apriori
+ *
+ * @function
+ * @param {express.Request} req - Express request object
+ * @param {express.Response} res - Express response object 
+ * @param {function} next - Express next middleware function
+ */
+exports.getBasicInfoTemp = function(req, res, next) {
+  
+  debug('getBasicInfoTemp')
+
+  var data_request = verb_utils.getRequestParams(req, true)
+
+  data_request["res_celda_snib_tb"] = "grid_geojson_" + data_request.grid_resolution + "km_aoi"
+  data_request["res_grid_tbl"] = "grid_" + data_request.grid_resolution + "km_aoi"
+  data_request["res_grid_column"] = "gridid_" + data_request.grid_resolution + "km"
+
+  // debug('region: ' + data_request.region)
+  // debug('res_celda_snib_tb: ' + data_request.res_celda_snib_tb)
+
+  var data_georel = [];
+  var iter = 0;
+  var promises = []
+  var json_response = {}
+
+  for(var iter = 0; iter<data_request.iterations; iter++){
+
+    // debug("iteration:" + (iter+1))
+    initialProcessTemp(iter, data_request.iterations, data_request, res, json_response, req)
+
+  }
+
+}
+
+function initialProcessTemp(iter, total_iterations, data, res, json_response, req) {
+
+
+}
+
+
+
+
+
+
 
 
 
@@ -45,6 +94,8 @@ exports.getBasicInfo = function(req, res, next) {
   var data_request = verb_utils.getRequestParams(req, true)
 
   data_request["res_celda_snib_tb"] = "grid_geojson_" + data_request.grid_resolution + "km_aoi"
+  data_request["res_grid_tbl"] = "grid_" + data_request.grid_resolution + "km_aoi"
+  data_request["res_grid_column"] = "gridid_" + data_request.grid_resolution + "km"
 
   // debug('region: ' + data_request.region)
   // debug('res_celda_snib_tb: ' + data_request.res_celda_snib_tb)
@@ -61,349 +112,6 @@ exports.getBasicInfo = function(req, res, next) {
 
   }
 
-  // if ( data_request.hasBios == true && data_request.hasRaster == false  ) {
-
-  //   debug('hasBios:true - hasRaster:false')
-  //   // debug('grid_resolution: ' + data_request.grid_resolution)
-  //   // debug('iterations: ' + data_request.iterations)
-
-    
-
-  // }
-  // else if ( data_request.hasBios == false && data_request.hasRaster == true ) {
-
-  //   debug('Caso: hasBios:false - hasRaster:true')
-  //   // debug('grid_resolution: ' + data_request.grid_resolution)
-  //   // debug('res_celda_snib: ' + data_request.res_celda_snib)
-  //   // debug('res_celda_snib_tb: ' + data_request.res_celda_snib_tb)
-
-  //   // Inica tarea
-  //   pool.task(t => {
-
-  //       return t.one(queries.basicAnalysis.getN, {
-
-  //           grid_resolution: data_request.grid_resolution,
-  //           footprint_region: data_request.region
-
-  //       }).then(resp => {
-
-  //           var query_abio;
-
-  //           data_request["N"] = resp.n
-  //           data_request["alpha"] = 1.0/resp.n 
-
-  //           debug("N:" + data_request["N"])
-  //           debug("alpha:" + data_request["alpha"])
-
-  //           // seleccion de caso para obtener datos de especie ibjetivo
-  //           if(data_request.caso === -1 && data_request.fossil.length == 0){
-  //             debug("counts case 1: basico")
-  //             query_abio = queries.basicAnalysis.getCountsAbio
-  //           }
-  //           else{
-  //             debug("counts case 2: fossil - time")
-  //             query_abio = queries.basicAnalysis.getCountsAbioFossilTime
-  //           }
-
-
-  //           debug("data_request.get_grid_species: " + data_request.get_grid_species)
-  //             if(data_request.get_grid_species !== false){
-
-  //               debug("analisis en celda")
-
-  //               var lat = verb_utils.getParam(req, 'lat')
-  //               var long = verb_utils.getParam(req, 'long')
-
-  //               debug("lat: " + lat)
-  //               debug("long: " + long)
-
-  //               data_request["lat"] = lat
-  //               data_request["long"] = long
-
-  //               // sobreescribe tablas de vistas por tablas de grid_16km_aoi
-  //               var grid_resolution = data_request.grid_resolution
-  //               data_request["res_celda_sp"] = "cells_"+grid_resolution+"km" 
-  //               data_request["res_celda_snib"] = "gridid_"+grid_resolution+"km" 
-  //               data_request["res_celda_snib_tb"] = "grid_"+grid_resolution+"km_aoi" 
-
-  //               debug('res_celda_snib_tb: ' + data_request.res_celda_snib_tb)
-
-  //               return t.one(queries.basicAnalysis.getGridIdByLatLong, data_request).then(resp => {
-
-  //                 data_request["cell_id"] = resp.gridid
-  //                 debug("cell_id: " + data_request.cell_id)
-
-  //                 data_request["res_celda_snib_tb"] = "grid_geojson_" + data_request.grid_resolution + "km_aoi"
-
-  //                 return t.any(query_abio, data_request)  
-
-  //               })
-
-  //             }
-  //             else{
-
-  //               debug("analisis general")
-
-  //               data_request["cell_id"] = 0
-
-  //               // Se obtiene todas las celdas para mandar valor de apriori o mapa de probabildiad
-  //               if(data_request.apriori === true){
-
-  //                 debug("obteniendo todas las celdas, analisis con apriori o mapa de probabilidad - hasBios:false - hasRaster:true")
-
-  //                 return t.one(queries.basicAnalysis.getAllGridId, data_request).then(data => {
-
-  //                   debug("obteniendo counts ABIO - hasBios:false - hasRaster:true")
-  //                   // debug(data_request["where_config_raster"]  + " - hasBios:false - hasRaster:true")
-
-  //                   data_request.all_cells = data
-  //                   return t.any(query_abio, data_request)
-
-  //                 })
-
-  //               }
-  //               else{
-
-  //                 debug("analisis basico")
-
-  //                 return t.any(query_abio, data_request)
-  //               }
-
-  //             }  
-
-
-  //         })
-        
-
-  //   })
-  //   .then(data => {
-
-  //     debug("RETURN ABIO - hasBios:false - hasRaster:true")
-
-  //       // debug(data)
-
-  //       var apriori = false
-  //       debug("data_request.apriori: " + data_request.apriori)
-  //       if(data_request.apriori !== false && data[0].ni !== undefined){
-  //         apriori = true
-  //       }
-
-  //       var mapa_prob = false
-  //       debug("data_request.mapa_prob: " + data_request.mapa_prob)
-  //       if(data_request.mapa_prob !== false && data[0].ni !== undefined){
-  //         mapa_prob = true          
-  //       }
-
-  //       var cell_id = 0
-  //       if(data_request.get_grid_species !== false){
-
-  //         cell_id = data_request.cell_id
-  //         debug("cell_id last: " + cell_id)
-  //         data = verb_utils.processDataForCellId(data, apriori, mapa_prob, cell_id)
-
-  //       }
-
-
-  //       var data_freq = data_request.with_data_freq === true ? verb_utils.processDataForFreqSpecie(data) : []
-  //       var data_score_cell = data_request.with_data_score_cell === true ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob, data_request.all_cells) : []
-  //       var data_freq_cell = data_request.with_data_freq_cell === true ? verb_utils.processDataForFreqCell(data_score_cell) : []
-
-  //       // debug('hasBios:false - hasRaster:true')
-  //       // debug(data)
-
-  //       res.json({
-  //         ok: true,
-  //         usuarioRequest: req.usuarioRequest,
-  //         data: data,
-  //         data_freq: data_freq,
-  //         data_score_cell: data_score_cell,
-  //         data_freq_cell: data_freq_cell
-  //       });
-
-  //   })
-  //   .catch(error => {
-  //       debug(error)
-  //       return res.json({
-  //         ok: false,
-  //         error: error
-  //       });
-  //   });
-
-
-  // }
-  // else if ( data_request.hasBios == true && data_request.hasRaster == true ) {
-
-  //   debug('Caso: hasBios:true - hasRaster:true')
-
-  //   pool.task(t => {
-
-  //       return t.one(queries.basicAnalysis.getN, {
-
-  //           grid_resolution: data_request.grid_resolution,
-  //           footprint_region: data_request.region
-
-  //       }).then(resp => {
-
-  //           data_request["N"] = resp.n
-  //           data_request["alpha"] = 1.0/resp.n 
-
-  //           debug("N:" + data_request["N"])
-  //           debug("alpha:" + data_request["alpha"])
-
-  //           var query
-
-  //           // seleccion de caso para obtener datos de especie ibjetivo
-  //           if(data_request.caso === -1 && data_request.fossil.length == 0){
-  //             debug("counts case 1: basico")
-  //             query = queries.basicAnalysis.getCounts
-  //           }
-  //           else if(data_request.caso === -1 && data_request.fossil.length > 1){
-  //             debug("counts case 2: sin fosil")
-  //             // query = queries.basicAnalysis.getSourceFossil
-  //             query = queries.basicAnalysis.getCountsFossil
-  //           }
-  //           else{
-  //             debug("counts case 3: tiempo y posible fosil")
-  //             // query = queries.basicAnalysis.getSourceTime  
-  //             query = queries.basicAnalysis.getCountsTime
-  //           }
-
-
-  //           debug("data_request.get_grid_species: " + data_request.get_grid_species)
-  //             if(data_request.get_grid_species !== false){
-
-  //               debug("analisis en celda")
-
-  //               var lat = verb_utils.getParam(req, 'lat')
-  //               var long = verb_utils.getParam(req, 'long')
-
-  //               debug("lat: " + lat)
-  //               debug("long: " + long)
-
-  //               data_request["lat"] = lat
-  //               data_request["long"] = long
-
-  //               // sobreescribe tablas de vistas por tablas de grid_16km_aoi
-  //               var grid_resolution = data_request.grid_resolution
-  //               data_request["res_celda_sp"] = "cells_"+grid_resolution+"km" 
-  //               data_request["res_celda_snib"] = "gridid_"+grid_resolution+"km" 
-  //               data_request["res_celda_snib_tb"] = "grid_"+grid_resolution+"km_aoi" 
-
-  //               debug('res_celda_snib_tb: ' + data_request.res_celda_snib_tb)
-
-  //               return t.one(queries.basicAnalysis.getGridIdByLatLong, data_request).then(resp => {
-
-  //                 data_request["cell_id"] = resp.gridid
-  //                 debug("cell_id: " + data_request.cell_id)
-
-  //                 data_request["res_celda_snib_tb"] = "grid_geojson_" + data_request.grid_resolution + "km_aoi"
-
-  //                 return t.any(query, data_request)  
-
-  //               })
-
-  //             }
-  //             else{
-
-  //               debug("analisis general")
-
-  //               data_request["cell_id"] = 0
-
-  //               // Se obtiene todas las celdas para mandar valor de apriori o mapa de probabildiad
-  //               if(data_request.apriori === true){
-
-  //                 debug("obteniendo todas las celdas, analisis con apriori o mapa de probabilidad - Caso: hasBios:true - hasRaster:true")
-  //                 // debug('data_request: ' + data_request.where_config)
-  //                 // debug('data_request: ' + data_request.where_config_raster)
-
-  //                 return t.one(queries.basicAnalysis.getAllGridId, data_request).then(data => {
-
-  //                   debug("obteniendo counts BOTH - hasBios:true - hasRaster:true")
-
-  //                   data_request.all_cells = data
-  //                   return t.any(query, data_request)
-
-  //                 })
-
-  //               }
-  //               else{
-
-  //                 debug("analisis basico")
-
-  //                 return t.any(query, data_request)
-  //               }
-
-  //             }  
-
-  //         })
-        
-
-  //   })
-  //   .then(data => {
-
-  //     debug("RETURN BOTH - hasBios:true - hasRaster:true")
-
-
-  //       // var apriori = 0
-  //       // if(!data_request.apriori && data[0].ni !== undefined){
-
-  //       var apriori = false
-  //       debug("data_request.apriori: " + data_request.apriori)
-  //       if(data_request.apriori !== false && data[0].ni !== undefined){
-  //         apriori = true
-  //       }
-
-  //       var mapa_prob = false
-  //       debug("data_request.mapa_prob: " + data_request.mapa_prob)
-  //       if(data_request.mapa_prob !== false && data[0].ni !== undefined){
-  //         mapa_prob = true          
-  //       }
-
-  //       var cell_id = 0
-  //       if(data_request.get_grid_species !== false){
-
-  //         cell_id = data_request.cell_id
-  //         debug("cell_id last: " + cell_id)
-  //         data = verb_utils.processDataForCellId(data, apriori, mapa_prob, cell_id)
-
-  //       }
-
-  //       var data_freq = data_request.with_data_freq === true ? verb_utils.processDataForFreqSpecie(data) : []
-  //       var data_score_cell = data_request.with_data_score_cell === true ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob, data_request.all_cells) : []
-  //       var data_freq_cell = data_request.with_data_freq_cell === true ? verb_utils.processDataForFreqCell(data_score_cell) : []
-
-  //       // debug('hasBios:true - hasRaster:true')
-  //       // debug(data)
-
-  //       res.json({
-  //         ok: true,
-  //         usuarioRequest: req.usuarioRequest,
-  //         data: data,
-  //         data_freq: data_freq,
-  //         data_score_cell: data_score_cell,
-  //         data_freq_cell: data_freq_cell
-  //       });
-
-  //   })
-  //   .catch(error => {
-  //       debug(error)
-  //       return res.json({
-  //         ok: false,
-  //         error: error
-  //       });
-  //   });
-
-
-  // }
-  // else{
-
-  //   return res.status(400).send({
-  //       ok: false,
-  //       message: "Error en petición, sin caso asignado"});
-  // }
-
-
-
 }
 
 
@@ -417,7 +125,6 @@ function initialProcess(iter, total_iterations, data, res, json_response, req) {
   pool.task(t => {
 
     var query = data_request.idtabla === "" ? "select array[]::integer[] as total_cells" : queries.validationProcess.getTotalCells
-    // debug(query)
 
     return t.one(query, {
 
@@ -425,8 +132,8 @@ function initialProcess(iter, total_iterations, data, res, json_response, req) {
         iter: (iter+1)
 
     })
-    .then(resp => {
-
+    .then(resp => { 
+      
       // debug("iter TC: " + (iter+1))
       data_request["total_cells"] = resp.total_cells
 
@@ -434,16 +141,22 @@ function initialProcess(iter, total_iterations, data, res, json_response, req) {
       // debug(query)
 
       return t.one(query, {
-
+      // return t.any(query, {
         tbl_process: data_request.idtabla,
-        iter: (iter+1)
+        iter: (iter+1),
+        res_grid_tbl: data_request.res_grid_tbl,
+        res_grid_column: data_request.res_grid_column
 
       })
       .then(resp => {
 
-        // debug("iter SC: " + (iter+1))
+        // debug(resp)
+        // debug("HOLA**********")
+        // debug(resp.map(function(d) {return d.spids}))
         data_request["source_cells"] = resp.source_cells
-
+        // data_request["source_cells"] = data_request.idtabla === "" ? [] : resp.map(function(d) {return d.cell}) 
+        // data_request["test_cells"] = data_request.idtabla === "" ? [] : resp.map(function(d) {return {cell:d.cell, spids:d.spids, iter:iter+1} }) 
+        
         // debug(data_request["source_cells"])
         // debug(data_request["total_cells"])
 
@@ -498,8 +211,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req) {
 
             })
 
-          }
-          else{
+          } else {
 
             debug("analisis general")
 
@@ -509,7 +221,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req) {
             // Se obtiene todas las celdas para mandar valor de apriori o mapa de probabildiad
             if( (data_request.apriori === true || data_request.mapa_prob === true) || (data_request.apriori === "true" || data_request.mapa_prob === "true") ){
 
-              debug("obteniendo todas las celdas, analisis con apriori o mapa de probabilidad - hasBios:true - hasRaster:false")
+              // debug("obteniendo todas las celdas, analisis con apriori o mapa de probabilidad - hasBios:true - hasRaster:false")
 
               return t.one(queries.basicAnalysis.getAllGridId, data_request).then(data => {
 
@@ -521,10 +233,12 @@ function initialProcess(iter, total_iterations, data, res, json_response, req) {
 
               })
 
-            }
-            else{
+            } else{
 
               debug("analisis basico")
+
+              //const query = pgp.as.format(case_query, data_request)
+              //debug(query)
 
               return t.any(case_query, data_request)
             }
@@ -541,8 +255,9 @@ function initialProcess(iter, total_iterations, data, res, json_response, req) {
 
   })
   .then(data_iteration => {
-
-    var data_response = {iter: (iter+1),data: data_iteration}
+    
+    // TODO: agregar valores necesarios para validacion del data_request
+    var data_response = {iter: (iter+1), data: data_iteration, test_cells: data_request["source_cells"], apriori: data_request.apriori, mapa_prob: data_request.mapa_prob }
     json_response["data_response"] = json_response["data_response"] === undefined ? [data_response] : json_response["data_response"].concat(data_response)
 
     if(!request_counter_map.has(data_request["title_valor"].title)){
@@ -563,15 +278,16 @@ function initialProcess(iter, total_iterations, data, res, json_response, req) {
       request_counter_map.set(data_request["title_valor"].title, 0)
       
       debug("COUNT PROCESS FINISHED")
-      var data
+      var data = []
+      var validation_data = []
       var is_validation = false
 
       if(total_iterations !== 1){
         debug("PROCESS RESULTS FOR VALIDATION")
         data = verb_utils.processValidationData(json_response["data_response"])
+        validation_data = verb_utils.getValidationValues(json_response["data_response"])
         is_validation = true
-      }
-      else{
+      } else{
         data = data_iteration
         is_validation = false
       }
@@ -600,17 +316,19 @@ function initialProcess(iter, total_iterations, data, res, json_response, req) {
       // debug("with_data_freq: " + data_request.with_data_freq === true)
       debug("COMPUTE RESULT DATA FOR HISTOGRAMS")
       var data_freq = data_request.with_data_freq === true ? verb_utils.processDataForFreqSpecie(data) : []
-      var data_score_cell = data_request.with_data_score_cell === true ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob, data_request.all_cells) : []
+      var data_score_cell = data_request.with_data_score_cell === true ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob, data_request.all_cells, is_validation) : []
       var data_freq_cell = data_request.with_data_freq_cell === true ? verb_utils.processDataForFreqCell(data_score_cell) : []
 
 
+      
       res.json({
           ok: true,
           // usuarioRequest: req.usuarioRequest,
           data: data,
           data_freq: data_freq,
           data_score_cell: data_score_cell,
-          data_freq_cell: data_freq_cell
+          data_freq_cell: data_freq_cell,
+          validation_data: validation_data
         });
       
       

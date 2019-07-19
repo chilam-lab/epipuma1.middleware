@@ -40,6 +40,10 @@ router.route('/especie/getEntList')
   .get(verbsCtrl.getEntListNiche)
   .post(verbsCtrl.getEntListNiche)
 
+router.route('/especie/getEntListByTaxon')
+  .get(verbsCtrl.getEntListByTaxonNiche)
+  .post(verbsCtrl.getEntListByTaxonNiche)
+
 router.route('/especie/getToken')
   .get(verbsCtrl.getToken)
   .post(verbsCtrl.getToken)
@@ -56,6 +60,9 @@ router.route('/especie/getValidationTables')
   .get(verbsCtrl.getValidationTables)
   .post(verbsCtrl.getValidationTables)
 
+router.route('/especie/getGroupValidationTables')
+  .post(verbsCtrl.getGroupValidationTables)
+
 router.route('/especie/processValidationTables')
   .get(verbsCtrl.processValidationTables)
   .post(verbsCtrl.processValidationTables)
@@ -68,8 +75,9 @@ router.route('/especie/getCountGridid')
   .get(verbsCtrl.getCountGridid)
   .post(verbsCtrl.getCountGridid)
 
-
-
+router.route('/especie/getGroupCountGridid')
+  .get(verbsCtrl.getGroupCountGridid)
+  .post(verbsCtrl.getGroupCountGridid)
 
 router.route('/especie/getVariables')
   .get(verbsCtrl.getVariablesNiche)
@@ -100,6 +108,15 @@ router.route('/especie/getGridids')
 router.route('/especie/getSpecies')
   .get(verbsCtrl.getSpeciesNiche)
   .post(verbsCtrl.getSpeciesNiche)
+
+
+router.route('/especie/getSpeciesArray')
+  .get(verbsCtrl.getSpeciesArrayNiche)
+  .post(verbsCtrl.getSpeciesArrayNiche)
+
+router.route('/especie/getSpeciesTaxon')
+  .get(verbsCtrl.getSpeciesTaxonNiche)
+  .post(verbsCtrl.getSpeciesTaxonNiche)
 
 
 router.route('/especie/getSubAOI')

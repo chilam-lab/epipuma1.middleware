@@ -4,7 +4,7 @@
   "description": "Middleware para consumir los datos del SNIB",
   "main": "server.js",
   "scripts": {
-    "start": "DEBUG=express:router,verbs:*,snib-middleware:* nodemon server.js",
+    "start": "DEBUG=express:router,verbs:*,snib-middleware:* nodemon --max-old-space-size=5000 server.js",
     "test": "DEBUG=verbs:*,snib-middleware:* mocha",
     "api-docs": "swagger-markdown -i api/swagger/swagger.yaml -o docs/api-docs.md",
     "lint": "eslint .",
@@ -37,12 +37,12 @@
     "pg-promise": "^8.4.4"
   },
   "devDependencies": {
-    "eslint": "^4.19.1",
-    "jsdoc": "^3.4.3",
     "chai": "*",
     "chai-things": "*",
+    "eslint": "^4.19.1",
+    "jsdoc": "^3.4.3",
     "mocha": "~3.1.0",
-    "nodemon": "^1.11.0",
+    "nodemon": "^1.18.9",
     "pg-monitor": "^0.5.11",
     "should": "^13.1.0",
     "supertest": "~2.0.0",
