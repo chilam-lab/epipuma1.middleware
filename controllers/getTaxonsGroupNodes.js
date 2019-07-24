@@ -90,7 +90,7 @@ exports.getTaxonsGroupNodes = function(req, res) {
 
 	    }).then(resp => {
     		
-        debug("numero de aristas " + resp.length)
+        debug("numero de nodes " + resp.length)
 
     		res.json({
     			

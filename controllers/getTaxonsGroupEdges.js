@@ -87,7 +87,7 @@ exports.getTaxonsGroupEdges = function (req, res) {
 
 	    }).then(resp => {
     		
-        debug("numero de nodos " + resp.length)
+        debug("numero de aristas " + resp.length)
 
     		res.json({
     			
