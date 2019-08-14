@@ -86,4 +86,5 @@ SELECT 	counts.biotic_s,
 		) as numeric), 2) as score
 FROM counts
 WHERE counts.reinovalido_s||counts.phylumdivisionvalido_s||counts.clasevalida_s||counts.ordenvalido_s||counts.familiavalida_s||counts.generovalido_s||counts.especieepiteto_s||counts.nombreinfra_s||counts.type_s||counts.layer_s||counts.bid_s !=  counts.reinovalido_t||counts.phylumdivisionvalido_t||counts.clasevalida_t||counts.ordenvalido_t||counts.familiavalida_t||counts.generovalido_t||counts.especieepiteto_t||counts.nombreinfra_t||counts.type_t||counts.layer_t||counts.bid_t
-ORDER BY value desc;
+ORDER BY value, score desc
+LIMIT 400000;

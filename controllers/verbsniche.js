@@ -1127,18 +1127,16 @@ exports.getGroupCountGridid = function (req, res) {
   nodes.forEach((group, index) => {
 
     merge_vars = group['merge_vars']
-    debug(merge_vars)
+    debug(group)
     where_clause = verb_utils.getWhereClauseFromGroupTaxonArray(merge_vars, false)
 
-    if (group['biotic']) { 
-      
+    if (group['biotic'] === 'true' || group['biotic'] === true) { 
       q += (index > 0 ? ", " : "WITH ") + queries.taxonsGroupNodes.getCellsBio
       q = q.toString().replace(/{region_cells:raw}/g, region_cells)
       q = q.toString().replace(/{where_filter:raw}/g, where_clause)
 
 
     } else {
-
 
       q += (index > 0 ? ", " : "WITH ") + queries.taxonsGroupNodes.getCellsAbio
       q = q.toString().replace(/{where_filter:raw}/g, where_clause)
