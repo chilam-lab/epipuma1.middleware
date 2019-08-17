@@ -8,8 +8,8 @@ aux_{name:raw} as (
 		and b.footprint_region = {region:raw}
 		--and b.footprint_region = 1	
 ), {name:raw} AS (
-	SELECT array_agg(distinct a.cell) - array[ {total_cells:raw} ]::integer[] as cells,
-		   array_length(array_agg(distinct a.cell) - array[ {total_cells:raw} ]::integer[],1) as nj,
+	SELECT array_agg(distinct a.cell)  - array[ {total_cells:raw} ]::integer[] as cells,
+		   array_length(array_agg(distinct a.cell)  - array[ {total_cells:raw} ]::integer[], 1) as nj,
 		   {fields:raw}
 	FROM (
 			select DISTINCT unnest(cells) as cell,
@@ -17,4 +17,5 @@ aux_{name:raw} as (
 			FROM aux_{name:raw}
 		 ) as a
 	GROUP BY {group_fields:raw}
+	HAVING icount(array_agg(distinct a.cell)) >= {min_occ:raw}
 ){groups}

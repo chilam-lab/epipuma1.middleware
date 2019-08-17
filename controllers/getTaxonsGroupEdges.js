@@ -36,15 +36,45 @@ exports.getTaxonsGroupEdges = function (req, res) {
   			})
   	}
 
+  	var bio_source = []
+  	var abio_source = []
+  	var where_bio_source = ''
+  	var where_abio_source = ''
+
+  	source.forEach(function(item){
+
+  		if(item['biotic']){
+
+  			bio_source.push(item)
+
+  		} else {
+
+  			abio_source.push(item)
+  		}
+
+  	})
+
+  	if(bio_source.length > 0){
+
+  		where_bio_source = verb_utils.getWhereClauseFromGroupTaxonArray(bio_source, false).replace('WHERE', '')
+
+  	}
+
+	if(abio_source.length > 0){
+
+  		where_abio_source = verb_utils.getWhereClauseFromGroupTaxonArray(abio_source, false).replace('WHERE', '')
+
+  	}
+
   	pool.task(t => {
 
   		// Creating queries
 	    var query = queries.taxonsGroupNodes.getEdgesBase
-	    var source_query = verb_utils.getCommunityAnalysisQuery(queries, footprint_region, res_cells, region_cells, res_views, source, false)
-	    var target_query = verb_utils.getCommunityAnalysisQuery(queries, footprint_region, res_cells, region_cells, res_views, target, true ).slice(5)
+	    var source_query = verb_utils.getCommunityAnalysisQuery(queries, footprint_region, res_cells, region_cells, res_views, source, false, where_bio_source, where_abio_source)
+	    var target_query = verb_utils.getCommunityAnalysisQuery(queries, footprint_region, res_cells, region_cells, res_views, target, true, where_bio_source, where_abio_source).slice(5)
 
 	    //const query1 = pgp.as.format(query, {source: source_query, target: target_query, res_views: res_views, region: footprint_region, min_occ: min_occ})
-        //debug(query1)
+      //debug(query1)
 
         // Executing queries
 	    return t.any(query, {
@@ -57,6 +87,8 @@ exports.getTaxonsGroupEdges = function (req, res) {
 
 	    }).then(resp => {
     		
+        debug("numero de aristas " + resp.length)
+
     		res.json({
     			
     			"ok":true,

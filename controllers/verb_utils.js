@@ -969,29 +969,99 @@ verb_utils.procesaTaxones = function(array_taxines){
 }
 
 
+verb_utils.processDataForScoreCellValidation = function (data, apriori, mapa_prob, all_cells = [], isvalidation = false){
+
+  debug("processDataForScoreCellValidation")
+
+  var cells_array = isvalidation ? data.map(function(d) {return {cells: d.cells_map, score: parseFloat(d.score)}}) : data.map(function(d) {return {cells: d.cells, score: parseFloat(d.score)}})
+
+  var df = d3.map([])
+
+  cells_array.forEach(function(obj) {
+
+    obj.cells.forEach(function(cell){
+
+      if(df.has(cell)){
+        df.set(cell, df.get(cell) + obj.score)
+      } else {
+        df.set(cell, obj.score)
+      }
+
+    })
+
+  })
+  training_cells = df.keys()
+  scored_training_cells = []
+  training_cells.forEach(function(cell) {
+    scored_training_cells.push({gridid: parseInt(cell), tscore:df.get(cell)})
+  })
+  //debug(scored_training_cells)
+  return scored_training_cells
+}
+
 verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, all_cells = [], isvalidation = false){
 
   debug("processDataForScoreCell")
   // debug("isvalidation: " + isvalidation)
-  var cells_array = isvalidation ? data.map(function(d) {return {cells: d.cells_map, score: parseFloat(d.score)}}) : data.map(function(d) {return {cells: d.cells, score: parseFloat(d.score)}})
-  // var cells_array = data.map(function(d) {return {cells: d.cells_map, score: parseFloat(d.score)}})
-  //debug(cells_array)
 
-  // se obtiene cada celda con su score
-  var cells = []
-  cells_array.forEach(function (item, index){
-    item.cells.forEach(function (cell_item, index){
-          cells.push({cell: cell_item, score: item.score})
-    })
-  })
+  var cells_array = []
   
-  var cross_cells = crossfilter(cells)
-  //debug(cross_cells)
+    cells_array = data.map(function(d) {
+
+      var iditem = verb_utils.hashCode(d.reinovalido +
+                      d.phylumdivisionvalido + 
+                      d.clasevalida + 
+                      d.ordenvalido + 
+                      d.familiavalida + 
+                      d.generovalido + 
+                      d.especieepiteto + 
+                      d.nombreinfra +
+                      d.type + 
+                      d.layer + 
+                      d.bid)
+
+      if(isvalidation){
+        return {
+          id: iditem, cells: d.cells_map, score: parseFloat(d.score)
+        }  
+      }
+      else{
+        return {
+          id: iditem, cells: d.cells, score: parseFloat(d.score)
+        }  
+      }
+      
+    })
+
+    
+  // se obtiene cada celda con su score
+  // var cells = []
+  var cell_map = d3.map([])
+
+  cells_array.forEach(function (item, index){
+
+    item.cells.forEach(function (cell_item, index){
+      var idsp = ""+item.id+cell_item
+        if(!cell_map.has(idsp)){
+          cell_map.set(idsp, {cell: cell_item, score: item.score})
+        }
+            
+      //cells.push({cell: cell_item, score: item.score})
+    
+    })
+
+  })
+
+  // debug("***** length CELLS MAP: " + cell_map.values().length)
+  // debug("***** length CELLS: " + cells.length)
+
+  // var cross_cells = crossfilter(cells)
+  var cross_cells = crossfilter(cell_map.values())
   
   cross_cells.groupAll();
   var cells_dimension = cross_cells.dimension(function(d) { return d.cell; });
 
-  var groupByCell = cells_dimension.group().reduceSum(function(d) { return parseFloat(parseFloat(d.score).toFixed(3)); });
+  var groupByCell = cells_dimension.group().reduceSum(function(d) { return parseFloat(d.score); });
   var map_cell = groupByCell.top(Infinity)
 
   var keys = [];
@@ -1049,6 +1119,7 @@ verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, all_cel
     // debug(all_cells)
     // debug(all_cells["cells"])
     
+    // agregando las celdas
     if(all_cells["cells"]){
 
       for(var i=0; i<all_cells.cells.length; i++){
@@ -1363,74 +1434,144 @@ verb_utils.generateFrequencyBeans = function (data_bucket, funcRange, paramType,
   return data_freq;
 }
 
-verb_utils.getGroupValidationValues = function(data_group) {
 
-  debug("getGroupValidationValues")
+verb_utils.get_target_cells = function(gridid, where_target, view, region, cells, queries) {
+  
+  debug("get_target_cells")
 
-  var result_test_cells = []
+  var query = queries.getGridSpeciesNiche.getTargetCells
 
-  data_group.forEach(function(item, index) {
+  return verb_utils.pool.one(query, {
+
+    gridid: gridid,
+    where_target: where_target.replace('WHERE', ''),
+    view: view,
+    region: region, 
+    cells: cells
+
+  }).then(resp => {
+
+    //debug(resp)
     
-    var apriori = item.apriori !== false && item.data[0].ni !== undefined ? true : false
-    var mapa_prob = item.mapa_prob !== false && item.data[0].ni !== undefined ? true : false
-    var train_cells = verb_utils.processDataForScoreCell(item.data, apriori, mapa_prob, [], false)
-    var temp_map = d3.map([])
+    return resp['target_cells']
     
-    train_cells.forEach(function(item){
-      temp_map.set(item.gridid, item.tscore)
-    })
-    
-    // obtiene el score por celda del conjunto de test
-    var temp_values = []
-    item.test_cells.forEach(function(cell_item){
-    
-      var temp_value = {}
-      temp_value.cell = cell_item
+  })
+}
 
-      if(temp_map.has(cell_item)){
+ verb_utils.getValidationDataNoValidation = function (data, target_cells, gridid, where_target, view, region, cells, apriori, mapa_prob, queries) {
 
-        temp_value.score = temp_map.get(cell_item)
+  debug("getValidationDataNoValidation")
+
+  var validation_data = []
+
+  var train_cells = verb_utils.processDataForScoreCellValidation(data, apriori, mapa_prob, [], false)
+  var temp_map = d3.map([])
+  train_cells.forEach(function(obj){
+
+    temp_map.set(obj.gridid, obj.tscore)
+
+  })
+
+  var scored_target_cells = []        
+  target_cells.forEach(function(cell){
+
+    var scored_cell = {}
+    scored_cell.gridid = cell
+
+    if(temp_map.has(cell)){
+
+      scored_cell.score = temp_map.get(cell)
+
+    } else {
+
+      scored_cell.score = null
+
+    }
+
+    scored_target_cells.push(scored_cell)
+
+  })
+
+  var sorted_scores = temp_map.values()
+  sorted_scores.sort(function(a, b){return a-b})
+  var N = sorted_scores.length
+  var partition = []
+  var delta_N = N / 10
+  for (var i = 0; i < 10; i++){
+
+    if(i == 0 ) {
+      
+      partition.push(sorted_scores[0])
+
+    } else {
+
+      partition.push(sorted_scores[parseInt(delta_N*i) - 1])
+
+    }
+
+  }
+  partition.push(sorted_scores[N - 1])
+  partition = partition.reverse()
+  debug(partition)
+
+  var vp = []
+  var fn = []
+  var nulo = []
+
+  for (var i = 0; i < 10; i ++) {
+
+    vp.push(0)
+    fn.push(0)
+    nulo.push(0)
+
+    scored_target_cells.forEach(function(item) {
+
+      if(item.score != 'null'){
+
+        if (item.score > partition[i+1]){
+
+          vp[i] += 1
+
+        } else {
+
+          fn[i] += 1
+          
+        }
 
       } else {
 
-        temp_value.score = 0 
+        nulo[i] += 1 
 
       }
 
-      temp_values.push(temp_value)
+    })
+
+
+    validation_data.push({
+
+      decil: 10 - i,
+      vp: vp[i],
+      fn: fn[i],
+      nulo: nulo[i],
+      recall: vp[i] / (vp[i] + fn[i])
 
     })
 
-    //debug(item)
+  }
 
-    // obtiene los deciles para obtener las métricas basados en lso resultados del conjunto de test
-    var num_deciles = 11
+  return validation_data  
 
-    var min_scr = d3.min(item.data.map(function(d) {return parseFloat(d.score);}));
-    // debug("min_scr: " + min_scr)  
-    
-    var max_scr = d3.max(item.data.map(function(d) {return parseFloat(d.score);}));
-    // debug("max_scr: " + max_scr)    
-    
-  })
-
-  //debug('............................................')
-  //debug()
-  //debug('............................................')  
-
-
-  return null
-}
+ }
 
 verb_utils.getValidationValues = function (data_group){
 
   debug("getValidationValues")
 
-  //debug(data_group[0]['test_cells'])
+  // debug(data_group)
 
   var result_test_cells = []
 
-  // obteniendo el score de las celdas del conjunto test basado en los resultados del conjunto train
+  // obteniendo el score de las celdas del conjunto test basado en los resultados del conjunto de entrenamiento
   data_group.forEach(function(item, index){
 
     // debug(item.data)
@@ -1440,13 +1581,18 @@ verb_utils.getValidationValues = function (data_group){
     // obteniendo el score por celda del conjunto de entrenamiento
     var apriori = item.apriori !== false && item.data[0].ni !== undefined ? true : false
     var mapa_prob = item.mapa_prob !== false && item.data[0].ni !== undefined ? true : false
-    var train_cells = verb_utils.processDataForScoreCell(item.data, apriori, mapa_prob, [], false)
+    //var train_cells = verb_utils.processDataForScoreCell(item.data, apriori, mapa_prob, [], false)
+    var train_cells = verb_utils.processDataForScoreCellValidation(item.data, apriori, mapa_prob, [], false)
     var temp_map = d3.map([])
 
+    var repeated_cells = d3.map([])
+
+    // Esta dejando el ultimo registro, no realiza un promedio del tscore de las celdas repetidas
     train_cells.forEach(function(item){
+
       temp_map.set(item.gridid, item.tscore)
+
     })
-    
 
     // debug(item.data)
     // debug(temp_map.values())
@@ -1461,8 +1607,7 @@ verb_utils.getValidationValues = function (data_group){
 
       if(temp_map.has(cell_item)){
         temp_value.score = temp_map.get(cell_item)
-      }
-      else{
+      } else {
         temp_value.score = null 
       }
       temp_values.push(temp_value)
@@ -1472,9 +1617,11 @@ verb_utils.getValidationValues = function (data_group){
 
     var array = temp_map.values()
     array.sort(function(a, b){return a-b})
-    // debug(array)
+    //debug(array)
 
     var len =  array.length;
+    // debug("min: " + d3.min(array))
+    // debug("max: " + d3.max(array))
     // debug(len)
 
     // se obtienen los limites de los deciles
@@ -1491,8 +1638,7 @@ verb_utils.getValidationValues = function (data_group){
     limites.push(array[Math.floor(len*.9) - 1])
     limites.push(array[Math.floor(len) - 1])
     
-    debug(limites)
-    // debug(array[Math.floor(len*.2) - 1])
+    //debug(limites)
     
     // obtiene los deciles para obtener las métricas basados en lso resultados del conjunto de test
     var num_deciles = 11
@@ -1516,7 +1662,8 @@ verb_utils.getValidationValues = function (data_group){
 
     // debug(limites)
     // // debug(temp_values)
-    // // debug(d3.range(1,num_deciles))
+
+    // debug(d3.range(1,num_deciles))
 
     // var max_scr_test = d3.max(temp_values.map(function(d) {return parseFloat(d.score);}));
     // var min_scr_test = d3.min(temp_values.map(function(d) {return parseFloat(d.score);}));
@@ -1524,8 +1671,10 @@ verb_utils.getValidationValues = function (data_group){
     // debug("max_scr_ TEST: " + max_scr_test)    
     // debug("min_scr_ TEST: " + min_scr_test)    
     // // debug("max_ TEST: " + rango_deciles(12))    
-    // // debug("min_ TEST: " + rango_deciles(220))    
-
+    // // debug("min_ TEST: " + rango_deciles(220))   
+    
+    //debug(item.iter) 
+    //debug(temp_values)
     
     var deciles = []
     d3.range(1,num_deciles).forEach(function(decil, index){
@@ -1539,16 +1688,17 @@ verb_utils.getValidationValues = function (data_group){
         
         // debug("decil: " + rango_deciles(row_value.score))
         // debug("es VP:" + rango_deciles(row_value.score) > 9)
-        // debug("decil: " + decil)
+        //debug("decil: " + decil)
 
 
         if(row_value.score === null){
           nulo_temp++
-        }
-        else if(row_value.score > limites[decil-1]){
+        } else if(row_value.score > limites[decil-1]){
+          /*if(decil == 10){
+            debug(row_value.cell, row_value.score, limites[decil-1])  
+          }*/
           vp_temp++
-        }
-        else{
+        } else{
           fn_temp++
         }
 
@@ -1574,7 +1724,7 @@ verb_utils.getValidationValues = function (data_group){
 
       var result_iter = {}
       
-      result_iter.iter = index+1
+      result_iter.iter = item.iter
       result_iter.decil = decil
       result_iter.vp = vp_temp
       result_iter.fn = fn_temp
@@ -1674,10 +1824,9 @@ verb_utils.updateObj = function(arr) {
 verb_utils.processGroupValidationData = function(data_group) {
 
   debug("processGroupValidationData")
-  
-  var avgdata = []
-  var data = []
 
+  var data = []
+  
   data_group.forEach(function(item){
 
     item['data'].forEach(function(element){
@@ -1697,357 +1846,287 @@ verb_utils.processGroupValidationData = function(data_group) {
     
   })
 
-  // debug(data_group[0])
-
+  // P  se agrupan todos los array data_i en un solo array de arrays, esto es [data_1, data_2, data_3, data_4, data_5]
   var data_map = data_group.map(function(d) {return  d.data})
 
-  //debug(data_map)
-
   data_map.forEach(function(item) {
-
     data = data.concat(item)
-
   })
 
-  // data.forEach(function(item) {
 
-  //   // if(item.generovalido === "Lynx" && item.especieepiteto === "rufus"){
-  //   //   debug("----------")
-  //   //   debug("sp: " + item.generovalido + " " + item.especieepiteto )
-  //   //   debug("N: " + item.n)
-  //   //   debug("ni: " + item.ni)
-  //   //   debug("tempid: " + item.tempid)
-  //   //   debug("----------")
-  //   // }
 
-  //   // if(item.generovalido === "Tamandua" && item.especieepiteto === "tetradactyla"){
-  //   //   debug("----------")
-  //   //   debug("sp: " + item.generovalido + " " + item.especieepiteto )
-  //   //   debug("N: " + item.n)
-  //   //   debug("ni: " + item.ni)
-  //   //   debug("tempid: " + item.tempid)
-  //   //   debug("----------")
-  //   // }
+  /*var score_total = 0;
+  data.forEach(function(item){
 
-  //   // if(item.generovalido === "Microtus" && item.especieepiteto === "guatemalensis"){
+    item['cells'].forEach(function(cell){
+
+      if(cell == 56688) {
+
+
+        score_total += parseFloat(item['score']);
+        debug('iter ' + item['iter']+ ' score de variable ' + item['bid'] + ' ' + item['score'])
       
-  //   //   debug("-processGroupValidationData---------")
-  //   //   debug("sp: " + item.generovalido + " " + item.especieepiteto )
-  //   //   debug("N: " + item.n)
-  //   //   debug("ni: " + item.ni)
-  //   //   debug("epsilon: " + item.epsilon)
-  //   //   debug("score: " + item.score)
-  //   //   debug("tempid: " + item.tempid)
-  //   //   debug("----------")
-  //   // }
+      }
 
-  //   // if(item.generovalido === "Glossophaga" && item.especieepiteto === "longirostris"){
+    })
+
+  })
+  debug("score_total " + score_total)*/
+
+  //debug('data ' + data.length/5)
+  // P data es un arreglo con los data_i concatenados
+
+  /****** implementación con map ********/
+
+  // var data_map = d3.map([])
+  // var counter = 0;
+
+  // data.forEach(function (row_item, index){
+
+  //   if(!data_map.has(row_item.tempid)){
+  //     row_item.count = 1
+  //     row_item.cells_map = []
+  //     row_item.epsilon = row_item.epsilon === undefined || row_item.epsilon === null  ? 0 : parseFloat(row_item.epsilon) 
+  //     row_item.score = row_item.score === undefined || row_item.score === null ? 0 : parseFloat(row_item.score) 
+
+  //     data_map.set(row_item.tempid,row_item)
+  //   }
+  //   else{
       
-  //   //   debug("----------")
-  //   //   debug("sp: " + item.generovalido + " " + item.especieepiteto )
-  //   //   debug("N: " + item.n)
-  //   //   debug("ni: " + item.ni)
-  //   //   debug("epsilon: " + item.epsilon)
-  //   //   debug("score: " + item.score)
-  //   //   debug("tempid: " + item.tempid)
-  //   //   debug("----------")
-  //   // }
+  //     // promedio (con n y ni variable) Varian por que existen especies que no estan en las 5 iteraciones, al promediar hacen variar la n y ni
+  //     var item = data_map.get(row_item.tempid)
+  //     item.n += row_item.n
+  //     item.ni += row_item.ni
+  //     item.nij += row_item.nij
+  //     item.nj += row_item.nj
+  //     item.epsilon += row_item.epsilon === undefined || row_item.epsilon === null  ? 0 : parseFloat(row_item.epsilon) 
+  //     item.score += row_item.score === undefined || row_item.score === null ? 0 : parseFloat(row_item.score) 
+
+  //     item.cells = item.cells.concat(row_item.cells)
+  //     // item.cells_map = item.cells.filter(function (item_dep, pos) {return item.cells.indexOf(item_dep) == pos})
+  //     item.cells_map = item.cells.filter(function (item_dep, pos) {return item.cells.indexOf(item_dep) == pos})
+  //     // item.cells_map = item.cells
+
+  //     item.count++
+  //   }
 
   // })
 
-
-
-  // debug(data)
-
-  var data_map = d3.map([])
-  var counter = 0;
-
-  // TODO: Esto no es una solución real
-  // var n_unica = data[0].n
-  // var ni_unica = data[0].ni
-
-  data.forEach(function (row_item, index){
-
-    if(!data_map.has(row_item.tempid)){
-      row_item.count = 1
-      row_item.cells_map = []
-      row_item.epsilon = row_item.epsilon === undefined || row_item.epsilon === null  ? 0 : parseFloat(row_item.epsilon) 
-      row_item.score = row_item.score === undefined || row_item.score === null ? 0 : parseFloat(row_item.score) 
-
-      // row_item.n = n_unica //row_item.n
-      // row_item.ni = ni_unica //row_item.ni
-      data_map.set(row_item.tempid,row_item)
-    }
-    else{
-      
-      // ultima iteracion
-      // var item = data_map.get(row_item.tempid)
-      // item.n = n_unica //row_item.n
-      // item.ni = ni_unica //row_item.ni
-
-      // item.nij = row_item.nij
-      // item.nj = row_item.nj
-      // item.epsilon = row_item.epsilon
-      // item.score = row_item.score
-      // item.cells = row_item.cells
-
-      // item.cells_map = item.cells.concat(row_item.cells).filter(function (item_dep, pos) {return item.cells.indexOf(item_dep) == pos})
-      // // item.cells_map = row_item.cells
-
-      // promedio (con n y ni variable) Varian por que existen especies que no estan en las 5 iteraciones, al promediar hacen variar la n y ni
-      var item = data_map.get(row_item.tempid)
-      item.n += row_item.n
-      item.ni += row_item.ni
-      item.nij += row_item.nij
-      item.nj += row_item.nj
-      item.epsilon += row_item.epsilon === undefined || row_item.epsilon === null  ? 0 : parseFloat(row_item.epsilon) 
-      item.score += row_item.score === undefined || row_item.score === null ? 0 : parseFloat(row_item.score) 
-
-      item.cells = item.cells.concat(row_item.cells)
-      // item.cells_map = item.cells.filter(function (item_dep, pos) {return item.cells.indexOf(item_dep) == pos})
-      item.cells_map = item.cells.filter(function (item_dep, pos) {return item.cells.indexOf(item_dep) == pos})
-      // item.cells_map = item.cells
-
-      item.count++
-    }
-
-  })
-
-
-
-
-  // debug(data_map)
-  // debug(data_map.values()[0])
-
-  var data_result = data_map.values()
-
-
-
-  // var n_temp = data_result[0].n
-  // debug("n_temp: " + n_temp)
-
-  data_result.forEach(function (item, index){
-
-    // if(item.generovalido === "Microtus" && item.especieepiteto === "guatemalensis"){
-    //   debug("************")
-    //   debug("sp: " + item.generovalido + " " + item.especieepiteto )
-    //   debug("N: " + item.n)
-    //   debug("ni: " + item.ni)
-    //   debug("epsilon: " + item.epsilon)
-    //   debug("score: " + item.score)
-    //   debug("tempid: " + item.tempid)
-    //   debug("count: " + item.count)
-    //   debug("************")
-    // }
-
-    // debug(item.generovalido + " " + item.especieepiteto + ": " + item.epsilon)
-    // debug(item.generovalido + " " + item.especieepiteto + ": " + item.score)
-
-    // if(item.score === undefined || item.score === 0){
-    //   debug("************")
-    //   debug("sp: " + item.generovalido + " " + item.especieepiteto )
-    //   debug("N: " + item.n)
-    //   debug("ni: " + item.ni)
-    //   debug("epsilon: " + item.epsilon)
-    //   debug("score: " + item.score)
-    //   debug("tempid: " + item.tempid)
-    //   debug("count: " + item.count)
-    //   debug("************")
-    // }
-
-    // if(item.generovalido === "Lynx" && item.especieepiteto === "rufus"){
-    //   debug("************")
-    //   debug("sp: " + item.generovalido + " " + item.especieepiteto )
-    //   debug("N: " + item.n)
-    //   debug("ni: " + item.ni)
-    //   debug("tempid: " + item.tempid)
-    //   debug("count: " + item.count)
-    //   debug("************")
-    // }
-
-    // if(n_temp !== item.n){
-    //   debug("*** FALSE")
-    //   debug("sp: " + item.generovalido + " " + item.especieepiteto )
-    //   debug("Otra N: " + item.n)
-    // }
-
-    // debug(row_item.n + " - " + row_item.count)
-
-      item.n = parseFloat(item.n / item.count).toFixed(2) 
-      item.ni = parseFloat(item.ni / item.count) .toFixed(2)
-      item.nij = parseFloat(item.nij / item.count).toFixed(2) 
-      item.nj = parseFloat(item.nj / item.count) .toFixed(2)
-      item.epsilon = parseFloat(item.epsilon / item.count) .toFixed(2)
-      item.score = parseFloat(item.score / item.count) .toFixed(2)
-    
-  })
-
-  // debug(data_result[0])
-
-  // debug(data.map(function(d) {return  d.ni}))
-  // debug(data.map(function(d) {return  d.n}))
-
-  // var ns = data.map(function(d) {return  d.n})
-  // var n = ns[0]
-  // for(i=0;i<ns.length;i++){
-  //   if(ns[i] != n){
-  //     debug("*****TRUE")
-  //     debug(ns[i])
-  //     break;
-  //   }
-  // }
-
-  // var cross_group = crossfilter(data)
-  // cross_group.groupAll()
+  // var data_result = data_map.values()
   
-  // debug(cross_group)
-  // debug(verb_utils.hashCode("hola"))
-  // debug(verb_utils.hashCode("hola"))
-  // debug(verb_utils.hashCode("hola2"))
+  // data_result.forEach(function (item, index){
+
+  //   // if(item.generovalido === "Microtus" && item.especieepiteto === "guatemalensis"){
+  //   //   debug("************")
+  //   //   debug("sp: " + item.generovalido + " " + item.especieepiteto )
+  //   //   debug("N: " + item.n)
+  //   //   debug("ni: " + item.ni)
+  //   //   debug("epsilon: " + item.epsilon)
+  //   //   debug("score: " + item.score)
+  //   //   debug("tempid: " + item.tempid)
+  //   //   debug("count: " + item.count)
+  //   //   debug("************")
+  //   // }
+
+  //     item.n = parseFloat(item.n / item.count).toFixed(2) 
+  //     item.ni = parseFloat(item.ni / item.count) .toFixed(2)
+  //     item.nij = parseFloat(item.nij / item.count).toFixed(2) 
+  //     item.nj = parseFloat(item.nj / item.count) .toFixed(2)
+  //     item.epsilon = parseFloat(item.epsilon / item.count) .toFixed(2)
+  //     item.score = parseFloat(item.score / item.count) .toFixed(2)
+    
+  // })
+
+  /****** termina implementación con map ********/
+
+
+
+  /****** implementación con crossfilter ********/
+
+  
+  var cross_group = crossfilter(data)
+  cross_group.groupAll()
+  
+  // // debug(cross_group)
+  // // debug(verb_utils.hashCode("hola"))
+  // // debug(verb_utils.hashCode("hola"))
+  // // debug(verb_utils.hashCode("hola2"))
   
 
-  //var name_dimension = cross_group.dimension(function(d) { return d.name; })  
-  // var name_dimension = cross_group.dimension(function(d) { return d.tempid;})
+  // // var name_dimension = cross_group.dimension(function(d) { return d.name; })  
+  var name_dimension = cross_group.dimension(function(d) { return d.tempid})
 
-
-  // var group_by_name = name_dimension.group().reduce(
+  var group_by_name = name_dimension.group().reduce(
     
-  //   function(item, add){
+    function(item, add){
 
-  //     // debug(item.ni)
+      ++item.count
 
-  //     ++item.count
-  //     item.reinovalido = add.reinovalido
-  //     item.phylumdivisionvalido = add.phylumdivisionvalido
-  //     item.clasevalida = add.clasevalida
-  //     item.ordenvalido = add.ordenvalido
-  //     item.familiavalida = add.familiavalida
-  //     item.generovalido = add.generovalido
-  //     item.especieepiteto = add.especieepiteto
-  //     item.nombreinfra = add.nombreinfra
-  //     item.type = add.type
-  //     item.layer = add.layer
-  //     item.bid = add.bid
-  //     item.icat = add.icat
-  //     item.tag =  add.tag
+      item.reinovalido = add.reinovalido
+      item.phylumdivisionvalido = add.phylumdivisionvalido
+      item.clasevalida = add.clasevalida
+      item.ordenvalido = add.ordenvalido
+      item.familiavalida = add.familiavalida
+      item.generovalido = add.generovalido
+      item.especieepiteto = add.especieepiteto
+      item.nombreinfra = add.nombreinfra
+      item.type = add.type
+      item.layer = add.layer
+      item.bid = add.bid
+      item.icat = add.icat
+      item.tag =  add.tag
 
-  //     item.cells = add.cells
-  //     item.cells_map = item.cells_map.concat(add.cells) 
+      item.cells = add.cells
 
-  //     item.nij = item.nij + add.nij
-  //     item.nj = item.nj + add.nj
+
+      item.cells_map = item.cells_map.concat(add.cells) 
+
+      item.nij += add.nij
+      item.nj += add.nj
       
-  //     item.ni = item.ni + add.ni
-  //     item.n = item.n + add.n
+      item.ni += add.ni
+      item.n += add.n
 
-  //     item.epsilon = parseFloat(add.epsilon) 
-  //     item.score = parseFloat(add.score)
-  //     item.tipo = add.tipo
-  //     return item
-  //   },
-  //   function(item,remove){
-  //     --item.count
-  //     item.reinovalido = remove.reinovalido
-  //     item.phylumdivisionvalido = remove.phylumdivisionvalido
-  //     item.clasevalida = remove.clasevalida
-  //     item.ordenvalido = remove.ordenvalido
-  //     item.familiavalida = remove.familiavalida
-  //     item.generovalido = remove.generovalido
-  //     item.especieepiteto = remove.especieepiteto
-  //     item.nombreinfra = remove.nombreinfra
-  //     item.type = remove.type
-  //     item.layer = remove.layer
-  //     item.bid = remove.bid
-  //     item.icat = remove.icat
-  //     item.tag = remove.tag
+      if(add.epsilon !== undefined && add.epsilon !== null){
+        item.epsilon += parseFloat(add.epsilon)
+        ++item.count_eps
+      }
       
-  //     item.cells = item.cells //remove.cells //
-  //     item.cells_map = item.cells_map
-
-  //     item.nij = item.nij - remove.nij
-  //     item.nj = item.nj - remove.nj
+      if(add.score !== undefined && add.score !== null){
+        item.score += parseFloat(add.score)
+        ++item.count_scr
+      }
       
-  //     item.ni = item.ni - remove.ni
-  //     item.n = item.n - remove.n
+      item.tipo = add.tipo
 
-  //     item.epsilon =  parseFloat(item.epsilon) 
-  //     item.score = parseFloat(item.score)
-  //     item.tipo = item.tipo
-  //     return item
-  //   },
-  //   function(){
-  //     return {
-  //       count: 0,
-  //       reinovalido: "",
-  //       phylumdivisionvalido: "",
-  //       clasevalida: "",
-  //       ordenvalido: "",
-  //       familiavalida: "",
-  //       generovalido: "",
-  //       especieepiteto: "",
-  //       nombreinfra:"",
-  //       type:"",
-  //       layer:"",
-  //       bid:"",
-  //       icat:"",
-  //       tag:"",
-  //       cells: [],
-  //       cells_map: [],
-  //       nij: 0,
-  //       nj: 0,
-  //       ni: 0,
-  //       n: 0,
-  //       epsilon: 0,
-  //       score: 0,
-  //       tipo: 0
-  //     }
-  //   }
-  // )
+      return item
+    },
+    function(item,remove){
+      --item.count
+      item.reinovalido = remove.reinovalido
+      item.phylumdivisionvalido = remove.phylumdivisionvalido
+      item.clasevalida = remove.clasevalida
+      item.ordenvalido = remove.ordenvalido
+      item.familiavalida = remove.familiavalida
+      item.generovalido = remove.generovalido
+      item.especieepiteto = remove.especieepiteto
+      item.nombreinfra = remove.nombreinfra
+      item.type = remove.type
+      item.layer = remove.layer
+      item.bid = remove.bid
+      item.icat = remove.icat
+      item.tag = remove.tag
+      
+      item.cells = item.cells //remove.cells //
+      item.cells_map = item.cells_map
 
-  // var reduced_data = group_by_name.top(Infinity);
+      item.nij -= remove.nij
+      item.nj -= remove.nj
+      
+      item.ni -= remove.ni
+      item.n -= remove.n
 
-  // var data_result = []
+      if(remove.epsilon !== undefined && remove.epsilon !== null){
+        item.epsilon -= parseFloat(remove.epsilon)
+        --item.count_eps
+      }
+      
+      if(remove.score !== undefined && remove.score !== null){
+        item.score -= parseFloat(remove.score)
+        --item.count_scr
+      }
+      
+      // item.epsilon -= parseFloat(remove.epsilon) 
+      // item.score -= parseFloat(remove.score) 
+      item.tipo = item.tipo
 
-  // for(var i=0; i<reduced_data.length; i++){
-  //     var entry = reduced_data[i]
-  //     var counter = parseInt(entry["value"].count)
+      return item
+    },
+    function(){
+      return {
+        count: 0,
+        count_eps: 0,
+        count_scr: 0,
+        reinovalido: "",
+        phylumdivisionvalido: "",
+        clasevalida: "",
+        ordenvalido: "",
+        familiavalida: "",
+        generovalido: "",
+        especieepiteto: "",
+        nombreinfra:"",
+        type:"",
+        layer:"",
+        bid:"",
+        icat:"",
+        tag:"",
+        cells: [],
+        cells_map: [],
+        nij: 0,
+        nj: 0,
+        ni: 0,
+        n: 0,
+        epsilon: 0,
+        score: 0,
+        tipo: 0
+      }
+    }
+  )
 
-  //     // debug(entry["value"].ni)
+  var reduced_data = group_by_name.top(Infinity);
 
-  //     data_result.push({
-  //       reinovalido: entry["value"].reinovalido,
-  //       phylumdivisionvalido: entry["value"].phylumdivisionvalido,
-  //       clasevalida: entry["value"].clasevalida,
-  //       ordenvalido: entry["value"].ordenvalido,
-  //       familiavalida: entry["value"].familiavalida,
-  //       generovalido: entry["value"].generovalido,
-  //       especieepiteto: entry["value"].especieepiteto,
-  //       nombreinfra: entry["value"].nombreinfra,
-  //       type: entry["value"].type,
-  //       layer: entry["value"].layer,
-  //       bid: entry["value"].bid, 
-  //       icat: entry["value"].icat,
-  //       tag: entry["value"].tag,
+  var data_result = []
+
+  debug('reduced ' + reduced_data.length)
+
+  for(var i=0; i<reduced_data.length; i++){
+      var entry = reduced_data[i]
+      var counter = parseInt(entry["value"].count)
+      var count_eps = parseInt(entry["value"].count_eps)
+      var count_scr = parseInt(entry["value"].count_scr)
+
+      data_result.push({
+        reinovalido: entry["value"].reinovalido,
+        phylumdivisionvalido: entry["value"].phylumdivisionvalido,
+        clasevalida: entry["value"].clasevalida,
+        ordenvalido: entry["value"].ordenvalido,
+        familiavalida: entry["value"].familiavalida,
+        generovalido: entry["value"].generovalido,
+        especieepiteto: entry["value"].especieepiteto,
+        nombreinfra: entry["value"].nombreinfra,
+        type: entry["value"].type,
+        layer: entry["value"].layer,
+        bid: entry["value"].bid, 
+        icat: entry["value"].icat,
+        tag: entry["value"].tag,
         
-  //       cells: entry["value"].cells,
-  //       cells_map: entry["value"].cells_map,
+        cells: entry["value"].cells,
+        cells_map: entry["value"].cells_map,
 
-  //       nij: parseFloat((entry["value"].nij ).toFixed(2)),
-  //       nj: parseFloat((entry["value"].nj ).toFixed(2)),
+        nij: parseFloat((entry["value"].nij/counter ).toFixed(2)),
+        nj: parseFloat((entry["value"].nj/counter ).toFixed(2)),
         
-  //       ni: parseFloat(parseInt(entry["value"].ni)/counter).toFixed(2),
-  //       n:  parseFloat(parseInt(entry["value"].n)/counter).toFixed(2),
+        ni: parseFloat(parseInt(entry["value"].ni)/counter).toFixed(2),
+        n:  parseFloat(parseInt(entry["value"].n)/counter).toFixed(2),
 
-  //       epsilon: parseFloat((entry["value"].epsilon).toFixed(2)),
-  //       score: parseFloat((entry["value"].score).toFixed(2)),
-  //       tipo: entry["value"].tipo
-  //     })
-  // }
+        epsilon: parseFloat((entry["value"].epsilon/count_eps).toFixed(2)),
+        score: parseFloat((entry["value"].score/count_scr).toFixed(2)),
+
+        tipo: entry["value"].tipo
+      })
+  }
 
   // debug('............................................')
   // debug(data_result.map(function(d) {return  d.ni}))
   // debug(data_result.map(function(d) {return  d.n}))
   // debug('............................................')
+
+  data_result.forEach(function(item) {
+
+    //debug('----------------> ' +  item['bid'])
+    item['cells_map'] = Array.from(new Set(item['cells_map']))
+
+  })
 
   return data_result
 }
@@ -2438,12 +2517,14 @@ verb_utils.getFieldsFromLevel = function (level) {
 
   }
 
-  if (level === 'bid')
-    fields  += ", icat, tag "
+  if (level === 'layer')
+    fields  += ", icat, layer, tag "
+  else if(level === 'bid')
+    fields  += ", icat, label, tag "
   else 
-    fields  += ", '' AS icat, '' AS tag "
+    fields  += ", '' AS icat, '' AS label, '' AS tag "
 
-  //debug("fields =" + fields)
+  //debug("fields === " + fields)
   return fields
 
 }
@@ -2537,8 +2618,10 @@ verb_utils.getGroupFieldsFromLevel = function (level) {
 
     }
 
-   if(level === 'bid')
-        group_fields += ", icat, tag "
+   if(level === 'layer')
+        group_fields += ", icat, layer, tag "
+  else if(level === 'bid')
+        group_fields  += ", icat, label, tag "
 
   }
 
@@ -2729,6 +2812,7 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
       query_covar = query_covar.toString().replace(/{excluded_cells:raw}/g, data_request["excluded_cells"].toString())
       query_covar = query_covar.toString().replace(/{total_cells:raw}/g, data_request["total_cells"])
       query_covar = query_covar.toString().replace(/{where_exclude_target:raw}/g, data_request["where_exclude_target"])
+      query_covar = query_covar.toString().replace(/{min_occ:raw}/g, data_request["min_occ"])
        
     } else {
 
@@ -2772,6 +2856,7 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
       query_covar = query_covar.toString().replace(/{res_celda_snib_tb:raw}/g, data_request.res_celda_snib_tb)
       query_covar = query_covar.toString().replace(/{excluded_cells:raw}/g, data_request["excluded_cells"].toString())
       query_covar = query_covar.toString().replace(/{total_cells:raw}/g, data_request["total_cells"])
+      query_covar = query_covar.toString().replace(/{min_occ:raw}/g, data_request["min_occ"])
 
     }
     
@@ -2781,7 +2866,7 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
   return query_covar  
 }
 
-verb_utils.getCommunityAnalysisQuery = function(queries, region, res_cells, region_cells, res_views, source, is_target){
+verb_utils.getCommunityAnalysisQuery = function(queries, region, res_cells, region_cells, res_views, source, is_target, where_bio_source, where_abio_source){
 
   debug("getCommunityAnalysisQuery")
 
@@ -2805,7 +2890,8 @@ verb_utils.getCommunityAnalysisQuery = function(queries, region, res_cells, regi
         fields = verb_utils.getFieldsFromLevel(level)
         group_fields = verb_utils.getGroupFieldsFromLevel(level)
         where = verb_utils.getWhereClauseFromGroupTaxonArray([taxon], false)
-        
+        //where = where + ((is_target && where_bio_source !== '') ? (" AND NOT " + where_bio_source) : '')
+
         q = q.toString().replace(/{index:raw}/g, index)
         q = q.toString().replace(/{fields:raw}/g, fields)
         q = q.toString().replace(/{biotic:raw}/g, 'true')
@@ -2821,9 +2907,11 @@ verb_utils.getCommunityAnalysisQuery = function(queries, region, res_cells, regi
         
         level = taxon["level"]
         fields = verb_utils.getFieldsFromLevel(level)
+        debug("FIELDSSSS"  + fields)
         group_fields = verb_utils.getGroupFieldsFromLevel(level)
         where = verb_utils.getWhereClauseFromGroupTaxonArray([taxon], false)
-        
+        //where = where + ((is_target && where_abio_source !== '') //? (" AND NOT " + where_abio_source): '')
+
         q_aux = q_aux.toString().replace(/{index:raw}/g, index)
         q_aux = q_aux.toString().replace(/{biotic:raw}/g, 'true')
         q_aux = q_aux.toString().replace(/{fields:raw}/g, fields)

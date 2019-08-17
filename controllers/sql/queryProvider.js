@@ -84,7 +84,8 @@ var queryProvider = {
   },
   getValidationTables: {
     createTables: sqlPath('especie/get_validation_tables.sql'),
-    createGroupTables: sqlPath('especie/get_group_validation_tables.sql')
+    createGroupTables: sqlPath('especie/get_group_validation_tables.sql'),
+    createGroupTables_2: sqlPath('especie/get_group_validation_tables_2.sql')
   },
   processValidationTables: {
     processTables: sqlPath('especie/process_validation_tables.sql')
@@ -144,7 +145,9 @@ var queryProvider = {
 
     getGridSpeciesBioM: sqlPath('getGridSpecies/get_grid_species_BM.sql'),
     getGridSpeciesRaM: sqlPath('getGridSpecies/get_grid_species_RaM.sql'),
-    getGridSpeciesM: sqlPath('getGridSpecies/get_grid_species_M.sql')
+    getGridSpeciesM: sqlPath('getGridSpecies/get_grid_species_M.sql'),
+
+    getTargetCells: sqlPath('getGridSpecies/get_target_cells.sql'),
 
   },
   getGeoRelNiche: {

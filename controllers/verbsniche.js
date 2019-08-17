@@ -535,9 +535,6 @@ exports.getToken = function (req, res, next) {
 
   debug('getToken')
 
-  // var tipo = getParam(req, 'tipo')
-  // var params = getParam(req, 'confparams')
-
   var sfilters = verb_utils.getParam(req, 'sfilters',[])
   var val_process = getParam(req, 'val_process')
   // var idtabla = getParam(req, 'idtabla')
@@ -552,7 +549,7 @@ exports.getToken = function (req, res, next) {
   var footprint_region = getParam(req, 'footprint_region')
   var discardedFilterids = getParam(req, 'discardedFilterids',[])
   var tfilters = verb_utils.getParam(req, 'tfilters',[])
-  var tipo = verb_utils.getParam(req, 'tipo')
+  var tipo = verb_utils.getParam(req, 'tipo', 'nicho')
 
   var link_str = "";
 
@@ -699,13 +696,17 @@ exports.getGroupValidationTables = function (req, res, next) {
 
   var target_group = verb_utils.getParam(req, 'target_taxons', [])
   var filter = verb_utils.getWhereClauseFromGroupTaxonArray(target_group, true).replace('WHERE', '')
+
   filter = filter.replace(new RegExp("\'", 'g'), "\'\'")
   var iter = getParam(req, 'iter')
-  debug(filter)
+  
+  // debug("filter:" + filter)
+
+
   var idtbl =  'tbl_' + new Date().getTime() //getParam(req, 'idtable')
   //var idtbl =  't01'
 
-  debug(idtbl)
+  //debug(idtbl)
   var iter = getParam(req, 'iterations',iterations)
 
   var footprint_region = parseInt(getParam(req, 'footprint_region', default_region))
@@ -713,6 +714,8 @@ exports.getGroupValidationTables = function (req, res, next) {
   var grid_resolution = verb_utils.getParam(req, 'grid_res',16)
   var res_celda_sp =  'cells_'+grid_resolution+'km'
   var res_celda_snib_tb = 'grid_geojson_'+grid_resolution+'km_aoi'
+  var res_grid_id = 'gridid_'+grid_resolution+'km'
+
 
   pool.any(queries.getValidationTables.createGroupTables, {
     filter: filter,
@@ -720,12 +723,14 @@ exports.getGroupValidationTables = function (req, res, next) {
     idtbl: idtbl,
     res_celda_sp: res_celda_sp,
     res_celda_snib_tb: res_celda_snib_tb,
-    region: footprint_region
+    region: footprint_region,
+    grid: res_grid_id
   })
         .then(function (data) {
 
           var item = data[0]
           item['tblname'] = idtbl
+          
           debug(data)
 
           res.json({'data': data})
@@ -1069,8 +1074,8 @@ exports.getCountGridid = function (req, res, next) {
   debug('getCountGridid')
 
   var columnas = ['gridid', 'conteo']
-  var spids = getParam(req, 'spids')
-  var isNicho = getParam(req, 'nicho')
+  var species = getParam(req, 'species', [])
+  var isNicho = getParam(req, 'nicho', false)
   var footprint_region = getParam(req, 'footprint_region', default_region)
 
   var grid_res = getParam(req, 'grid_res', 16)
@@ -1081,13 +1086,13 @@ exports.getCountGridid = function (req, res, next) {
   //debug(columnas)
   //debug(spids)
 
-  if (isNicho === 'true') {
+  if (isNicho === true) {
     columnas.push('spids')
     columnas.push('bioclim')
   }
 
   pool.any(queries.getCountGridid.getCount, {
-    spids: spids,
+    species: species,
     res_celda: res_celda,
     res_grid: res_grid,
     columns: columnas,
@@ -1111,7 +1116,7 @@ exports.getGroupCountGridid = function (req, res) {
 
   // defining necessary varaiables 
   var region_cells = 'cells_' + grid_res + 'km_' + footprint_region
-  var res_view = 'gridid_geojson_' + grid_res + 'km_aoi'
+  var res_views = 'grid_geojson_' + grid_res + 'km_aoi'
   var res_cells = 'cells_' + grid_res + 'km'
   var where_clause = ''
   var query = "" 
@@ -1122,28 +1127,29 @@ exports.getGroupCountGridid = function (req, res) {
   nodes.forEach((group, index) => {
 
     merge_vars = group['merge_vars']
-    debug(merge_vars)
+    debug(group)
     where_clause = verb_utils.getWhereClauseFromGroupTaxonArray(merge_vars, false)
 
-    if (group['biotic']) {
-      
+    if (group['biotic'] === 'true' || group['biotic'] === true) { 
       q += (index > 0 ? ", " : "WITH ") + queries.taxonsGroupNodes.getCellsBio
       q = q.toString().replace(/{region_cells:raw}/g, region_cells)
       q = q.toString().replace(/{where_filter:raw}/g, where_clause)
 
+
     } else {
 
-      q += (index > 0 ? ", " : "WITH ") + queries.taxonsGroupNodes.getCellsBio
+      q += (index > 0 ? ", " : "WITH ") + queries.taxonsGroupNodes.getCellsAbio
       q = q.toString().replace(/{where_filter:raw}/g, where_clause)
       q = q.toString().replace(/{res_cells:raw}/g, res_cells)
       q = q.toString().replace(/{res_views:raw}/g, res_views)
-      q = q.toString().replace(/{region:raw}/g, region)
+      q = q.toString().replace(/{region:raw}/g, footprint_region)
 
     }
     
     select += (index > 0 ? "\n UNION \n" : "") + queries.taxonsGroupNodes.selectCount
     q = q.toString().replace(/{index:raw}/g, index)
     select = select.toString().replace(/{index:raw}/g, index)
+
 
   })
 
