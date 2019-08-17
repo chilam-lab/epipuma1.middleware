@@ -484,6 +484,50 @@ describe("verbo getEdges", function(){
 	
 });
 
+
+describe("Verbo que devuelve la distribución (celdas con `gridid_xxkm`) de nodos seleccionados", function(){
+	[
+	  // 8,
+	  // 16,
+	  32,
+	  64
+	].forEach(cell_res =>{
+	  [
+	    // {rank: "kingdom", value: "Animalia"},
+	    // {rank: "phylum",  value: "Bacillariophyta"},
+	    // {rank: "class",   value: "Reptilia"},
+	    // {rank: "order",   value: "Caryophyllales"},
+	    {rank: "family",  value: "Curculionidae"},
+	    {rank: "genus",   value: "Tillandsia"},
+	    {rank: "species", value: "Zea mays"},
+	    {rank: "subspecies", value: "Urtica praetermissa praetermissa"}
+	  ].forEach(variable => {
+
+	    it("verbo getGroupCountGridid - DISPONIBLE", function(done) {
+	      //console.log(variable);
+	      supertest(server).post("niche/especie/getGroupCountGridid")
+	        .send({
+	          "nodes": [{
+	            "biotic": true,
+	            "merge_vars": [variable]
+	          }],
+	          "grid_res": cell_res,
+	          "region": 1
+	        })
+	        .expect("Content-type", /json/)
+	        .expect(200)
+	        .end(function(err, response) {
+	          response.statusCode.should.equal(200)
+	          expect(response.body.data).to.not.equal(null)
+	          expect(response.body.data).all.have.property("gridid")
+	          expect(response.body.data).all.have.property("conteo")
+	          done();
+	        });
+	    })
+	    });
+	});
+});
+
 // describe("Test cells endpoint",function(){
 // 	var last_cells_size = 0;
 
