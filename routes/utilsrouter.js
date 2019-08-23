@@ -119,6 +119,11 @@ router.route('/especie/getSpeciesTaxon')
   .post(verbsCtrl.getSpeciesTaxonNiche)
 
 
+router.route('/especie/getGridSpeciesTaxon')
+  .get(verbsCtrl.getGridSpeciesTaxonNiche)
+  .post(verbsCtrl.getGridSpeciesTaxonNiche)
+
+
 router.route('/especie/getSubAOI')
   .post(verbsCtrl.getSubAOI)
 
