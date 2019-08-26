@@ -1,0 +1,22 @@
+WITH aux_{label:raw} AS (
+	{query:raw}	
+), {label:raw} AS (
+	SELECT
+		cells,
+		biotic,
+		reinovalido, 
+		phylumdivisionvalido,
+		clasevalida,
+		ordenvalido,
+	    familiavalida,
+	    generovalido, 
+	    especieepiteto,
+	    nombreinfra,
+		type::varchar,
+		layer,
+		label,
+	    bid::varchar,
+	    tag,
+	    icat::varchar
+	FROM aux_{label:raw}
+)

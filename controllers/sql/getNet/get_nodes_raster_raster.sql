@@ -5,16 +5,18 @@ with raster_cell as (
 		layer as reinovalido, label as phylumdivisionvalido, tag as clasevalida, ''::text as  ordenvalido, ''::text as familiavalida, ''::text as generovalido,
 		case when type = 1 then
 			layer
-		else
-			case when strpos(label,'Precipit') = 0 then
-			(layer || ' ' || round(cast(split_part(split_part(tag,':',1),'.',1) as numeric)/10,2)  ||' ºC - ' || round(cast(split_part(split_part(tag,':',2),'.',1) as numeric)/10,2) || ' ºC')
-			else
-			(layer || ' ' || round(cast(split_part(split_part(tag,':',1),'.',1) as numeric),2)  ||' mm - ' || round(cast(split_part(split_part(tag,':',2),'.',1) as numeric),2) || ' mm')
-			end
-		end as especievalidabusqueda,
-		2 as grp,
-		unnest($<res_celda:raw>) as cell
-		--unnest(cells_16km) as cell
+			ELSE
+			(label || ' ' || round(cast(split_part(split_part(tag,':',1),'.',1) as numeric)/10,2)  ||' ºC - ' || round(cast(split_part(split_part(tag,':',2),'.',1) as numeric)/10,2) || ' ºC')
+			--(label || ' ' || tag) 
+			end as especievalidabusqueda,
+			1 as grp,
+			array_intersection($<res_celda:raw>,
+				ARRAY(SELECT cells
+					FROM grid_geojson_$<resolution:raw>km_aoi
+					WHERE footprint_region = $<region:raw>
+				)
+			) AS cells
+			--raster_bins.cells_16km AS cells
 	FROM raster_bins
 	$<where_config_source_raster:raw>
 	--where layer = 'bio1'
@@ -39,16 +41,18 @@ raster_cell_target as (
 		layer as reinovalido, label as phylumdivisionvalido, tag as clasevalida, ''::text as  ordenvalido, ''::text as familiavalida, ''::text as generovalido,
 		case when type = 1 then
 			layer
-		else
-			case when strpos(label,'Precipit') = 0 then
-			(layer || ' ' || round(cast(split_part(split_part(tag,':',1),'.',1) as numeric)/10,2)  ||' ºC - ' || round(cast(split_part(split_part(tag,':',2),'.',1) as numeric)/10,2) || ' ºC')
-			else
-			(layer || ' ' || round(cast(split_part(split_part(tag,':',1),'.',1) as numeric),2)  ||' mm - ' || round(cast(split_part(split_part(tag,':',2),'.',1) as numeric),2) || ' mm')
-			end
-		end as especievalidabusqueda,
-		2 as grp,
-		unnest($<res_celda:raw>) as cell
-		--unnest(cells_16km) as cell
+			ELSE
+			(label || ' ' || round(cast(split_part(split_part(tag,':',1),'.',1) as numeric)/10,2)  ||' ºC - ' || round(cast(split_part(split_part(tag,':',2),'.',1) as numeric)/10,2) || ' ºC')
+			--(label || ' ' || tag) 
+			end as especievalidabusqueda,
+			2 as grp,
+			array_intersection($<res_celda:raw>,
+				ARRAY(SELECT cells
+					FROM grid_geojson_$<resolution:raw>km_aoi
+					WHERE footprint_region = $<region:raw>
+				)
+			) AS cells
+			--raster_bins.cells_16km AS cells 
 	FROM raster_bins
 	$<where_config_target_raster:raw>
 	--where layer = 'bio1'

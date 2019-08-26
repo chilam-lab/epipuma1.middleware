@@ -40,6 +40,10 @@ router.route('/especie/getEntList')
   .get(verbsCtrl.getEntListNiche)
   .post(verbsCtrl.getEntListNiche)
 
+router.route('/especie/getEntListByTaxon')
+  .get(verbsCtrl.getEntListByTaxonNiche)
+  .post(verbsCtrl.getEntListByTaxonNiche)
+
 router.route('/especie/getToken')
   .get(verbsCtrl.getToken)
   .post(verbsCtrl.getToken)
@@ -56,6 +60,9 @@ router.route('/especie/getValidationTables')
   .get(verbsCtrl.getValidationTables)
   .post(verbsCtrl.getValidationTables)
 
+router.route('/especie/getGroupValidationTables')
+  .post(verbsCtrl.getGroupValidationTables)
+
 router.route('/especie/processValidationTables')
   .get(verbsCtrl.processValidationTables)
   .post(verbsCtrl.processValidationTables)
@@ -68,8 +75,9 @@ router.route('/especie/getCountGridid')
   .get(verbsCtrl.getCountGridid)
   .post(verbsCtrl.getCountGridid)
 
-
-
+router.route('/especie/getGroupCountGridid')
+  .get(verbsCtrl.getGroupCountGridid)
+  .post(verbsCtrl.getGroupCountGridid)
 
 router.route('/especie/getVariables')
   .get(verbsCtrl.getVariablesNiche)
@@ -79,6 +87,12 @@ router.route('/especie/getVariables')
 router.route('/especie/getRasterVariables')
   .get(verbsCtrl.getRasterNiche)
   .post(verbsCtrl.getRasterNiche)
+
+
+
+router.route('/especie/getAvailableVariables')
+  .get(verbsCtrl.getAvailableVariables)
+  .post(verbsCtrl.getAvailableVariables)
 
 
 // router.route('/especie/getRasterVariables')
@@ -94,6 +108,39 @@ router.route('/especie/getGridids')
 router.route('/especie/getSpecies')
   .get(verbsCtrl.getSpeciesNiche)
   .post(verbsCtrl.getSpeciesNiche)
+
+
+router.route('/especie/getSpeciesArray')
+  .get(verbsCtrl.getSpeciesArrayNiche)
+  .post(verbsCtrl.getSpeciesArrayNiche)
+
+router.route('/especie/getSpeciesTaxon')
+  .get(verbsCtrl.getSpeciesTaxonNiche)
+  .post(verbsCtrl.getSpeciesTaxonNiche)
+
+
+router.route('/especie/getSubAOI')
+  .post(verbsCtrl.getSubAOI)
+
+
+router.route('/especie/getN')
+  .get(verbsCtrl.getN)
+  .post(verbsCtrl.getN)
+
+
+router.route('/especie/getAvailableCountries')
+  .get(verbsCtrl.getAvailableCountries)
+  .post(verbsCtrl.getAvailableCountries)  
+
+
+router.route('/especie/getAvailableCountriesFootprint')
+  .get(verbsCtrl.getAvailableCountriesFootprint)
+  .post(verbsCtrl.getAvailableCountriesFootprint)  
+
+
+router.route('/especie/getIdFromName')
+  .get(verbsCtrl.getIdFromName)
+  .post(verbsCtrl.getIdFromName)  
 
 
 module.exports = router

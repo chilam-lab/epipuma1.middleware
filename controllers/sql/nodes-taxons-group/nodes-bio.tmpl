@@ -1,0 +1,21 @@
+WITH aux_{index:raw} AS (
+	SELECT DISTINCT 
+		{biotic:raw} AS biotic,
+		{fields:raw},
+		UNNEST({region_cells:raw}) AS cell
+	FROM sp_snib
+	{where_filter:raw}
+) {aux:raw}
+SELECT 
+	biotic,
+	array_agg(distinct a.cell) AS cells,
+	{fields:raw}
+FROM (
+		SELECT
+			biotic, 
+			cell,
+			{fields:raw}
+		FROM aux_{index:raw}
+	) AS a
+GROUP BY biotic, {group_fields:raw}
+{union:raw}
