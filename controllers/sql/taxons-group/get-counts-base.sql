@@ -1,6 +1,6 @@
 WITH aux_target AS (
-	SELECT DISTINCT b.${res_celda_snib:raw} AS cells
-	FROM snib AS b
+	SELECT b.${res_celda_snib:raw} AS cells
+	FROM snib_grid_${grid_resolution:raw}km AS b
 	JOIN 
 		(
 			SELECT spid
@@ -13,6 +13,7 @@ WITH aux_target AS (
 			-- and array_length(a.cells_16km_1, 1) > 0)
 		) AS c
 	ON b.spid = c.spid
+	AND b.${res_celda_snib:raw} is not null
 	${where_filter:raw}
 ), target AS (
 	SELECT '${target_name:raw}' as target_name,

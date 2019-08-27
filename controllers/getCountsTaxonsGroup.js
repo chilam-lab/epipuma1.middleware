@@ -127,7 +127,8 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
       where_target: data_request["where_target"].replace('WHERE', ''),
       view: data_request["res_celda_snib_tb"],
       region: data_request["region"],
-      cells: data_request["res_celda_sp"], 
+      cells: data_request["res_celda_sp"],
+      grid_resolution: data_request["grid_resolution"] 
 
     }).then(resp => {
 
