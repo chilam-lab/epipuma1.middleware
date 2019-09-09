@@ -6,30 +6,30 @@ n_res AS (
 	WHERE footprint_region = $<region:raw>
 ),
 counts AS (
-	SELECT 	source.biotic AS biotic_s, 
-			source.reinovalido AS reinovalido_s, 
-			source.phylumdivisionvalido AS phylumdivisionvalido_s,
-			source.clasevalida AS clasevalida_s,
-			source.ordenvalido AS ordenvalido_s,
-		    source.familiavalida AS familiavalida_s,
-		    source.generovalido AS generovalido_s, 
-		    source.especieepiteto AS especieepiteto_s,
-		    source.nombreinfra AS nombreinfra_s,
-			source.type AS type_s,
-			source.layer AS layer_s,
-		    source.bid AS bid_s,
+	SELECT 	source.biotic AS biotic_s,
+		    md5(source.reinovalido|| 
+				source.phylumdivisionvalido||
+				source.clasevalida||
+				source.ordenvalido||
+				source.familiavalida||
+				source.generovalido|| 
+				source.especieepiteto||
+				source.nombreinfra||
+				(source.type::text)||
+				source.layer||
+				(source.bid::text) ) AS id_node_source,
 		    target.biotic AS biotic_t, 
-			target.reinovalido AS reinovalido_t, 
-			target.phylumdivisionvalido AS phylumdivisionvalido_t,
-			target.clasevalida AS clasevalida_t,
-			target.ordenvalido AS ordenvalido_t,
-		    target.familiavalida AS familiavalida_t,
-		    target.generovalido AS generovalido_t, 
-		    target.especieepiteto AS especieepiteto_t,
-		    target.nombreinfra nombreinfra_t,
-			target.type AS type_t,
-			target.layer AS layer_t,
-		    target.bid AS bid_t,
+			md5(target.reinovalido|| 
+				target.phylumdivisionvalido||
+				target.clasevalida||
+				target.ordenvalido||
+				target.familiavalida||
+				target.generovalido|| 
+				target.especieepiteto||
+				target.nombreinfra||
+				(target.type::text)||
+				target.layer||
+				(target.bid::text) ) AS id_node_target,
 			icount(source.cells & target.cells) AS niyj,
 			icount(target.cells) AS nj,
 			icount(source.cells) AS ni,
@@ -39,30 +39,10 @@ counts AS (
 	where icount(target.cells) > $<min_occ:raw>
 	and icount(source.cells) > 0
 ) 
-SELECT 	counts.biotic_s, 
-		counts.reinovalido_s, 
-		counts.phylumdivisionvalido_s,
-		counts.clasevalida_s,
-		counts.ordenvalido_s,
-	    counts.familiavalida_s,
-	    counts.generovalido_s, 
-	    counts.especieepiteto_s,
-	    counts.nombreinfra_s,
-		counts.type_s,
-		counts.layer_s,
-	    counts.bid_s,
-	    counts.biotic_t, 
-		counts.reinovalido_t, 
-		counts.phylumdivisionvalido_t,
-		counts.clasevalida_t,
-		counts.ordenvalido_t,
-	    counts.familiavalida_t,
-	    counts.generovalido_t, 
-	    counts.especieepiteto_t,
-	    counts.nombreinfra_t,
-		counts.type_t,
-		counts.layer_t,
-	    counts.bid_t,
+SELECT 	counts.biotic_s,
+		counts.biotic_t,
+		counts.id_node_source,
+		counts.id_node_target,
 		counts.niyj as nij,
 		counts.nj,
 		counts.ni,
@@ -85,6 +65,5 @@ SELECT 	counts.biotic_s,
 			)
 		) as numeric), 2) as score
 FROM counts
-WHERE counts.reinovalido_s||counts.phylumdivisionvalido_s||counts.clasevalida_s||counts.ordenvalido_s||counts.familiavalida_s||counts.generovalido_s||counts.especieepiteto_s||counts.nombreinfra_s||counts.type_s||counts.layer_s||counts.bid_s !=  counts.reinovalido_t||counts.phylumdivisionvalido_t||counts.clasevalida_t||counts.ordenvalido_t||counts.familiavalida_t||counts.generovalido_t||counts.especieepiteto_t||counts.nombreinfra_t||counts.type_t||counts.layer_t||counts.bid_t
-ORDER BY value, score desc
-LIMIT 400000;
+WHERE counts.id_node_source != counts.id_node_target
+ORDER BY value desc, score desc;
