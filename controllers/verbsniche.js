@@ -724,7 +724,8 @@ exports.getGroupValidationTables = function (req, res, next) {
     res_celda_sp: res_celda_sp,
     res_celda_snib_tb: res_celda_snib_tb,
     region: footprint_region,
-    grid: res_grid_id
+    grid: res_grid_id,
+    resolution: grid_resolution
   })
         .then(function (data) {
 
