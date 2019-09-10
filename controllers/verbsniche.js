@@ -2080,15 +2080,6 @@ exports.getAvailableCountriesFootprint = function(req, res) {
 }
 
 
-/**
-* getAvailableCountriesFootprint
-*
-* Obtiene la el footprint_region del pais que estan disponibles en el sistema
-* 
-* @param {express.Request} req
-* @param {express.Response} res
-*
-*/
 exports.getIdFromName = function(req, res) {
 
     debug("getIdFromName");
@@ -2116,6 +2107,61 @@ exports.getIdFromName = function(req, res) {
 
 }
 
+
+exports.getGridSpeciesTaxonNiche = function (req, res, next) {
+
+  debug("getGridSpeciesTaxonNiche")
+  
+  var target_taxons     = getParam(req, 'target_taxons')
+  var sfecha            = getParam(req, 'sfecha', false)
+  var sfosil            = getParam(req, 'sfosil', false)
+  var liminf            = getParam(req, 'liminf', 1500)
+  var limsup            = getParam(req, 'limsup', 2019)
+  var grid_res          = getParam(req, 'grid_res', 16)
+  var region            = getParam(req, 'region', 1)
+
+  var species_filter  = verb_utils.getWhereClauseFromGroupTaxonArray(target_taxons, true)
+  var resolution_view = 'grid_geojson_' + grid_res + 'km_aoi'
+  var gridid          = 'gridid_' + grid_res + 'km'
+  var snib_grid_xxkm  = 'snib_grid_' + grid_res + 'km'
+  var where_filter    = ' AND ( aniocolecta BETWEEN ' + liminf + ' AND ' + limsup + ' )'
+
+  if (!sfecha)
+    where_filter += ' AND aniocolecta != 9999 '
+
+  if(!sfosil)
+    where_filter += " AND ejemplarfosil = 'NO'"
+
+  /*const query1 = pgp.as.format(queries.getGridSpeciesNiche.getGridSpeciesTaxons, {'species_filter' : species_filter, 
+            'resolution_view': resolution_view,
+            'region'         : region,
+            'gridid'         : gridid,
+            'snib_grid_xxkm' : snib_grid_xxkm,
+            'where_filter'   : where_filter})
+  debug(query1)*/
+
+  pool.any(queries.getGridSpeciesNiche.getGridSpeciesTaxons, {
+            'species_filter' : species_filter, 
+            'resolution_view': resolution_view,
+            'region'         : region,
+            'gridid'         : gridid,
+            'snib_grid_xxkm' : snib_grid_xxkm,
+            'where_filter'   : where_filter}
+      ).then(function (data) {
+        debug(data[0]['array'].length + ' ocurrence cells')
+        res.json({
+          ok: true,
+          'data': data[0]['array']
+        })
+    }).catch(function (error) {
+      return res.json({
+        err: error,
+        ok: false,
+        message: "Error al procesar la query"
+      })
+    })
+  
+}
 
 
 
