@@ -1,6 +1,6 @@
 WITH aux_target AS (
 	SELECT DISTINCT b.${res_celda_snib:raw} AS cells
-	FROM snib AS b
+	FROM snib_grid_${grid_resolution:raw}km AS b
 	JOIN 
 		(
 			SELECT spid
@@ -14,6 +14,7 @@ WITH aux_target AS (
 		) AS c
 	ON b.spid = c.spid
 	${where_filter:raw}
+	AND b.${res_celda_snib:raw} is not null
 ), target AS (
 	SELECT '${target_name:raw}' as target_name,
 	   (array_agg(a.cells) - (${excluded_cells:raw}::integer[] + ${source_cells:raw}::integer[])) as cells,
