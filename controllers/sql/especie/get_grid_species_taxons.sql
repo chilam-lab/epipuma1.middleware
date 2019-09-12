@@ -9,13 +9,12 @@ gids_countries AS (
 	FROM $<resolution_view:raw>
 	WHERE footprint_region=$<region:raw>
 )
-SELECT array(
-			SELECT DISTINCT a.$<gridid:raw>
-			FROM $<snib_grid_xxkm:raw> AS a 
-			JOIN spids_species AS b
-			ON a.spid = b.spid
-			JOIN gids_countries AS c
-			ON a.gid = c.gid
-			WHERE 	a.$<gridid:raw> is not null
-					$<where_filter:raw> 
-		)::integer[]
+SELECT a.$<gridid:raw>, sum(a.occ)
+FROM $<snib_grid_xxkm:raw> AS a 
+JOIN spids_species AS b
+ON a.spid = b.spid
+JOIN gids_countries AS c
+ON a.gid = c.gid
+WHERE 	a.$<gridid:raw> is not null
+		$<where_filter:raw> 
+GROUP BY a.$<gridid:raw>
