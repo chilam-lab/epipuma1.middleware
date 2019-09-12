@@ -2124,13 +2124,15 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
   var resolution_view = 'grid_geojson_' + grid_res + 'km_aoi'
   var gridid          = 'gridid_' + grid_res + 'km'
   var snib_grid_xxkm  = 'snib_grid_' + grid_res + 'km'
-  var where_filter    = ' AND ( aniocolecta BETWEEN ' + liminf + ' AND ' + limsup + ' )'
+  var where_filter    = ''
 
-  if (!sfecha)
-    where_filter += ' AND aniocolecta != 9999 '
+  if (sfecha)
+    where_filter += ' AND ( ( aniocolecta BETWEEN ' + liminf + ' AND ' + limsup + ' ) OR aniocolecta = 9999 )'
+  else
+    where_filter += ' AND ( aniocolecta BETWEEN ' + liminf + ' AND ' + limsup + ' ) '
 
   if(!sfosil)
-    where_filter += " AND ejemplarfosil = 'NO'"
+    where_filter += " AND ejemplarfosil != 'SI'"
 
   /*const query1 = pgp.as.format(queries.getGridSpeciesNiche.getGridSpeciesTaxons, {'species_filter' : species_filter, 
             'resolution_view': resolution_view,
@@ -2148,10 +2150,10 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
             'snib_grid_xxkm' : snib_grid_xxkm,
             'where_filter'   : where_filter}
       ).then(function (data) {
-        debug(data[0]['array'].length + ' ocurrence cells')
+        debug(data.length + ' ocurrence cells')
         res.json({
           ok: true,
-          'data': data[0]['array']
+          'data': data
         })
     }).catch(function (error) {
       return res.json({
