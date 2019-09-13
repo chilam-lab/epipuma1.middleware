@@ -11,6 +11,20 @@ with source AS (
 	$<where_config_source:raw>	 
 	and especievalidabusqueda <> ''	 	 
 ),
+raster_cell as (
+	SELECT 
+		case when strpos(label,'Precipit') = 0 then
+		(layer || ' ' || round(cast(split_part(split_part(tag,':',1),'.',1) as numeric)/10,2)  ||' ºC - ' || round(cast(split_part(split_part(tag,':',2),'.',1) as numeric)/10,2) || ' ºC')
+		else
+		(layer || ' ' || round(cast(split_part(split_part(tag,':',1),'.',1) as numeric),2)  ||' mm - ' || round(cast(split_part(split_part(tag,':',2),'.',1) as numeric),2) || ' mm')
+		end as especievalidabusqueda,
+	bid as spid,
+	unnest($<res_celda:raw>) as cell
+	--unnest(cells_16km) as cell
+	FROM raster_bins
+	$<where_config_target_raster:raw>
+	--where layer = 'bio1'
+),
 target AS (
 	 SELECT spid,
 			array_intersection($<res_celda:raw>,

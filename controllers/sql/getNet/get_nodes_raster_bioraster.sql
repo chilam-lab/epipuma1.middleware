@@ -1,8 +1,9 @@
 /*getGeoRel sin filtros*/
-with source AS (
-	SELECT  bid as spid,
-			layer as reinovalido, label as phylumdivisionvalido, tag as clasevalida, ''::text as  ordenvalido, ''::text as familiavalida, ''::text as generovalido,
-			case when type = 1 then
+with raster_cell as (
+	SELECT 
+		bid as spid,
+		layer as reinovalido, label as phylumdivisionvalido, tag as clasevalida, ''::text as  ordenvalido, ''::text as familiavalida, ''::text as generovalido,
+		case when type = 1 then
 			layer
 			ELSE
 			(label || ' ' || round(cast(split_part(split_part(tag,':',1),'.',1) as numeric)/10,2)  ||' ºC - ' || round(cast(split_part(split_part(tag,':',2),'.',1) as numeric)/10,2) || ' ºC')
@@ -16,8 +17,8 @@ with source AS (
 				)
 			) AS cells 
 	FROM raster_bins
-	--where layer = 'bio01'
-	$<where_config_source_raster:raw>	 
+	$<where_config_target_raster:raw>
+	--where layer = 'bio1'
 ),
 target AS (
 	SELECT spid,

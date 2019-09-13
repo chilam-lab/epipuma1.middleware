@@ -14,10 +14,11 @@ with source AS (
 	$<where_config_source:raw>	 
 	and especievalidabusqueda <> ''
 ),
-target AS (
-	 SELECT  bid as spid,
-			layer as reinovalido, label as phylumdivisionvalido, tag as clasevalida, ''::text as  ordenvalido, ''::text as familiavalida, ''::text as generovalido,
-			case when type = 1 then
+raster_cell as (
+	SELECT 
+		bid as spid,
+		layer as reinovalido, label as phylumdivisionvalido, tag as clasevalida, ''::text as  ordenvalido, ''::text as familiavalida, ''::text as generovalido,
+		case when type = 1 then
 			layer
 			ELSE
 			(label || ' ' || round(cast(split_part(split_part(tag,':',1),'.',1) as numeric)/10,2)  ||' ºC - ' || round(cast(split_part(split_part(tag,':',2),'.',1) as numeric)/10,2) || ' ºC')
@@ -31,8 +32,22 @@ target AS (
 				)
 			) AS cells 
 	FROM raster_bins
-	--where layer = 'bio01'
 	$<where_config_target_raster:raw>
+	--where layer = 'bio1'
+),
+target AS (
+	SELECT  spid,
+			reinovalido, phylumdivisionvalido, clasevalida, ordenvalido, familiavalida, generovalido, especievalidabusqueda, grp,
+			array_agg(rc.cell) as cells 
+	FROM raster_cell as rc
+	--join grid_16km_aoi as gdkm
+	join $<res_celda_snib_tb:raw> as gdkm
+	--on rc.cell = gdkm.gridid_16km
+	on rc.cell = gdkm.$<res_celda_snib:raw>
+	join america
+	on st_intersects(america.geom, gdkm.small_geom)
+	where america.country = 'MEXICO'
+	group by spid, reinovalido, phylumdivisionvalido, clasevalida, ordenvalido, familiavalida, generovalido, especievalidabusqueda, grp	
 )
 select 	spid,
 	 	reinovalido, phylumdivisionvalido, clasevalida, ordenvalido, familiavalida, generovalido, 

@@ -8,8 +8,8 @@ with source AS (
 				)
 			) AS cells 
 	FROM raster_bins
-	--where layer = 'bio01'
-	$<where_config_source_raster:raw>	 	 
+	$<where_config_target_raster:raw>
+	--where layer = 'bio1'
 ),
 target AS (
 	 SELECT spid,
