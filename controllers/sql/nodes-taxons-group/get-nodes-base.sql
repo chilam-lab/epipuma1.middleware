@@ -18,7 +18,8 @@ SELECT
     source.tag,
     source.icat,
 	array_length(source.cells, 1) AS occ
-FROM source
+FROM source 
+WHERE array_length(source.cells, 1) > ${min_occ_source:raw}
 UNION
 SELECT
 	2 AS grp,
@@ -39,3 +40,4 @@ SELECT
     target.icat,
 	array_length(target.cells, 1) AS occ
 FROM target
+WHERE array_length(target.cells, 1) > ${min_occ_target:raw}

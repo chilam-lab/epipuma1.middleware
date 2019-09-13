@@ -14,7 +14,8 @@ exports.getTaxonsGroupNodes = function(req, res) {
 	debug("getTaxonsGroupNodes")
 
 	// Getting parameters
-	var min_occ = verb_utils.getParam(req, 'min_occ', 1)
+	var min_occ_source = verb_utils.getParam(req, 'min_occ_source', 1)
+  var min_occ_target = verb_utils.getParam(req, 'min_occ_target', 1)
   	var grid_res = verb_utils.getParam(req, 'grid_res', 16)
   	var footprint_region = verb_utils.getParam(req, 'region', 1) 
   	var source = verb_utils.getParam(req, 'source', [])
@@ -86,7 +87,9 @@ exports.getTaxonsGroupNodes = function(req, res) {
 	    return t.any(query, {
 
 	    	source: source_query,
-	    	target: target_query
+	    	target: target_query,
+        min_occ_source: min_occ_source,
+        min_occ_target: min_occ_target 
 
 	    }).then(resp => {
     		
