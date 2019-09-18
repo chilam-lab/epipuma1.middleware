@@ -9,7 +9,7 @@ gids_countries AS (
 	FROM $<resolution_view:raw>
 	WHERE footprint_region=$<region:raw>
 )
-SELECT a.$<gridid:raw>, sum(a.occ)
+SELECT a.$<gridid:raw> AS gridid, sum(a.occ) AS occ
 FROM $<snib_grid_xxkm:raw> AS a 
 JOIN spids_species AS b
 ON a.spid = b.spid
