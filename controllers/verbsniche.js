@@ -2165,6 +2165,63 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
   
 }
 
+exports.getCountByYear = function(req, res) {
+
+  debug("getCountByYear")
+  
+  var target_taxons     = getParam(req, 'target_taxons')
+  var sfecha            = getParam(req, 'sfecha', false)
+  var sfosil            = getParam(req, 'sfosil', false)
+  var liminf            = getParam(req, 'liminf', 1500)
+  var limsup            = getParam(req, 'limsup', 2019)
+  var grid_res          = getParam(req, 'grid_res', 16)
+  var region            = getParam(req, 'region', 1)
+
+  var species_filter  = verb_utils.getWhereClauseFromGroupTaxonArray(target_taxons, true)
+  var resolution_view = 'grid_geojson_' + grid_res + 'km_aoi'
+  var gridid          = 'gridid_' + grid_res + 'km'
+  var snib_grid_xxkm  = 'snib_grid_' + grid_res + 'km'
+  var where_filter    = ''
+
+  if (sfecha)
+    where_filter += ' AND ( ( aniocolecta BETWEEN ' + liminf + ' AND ' + limsup + ' ) OR aniocolecta = 9999 )'
+  else
+    where_filter += ' AND ( aniocolecta BETWEEN ' + liminf + ' AND ' + limsup + ' ) '
+
+  if(!sfosil)
+    where_filter += " AND ejemplarfosil != 'SI'"
+
+  /*const query1 = pgp.as.format(queries.basicAnalysis.getCountByYear, {'species_filter' : species_filter, 
+            'resolution_view': resolution_view,
+            'region'         : region,
+            'gridid'         : gridid,
+            'snib_grid_xxkm' : snib_grid_xxkm,
+            'where_filter'   : where_filter})
+  debug(query1)*/
+
+  pool.any(queries.basicAnalysis.getCountByYear, {
+            'species_filter' : species_filter, 
+            'resolution_view': resolution_view,
+            'region'         : region,
+            'gridid'         : gridid,
+            'snib_grid_xxkm' : snib_grid_xxkm,
+            'where_filter'   : where_filter}
+      ).then(function (data) {
+        debug(data.length + ' ocurrence years')
+        res.json({
+          ok: true,
+          'data': data
+        })
+    }).catch(function (error) {
+      return res.json({
+        err: error,
+        ok: false,
+        message: "Error al procesar la query"
+      })
+    })
+
+}
+
 
 
 

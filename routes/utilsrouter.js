@@ -140,7 +140,11 @@ router.route('/especie/getAvailableCountries')
 
 router.route('/especie/getAvailableCountriesFootprint')
   .get(verbsCtrl.getAvailableCountriesFootprint)
-  .post(verbsCtrl.getAvailableCountriesFootprint)  
+  .post(verbsCtrl.getAvailableCountriesFootprint) 
+
+router.route('/especie/getCountByYear')
+  .get(verbsCtrl.getCountByYear)
+  .post(verbsCtrl.getCountByYear)  
 
 
 router.route('/especie/getIdFromName')
