@@ -219,7 +219,8 @@ var queryProvider = {
     getCountsTime: sqlPath("basic-analysis/get-counts-time.sql"),
 
     getCountsGroupBio: sqlPath("basic-analysis/get-counts-group-bio.sql"),
-    getCountByYear: sqlPath("especie/get-count-by-year.sql")
+    getCountByYear: sqlPath("especie/get-count-by-year.sql"),
+    getCellOcurrences: sqlPath("especie/get-cell-ocurrences.sql")
 
     // getSource: sqlPath("basic-analysis/get-source.sql"),
     // getSourceFossil: sqlPath("basic-analysis/get-source-fossil.sql"),

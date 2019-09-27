@@ -2223,6 +2223,70 @@ exports.getCountByYear = function(req, res) {
 }
 
 
+exports.getCellOcurrences = function(req, res) {
+
+  debug("getCellOcurrences")
+  
+  var target_taxons     = getParam(req, 'target_taxons')
+  var sfecha            = getParam(req, 'sfecha', false)
+  var sfosil            = getParam(req, 'sfosil', false)
+  var liminf            = getParam(req, 'liminf', 1500)
+  var limsup            = getParam(req, 'limsup', 2019)
+  var grid_res          = getParam(req, 'grid_res', 16)
+  var region            = getParam(req, 'region', 1)
+  var longitud          = getParam(req, 'longitud', 0)
+  var latitud           = getParam(req, 'latitud', 0)
+
+  var species_filter  = verb_utils.getWhereClauseFromGroupTaxonArray(target_taxons, true)
+  var resolution_view = 'grid_geojson_' + grid_res + 'km_aoi'
+  var gridid          = 'gridid_' + grid_res + 'km'
+  var where_filter    = ''
+  var grid_table      = 'grid_'+ grid_res + 'km_aoi'
+
+  if (sfecha)
+    where_filter += ' AND ( ( aniocolecta BETWEEN ' + liminf + ' AND ' + limsup + ' ) OR aniocolecta = 9999 )'
+  else
+    where_filter += ' AND ( aniocolecta BETWEEN ' + liminf + ' AND ' + limsup + ' ) '
+
+  if(!sfosil)
+    where_filter += " AND ejemplarfosil != 'SI'"
+
+  /*const query1 = pgp.as.format(queries.basicAnalysis.getCellOcurrences, {'species_filter' : species_filter, 
+            'resolution_view': resolution_view,
+            'region'         : region,
+            'gridid'         : gridid,
+            'grid_table'     : grid_table,
+            'where_filter'   : where_filter,
+            'longitud'       : longitud,
+            'latitud'       : latitud})
+  debug(query1)*/
+
+  pool.any(queries.basicAnalysis.getCellOcurrences, {
+            'species_filter' : species_filter, 
+            'resolution_view': resolution_view,
+            'region'         : region,
+            'gridid'         : gridid,
+            'grid_table'     : grid_table,
+            'where_filter'   : where_filter,
+            'longitud'       : longitud,
+            'latitud'       : latitud}
+      ).then(function (data) {
+        debug(data.length + ' ocurrences')
+        res.json({
+          ok: true,
+          'data': data
+        })
+    }).catch(function (error) {
+      return res.json({
+        err: error,
+        ok: false,
+        message: "Error al procesar la query"
+      })
+    })
+
+}
+
+
 
 
 

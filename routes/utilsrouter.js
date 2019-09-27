@@ -151,5 +151,8 @@ router.route('/especie/getIdFromName')
   .get(verbsCtrl.getIdFromName)
   .post(verbsCtrl.getIdFromName)  
 
+router.route('/especie/getCellOcurrences')
+  .get(verbsCtrl.getCellOcurrences)
+  .post(verbsCtrl.getCellOcurrences)
 
 module.exports = router
