@@ -14,7 +14,8 @@ grid_ids AS(
 	FROM $<grid_table:raw> AS a 
 	WHERE ST_Intersects(a.the_geom, ST_SetSRID(ST_Point($<longitud:raw>, $<latitud:raw>), 4326))
 )
-SELECT ST_AsGeoJSON(a.the_geom) AS the_geom,
+SELECT a.especievalidabusqueda AS species,
+	   ST_AsGeoJSON(a.the_geom) AS the_geom,
 	   a.urlejemplar,
 	   a.aniocolecta,
 	   a.$<gridid:raw> AS gridid
