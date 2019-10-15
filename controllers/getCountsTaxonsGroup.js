@@ -274,7 +274,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
       
       }    
     
-      if(request_counter_map.get(data_request["title_valor"].title) === total_iterations){
+      if(request_counter_map.get(data_request["title_valor"].title) === total_iterations && data_iteration.length > 0){
 
         request_counter_map.set(data_request["title_valor"].title, 0)
         
@@ -351,7 +351,18 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
             validation_data: validation_data
         })
         
-      }     
+      } else {
+
+          res.json({
+            ok: true,
+            data: [],
+            data_freq: [],
+            data_score_cell: [],
+            data_freq_cell: [],
+            validation_data: []
+          })
+          
+      }
 
     }).catch(error => {
       
@@ -360,6 +371,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
       res.json({
           ok: false,
           message: "Error al ejecutar la petición",
+          data:[],
           error: error
         })
     })

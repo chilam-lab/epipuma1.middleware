@@ -1866,9 +1866,9 @@ exports.getEntListNiche = function (req, res, next) {
     var region    = parseInt(getParam(req, 'footprint_region',default_region))
     var nivel     = getParam(req, 'nivel', min_taxon_name)
     
-    var grid_resolution = getParam(req, 'grid_res',16)
-    var res_celda_sp =  'cells_'+grid_resolution+'km_'+region
-    var res_celda_snib =  'gridid_'+grid_resolution+'km'
+    var grid_resolution   = getParam(req, 'grid_res',16)
+    var res_celda_sp      =  'cells_'+grid_resolution+'km_'+region
+    var res_celda_snib    =  'gridid_'+grid_resolution+'km'
     var res_celda_snib_tb = 'grid_'+grid_resolution+'km_aoi'
     
     // res_celda_sp = (source == 1) ? res_celda_sp : 'array[]::int[]'
