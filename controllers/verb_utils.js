@@ -2903,7 +2903,7 @@ verb_utils.getCommunityAnalysisQuery = function(queries, region, res_cells, regi
 
       } else {
 
-        q_aux    =  queries.taxonsGroupNodes.covarBio
+        q_aux    = ", aux_" + index + " AS ( " + queries.taxonsGroupNodes.covarBio + " )"
         q_select = " UNION " + queries.taxonsGroupNodes.selectNodes
         
         level = taxon["level"]
