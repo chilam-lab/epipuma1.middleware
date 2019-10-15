@@ -2288,8 +2288,39 @@ exports.getCellOcurrences = function(req, res) {
 
 
 
+exports.getIDCellFromCoordinates =  function(req, res) {
 
+  debug("getIDCellFromCoordinates")
+  
+  var longitud   = getParam(req, 'longitud')
+  var latitud    = getParam(req, 'latitud')
+  var resolution = getParam(req, 'res')
 
+  pool.any(queries.getCells.fromCoordinates, {
+    longitud: longitud,
+    latitud : latitud,
+    res: resolution
+  }).then(function (data) {
+
+    data.forEach(function (element){
+      element['the_geom'] = JSON.parse(element['the_geom'])
+    })
+    
+    res.json({
+      ok: true,
+      'data': data
+    })
+    
+  }).catch(function (error) {
+    res.json({
+        ok: false,
+        err: error,
+        data: [],
+        message: "Error al procesar la query"
+      })
+  })
+
+}
 
 
 
