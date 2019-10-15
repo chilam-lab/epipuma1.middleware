@@ -155,4 +155,9 @@ router.route('/especie/getCellOcurrences')
   .get(verbsCtrl.getCellOcurrences)
   .post(verbsCtrl.getCellOcurrences)
 
+
+router.route('/especie/getIDCellFromCoordinates')
+  .get(verbsCtrl.getIDCellFromCoordinates)
+  .post(verbsCtrl.getIDCellFromCoordinates)
+
 module.exports = router
