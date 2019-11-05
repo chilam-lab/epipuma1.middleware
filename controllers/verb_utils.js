@@ -1976,10 +1976,13 @@ verb_utils.processGroupValidationData = function(data_group) {
       item.icat = add.icat
       item.tag =  add.tag
 
-      item.cells = add.cells
 
+     
+      item.cells = add.cells
+      // item.cells = item.cells.concat(add.cells).unique(); 
 
       item.cells_map = item.cells_map.concat(add.cells) 
+      // item.cells_map = item.cells_map.concat(add.cells_map) 
 
       item.nij += add.nij
       item.nj += add.nj
@@ -2017,8 +2020,13 @@ verb_utils.processGroupValidationData = function(data_group) {
       item.icat = remove.icat
       item.tag = remove.tag
       
-      item.cells = item.cells //remove.cells //
+      // item.cells = item.cells //remove.cells //
+      item.cells = remove.cells
+      // item.cells = item.cells.concat(remove.cells).unique(); 
+
       item.cells_map = item.cells_map
+      // item.cells_map = item.cells_map.filter(f => !remove.cell_map.includes(f));
+      
 
       item.nij -= remove.nij
       item.nj -= remove.nj
@@ -2130,6 +2138,19 @@ verb_utils.processGroupValidationData = function(data_group) {
 
   return data_result
 }
+
+
+Array.prototype.unique = function() {
+    var a = this.concat();
+    for(var i=0; i<a.length; ++i) {
+        for(var j=i+1; j<a.length; ++j) {
+            if(a[i] === a[j])
+                a.splice(j--, 1);
+        }
+    }
+
+    return a;
+};
 
 verb_utils.processValidationData = function (data_group){
 
