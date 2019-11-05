@@ -94,6 +94,8 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
 
       // debug("filter: " + data_request["where_filter"])
       
+      debug("Iteraciones: " + NIterations)
+
       for(var iter = 0; iter<NIterations; iter++){
 
         initialProcess(iter, NIterations, data_request, res, json_response, req, covars_groups)
@@ -274,7 +276,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
       
       }    
     
-      if(request_counter_map.get(data_request["title_valor"].title) === total_iterations && data_iteration.length > 0){
+      if(request_counter_map.get(data_request["title_valor"].title) === total_iterations){
 
         request_counter_map.set(data_request["title_valor"].title, 0)
         
@@ -351,17 +353,6 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
             validation_data: validation_data
         })
         
-      } else {
-
-          res.json({
-            ok: true,
-            data: [],
-            data_freq: [],
-            data_score_cell: [],
-            data_freq_cell: [],
-            validation_data: []
-          })
-          
       }
 
     }).catch(error => {
