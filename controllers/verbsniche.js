@@ -969,6 +969,7 @@ exports.getRasterNiche = function (req, res, next) {
 
   var field = getParam(req, 'field', '')
   var level = parseInt(getParam(req, 'level', 0))
+  debug(level + ' kjrwnvnrwenjnvrjvrjkrvkn')
   var region = parseInt(getParam(req, 'footprint_region', default_region))
   var type = parseInt(getParam(req, 'type', 1))
 

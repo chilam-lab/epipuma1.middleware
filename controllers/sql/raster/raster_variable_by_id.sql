@@ -1,10 +1,12 @@
 SELECT 
-	bid,
+	raster_bins.bid,
 	fuentes_bioclimaticas.fuente,
-	layer, 
-	label, 
-	tag,
-	"type"
+	raster_bins.layer, 
+	raster_bins.label, 
+	raster_bins.tag,
+	raster_bins."type",
+	raster_bins.coeficiente,
+	raster_bins.unidad
 FROM raster_bins 
 	LEFT JOIN fuentes_bioclimaticas 
 	ON "type" = fuentes_bioclimaticas.id 
