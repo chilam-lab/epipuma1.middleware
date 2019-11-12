@@ -1,8 +1,10 @@
 SELECT 
 	fuentes_bioclimaticas.fuente,
-	layer, 
-	label,
-	type
+	raster_bins.layer, 
+	raster_bins.label,
+	raster_bins.type,
+	raster_bins.coeficiente,
+	raster_bins.unidad
 FROM raster_bins
 	LEFT JOIN fuentes_bioclimaticas 
 	ON "type" = fuentes_bioclimaticas.id 
@@ -15,7 +17,9 @@ GROUP BY
 	fuentes_bioclimaticas.fuente,
 	raster_bins.layer, 
 	raster_bins.label,
-	raster_bins.type
+	raster_bins.type,
+	raster_bins.coeficiente,
+	raster_bins.unidad
 ORDER BY
 	raster_bins.layer;
 
