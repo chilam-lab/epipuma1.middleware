@@ -851,6 +851,10 @@ exports.getGridGeoJsonNiche = function (req, res, next) {
     })
       .then(data => {
 
+          var N = data[0].json['features'].length;
+          for(var i = 0; i < N; i++) {
+            data[0].json['features'][i] = JSON.parse(data[0].json['features'][i]);  
+          } 
           res.json(data[0].json)
 
       })
