@@ -38,6 +38,9 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   var data_target = {}
   var str_query = ''
 
+
+  data_request["decil_selected"] = verb_utils.getParam(req, 'decil_selected', 10)
+
   var grid_resolution = parseInt(verb_utils.getParam(req, 'grid_resolution', 16)) 
   var region = parseInt(verb_utils.getParam(req, 'region', verb_utils.region_mx))
   var fosil = verb_utils.getParam(req, 'fosil', true)
@@ -262,6 +265,9 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
   }).then(data_iteration => {
 
+    var decil_selected = data_request["decil_selected"]
+    debug("decil_selected: " + decil_selected)
+
       var data_response = {iter: (iter+1), data: data_iteration, test_cells: data_request["source_cells"], apriori: data_request.apriori, mapa_prob: data_request.mapa_prob }
       json_response["data_response"] = json_response["data_response"] === undefined ? [data_response] : json_response["data_response"].concat(data_response)
       
@@ -282,22 +288,40 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
         
         debug("COUNT PROCESS FINISHED")
         var data = []
+        var data_avg = []
         var validation_data = []
         var is_validation = false
 
+        var data_freq = []
+        
+
+
+
+
         if(total_iterations !== 1){
+
           debug("PROCESS RESULTS FOR VALIDATION")
+          is_validation = true
 
-          var items = json_response["data_response"]
-          // debug(items[0].data[0])
 
+          // Promedia los valores obtenidos en las N iteraciones para n, nj, nij, ni, epsilon y score. 
+          // Además obtiene un array de cobertura total por las celdas de cada especie
           data = verb_utils.processGroupValidationData(json_response["data_response"])
-          // debug(data)
+          
+          
+          // Obtiene los 20 rangos de epsilon y score por especie, utilizados para las gráficas en el cliente de frecuencia por especie. 
+          // En caso de ser validación se promedia cada rango
+          data_freq = data_request.with_data_freq === true ? verb_utils.processDataForFreqSpecie(json_response["data_response"], is_validation) : []
+          
 
           validation_data = verb_utils.getValidationValues(json_response["data_response"])
 
-          is_validation = true
+
         } else{
+
+          debug("PROCESS RESULTS")
+          is_validation = false
+
           data = data_iteration
 
           validation_data = verb_utils.getValidationDataNoValidation(data, 
@@ -311,7 +335,13 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
                             data_request["mapa_prob"],
                             queries)
 
-          is_validation = false
+          
+          // Obtiene los 20 rangos de epsilon y score por especie, utilizados para las gráficas en el cliente de frecuencia por especie. 
+          // En caso de ser validación se promedia cada rango
+          // TODO: No realizar cuando es selección de celda
+          data_freq = data_request.with_data_freq === true ? verb_utils.processDataForFreqSpecie([data], is_validation) : []
+
+          
         }
 
         var apriori = false
@@ -326,6 +356,10 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
           mapa_prob = true          
         }
 
+
+        // TODO: Revisar comportamiento con seleccion de celda
+        // data = is_validation ? data_avg : data
+
         var cell_id = 0
         if(data_request.get_grid_species !== false){
 
@@ -334,15 +368,28 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
           data = verb_utils.processGroupDataForCellId(data, apriori, mapa_prob, cell_id)
         }
 
+
+
         debug("COMPUTE RESULT DATA FOR HISTOGRAMS")
-        var data_freq = data_request.with_data_freq === true ? verb_utils.processDataForFreqSpecie(data) : []
+        
+
+        // Obtiene la sumatoria de score por celdas contemplando si existe apriori o probabilidad
         var data_score_cell = data_request.with_data_score_cell === true ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob, data_request.all_cells, is_validation) : []
+
+
+        // TODO: Revisar funcionamiento con validacion
         var data_freq_cell = data_request.with_data_freq_cell === true ? verb_utils.processDataForFreqCell(data_score_cell) : []
 
 
-        // debug("****** iter: " + iter)
-        // debug(data)
 
+        // Obtiene el score por celda, asigna decil y Obtiene la lista de especies por decil seleccionado en las N iteraciones requeridas
+        // data = is_validation ? verb_utils.processCellDecilPerIter(json_response["data_response"], apriori, mapa_prob, data_request.all_cells, is_validation) : data
+        var percentage_avg = []
+        percentage_avg = verb_utils.processCellDecilPerIter(json_response["data_response"], apriori, mapa_prob, data_request.all_cells, is_validation, decil_selected) 
+        // debug(percentage_avg)
+
+
+        
 
         res.json({
             ok: true,
@@ -350,7 +397,8 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
             data_freq: data_freq,
             data_score_cell: data_score_cell,
             data_freq_cell: data_freq_cell,
-            validation_data: validation_data
+            validation_data: validation_data,
+            percentage_avg: percentage_avg
         })
         
       }
