@@ -15,6 +15,7 @@ console.info("\n************************************")
 console.info("\nABREVIACIONES:\nNP: No parametros \nNF: No filtros \nB: Bioticos \nA: Abioticos \nAB: Ambos \nReg: Registros \nSF:Sin Filtros");
 console.info("\n************************************\n")
 
+// var server = "http://species.conabio.gob.mx/api-db-dev"
 var server
 
 beforeEach(function () {
@@ -46,6 +47,7 @@ describe("Prueba petición variables abioticas, su contenido y su tamaño",funct
 	it("Árbol variables abioticas - DISPONIBLE", function(done){
 
 		supertest(server).get("/niche/especie/getRasterVariables")
+		.send({})
 		.expect("Content-type",/json/)
 		.expect(200)
 		.end(function(err, response){
@@ -60,50 +62,54 @@ describe("Prueba petición variables abioticas, su contenido y su tamaño",funct
 
 });
 
+[
+	["especieepiteto", "Ly"],
+	["familiavalida", "Ma"],
+	["generovalido", "Ro"]
+].forEach(pair => {
 
+	describe("Prueba búsqueda de especies, su contenido y tipo de valor", function() {
 
-describe("Prueba búsqueda de especies, su contenido y tipo de valor",function(){
+	this.timeout(1000 * 60 * 2); // 3 minutos maximo
 
-	it("Buscador de especies - DISPONIBLE", function(done){
-
-		supertest(server).post("/niche/especie/getEntList")
-		.send({limit : 15, nivel: "especievalidabusqueda", searchStr: "Lynx", source: 1, grid_res: 16, footprint_region: 3})
-		.expect("Content-type",/json/)
-		.expect(200)
-		.end(function(err, response){
-			response.statusCode.should.equal(200)
-			expect(response.body.data).all.have.property("spid")
-			expect(response.body.data).all.have.property("reinovalido")
-			expect(response.body.data).all.have.property("phylumdivisionvalido")
-			expect(response.body.data).all.have.property("clasevalida")
-			expect(response.body.data).all.have.property("ordenvalido")
-			expect(response.body.data).all.have.property("familiavalida")
-			expect(response.body.data).all.have.property("generovalido")
-			expect(response.body.data).all.have.property("especievalidabusqueda")
-			expect(response.body.data).all.have.property("occ")
-			expect(response.body.data[0].spid).to.be.a("number")
-			expect(response.body.data[0].occ).to.be.a("number")
-			expect(response.body.data[0].reinovalido).to.be.a("string")
-			expect(response.body.data[0].phylumdivisionvalido).to.be.a("string")
-			expect(response.body.data[0].clasevalida).to.be.a("string")
-			expect(response.body.data[0].ordenvalido).to.be.a("string")
-			expect(response.body.data[0].familiavalida).to.be.a("string")
-			expect(response.body.data[0].generovalido).to.be.a("string")
-			expect(response.body.data[0].especievalidabusqueda).to.be.a("string")
-			done();
-		})
-
+		it("Buscador de especies - DISPONIBLE", function(done) {
+			
+			supertest(server).post("/niche/especie/getEntList")
+			.send({
+				nivel: pair[0],
+				searchStr: pair[1],
+				source: 0,
+				footprint_region: 1
+			})
+			.expect("Content-type", /json/)
+			.expect(200)
+			.end(function(err, response) {
+				response.statusCode.should.equal(200)
+				expect(response.body.data).to.not.equal(null)
+				done();
+			})
+			
+		});
 	});
-
 });
 
 
-[["false", "false", "false"], ["false", "false", "true"], ["true", "true", "true"], ["true", "true", "false"], ["false", "true", "false"], ["false", "true", "true"], ["true", "false", "true"], ["true", "false", "false"]].forEach(pair => {
+[
+	["false", "false", "false"],
+	["false", "false", "true"],
+	["true", "true", "true"],
+	["true", "true", "false"],
+	["false", "true", "false"],
+	["false", "true", "true"],
+	["true", "false", "true"],
+	["true", "false", "false"]
+].forEach(pair => {
 
-	describe("Prueba obtención de ocurrencias de especie objetivo con (sfecha, rango, sfosil) => " + pair, function(done){
+	describe("Prueba obtención de ocurrencias de especie objetivo con (sfecha = "+pair[0]+ ", rango = "+pair[1]+ ", sfosil = "+pair[2]+")", function(done){
 
 		this.timeout(1000 * 60 * 2); // 3 minutos maximo
-		var spid = 27333;
+		//var spid = 27333;
+		var spid = 341; // Lygodium heterodoxum
 		var lim_inf = 1500
 		var lim_sup = parseInt(moment().format('YYYY'));
 
@@ -141,15 +147,9 @@ describe("Prueba búsqueda de especies, su contenido y tipo de valor",function()
 					expect(response.body.data[0].json_geom).to.have.string("type")
 					done();
 				})
-
 			});
-
-
 		})
-
 	});
-
-
 });
 
 
@@ -160,9 +160,9 @@ describe("Petición de mallas a diferentes resoluciones y distintas regiones",fu
 	this.timeout(1000 * 60 * 2); // 3 minutos maximo
 
 	[
-	//8, 
-	//16, 
-	//32, 
+	//8,
+	//16,
+	//32,
 	64].forEach(cell_res => {
 
 		[1
@@ -171,31 +171,98 @@ describe("Petición de mallas a diferentes resoluciones y distintas regiones",fu
 		//, 4
 		].forEach(footprint_region => {
 
-			it("\nPetición de la malla de " + cell_res + "en la region numero " + footprint_region, 
-			function(done){
+			it("Petición de la malla de "+ cell_res +" en la region numero "+ footprint_region, function(done) {
 
 				supertest(server).post("/niche/especie/getGridGeoJson")
-				.send({grid_res : ""+cell_res, footprint_region:""+footprint_region})
-				.expect("Content-type",/json/)
+				.send({
+					grid_res: cell_res,
+					footprint_region: footprint_region
+				})
+				.expect("Content-type", /json/)
 				.expect(200)
-				.end(function(err, response){
+				.end(function(err, response) {
 					response.statusCode.should.equal(200)
 					response.res.text.includes('FeatureCollection').should.equal(true)
 					response.res.text.includes('features').should.equal(true)
 					done();
 				})
 			});
-
 		});
 
 	});
 });
 
+describe("Petición de la malla con especies",function(){
 
-[[[{value:"bio001",type:1,level:2,group_item:1,label:"Annual Mean Temperature"}], false, true], 
- [[                    {field:"generovalido",value:"Aedes",type:0,group_item:1}], true, false], 
- [[{value:"bio001",type:1,level:2,group_item:1,label:"Annual Mean Temperature"},
- 			{field:"generovalido",value:"Aedes",type:0,group_item:1}           ], true, true ]].forEach(pars => {
+	this.timeout(1000 * 60 * 2); // 3 minutos maximo
+
+	[
+	//8,
+	16,
+	32
+	//64
+	].forEach(cell_res => {
+
+		it("Petición de la malla de "+ cell_res, function(done) {
+			
+			supertest(server).post("/niche/especie/getGridSpeciesTaxon")
+			.send({
+				name: "k",
+				target_taxons: [{
+					taxon_rank: "family",
+					value: "Tyrannidae",
+					title: "Gpo+Bio+1",
+					nivel: 6
+				}],
+				idtime: 1575195588466,
+				sfecha: false,
+				sfosil: false,
+				grid_res: cell_res,
+				region: 1
+			})
+			.expect("Content-type", /json/)
+			.expect(200)
+			.end(function(err, response) {
+				response.statusCode.should.equal(200)
+				expect(response.body.ok).to.equal(true)
+				expect(response.body.data).to.not.equal(null)
+				done();
+			})
+		});
+	});
+});
+
+[
+	[
+		[{value: "bio001",
+			type: 1,
+			level: 2,
+			group_item: 1,
+			label: "Annual Mean Temperature"
+		}], false, true
+	],
+	[
+		[{field: "generovalido",
+			value: "Aedes",
+			type: 0,
+			group_item: 1
+		}], true, false
+	],
+	[
+		[{value: "bio001",
+			type: 1,
+			level: 2,
+			group_item: 1,
+			label: "Annual Mean Temperature"
+		},
+		{
+			field: "generovalido",
+			value: "Aedes",
+			type: 0,
+			group_item: 1
+		}], true, true
+	]
+].forEach(pars => {
  	
  	describe("Prueba verbo counts", function(){
 
@@ -204,8 +271,7 @@ describe("Petición de mallas a diferentes resoluciones y distintas regiones",fu
 		it("verbo counts - DISPONIBLE", function(done){
 
 			supertest(server).post("/niche/counts")
-			.send(
-					{
+			.send({
 						time:"1550259505727",
 						footprint_region:1,
 						fossil:true,
@@ -225,27 +291,26 @@ describe("Petición de mallas a diferentes resoluciones y distintas regiones",fu
 						with_data_score_decil:false,
 						discardedFilterids:[],
 						tfilters: pars[0]
-					}
-			).expect("Content-type",/json/)
+					}).expect("Content-type",/json/)
 			.expect(200)
 			.end(function(err, response){
-	            response.statusCode.should.equal(200)
-	            expect(response.body.data).to.not.equal(null)
-	            expect(response.body.data).all.have.property("spid")
-	            expect(response.body.data).all.have.property("tipo")
-	            expect(response.body.data).all.have.property("reinovalido")
-	            expect(response.body.data).all.have.property("phylumdivisionvalido")
-	            expect(response.body.data).all.have.property("clasevalida")
-	            expect(response.body.data).all.have.property("familiavalida")
-	            expect(response.body.data).all.have.property("generovalido")
-	            expect(response.body.data).all.have.property("familiavalida")
-	            expect(response.body.data).all.have.property("especievalidabusqueda")
-	            expect(response.body.data).all.have.property("cells")
-	            expect(response.body.data).all.have.property("ni")
-	            expect(response.body.data).all.have.property("nij")
-	            expect(response.body.data).all.have.property("n")
-	            expect(response.body.data).all.have.property("epsilon")
-	            expect(response.body.data).all.have.property("score")
+				response.statusCode.should.equal(200)
+				expect(response.body.data).to.not.equal(null)
+				expect(response.body.data).all.have.property("spid")
+				expect(response.body.data).all.have.property("tipo")
+				expect(response.body.data).all.have.property("reinovalido")
+				expect(response.body.data).all.have.property("phylumdivisionvalido")
+				expect(response.body.data).all.have.property("clasevalida")
+				expect(response.body.data).all.have.property("familiavalida")
+				expect(response.body.data).all.have.property("generovalido")
+				expect(response.body.data).all.have.property("familiavalida")
+				expect(response.body.data).all.have.property("especievalidabusqueda")
+				expect(response.body.data).all.have.property("cells")
+				expect(response.body.data).all.have.property("ni")
+				expect(response.body.data).all.have.property("nij")
+				expect(response.body.data).all.have.property("n")
+				expect(response.body.data).all.have.property("epsilon")
+				expect(response.body.data).all.have.property("score")
 				done();
 			})
 
@@ -255,15 +320,15 @@ describe("Petición de mallas a diferentes resoluciones y distintas regiones",fu
 });
 
 describe("verbo getVariables", function(){
-	
+
 	it("verbo getVariables - DISPONIBLE", function(done){
 
 		supertest(server).post("/niche/especie/getVariables")
 		.send({
-			  	field:"phylumdivisionvalido",
-			  	parentfield:"especievalidabusqueda",
-			  	parentitem:"Lynx rufus",
-				footprint_region:1
+			field:"phylumdivisionvalido",
+			parentfield:"especievalidabusqueda",
+			parentitem:"Lynx rufus",
+			footprint_region:1
 			})
 		.expect("Content-type",/json/)
 		.expect(200)
@@ -278,7 +343,7 @@ describe("verbo getVariables", function(){
 });
 
 describe("verbo getIdFromName", function(){
-	
+
 	it("verbo getIdFromName - DISPONIBLE", function(done){
 
 		supertest(server).post("/niche/especie/getIdFromName")
@@ -298,22 +363,20 @@ describe("verbo getIdFromName", function(){
 });
 
 describe("verbo getAvailableVariables", function(){
-	
+
 	it("verbo getAvailableVariables - DISPONIBLE", function(done){
 
 		supertest(server).post("/niche/especie/getAvailableVariables")
-		.send({
- 			 	field:"bio001",
-  				level:0,
-  				footprint_region:1
-			})
+		.send({})
 		.expect("Content-type",/json/)
 		.expect(200)
 		.end(function(err, response){
 			response.statusCode.should.equal(200)
-			expect(response.body.data).all.have.property("fuente")
+			expect(response.body.ok).to.equal(true)
+			expect(response.body.data).to.not.equal(null)
 			expect(response.body.data).all.have.property("id")
 			expect(response.body.data).all.have.property("descripcion")
+			expect(response.body.data).all.have.property("footprint_region")
 			done();
 		});
 	});
@@ -321,7 +384,7 @@ describe("verbo getAvailableVariables", function(){
 });
 
 describe("verbo getSubAOI", function(){
-	
+
 	it("verbo getSubAOI - DISPONIBLE", function(done){
 
 		supertest(server).post("/niche/especie/getSubAOI")
@@ -340,14 +403,14 @@ describe("verbo getSubAOI", function(){
 });
 
 describe("verbo getValuesFromToken", function(){
-	
+
 	it("verbo getValuesFromToken - DISPONIBLE", function(done){
 
 		supertest(server).post("/niche/especie/getValuesFromToken")
 		.send({
-				"token":"fef646b3d8248ddf191d3e908261cefb",
-				"tipo":"nicho"
-             })
+			"token":"fef646b3d8248ddf191d3e908261cefb",
+			"tipo":"nicho"
+			})
 		.expect("Content-type",/json/)
 		.expect(200)
 		.end(function(err, response){
@@ -360,7 +423,7 @@ describe("verbo getValuesFromToken", function(){
 });
 
 describe("verbo getAvailableCountriesFootprint", function(){
-	
+
 	it("verbo getAvailableCountriesFootprint - DISPONIBLE", function(done){
 
 		supertest(server).post("/niche/especie/getAvailableCountriesFootprint")
@@ -375,111 +438,102 @@ describe("verbo getAvailableCountriesFootprint", function(){
 			done();
 		});
 	});
-	
 });
 
 describe("verbo getNodes", function(){
-	
+
 	it("verbo getNodes - DISPONIBLE", function(done){
 
 		supertest(server).post("/niche/getNodes")
-		.send({
-	              qtype:"getNodes",
-	              s_tfilters:[
-	                  {
-	                      field:"generovalido",
-	                      value:"Lynx",
-	                      type:0,
-	                      parent:"",
-	                      fGroupId:1,
-	                      grp:0
-	                  }
-	              ],
-	              t_tfilters:[
-	                  {
-	                      field:"especievalidabusqueda",
-	                      value:"Aedes aegypti",
-	                      type:0,
-	                      parent:"",
-	                      fGroupId:2,
-	                      grp:1
-	                  }
-	              ],
-	              hasbiosource:true,
-	              hasrastersource:false,
-	              hasbiotarget:true,
-	              hasrastertarget:false,
-	              min_occ:5,
-	              grid_res:"16",
-	              footprint_region:1
-	        })
+			.send({
+				qtype: "getNodes",
+				s_tfilters: [{
+					field: "generovalido",
+					value: "Lynx",
+					type: 0,
+					parent: "",
+					fGroupId: 1,
+					grp: 0
+				}],
+				t_tfilters: [{
+					field: "especievalidabusqueda",
+					value: "Aedes aegypti",
+					type: 0,
+					parent: "",
+					fGroupId: 2,
+					grp: 1
+				}],
+				hasbiosource: true,
+				hasrastersource: false,
+				hasbiotarget: true,
+				hasrastertarget: false,
+				min_occ: 5,
+				grid_res: "16",
+				footprint_region: 1
+			})
 		.expect("Content-type",/json/)
 		.expect(200)
-		.end(function(err, response){
+		.end(function(err, response) {
 			response.statusCode.should.equal(200)
 			expect(response.body.data).to.not.equal(null)
-            expect(response.body.data).all.have.property("spid")
-            expect(response.body.data).all.have.property("reinovalido")
-            expect(response.body.data).all.have.property("phylumdivisionvalido")
-            expect(response.body.data).all.have.property("clasevalida")
-            expect(response.body.data).all.have.property("familiavalida")
-            expect(response.body.data).all.have.property("generovalido")
-            expect(response.body.data).all.have.property("familiavalida")
-            expect(response.body.data).all.have.property("label")
-            expect(response.body.data).all.have.property("occ")
+			expect(response.body.data).all.have.property("spid")
+			expect(response.body.data).all.have.property("reinovalido")
+			expect(response.body.data).all.have.property("phylumdivisionvalido")
+			expect(response.body.data).all.have.property("clasevalida")
+			expect(response.body.data).all.have.property("familiavalida")
+			expect(response.body.data).all.have.property("generovalido")
+			expect(response.body.data).all.have.property("familiavalida")
+			expect(response.body.data).all.have.property("label")
+			expect(response.body.data).all.have.property("occ")
 			done();
 		});
 	});
-	
+
 });
 
 describe("verbo getEdges", function(){
-	
+
 	it("verbo getEdges - DISPONIBLE", function(done){
 
 		supertest(server).post("/niche/getEdges")
-		.send({
-                      "qtype":"getEdges",
-                      "s_tfilters":[
-                          {
-                              "field":"generovalido",
-                              "value":"Lynx",
-                              "type":0,
-                              "parent":"",
-                              "fGroupId":1,
-                              "grp":0
-                          }
-                      ],
-                      "t_tfilters":[
-                          {
-                              "field":"especievalidabusqueda",
-                              "value":"Aedes aegypti",
-                              "type":0,
-                              "parent":"",
-                              "fGroupId":2,
-                              "grp":1
-                          }
-                      ],
-                      "hasbiosource":true,
-                      "hasrastersource":false,
-                      "hasbiotarget":true,
-                      "hasrastertarget":false,
-                      "ep_th":0,
-                      "min_occ":5,
-                      "grid_res":"16",
-                      "footprint_region":1
-                  })
+			.send({
+				"qtype": "getEdges",
+				"s_tfilters": [{
+					"field": "generovalido",
+					"value": "Lynx",
+					"type": 0,
+					"parent": "",
+					"fGroupId": 1,
+					"grp": 0
+				}],
+				"t_tfilters": [{
+					"field": "especievalidabusqueda",
+					"value": "Aedes aegypti",
+					"type": 0,
+					"parent": "",
+					"fGroupId": 2,
+					"grp": 1
+				}],
+				"hasbiosource": true,
+				"hasrastersource": false,
+				"hasbiotarget": true,
+				"hasrastertarget": false,
+				"ep_th": 0,
+				"min_occ": 5,
+				"grid_res": "16",
+				"footprint_region": 1
+			})
 		.expect("Content-type",/json/)
 		.expect(200)
 		.end(function(err, response){
 			response.statusCode.should.equal(200)
 			expect(response.body.data).to.not.equal(null)
-            expect(response.body.data).all.have.property("source")
-            expect(response.body.data).all.have.property("target")
-            expect(response.body.data).all.have.property("ni")
-            expect(response.body.data).all.have.property("nj")
-            expect(response.body.data).all.have.property("nij")
-            done();
+			expect(response.body.data).all.have.property("source")
+			expect(response.body.data).all.have.property("target")
+			expect(response.body.data).all.have.property("ni")
+			expect(response.body.data).all.have.property("nj")
+			expect(response.body.data).all.have.property("nij")
+			done();
 		});
 	});
 	
