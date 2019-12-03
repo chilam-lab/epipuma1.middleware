@@ -1432,6 +1432,8 @@ verb_utils.processDataForScoreCellTable = function (data, apriori, mapa_prob){
   var val_apriori = 0
   var cells = d3.map([]);
 
+  // console.log(data)
+
 
   data.forEach(function (item, index) {
 
@@ -1439,7 +1441,9 @@ verb_utils.processDataForScoreCellTable = function (data, apriori, mapa_prob){
 
       item.cells.forEach(function (cell_item, index) {
       
-          var name = item.reinovalido === "" ? (item.layer + " " + item.tag) : (item.generovalido +" "+item.especieepiteto+" "+item.nombreinfra)
+          // TODO: Cambiar el layer por el label
+          // var name = item.reinovalido === "" ? (item.layer + " " + item.tag) : (item.generovalido +" "+item.especieepiteto+" "+item.nombreinfra)
+          var name = item.reinovalido === "" ? (item.label + " | " + item.tag) : (item.generovalido +" "+item.especieepiteto+" "+item.nombreinfra)
           
           var item_map = {
               cell: cell_item,
