@@ -680,20 +680,31 @@ verb_utils.processDataForScoreDecilTable = function (data_cell, decil_selected){
   var decile = deciles
   var delta = Math.floor(data_cell.length/decile)
 
+  // debug(data_cell)
+
   data_cell.reverse()
   data_cell.forEach(function (item, index){
       var dec = Math.floor(index/delta)+1
       item["decile"] = dec > decile ? decile : dec
   })
   data_cell.reverse()
-  // debug(data_cell)
+  
+  
 
   // filtra las celdas del decil seleccionado
   var cell_decil_filter_array = data_cell.filter(function(item){     
     return item.decile == decil_selected  
   });
 
-  // debug(decil_array)
+  // debug(cell_decil_filter_array.length)
+  // debug(cell_decil_filter_array)
+
+
+  //TODO: REVISAR ESTAN DANDO CELDAS CONSECUTVIAS O CON UN PATRON EXTRAÑO!!
+  
+  var cell_array = cell_decil_filter_array.map(function(d){return d.gridid})
+  // debug(cell_array)
+
 
   var map_spid = d3.map([])
 
@@ -726,7 +737,7 @@ verb_utils.processDataForScoreDecilTable = function (data_cell, decil_selected){
 
   // debug(map_spid.values());
 
-  return {decil_array: map_spid.values(), length_decil: cell_decil_filter_array.length} 
+  return {cell_array: cell_array, decil_array: map_spid.values(), length_decil: cell_decil_filter_array.length} 
 
 
 }
@@ -1168,21 +1179,27 @@ verb_utils.processCellDecilPerIter = function(data_group, apriori, mapa_prob, al
     // debug(decil_list)
 
     // decil_list es un array de las especies que pertenecen al decil seleccionado con su porcentaje de presencia en cada decil. Esto por cada iteración.
-    percentagedecil_array.push(decil_list)
+    percentagedecil_array.push({list: decil_list, decil_cells: data_result.cell_array})
 
   })
 
 
   var decil_map = d3.map([]);
+  var decil_cells = []
 
-  // debug(percentagedecil_array)
+  percentagedecil_array.forEach(function (item, index){
 
 
 
-  percentagedecil_array.forEach(function (decil_list, index){
+    var decil_list = item.list
 
-    // debug(decil_list)
+    // debug(item.decil_cells)
+    
+    decil_cells = verb_utils.arrayUnique(decil_cells.concat(item.decil_cells))
+    // decil_cells = item.decil_cells
+    // debug(decil_cells)
 
+        
     decil_list.forEach(function (specie_decil_item, index){
 
       // debug(specie_decil_item)
@@ -1251,7 +1268,7 @@ verb_utils.processCellDecilPerIter = function(data_group, apriori, mapa_prob, al
   // debug(result_datapercentage)
 
   // se envia un promedio de las N iteraciones realizadas, cada valor relacioanda a la especie (epsilon, score, occ, occ_perdecile) se promedia con base al numero de ocasiones que aparecio en cada iteración
-  return result_datapercentage
+  return {decil_cells: decil_cells, result_datapercentage: result_datapercentage} 
 
 
 }
@@ -1293,8 +1310,14 @@ verb_utils.compare_desc = function(a, b) {
     return 0;
 }
 
-
-
+verb_utils.sort_by_key = function(array, key)
+{
+ return array.sort(function(a, b)
+ {
+  var x = a[key]; var y = b[key];
+  return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+ });
+}
 
 
 
@@ -1577,7 +1600,12 @@ verb_utils.processDataForScoreCellTable = function (data, apriori, mapa_prob){
       cell_score_array.push(item)
 
   }
-  cell_score_array.sort(verb_utils.compare_desc);
+  
+  // cell_score_array.sort(verb_utils.compare_desc);
+  cell_score_array = verb_utils.sort_by_key(cell_score_array, "tscore")
+  cell_score_array.reverse()
+  
+  // debug(cell_score_array)
 
   return cell_score_array
 
@@ -2527,6 +2555,20 @@ verb_utils.processGroupValidationData = function(data_group) {
 
 
   return data_result
+}
+
+
+verb_utils.arrayUnique = function(array) {
+   
+    var a = array.concat();
+    for(var i=0; i<a.length; ++i) {
+        for(var j=i+1; j<a.length; ++j) {
+            if(a[i] === a[j])
+                a.splice(j--, 1);
+        }
+    }
+
+    return a;
 }
 
 
