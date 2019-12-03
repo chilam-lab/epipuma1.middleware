@@ -385,12 +385,12 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
         // Obtiene el score por celda, asigna decil y Obtiene la lista de especies por decil seleccionado en las N iteraciones requeridas
         // data = is_validation ? verb_utils.processCellDecilPerIter(json_response["data_response"], apriori, mapa_prob, data_request.all_cells, is_validation) : data
-        var percentage_avg = []
-        percentage_avg = verb_utils.processCellDecilPerIter(json_response["data_response"], apriori, mapa_prob, data_request.all_cells, is_validation, decil_selected) 
-        // debug(percentage_avg)
-
-
+        var percentage_occ = []
+        var decil_cells = []
+        var decilper_iter = verb_utils.processCellDecilPerIter(json_response["data_response"], apriori, mapa_prob, data_request.all_cells, is_validation, decil_selected) 
         
+        percentage_occ = decilper_iter.result_datapercentage
+        decil_cells = decilper_iter.decil_cells
 
         res.json({
             ok: true,
@@ -399,7 +399,8 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
             data_score_cell: data_score_cell,
             data_freq_cell: data_freq_cell,
             validation_data: validation_data,
-            percentage_avg: percentage_avg
+            percentage_avg: percentage_occ,
+            decil_cells: decil_cells
         })
         
       }
