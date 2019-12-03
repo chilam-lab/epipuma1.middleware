@@ -266,7 +266,8 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
   }).then(data_iteration => {
 
     var decil_selected = data_request["decil_selected"]
-    debug("decil_selected: " + decil_selected)
+    // debug(data_iteration)
+    // debug("decil_selected: " + decil_selected)
 
       var data_response = {iter: (iter+1), data: data_iteration, test_cells: data_request["source_cells"], apriori: data_request.apriori, mapa_prob: data_request.mapa_prob }
       json_response["data_response"] = json_response["data_response"] === undefined ? [data_response] : json_response["data_response"].concat(data_response)
