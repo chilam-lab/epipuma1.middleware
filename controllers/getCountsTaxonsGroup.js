@@ -266,7 +266,11 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
   }).then(data_iteration => {
 
     var decil_selected = data_request["decil_selected"]
-    // debug(data_iteration)
+    // var ni_sp = data_iteration[0].ni
+    
+    // debug("****** nj: " + data_iteration[0].nj)
+    // debug("****** ni_sp: " + ni_sp)
+
     // debug("decil_selected: " + decil_selected)
 
       var data_response = {iter: (iter+1), data: data_iteration, test_cells: data_request["source_cells"], apriori: data_request.apriori, mapa_prob: data_request.mapa_prob }
@@ -307,7 +311,20 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
           // Promedia los valores obtenidos en las N iteraciones para n, nj, nij, ni, epsilon y score. 
           // Además obtiene un array de cobertura total por las celdas de cada especie
-          data = verb_utils.processGroupValidationData(json_response["data_response"])
+
+          // debug("length: " + json_response["data_response"].length)
+          // var items = json_response["data_response"]
+          // debug(items[0].data[0])
+          // var data_clone = json_response["data_response"].filter(() => true);
+
+          var dup_array = JSON.parse(JSON.stringify(json_response["data_response"]))
+
+          data = verb_utils.processGroupValidationData(dup_array)
+
+          // debug(items[0].data[0])
+
+          // var items = json_response["data_response"]
+          // debug(items[0].nj)
           
           
           // Obtiene los 20 rangos de epsilon y score por especie, utilizados para las gráficas en el cliente de frecuencia por especie. 
@@ -375,11 +392,13 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
         
 
         // Obtiene la sumatoria de score por celdas contemplando si existe apriori o probabilidad
-        var data_score_cell = data_request.with_data_score_cell === true ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob, data_request.all_cells, is_validation) : []
+        var data_score_cell = []
+        data_score_cell = data_request.with_data_score_cell === true ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob, data_request.all_cells, is_validation) : []
 
 
         // TODO: Revisar funcionamiento con validacion
-        var data_freq_cell = data_request.with_data_freq_cell === true ? verb_utils.processDataForFreqCell(data_score_cell) : []
+        var data_freq_cell = []
+        data_freq_cell = data_request.with_data_freq_cell === true ? verb_utils.processDataForFreqCell(data_score_cell) : []
 
 
 
@@ -391,6 +410,8 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
         
         percentage_occ = decilper_iter.result_datapercentage
         decil_cells = decilper_iter.decil_cells
+
+
 
         res.json({
             ok: true,
