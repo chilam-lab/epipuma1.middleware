@@ -1483,7 +1483,7 @@ verb_utils.processDataForScoreCellTable = function (data, apriori, mapa_prob){
       item.cells.forEach(function (cell_item, index) {
       
           // var name = item.reinovalido === "" ? (item.layer + " " + item.tag) : (item.generovalido +" "+item.especieepiteto+" "+item.nombreinfra)
-          var name = item.reinovalido === "" ? (item.label + " | " + item.tag) : (item.generovalido +" "+item.especieepiteto+" "+item.nombreinfra)
+          var name = item.reinovalido === "" ? (item.label + "|" + item.tag + "|" + item.unidad + "|" + item.coeficiente) : (item.generovalido +" "+item.especieepiteto+" "+item.nombreinfra)
 
           // debug(name + ": " + item.nj)
           
