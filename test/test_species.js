@@ -539,117 +539,45 @@ describe("verbo getEdges", function(){
 	
 });
 
-// describe("Test cells endpoint",function(){
-// 	var last_cells_size = 0;
+describe("Verbo que devuelve la distribución (celdas con `gridid_xxkm`) de nodos seleccionados", function(){
+	[
+	  // 8,
+	  // 16,
+	  32,
+	  64
+	].forEach(cell_res =>{
+	  [
+	    // {rank: "kingdom", value: "Animalia"},
+	    // {rank: "phylum",  value: "Bacillariophyta"},
+	    // {rank: "class",   value: "Reptilia"},
+	    // {rank: "order",   value: "Caryophyllales"},
+	    {rank: "family",  value: "Curculionidae"},
+	    {rank: "genus",   value: "Tillandsia"},
+	    {rank: "species", value: "Zea mays"},
+	    {rank: "subspecies", value: "Urtica praetermissa praetermissa"}
+	  ].forEach(variable => {
 
-// 	it("Should return a 200 response", function(done){
-
-// 		supertest(server).post("/niche/cells")
-// 		.send({})
-// 		.expect("Content-type",/json/)
-// 		.expect(200, done);
-// 	});
-
-// 	it("Should respond with a listening message", function(done){
-
-// 		supertest(server).post("/niche/cells")
-// 		.send({})
-// 		.expect("Content-type",/json/)
-// 		.expect(200)
-// 		.end(function(err, res) {
-// 			expect(res.body).to.have.property("msg");
-// 			expect(res.body.msg).to.equal("cells endpoint listening")
-// 			done();
-// 		})
-// 	});
-
-// 	it("Should get resolution of 16km as default", function(done){
-// 		var spid = 28923;
-
-// 		supertest(server).post("/niche/cells")
-// 		.send({
-// 			sp_id : spid
-// 		})
-// 		.expect("Content-type",/json/)
-// 		.expect(200)
-// 		.end(function(err, res){
-// 			expect(res.body).to.have.property("cells_col")
-// 			expect(res.body.cells_col).to.equal("cells_16km")
-// 			done();
-// 		})
-
-// 	});
-
-// 	it("Should get the cells containing a given species at default resolution", function(done){
-// 		var spid = 28923;
-
-// 		supertest(server).post("/niche/cells")
-// 		.send({
-// 			sp_id : spid
-// 		})
-// 		.expect("Content-type",/json/)
-// 		.expect(200)
-// 		.end(function(err, res){
-// 			expect(res.body).to.have.property("data")
-// 			expect(res.body.data).to.not.equal(null)
-// 			expect(res.body).to.have.property("cells_col")
-// 			expect(res.body.cells_col).to.equal("cells_16km")
-// 			expect(res.body.data).to.have.property("cell_ids")
-// 			expect(res.body.data.cell_ids).to.be.an("array")
-// 			expect(res.body.data.cell_ids).to.have.length.above(0)
-// 			done();
-// 		})
-
-// 	});
-
-// 	[8, 16, 32, 64].forEach(value => {
-// 		it("Should get the cells containing a given species at res " + value + " km", function(done){
-// 			var spid = 28923;
-
-// 			supertest(server).post("/niche/cells")
-// 			.send({
-// 				sp_id: spid,
-// 				cells_res: value
-// 			})
-// 			.expect("Content-type",/json/)
-// 			.expect(200)
-// 			.end(function(err, res){
-// 				expect(res.body).to.have.property("data")
-// 				expect(res.body.data).to.not.equal(null)
-// 				expect(res.body.data).to.be.an("array")
-// 				expect(res.body.data).to.have.length.equal(1)
-// 				expect(res.body).to.have.property("cells_col")
-// 				expect(res.body.cells_col).to.equal("cells_" + value + "km")
-// 				expect(res.body.data).to.have.property("cell_ids")
-// 				expect(res.body.data.cell_ids).to.be.an("array")
-// 				expect(res.body.data.cell_ids).to.have.length.above(0)
-// 				done();
-// 			})
-// 		});
-// 	});
-
-// 	var niveles_tax = [ 
-// 		["generovalido", "Panthera"]];
-
-// 	niveles_tax.forEach(pair => {
-// 		it("Should get the cells for " + pair, function(done){
-
-// 			supertest(server).post("/niche/cells")
-// 			.send({
-// 				tax_level: pair[0],
-// 				tax_name: pair[1]
-// 			})
-// 			.expect("Content-type",/json/)
-// 			.expect(200)
-// 			.end(function(err, res){
-// 				expect(res.body).to.have.property("cells_col")
-// 				expect(res.body.cells_col).to.equal("cells_16km")
-// 				expect(res.body).to.have.property("data")
-// 				expect(res.body.data).to.have.property("cell_ids")
-// 				expect(res.body.data.cell_ids).to.be.an("array")
-// 				expect(res.body.data.cell_ids).to.have.length.above(0)
-// 				done();
-// 			})
-// 		});
-// 	});
-// });
+	    it("verbo getGroupCountGridid - DISPONIBLE", function(done) {
+	      //console.log(variable);
+	      supertest(server).post("niche/especie/getGroupCountGridid")
+	        .send({
+	          "nodes": [{
+	            "biotic": true,
+	            "merge_vars": [variable]
+	          }],
+	          "grid_res": cell_res,
+	          "region": 1
+	        })
+	        .expect("Content-type", /json/)
+	        .expect(200)
+	        .end(function(err, response) {
+	          response.statusCode.should.equal(200)
+	          expect(response.body.data).to.not.equal(null)
+	          expect(response.body.data).all.have.property("gridid")
+	          expect(response.body.data).all.have.property("conteo")
+	          done();
+	        });
+	    })
+	    });
+	});
+});

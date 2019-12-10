@@ -37,21 +37,22 @@ describe("Prueba verbo getSpeciesTaxonNiche", function(){
 
 	it("verbo getSpeciesTaxonNiche - DISPONIBLE", function(done){
 
-		supertest(server).post("/niche/getSpeciesTaxonNiche")
-		.send(
-				{
-
-
-				}
-		).expect("Content-type",/json/)
+		supertest(server).post("/niche/especie/getSpeciesTaxon")
+		.send({})
+		.expect("Content-type",/json/)
 		.expect(200)
 		.end(function(err, response){
-            response.statusCode.should.equal(200)
-            expect(response.body.data).to.not.equal(null)
+			response.statusCode.should.equal(200)
+			expect(response.body.data).to.not.equal(null)
+			expect(response.body.data).all.have.property("json_geom")
+			expect(response.body.data).all.have.property("gridid")
+			expect(response.body.data).all.have.property("urlejemplar")
+			expect(response.body.data).all.have.property("especie")
+			expect(response.body.data).all.have.property("aniocolecta")
+			expect(response.body.data).all.have.property("occ")
 			done();
 		})
 
 	});
 
 });
-
