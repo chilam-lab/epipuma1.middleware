@@ -2994,11 +2994,11 @@ verb_utils.getFieldsFromLevel = function (level) {
   }
 
   if (level === 'layer')
-    fields  += ", icat, layer, tag "
+    fields  += ", icat, layer, tag, unidad, coeficiente "
   else if(level === 'bid')
-    fields  += ", icat, label, tag "
+    fields  += ", icat, label, tag, unidad, coeficiente "
   else 
-    fields  += ", '' AS icat, '' AS label, '' AS tag "
+    fields  += ", '' AS icat, '' AS label, '' AS tag, '' AS unidad, '' AS coeficiente "
 
   //debug("fields === " + fields)
   return fields
@@ -3095,9 +3095,9 @@ verb_utils.getGroupFieldsFromLevel = function (level) {
     }
 
    if(level === 'layer')
-        group_fields += ", icat, layer, tag "
+        group_fields += ", icat, layer, tag, unidad, coeficiente "
   else if(level === 'bid')
-        group_fields  += ", icat, label, tag "
+        group_fields  += ", icat, label, tag, unidad, coeficiente "
 
   }
 
