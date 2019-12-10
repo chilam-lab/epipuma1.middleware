@@ -700,18 +700,23 @@ verb_utils.processDataForScoreDecilTable = function (data_cell, decil_selected){
   // debug(cell_decil_filter_array)
 
 
-  //TODO: REVISAR ESTAN DANDO CELDAS CONSECUTVIAS O CON UN PATRON EXTRAÑO!!
-  
   var cell_array = cell_decil_filter_array.map(function(d){return d.gridid})
   // debug(cell_array)
 
 
   var map_spid = d3.map([])
+  var conteo_sp = 0
 
   // obtiene un array con toda las especies del decil y el porcentaje de la especie en el decil
   cell_decil_filter_array.forEach(function (cell_item, index) {
 
     cell_item.species.forEach(function (specie, index){
+
+      // debug("**********-> sp: " + specie.name)
+      // if(specie.name.indexOf("Microtus pennsylvanicus") != -1){
+      //   conteo_sp++
+      //   debug(specie)
+      // }
 
         if(!map_spid.has(specie.name)){
             var item = {};
@@ -734,6 +739,11 @@ verb_utils.processDataForScoreDecilTable = function (data_cell, decil_selected){
     })
 
   })
+
+  // debug("**********->")
+  // debug("conteo_sp: " + conteo_sp)
+  // conteo_sp = 0
+  // debug(map_spid.get("Microtus pennsylvanicus "))
 
   // debug(map_spid.values());
 
@@ -1164,7 +1174,7 @@ verb_utils.processCellDecilPerIter = function(data_group, apriori, mapa_prob, al
 
     var data = iter.data
 
-    // debug(data)
+    // debug(data[0].nj)
 
     // Suma score por celda tomando encuenta apriori y probabilidad
     var cellsarray_temp = verb_utils.processDataForScoreCellTable(data, apriori, mapa_prob)
@@ -1290,6 +1300,14 @@ verb_utils.getPercentageOccPerDecil = function(data, length_decil){
       var occ_perdecile = parseFloat(specie.njd / length_decil * 100)
 
       var value_abio = specie.name;
+
+      // if(value_abio == "Microtus pennsylvanicus "){
+      //   debug("specie.njd: " + specie.njd)
+      //   debug("specie.nj: " + specie.nj)
+      //   debug("length_decil: " + length_decil)
+      //   debug("per_decil: " + per_decil)
+      //   debug("occ_perdecile: " + occ_perdecile)
+      // }
 
       decil_list.push({decil: specie.decile, species: value_abio, epsilons: specie.epsilon, scores: specie.score, occ: per_decil, occ_perdecile: occ_perdecile});
 
@@ -1464,9 +1482,10 @@ verb_utils.processDataForScoreCellTable = function (data, apriori, mapa_prob){
 
       item.cells.forEach(function (cell_item, index) {
       
-          // TODO: Cambiar el layer por el label
           // var name = item.reinovalido === "" ? (item.layer + " " + item.tag) : (item.generovalido +" "+item.especieepiteto+" "+item.nombreinfra)
           var name = item.reinovalido === "" ? (item.label + " | " + item.tag) : (item.generovalido +" "+item.especieepiteto+" "+item.nombreinfra)
+
+          // debug(name + ": " + item.nj)
           
           var item_map = {
               cell: cell_item,
@@ -1481,10 +1500,8 @@ verb_utils.processDataForScoreCellTable = function (data, apriori, mapa_prob){
       })
   })
 
-  // debug(cells.values())
 
-
-
+  // no hay dobles de celda y especie
 
   var cross_cells = crossfilter(cells.values())
   cross_cells.groupAll();
@@ -1540,7 +1557,6 @@ verb_utils.processDataForScoreCellTable = function (data, apriori, mapa_prob){
   // var groupByCell = cells_dimension.group().reduceSum(function(d) { return parseFloat(parseFloat(d.score).toFixed(3)); });
   var map_cell = groupByScoreCell.top(Infinity);
 
-  // console.log(map_cell)
   // console.log("map_cell: " + map_cell.length)
 
   if(apriori || mapa_prob){
@@ -1583,9 +1599,13 @@ verb_utils.processDataForScoreCellTable = function (data, apriori, mapa_prob){
 
       item.tscore = parseFloat((tscore).toFixed(3));
 
+      // if(entry["value"].names.indexOf())
+      // debug("*********>> names: " + map_cell.values()[0].names)
+
 
       var species = [];
       for (var j = 0; j < len; j++) {
+
 
           var specie = {};
           // specie.spid = entry["value"].spids[j];
@@ -1600,6 +1620,8 @@ verb_utils.processDataForScoreCellTable = function (data, apriori, mapa_prob){
       cell_score_array.push(item)
 
   }
+
+  // debug(cell_score_array[0])
   
   // cell_score_array.sort(verb_utils.compare_desc);
   cell_score_array = verb_utils.sort_by_key(cell_score_array, "tscore")
@@ -2289,10 +2311,10 @@ verb_utils.processGroupValidationData = function(data_group) {
 
   data.forEach(function (row_item, index){
 
-    if(row_item.tempid == 356184910){
-      debug("******** " + row_item.generovalido + " " + row_item.especieepiteto)
-      debug("******** " + row_item.cells.length)
-    }
+    // if(row_item.tempid == 356184910){
+    //   debug("******** " + row_item.generovalido + " " + row_item.especieepiteto)
+    //   debug("******** " + row_item.cells.length)
+    // }
 
     if(!data_map.has(row_item.tempid)){
       
