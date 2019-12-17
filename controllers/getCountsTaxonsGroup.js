@@ -80,6 +80,7 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   data_request["with_data_freq"] = verb_utils.getParam(req, 'with_data_freq', true)
   data_request["with_data_score_cell"] = verb_utils.getParam(req, 'with_data_score_cell', true)
   data_request["with_data_freq_cell"] = verb_utils.getParam(req, 'with_data_freq_cell', true)
+  data_request["with_data_score_decil"] = verb_utils.getParam(req, 'with_data_score_decil', true)
    
   var NIterations = verb_utils.getParam(req, 'iterations', iterations)
   var iter = 0
@@ -266,14 +267,9 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
   }).then(data_iteration => {
 
-    var decil_selected = data_request["decil_selected"]
-    // var ni_sp = data_iteration[0].ni
+      var decil_selected = data_request["decil_selected"]
     
-    // debug("****** nj: " + data_iteration[0].nj)
-    // debug("****** ni_sp: " + ni_sp)
-
-    // debug("decil_selected: " + decil_selected)
-
+    
       var data_response = {iter: (iter+1), data: data_iteration, test_cells: data_request["source_cells"], apriori: data_request.apriori, mapa_prob: data_request.mapa_prob }
       json_response["data_response"] = json_response["data_response"] === undefined ? [data_response] : json_response["data_response"].concat(data_response)
       
@@ -300,9 +296,6 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
         var data_freq = []
         
 
-
-
-
         if(total_iterations !== 1){
 
           debug("PROCESS RESULTS FOR VALIDATION")
@@ -320,7 +313,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
           // En caso de ser validación se promedia cada rango
           data_freq = data_request.with_data_freq === true ? verb_utils.processDataForFreqSpecie(json_response["data_response"], is_validation) : []
 
-          validation_data = verb_utils.getValidationValues(json_response["data_response"])
+          validation_data = data_request.with_data_score_decil === true ? verb_utils.getValidationValues(json_response["data_response"]) : []
 
 
         } else{
@@ -330,7 +323,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
           data = data_iteration
 
-          validation_data = verb_utils.getValidationDataNoValidation(data, 
+          validation_data = data_request.with_data_score_decil === true ? verb_utils.getValidationDataNoValidation(data, 
                             data_request["target_cells"],
                             data_request["res_celda_snib"], 
                             data_request["where_target"], 
@@ -339,12 +332,11 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
                             data_request["res_celda_sp"], 
                             data_request["apriori"],
                             data_request["mapa_prob"],
-                            queries)
+                            queries) : []
 
           
           // Obtiene los 20 rangos de epsilon y score por especie, utilizados para las gráficas en el cliente de frecuencia por especie. 
           // En caso de ser validación se promedia cada rango
-          // TODO: No realizar cuando es selección de celda
           data_freq = data_request.with_data_freq === true ? verb_utils.processDataForFreqSpecie([data], is_validation) : []
 
           
@@ -394,11 +386,16 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
         // data = is_validation ? verb_utils.processCellDecilPerIter(json_response["data_response"], apriori, mapa_prob, data_request.all_cells, is_validation) : data
         var percentage_occ = []
         var decil_cells = []
-        var decilper_iter = verb_utils.processCellDecilPerIter(json_response["data_response"], apriori, mapa_prob, data_request.all_cells, is_validation, decil_selected) 
-        
-        percentage_occ = decilper_iter.result_datapercentage
-        decil_cells = decilper_iter.decil_cells
 
+        if(data_request.with_data_score_decil === true ){
+
+          debug("Calcula valores decil")
+
+          var decilper_iter = verb_utils.processCellDecilPerIter(json_response["data_response"], apriori, mapa_prob, data_request.all_cells, is_validation, decil_selected) 
+          percentage_occ = decilper_iter.result_datapercentage
+          decil_cells = decilper_iter.decil_cells
+
+        }
 
 
         res.json({
