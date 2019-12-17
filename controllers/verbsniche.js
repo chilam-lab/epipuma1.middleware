@@ -2127,6 +2127,12 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
   var grid_res          = getParam(req, 'grid_res', 16)
   var region            = getParam(req, 'region', 1)
 
+  console.log("liminf: " + liminf)
+  console.log("limsup: " + limsup)
+
+  console.log("sfecha: " + sfecha)
+  console.log("sfosil: " + sfosil)
+
   var species_filter  = verb_utils.getWhereClauseFromGroupTaxonArray(target_taxons, true)
   var resolution_view = 'grid_geojson_' + grid_res + 'km_aoi'
   var gridid          = 'gridid_' + grid_res + 'km'
@@ -2139,7 +2145,10 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
     where_filter += ' AND ( aniocolecta BETWEEN ' + liminf + ' AND ' + limsup + ' ) '
 
   if(!sfosil)
-    where_filter += " AND ejemplarfosil != 'SI'"
+    where_filter += " AND (ejemplarfosil != 'SI' or ejemplarfosil isnull)"
+
+
+  console.log("where_filter: " + where_filter)
 
   /*const query1 = pgp.as.format(queries.getGridSpeciesNiche.getGridSpeciesTaxons, {'species_filter' : species_filter, 
             'resolution_view': resolution_view,
@@ -2214,7 +2223,7 @@ exports.getCountByYear = function(req, res) {
             'snib_grid_xxkm' : snib_grid_xxkm,
             'where_filter'   : where_filter}
       ).then(function (data) {
-        debug(data.length + ' ocurrence years')
+        // debug(data.length + ' ocurrence years')
         res.json({
           ok: true,
           'data': data
