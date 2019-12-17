@@ -2205,7 +2205,7 @@ exports.getCountByYear = function(req, res) {
     where_filter += ' AND ( aniocolecta BETWEEN ' + liminf + ' AND ' + limsup + ' ) '
 
   if(!sfosil)
-    where_filter += " AND ejemplarfosil != 'SI'"
+    where_filter += " AND (ejemplarfosil != 'SI' or ejemplarfosil isnull)"
 
   /*const query1 = pgp.as.format(queries.basicAnalysis.getCountByYear, {'species_filter' : species_filter, 
             'resolution_view': resolution_view,
