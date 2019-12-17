@@ -1952,7 +1952,7 @@ verb_utils.get_target_cells = function(gridid, where_target, view, region, cells
   }
   partition.push(sorted_scores[N - 1])
   partition = partition.reverse()
-  debug(partition)
+  // debug(partition)
 
   var vp = []
   var fn = []
@@ -1966,7 +1966,7 @@ verb_utils.get_target_cells = function(gridid, where_target, view, region, cells
 
     scored_target_cells.forEach(function(item) {
 
-      if(item.score != 'null'){
+      if(item.score != null){
 
         if (item.score > partition[i+1]){
 
@@ -1996,6 +1996,10 @@ verb_utils.get_target_cells = function(gridid, where_target, view, region, cells
       recall: vp[i] / (vp[i] + fn[i])
 
     })
+
+    // debug(validation_data)
+
+
 
   }
 

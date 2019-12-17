@@ -246,8 +246,9 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
            } else {
 
             debug("analisis basico")
-            //const query1 = pgp.as.format(query_analysis, data_request)
-            //debug("iter " + iter + query1)
+
+            const query1 = pgp.as.format(query_analysis, data_request)
+            // debug("iter " + iter + query1)
             // debug(query_analysis)
             //debug(data_request)
 
@@ -296,7 +297,6 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
         var data_avg = []
         var validation_data = []
         var is_validation = false
-
         var data_freq = []
         
 
@@ -312,25 +312,13 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
           // Promedia los valores obtenidos en las N iteraciones para n, nj, nij, ni, epsilon y score. 
           // Además obtiene un array de cobertura total por las celdas de cada especie
 
-          // debug("length: " + json_response["data_response"].length)
-          // var items = json_response["data_response"]
-          // debug(items[0].data[0])
-          // var data_clone = json_response["data_response"].filter(() => true);
-
           var dup_array = JSON.parse(JSON.stringify(json_response["data_response"]))
 
           data = verb_utils.processGroupValidationData(dup_array)
 
-          // debug(items[0].data[0])
-
-          // var items = json_response["data_response"]
-          // debug(items[0].nj)
-          
-          
           // Obtiene los 20 rangos de epsilon y score por especie, utilizados para las gráficas en el cliente de frecuencia por especie. 
           // En caso de ser validación se promedia cada rango
           data_freq = data_request.with_data_freq === true ? verb_utils.processDataForFreqSpecie(json_response["data_response"], is_validation) : []
-          
 
           validation_data = verb_utils.getValidationValues(json_response["data_response"])
 
