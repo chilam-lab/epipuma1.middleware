@@ -1881,6 +1881,7 @@ exports.getEntListNiche = function (req, res, next) {
     // res_celda_sp = (source == 1) ? res_celda_sp : 'array[]::int[]'
     // var val_tree = (source == 1) ? ' and icount('+res_celda_sp+') > 0 ' : ''
     var val_tree = ' and icount('+res_celda_sp+') > 0 '
+    var region_col = ' and region_' + region
 
     var txt_limite = has_limit === false ? '' : 'limit ' + limite
 
@@ -1918,6 +1919,25 @@ exports.getEntListNiche = function (req, res, next) {
 
     debug('Parsea datos, (antes de ejecutar query) en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
 
+    /*debug("---------------------------------------");
+    debug('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+    const query1 = pgp.as.format(queries.getEntListNiche.getEntList, {
+                                    str: str,
+                                    columnas: columnas,
+                                    nivel: nivel,
+                                    res_celda_sp: res_celda_sp,
+                                    res_celda_snib: res_celda_snib,
+                                    res_celda_snib_tb: res_celda_snib_tb,
+                                    val_tree: val_tree,
+                                    limite: txt_limite,
+                                    region: region,
+                                    ad_param: ad_param,
+                                    region_col: region_col
+                                  });
+    debug('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+    debug(query1);
+    debug("---------------------------------------")*/
+
     pool.any(queries.getEntListNiche.getEntList, {
       str: str,
       columnas: columnas,
@@ -1928,7 +1948,8 @@ exports.getEntListNiche = function (req, res, next) {
       val_tree: val_tree,
       limite: txt_limite,
       region: region,
-      ad_param: ad_param
+      ad_param: ad_param,
+      region_col: region_col
     })
     .then(function (data) {
 
