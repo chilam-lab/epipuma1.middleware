@@ -2022,7 +2022,7 @@ verb_utils.getValidationValues = function (data_group){
     // debug(item.data)
     // debug(item.apriori)
     // debug(item.mapa_prob)
-
+    
     // obteniendo el score por celda del conjunto de entrenamiento
     var apriori = item.apriori !== false && item.data[0].ni !== undefined ? true : false
     var mapa_prob = item.mapa_prob !== false && item.data[0].ni !== undefined ? true : false
@@ -2045,7 +2045,17 @@ verb_utils.getValidationValues = function (data_group){
 
     // obtiene el score por celda del conjunto de test
     var temp_values = []
-    item.test_cells.forEach(function(cell_item){
+
+    // TODO: Asegurar que las test_cells no contengan las celdas que no tienen fosiles o registros sin fecha cuando son agregados
+    // debug("target_cells:" + item.target_cells.length)
+    // debug("test_cells:" + item.test_cells.length)
+
+    // Interseción entre las celdas sin fosiles y las celdas
+    var arg_temp = item.test_cells.filter(value => -1 !== item.target_cells.indexOf(value))
+    debug("arg_temp:" + arg_temp.length)
+
+
+    arg_temp.forEach(function(cell_item){
     
       var temp_value = {}
       temp_value.cell = cell_item

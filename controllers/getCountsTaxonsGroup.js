@@ -286,10 +286,13 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
       // debug("data_iteration.length: " + data_iteration.length)
       // debug("target_cells.length: " +  data_request["target_cells"].length)
 
+      // debug("source_cells.length: " +  data_request["source_cells"].length)
+      // debug("total_cells.length: " +  data_request["total_cells"].length)
+
       var decil_selected = data_request["decil_selected"]
     
     
-      var data_response = {iter: (iter+1), data: data_iteration, test_cells: data_request["source_cells"], apriori: data_request.apriori, mapa_prob: data_request.mapa_prob }
+      var data_response = {iter: (iter+1), data: data_iteration, test_cells: data_request["source_cells"], target_cells: data_request["target_cells"], apriori: data_request.apriori, mapa_prob: data_request.mapa_prob }
       json_response["data_response"] = json_response["data_response"] === undefined ? [data_response] : json_response["data_response"].concat(data_response)
       
       if(!request_counter_map.has(data_request["title_valor"].title)){
