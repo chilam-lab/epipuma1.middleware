@@ -2948,7 +2948,11 @@ verb_utils.getFieldsFromLevel = function (level) {
 
         } else {
 
-          fields += ", " + taxon_map[key] 
+          if(taxon_map[key] === 'type' || taxon_map[key] === 'bid')
+            fields += ", " + taxon_map[key] + '::varchar' 
+          else
+            fields += ", " + taxon_map[key]
+          //fields += ", " + taxon_map[key] 
         
         }
 
@@ -2978,12 +2982,19 @@ verb_utils.getFieldsFromLevel = function (level) {
       if (level === key) {
 
           notyet = false
-          fields += ", " + rank_map[key]
+          if(rank_map[key] === 'type' || rank_map[key] === 'bid')
+            fields += ", " + rank_map[key] + '::varchar' 
+          else
+            fields += ", " + rank_map[key]
 
 
       } else {
 
-          fields += ", " + rank_map[key] 
+          if(rank_map[key] === 'type' || rank_map[key] === 'bid')
+            fields += ", " + rank_map[key] + '::varchar' 
+          else
+            fields += ", " + rank_map[key]
+          //fields += ", " + rank_map[key] 
 
       }
 
@@ -2998,9 +3009,9 @@ verb_utils.getFieldsFromLevel = function (level) {
   }
 
   if (level === 'layer')
-    fields  += ", icat, layer, tag, unidad, coeficiente "
+    fields  += ", icat::varchar, layer, tag, unidad, coeficiente::varchar "
   else if(level === 'bid')
-    fields  += ", icat, label, tag, unidad, coeficiente "
+    fields  += ", icat::varchar, label, tag, unidad, coeficiente::varchar "
   else 
     fields  += ", '' AS icat, '' AS label, '' AS tag, '' AS unidad, '' AS coeficiente "
 
@@ -3374,6 +3385,7 @@ verb_utils.getCommunityAnalysisQuery = function(queries, region, res_cells, regi
 
         q = q.toString().replace(/{index:raw}/g, index)
         q = q.toString().replace(/{fields:raw}/g, fields)
+        //q = q.toString().replace(/type/g, 'type::varchar')
         q = q.toString().replace(/{biotic:raw}/g, 'true')
         q = q.toString().replace(/{region_cells:raw}/g, region_cells)
         q = q.toString().replace(/{where_filter:raw}/g, where)
@@ -3395,6 +3407,7 @@ verb_utils.getCommunityAnalysisQuery = function(queries, region, res_cells, regi
         q_aux = q_aux.toString().replace(/{index:raw}/g, index)
         q_aux = q_aux.toString().replace(/{biotic:raw}/g, 'true')
         q_aux = q_aux.toString().replace(/{fields:raw}/g, fields)
+        //q_aux = q_aux.toString().replace(/type/g, 'type::varchar')
         q_aux = q_aux.toString().replace(/{region_cells:raw}/g, region_cells)
         q_aux = q_aux.toString().replace(/{where_filter:raw}/g, where)
     
