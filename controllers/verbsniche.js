@@ -2160,13 +2160,21 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
   var snib_grid_xxkm  = 'snib_grid_' + grid_res + 'km'
   var where_filter    = ''
 
-  if (sfecha)
+  if (sfecha){
     where_filter += ' AND ( ( aniocolecta BETWEEN ' + liminf + ' AND ' + limsup + ' ) OR aniocolecta = 9999 )'
-  else
+  }
+  else{
+    // Esta condicion esta filtrando tmb los fosiles, ya que los registros fosiles tienen año 9999
     where_filter += ' AND ( aniocolecta BETWEEN ' + liminf + ' AND ' + limsup + ' ) '
+  }
 
-  if(!sfosil)
+  if(!sfosil){
     where_filter += " AND (ejemplarfosil != 'SI' or ejemplarfosil isnull)"
+  }
+  else{
+    // TODO: Se debe validar si se piden o no foisles y agregar la sentencia de OR ejemplarfosil = 'SI'
+    where_filter += " OR ejemplarfosil = 'SI'"
+  }
 
 
   /*const query1 = pgp.as.format(queries.getGridSpeciesNiche.getGridSpeciesTaxons, {'species_filter' : species_filter, 
@@ -2217,14 +2225,38 @@ exports.getCountByYear = function(req, res) {
   var gridid          = 'gridid_' + grid_res + 'km'
   var snib_grid_xxkm  = 'snib_grid_' + grid_res + 'km'
   var where_filter    = ''
+  var where_filter_fosil    = ''
 
-  if (sfecha)
+  if (sfecha){
     where_filter += ' AND ( ( aniocolecta BETWEEN ' + liminf + ' AND ' + limsup + ' ) OR aniocolecta = 9999 )'
-  else
-    where_filter += ' AND ( aniocolecta BETWEEN ' + liminf + ' AND ' + limsup + ' ) '
+    where_filter_fosil += ' AND ( ( aniocolecta BETWEEN ' + liminf + ' AND ' + limsup + ' ) OR aniocolecta = 9999 )'
+  }
+  else{
+    // Esta condicion esta filtrando tmb los fosiles, ya que los registros fosiles tienen año 9999
+    where_filter += ' AND ( aniocolecta BETWEEN ' + liminf + ' AND ' + limsup + ' ) ' 
+    where_filter_fosil += ' AND ( aniocolecta BETWEEN ' + liminf + ' AND ' + limsup + ' ) ' 
+    
+    if(sfosil){
+      where_filter_fosil += " OR ejemplarfosil = 'SI'"
+    }
 
-  if(!sfosil)
+  }
+
+  if(!sfosil){
     where_filter += " AND (ejemplarfosil != 'SI' or ejemplarfosil isnull)"
+    where_filter_fosil += " AND (ejemplarfosil != 'SI' or ejemplarfosil isnull)"
+  }
+  else{
+    // TODO: Se debe validar si se piden o no foisles y agregar la sentencia de OR ejemplarfosil = 'SI'
+    if(sfecha){
+      where_filter += " OR ejemplarfosil = 'SI'"  
+    }
+    
+  }
+
+  where_filter_fosil += " AND (ejemplarfosil = 'SI') "
+    
+  
 
   /*const query1 = pgp.as.format(queries.basicAnalysis.getCountByYear, {'species_filter' : species_filter, 
             'resolution_view': resolution_view,
@@ -2234,13 +2266,21 @@ exports.getCountByYear = function(req, res) {
             'where_filter'   : where_filter})
   debug(query1)*/
 
+  debug("species_filter: " + species_filter)
+  debug("snib_grid_xxkm: " + snib_grid_xxkm)
+  debug("where_filter: " + where_filter)
+  debug("where_filter_fosil: " + where_filter_fosil)
+  debug("gridid: " + gridid)
+  debug("resolution_view: " + resolution_view)
+
   pool.any(queries.basicAnalysis.getCountByYear, {
             'species_filter' : species_filter, 
             'resolution_view': resolution_view,
             'region'         : region,
             'gridid'         : gridid,
             'snib_grid_xxkm' : snib_grid_xxkm,
-            'where_filter'   : where_filter}
+            'where_filter'   : where_filter,
+            'where_filter_fosil' : where_filter_fosil}
       ).then(function (data) {
         // debug(data.length + ' ocurrence years')
         res.json({
