@@ -63,7 +63,21 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   data_request["target_name"] = verb_utils.getParam(req, 'target_name', 'target_group')
   data_request["where_target"] = verb_utils.getWhereClauseFromGroupTaxonArray(target_group, true)
   data_request["where_exclude_target"] = verb_utils.getExcludeTargetWhereClause(target_group)
-  debug(target_group)
+  // debug(target_group)
+
+  var where_filter_target    = ''
+  if (date)
+    where_filter_target += ' AND ( ( aniocolecta BETWEEN ' + lim_inf + ' AND ' + lim_sup + ' ) OR aniocolecta = 9999 )'
+  else
+    where_filter_target += ' AND ( aniocolecta BETWEEN ' + lim_inf + ' AND ' + lim_sup + ' ) '
+
+  if(!fosil)
+    where_filter_target += " AND (ejemplarfosil != 'SI' or ejemplarfosil isnull)"
+
+  // debug("where_filter_target: " + where_filter_target)
+  data_request["where_filter_target"] = where_filter_target
+
+
 
   var covars_groups = verb_utils.getParam(req, 'covariables', []) 
   //debug(covars_groups)
@@ -124,7 +138,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
   pool.task(t => {
 
-
+    //TODO: No esta filtrando las especies fosil, sin fecha y rangos
     var query = queries.getGridSpeciesNiche.getTargetCells
 
     return t.one(query, {
@@ -134,7 +148,8 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
       view: data_request["res_celda_snib_tb"],
       region: data_request["region"],
       cells: data_request["res_celda_sp"],
-      grid_resolution:data_request["grid_resolution"] 
+      grid_resolution:data_request["grid_resolution"],
+      where_filter: data_request["where_filter_target"]
 
     }).then(resp => {
 
@@ -266,6 +281,10 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
     })    
 
   }).then(data_iteration => {
+
+      // debug("data_iteration[0].ni: " + data_iteration[0].ni)
+      // debug("data_iteration.length: " + data_iteration.length)
+      // debug("target_cells.length: " +  data_request["target_cells"].length)
 
       var decil_selected = data_request["decil_selected"]
     
