@@ -2169,8 +2169,6 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
     where_filter += " AND (ejemplarfosil != 'SI' or ejemplarfosil isnull)"
 
 
-  console.log("where_filter: " + where_filter)
-
   /*const query1 = pgp.as.format(queries.getGridSpeciesNiche.getGridSpeciesTaxons, {'species_filter' : species_filter, 
             'resolution_view': resolution_view,
             'region'         : region,
