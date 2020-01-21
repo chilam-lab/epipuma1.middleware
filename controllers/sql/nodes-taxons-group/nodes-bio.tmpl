@@ -1,10 +1,21 @@
 WITH aux_{index:raw} AS (
-	SELECT DISTINCT 
-		{biotic:raw} AS biotic,
-		{fields:raw},
-		UNNEST({region_cells:raw}) AS cell
-	FROM sp_snib
-	{where_filter:raw}
+	select distinct 
+	biotic, {fields:raw},
+	b.{gridid:raw} AS cell
+	FROM snib_grid_{grid_res:raw}km AS b
+	JOIN(
+		SELECT DISTINCT 
+			spid,
+			{biotic:raw} AS biotic,
+			{fields:raw}
+		FROM sp_snib as a
+		{where_filter:raw}
+		and a.spid is not null
+		and array_length(a.{region_cells:raw}, 1) > 0
+	) AS c
+	ON b.spid = c.spid
+	WHERE b.{gridid:raw} is not null
+	{where_filter_cell:raw}
 ) {aux:raw}
 SELECT 
 	biotic,
