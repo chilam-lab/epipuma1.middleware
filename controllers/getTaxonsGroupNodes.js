@@ -79,8 +79,8 @@ exports.getTaxonsGroupNodes = function(req, res) {
 	    var source_query = verb_utils.getCommunityAnalysisQuery(queries, footprint_region, res_cells, region_cells, res_views, source, false, where_bio_source, where_abio_source)
 	    var target_query = verb_utils.getCommunityAnalysisQuery(queries, footprint_region, res_cells, region_cells, res_views, target, true, where_bio_source, where_abio_source).slice(5)
 
-	    const query1 = pgp.as.format(query, {source: source_query, target: target_query})
-      debug(query1)
+	    //const query1 = pgp.as.format(query, {source: source_query, target: target_query})
+      //debug(query1)
 
         // Executing queries
 	    return t.any(query, {
