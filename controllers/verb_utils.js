@@ -3367,7 +3367,7 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
   return query_covar  
 }
 
-verb_utils.getCommunityAnalysisQuery = function(queries, region, res_cells, region_cells, res_views, source, is_target, where_bio_source, where_abio_source){
+verb_utils.getCommunityAnalysisQuery = function(queries, region, res_cells, region_cells, res_views, source, is_target, where_bio_source, where_abio_source, where_filter_cell, gridid, grid_res){
 
   debug("getCommunityAnalysisQuery")
 
@@ -3402,6 +3402,12 @@ verb_utils.getCommunityAnalysisQuery = function(queries, region, res_cells, regi
         q = q.toString().replace(/{level:raw}/g, level)
         q = q.toString().replace(/{group_fields:raw}/g, group_fields)
 
+        // Se añade replace para añadir filtro fecha y fosil
+        q = q.toString().replace(/{gridid:raw}/g, gridid)
+        q = q.toString().replace(/{grid_res:raw}/g, grid_res)
+        q = q.toString().replace(/{where_filter_cell:raw}/g, where_filter_cell)
+        
+
       } else {
 
         q_aux    = ", aux_" + index + " AS ( " + queries.taxonsGroupNodes.covarBio + " )"
@@ -3420,6 +3426,14 @@ verb_utils.getCommunityAnalysisQuery = function(queries, region, res_cells, regi
         //q_aux = q_aux.toString().replace(/type/g, 'type::varchar')
         q_aux = q_aux.toString().replace(/{region_cells:raw}/g, region_cells)
         q_aux = q_aux.toString().replace(/{where_filter:raw}/g, where)
+
+        // Se añade replace para añadir filtro fecha y fosil
+        q_aux = q_aux.toString().replace(/{gridid:raw}/g, gridid)
+        q_aux = q_aux.toString().replace(/{grid_res:raw}/g, grid_res)
+        q_aux = q_aux.toString().replace(/{where_filter_cell:raw}/g, where_filter_cell)
+
+
+
     
         q_select = q_select.toString().replace(/{index:raw}/g, index)
         q_select = q_select.toString().replace(/{fields:raw}/g, fields)
@@ -3428,6 +3442,7 @@ verb_utils.getCommunityAnalysisQuery = function(queries, region, res_cells, regi
         q = q.toString().replace(/{aux:raw}/g, q_aux + ' {aux:raw}')
         q = q.toString().replace(/{union:raw}/g, q_select + ' {union:raw}')
 
+        
       }
 
     } else {
