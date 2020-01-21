@@ -17,7 +17,9 @@ SELECT
     source.bid,
     source.tag,
     source.icat,
-	array_length(source.cells, 1) AS occ
+	array_length(source.cells, 1) AS occ,
+    source.coeficiente::varchar,
+	source.unidad::varchar
 FROM source
 UNION
 SELECT
@@ -37,5 +39,7 @@ SELECT
     target.bid,
     target.tag,
     target.icat,
-	array_length(target.cells, 1) AS occ
+	array_length(target.cells, 1) AS occ,
+    target.coeficiente::varchar,
+	target.unidad::varchar
 FROM target
