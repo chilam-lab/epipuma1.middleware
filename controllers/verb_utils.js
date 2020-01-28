@@ -3411,6 +3411,8 @@ verb_utils.getCommunityAnalysisQuery = function(queries, region, res_cells, regi
         q = q.toString().replace(/{gridid:raw}/g, gridid)
         q = q.toString().replace(/{grid_res:raw}/g, grid_res)
         q = q.toString().replace(/{where_filter_cell:raw}/g, where_filter_cell)
+
+        q = q.toString().replace(/{region:raw}/g, region)
         
 
       } else {
@@ -3446,6 +3448,9 @@ verb_utils.getCommunityAnalysisQuery = function(queries, region, res_cells, regi
 
         q = q.toString().replace(/{aux:raw}/g, q_aux + ' {aux:raw}')
         q = q.toString().replace(/{union:raw}/g, q_select + ' {union:raw}')
+
+
+        q = q.toString().replace(/{region:raw}/g, region)
 
         
       }
