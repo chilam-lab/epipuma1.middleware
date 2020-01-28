@@ -31,13 +31,19 @@ exports.getTaxonsGroupNodes = function(req, res) {
   // debug("date: " + date)
 
   var where_filter_cell    = ''
-  if (date)
+  if (date){
     where_filter_cell += ' AND ( ( aniocolecta BETWEEN ' + lim_inf + ' AND ' + lim_sup + ' ) OR aniocolecta = 9999 )'
-  else
+  }
+  else{
     where_filter_cell += ' AND ( aniocolecta BETWEEN ' + lim_inf + ' AND ' + lim_sup + ' ) '
+  }
 
-  if(!fosil)
+  if(!fosil){
     where_filter_cell += " AND (ejemplarfosil != 'SI' or ejemplarfosil isnull)"
+  }
+  else{
+    where_filter_cell += " OR ejemplarfosil = 'SI'"
+  }
 
   debug("where_filter_cell: " + where_filter_cell)
 
@@ -111,7 +117,7 @@ exports.getTaxonsGroupNodes = function(req, res) {
 	    return t.any(query, {
 
 	    	source: source_query,
-	    	target: target_query
+	    	target: target_query,
 
 	    }).then(resp => {
     		

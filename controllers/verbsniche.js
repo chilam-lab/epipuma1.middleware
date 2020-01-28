@@ -2177,13 +2177,13 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
   }
 
 
-  /*const query1 = pgp.as.format(queries.getGridSpeciesNiche.getGridSpeciesTaxons, {'species_filter' : species_filter, 
+  const query1 = pgp.as.format(queries.getGridSpeciesNiche.getGridSpeciesTaxons, {'species_filter' : species_filter, 
             'resolution_view': resolution_view,
             'region'         : region,
             'gridid'         : gridid,
             'snib_grid_xxkm' : snib_grid_xxkm,
             'where_filter'   : where_filter})
-  debug(query1)*/
+  debug(query1)
 
   pool.any(queries.getGridSpeciesNiche.getGridSpeciesTaxons, {
             'species_filter' : species_filter, 
