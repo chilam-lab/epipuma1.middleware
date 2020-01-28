@@ -11,7 +11,6 @@ WITH aux_{index:raw} AS (
 		FROM sp_snib as a
 		{where_filter:raw}
 		and a.spid is not null
-		and array_length(a.{region_cells:raw}, 1) > 0
 	) AS c
 	ON b.spid = c.spid
 	JOIN (
