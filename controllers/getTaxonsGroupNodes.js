@@ -117,7 +117,7 @@ exports.getTaxonsGroupNodes = function(req, res) {
 	    return t.any(query, {
 
 	    	source: source_query,
-	    	target: target_query
+	    	target: target_query,
 
 	    }).then(resp => {
     		

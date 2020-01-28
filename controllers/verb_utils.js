@@ -3406,6 +3406,7 @@ verb_utils.getCommunityAnalysisQuery = function(queries, region, res_cells, regi
         q = q.toString().replace(/{where_filter:raw}/g, where)
         q = q.toString().replace(/{level:raw}/g, level)
         q = q.toString().replace(/{group_fields:raw}/g, group_fields)
+        q = q.toString().replace(/{region:raw}/g, region)
 
         // Se añade replace para añadir filtro fecha y fosil
         q = q.toString().replace(/{gridid:raw}/g, gridid)
@@ -3438,6 +3439,7 @@ verb_utils.getCommunityAnalysisQuery = function(queries, region, res_cells, regi
         q_aux = q_aux.toString().replace(/{gridid:raw}/g, gridid)
         q_aux = q_aux.toString().replace(/{grid_res:raw}/g, grid_res)
         q_aux = q_aux.toString().replace(/{where_filter_cell:raw}/g, where_filter_cell)
+        q_aux = q_aux.toString().replace(/{region:raw}/g, region)
 
 
 
