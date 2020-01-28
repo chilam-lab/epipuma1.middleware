@@ -680,7 +680,8 @@ verb_utils.processDataForScoreDecilTable = function (data_cell, decil_selected){
   var decile = deciles
   var delta = Math.floor(data_cell.length/decile)
 
-  // debug(data_cell)
+  debug(decil_selected)
+  debug("data_cell.length: " + data_cell.length)
 
   data_cell.reverse()
   data_cell.forEach(function (item, index){
@@ -688,17 +689,21 @@ verb_utils.processDataForScoreDecilTable = function (data_cell, decil_selected){
       item["decile"] = dec > decile ? decile : dec
   })
   data_cell.reverse()
+
+  //TODO: verificar por que no trae la suma de los diferentes deciles selccionados
   
   
 
   // filtra las celdas del decil seleccionado
   var cell_decil_filter_array = data_cell.filter(function(item){     
-    return item.decile == decil_selected  
+    // return item.decile == decil_selected  
+    return decil_selected.indexOf(item.decile) === -1 ? false : true
   });
 
-  // debug(cell_decil_filter_array.length)
+  debug(cell_decil_filter_array.length)
   // debug(cell_decil_filter_array)
 
+  // si esta la suma de los dos deciles, mas adelante es cuando los esta filtrando!!!!!!!
 
   var cell_array = cell_decil_filter_array.map(function(d){return d.gridid})
   // debug(cell_array)
@@ -712,13 +717,13 @@ verb_utils.processDataForScoreDecilTable = function (data_cell, decil_selected){
 
     cell_item.species.forEach(function (specie, index){
 
-      // debug("**********-> sp: " + specie.name)
-      // if(specie.name.indexOf("Microtus pennsylvanicus") != -1){
-      //   conteo_sp++
-      //   debug(specie)
-      // }
+        // debug("**********-> sp: " + specie.name)
+        // if(specie.name.indexOf("Microtus pennsylvanicus") != -1){
+        //   conteo_sp++
+        //   debug(specie)
+        // }
 
-        if(!map_spid.has(specie.name)){
+        if(!map_spid.has(specie.name+cell_item.decile)){
             var item = {};
             item.decile = cell_item.decile,
             // item.spid = specie.spid
@@ -727,10 +732,10 @@ verb_utils.processDataForScoreDecilTable = function (data_cell, decil_selected){
             item.nj = specie.nj
             item.njd = 1
             item.name = specie.name
-            map_spid.set(specie.name, item)
+            map_spid.set(specie.name+cell_item.decile, item)
         }
         else{
-            var item = map_spid.get(specie.name);
+            var item = map_spid.get(specie.name+cell_item.decile);
             item.njd = item.njd + 1
 
             // map_spid.set(specie.name, item)
@@ -1163,7 +1168,7 @@ verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, all_cel
 
 
 // obtiene el score por celda, asigna decil y obitne las especies por decil por cada iteracion realizada
-verb_utils.processCellDecilPerIter = function(data_group, apriori, mapa_prob, all_cells = [], isvalidation = false, decil = 10){
+verb_utils.processCellDecilPerIter = function(data_group, apriori, mapa_prob, all_cells = [], isvalidation = false, deciles = [10]){
 
   debug("processCellDecilPerIter")
 
@@ -1181,7 +1186,7 @@ verb_utils.processCellDecilPerIter = function(data_group, apriori, mapa_prob, al
     // debug(cellsarray_temp)
 
     // Asigna decil a cada celda y realiza el conteo por especie en cada decil 
-    var data_result = verb_utils.processDataForScoreDecilTable(cellsarray_temp, decil)
+    var data_result = verb_utils.processDataForScoreDecilTable(cellsarray_temp, deciles)
     // debug(data)
 
     // Obtiene el porcentaje de la especie en el decil y el porcentaje del decil que abarca la especie

@@ -39,7 +39,7 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   var str_query = ''
 
 
-  data_request["decil_selected"] = verb_utils.getParam(req, 'decil_selected', 10)
+  data_request["decil_selected"] = verb_utils.getParam(req, 'decil_selected', [10])
 
   var grid_resolution = parseInt(verb_utils.getParam(req, 'grid_resolution', 16)) 
   var region = parseInt(verb_utils.getParam(req, 'region', verb_utils.region_mx))
