@@ -66,13 +66,19 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   // debug(target_group)
 
   var where_filter_target    = ''
-  if (date)
+  if (date){
     where_filter_target += ' AND ( ( aniocolecta BETWEEN ' + lim_inf + ' AND ' + lim_sup + ' ) OR aniocolecta = 9999 )'
-  else
+  }
+  else{
     where_filter_target += ' AND ( aniocolecta BETWEEN ' + lim_inf + ' AND ' + lim_sup + ' ) '
+  }
 
-  if(!fosil)
+  if(!fosil){
     where_filter_target += " AND (ejemplarfosil != 'SI' or ejemplarfosil isnull)"
+  }
+  else{
+    where_filter_target += " OR ejemplarfosil = 'SI'"
+  }
 
   // debug("where_filter_target: " + where_filter_target)
   data_request["where_filter_target"] = where_filter_target
