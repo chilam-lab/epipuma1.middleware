@@ -14,12 +14,18 @@ WITH aux_{index:raw} AS (
 		and array_length(a.{region_cells:raw}, 1) > 0
 	) AS c
 	ON b.spid = c.spid
+	JOIN (
+		SELECT UNNEST(gid) AS gid 
+		FROM grid_geojson_16km_aoi
+		WHERE footprint_region={region:raw}
+	) as d 
+	ON b.gid = d.gid
 	WHERE b.{gridid:raw} is not null
 	{where_filter_cell:raw}
 ) {aux:raw}
 SELECT 
 	biotic,
-	array_agg(distinct a.cell) AS cells,
+	array_agg(a.cell) AS cells,
 	{fields:raw}
 FROM (
 		SELECT
