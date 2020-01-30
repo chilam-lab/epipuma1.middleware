@@ -14,7 +14,7 @@ exports.getTaxonsGroupEdges = function (req, res) {
 
 	var min_occ = verb_utils.getParam(req, 'min_occ', 5)
 	var grid_res = verb_utils.getParam(req, 'grid_res', 16)
-	var footprint_region = verb_utils.getParam(req, 'region', 1) 
+	var footprint_region = verb_utils.getParam(req, 'footprint_region', 1) 
 	var source = verb_utils.getParam(req, 'source', [])
 	var target = verb_utils.getParam(req, 'target', [])
 	var biotic_source = verb_utils.getParam(req, 'biotic_source', true)
