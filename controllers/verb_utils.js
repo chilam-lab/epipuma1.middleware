@@ -681,6 +681,7 @@ verb_utils.processDataForScoreDecilTable = function (data_cell, decil_selected){
   var delta = Math.floor(data_cell.length/decile)
 
   debug(decil_selected)
+  // debug(data_cell)
   debug("data_cell.length: " + data_cell.length)
 
   data_cell.reverse()
@@ -690,8 +691,6 @@ verb_utils.processDataForScoreDecilTable = function (data_cell, decil_selected){
   })
   data_cell.reverse()
 
-  //TODO: verificar por que no trae la suma de los diferentes deciles selccionados
-  
   
 
   // filtra las celdas del decil seleccionado
@@ -703,10 +702,9 @@ verb_utils.processDataForScoreDecilTable = function (data_cell, decil_selected){
   debug(cell_decil_filter_array.length)
   // debug(cell_decil_filter_array)
 
-  // si esta la suma de los dos deciles, mas adelante es cuando los esta filtrando!!!!!!!
-
   var cell_array = cell_decil_filter_array.map(function(d){return d.gridid})
-  // debug(cell_array)
+  
+  debug(cell_array)
 
 
   var map_spid = d3.map([])
@@ -1160,6 +1158,8 @@ verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, all_cel
 
     }
     
+    debug("cell_score_array.length: " + cell_score_array.length)
+
     return cell_score_array
       
 
@@ -3164,17 +3164,19 @@ verb_utils.getWhereClauseFromGroupTaxonArray = function (taxon_array, target){
   
   var whereClause = ''
   taxon_array.forEach ( function (taxon, index) {
-    //debug(taxon_rank_map[taxon[key]], taxon[key])
+    // debug(taxon_rank_map[taxon[key]], taxon[key])
+
+
     if (index === 0){
       
       if (taxon[key] === 'species') {
         var value = taxon['value'].split(' ')
-        whereClause += " WHERE (" + taxon_rank_map[taxon[key]][0] + " = '" + value[0] + "' AND " + taxon_rank_map[taxon[key]][1] + " = '" + value[1] + "')"
+        whereClause += " WHERE ((" + taxon_rank_map[taxon[key]][0] + " = '" + value[0] + "' AND " + taxon_rank_map[taxon[key]][1] + " = '" + value[1] + "')"
       } else if(taxon[key] === 'subspecies') {
         var value = taxon['value'].split(' ')
-        whereClause += " WHERE (" + taxon_rank_map[taxon[key]][0] + " = '" + value[0] + "' AND " + taxon_rank_map[taxon[key]][1] + " = '" + value[1] + "' AND " + taxon_rank_map[taxon[key]][2] + " = '" + value[2] + "')"
+        whereClause += " WHERE ((" + taxon_rank_map[taxon[key]][0] + " = '" + value[0] + "' AND " + taxon_rank_map[taxon[key]][1] + " = '" + value[1] + "' AND " + taxon_rank_map[taxon[key]][2] + " = '" + value[2] + "')"
       } else {
-        whereClause += " WHERE " + taxon_rank_map[taxon[key]] + " = '" + taxon['value'] + "'"
+        whereClause += " WHERE (" + taxon_rank_map[taxon[key]] + " = '" + taxon['value'] + "'"
       }
 
     } else{
@@ -3193,7 +3195,8 @@ verb_utils.getWhereClauseFromGroupTaxonArray = function (taxon_array, target){
       
   })
 
-  return whereClause
+  whereClause += ')';
+  return whereClause;
 
 }
 
@@ -3368,7 +3371,7 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
     
   })
   
-  //debug(query_covar)
+  // debug(query_covar)
   return query_covar  
 }
 

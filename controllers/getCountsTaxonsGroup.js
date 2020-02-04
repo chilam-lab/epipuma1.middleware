@@ -225,6 +225,8 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
          
          if( data_request["get_grid_species"] !== false ) {
 
+          debug('--------------------------------------------------')
+
           debug("analisis en celda")
 
           debug("long: " + data_request.long)
@@ -236,6 +238,9 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
             'long'              : data_request.long,
             'lat'               : data_request.lat
           }
+
+          const query1 = pgp.as.format(queries.basicAnalysis.getGridIdByLatLong, data_temp)
+          debug("iter " + iter + query1)
 
           return t.one(queries.basicAnalysis.getGridIdByLatLong, data_temp).then(resp => {
 
@@ -269,11 +274,12 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
             debug("analisis basico")
 
+            // debug(query_analysis)
+            debug(data_request)
+
             const query1 = pgp.as.format(query_analysis, data_request)
             // debug("iter " + iter + query1)
-            // debug(query_analysis)
-            //debug(data_request)
-
+            
             return t.any(query_analysis, data_request)
 
            }
@@ -288,6 +294,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
   }).then(data_iteration => {
 
+      // debug(data_iteration)
       // debug("data_iteration[0].ni: " + data_iteration[0].ni)
       // debug("data_iteration.length: " + data_iteration.length)
       // debug("target_cells.length: " +  data_request["target_cells"].length)

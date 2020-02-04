@@ -30,7 +30,7 @@ counts AS (
 			target.type AS type_t,
 			target.layer AS layer_t,
 		    target.bid AS bid_t,
-			icount(source.cells & target.cells) AS niyj,
+			icount(array_intersection(source.cells, target.cells)) AS niyj,
 			icount(target.cells) AS nj,
 			icount(source.cells) AS ni,
 			n_res.n AS n
