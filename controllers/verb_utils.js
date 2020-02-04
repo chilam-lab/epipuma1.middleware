@@ -3169,12 +3169,12 @@ verb_utils.getWhereClauseFromGroupTaxonArray = function (taxon_array, target){
       
       if (taxon[key] === 'species') {
         var value = taxon['value'].split(' ')
-        whereClause += " WHERE (" + taxon_rank_map[taxon[key]][0] + " = '" + value[0] + "' AND " + taxon_rank_map[taxon[key]][1] + " = '" + value[1] + "')"
+        whereClause += " WHERE ((" + taxon_rank_map[taxon[key]][0] + " = '" + value[0] + "' AND " + taxon_rank_map[taxon[key]][1] + " = '" + value[1] + "')"
       } else if(taxon[key] === 'subspecies') {
         var value = taxon['value'].split(' ')
-        whereClause += " WHERE (" + taxon_rank_map[taxon[key]][0] + " = '" + value[0] + "' AND " + taxon_rank_map[taxon[key]][1] + " = '" + value[1] + "' AND " + taxon_rank_map[taxon[key]][2] + " = '" + value[2] + "')"
+        whereClause += " WHERE ((" + taxon_rank_map[taxon[key]][0] + " = '" + value[0] + "' AND " + taxon_rank_map[taxon[key]][1] + " = '" + value[1] + "' AND " + taxon_rank_map[taxon[key]][2] + " = '" + value[2] + "')"
       } else {
-        whereClause += " WHERE " + taxon_rank_map[taxon[key]] + " = '" + taxon['value'] + "'"
+        whereClause += " WHERE (" + taxon_rank_map[taxon[key]] + " = '" + taxon['value'] + "'"
       }
 
     } else{
@@ -3193,7 +3193,8 @@ verb_utils.getWhereClauseFromGroupTaxonArray = function (taxon_array, target){
       
   })
 
-  return whereClause
+  whereClause += ')';
+  return whereClause;
 
 }
 
