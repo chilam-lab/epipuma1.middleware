@@ -3195,7 +3195,8 @@ verb_utils.getWhereClauseFromGroupTaxonArray = function (taxon_array, target){
       
   })
 
-  return whereClause + ") "
+  whereClause += ')';
+  return whereClause;
 
 }
 
