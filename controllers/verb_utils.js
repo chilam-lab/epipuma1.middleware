@@ -704,7 +704,7 @@ verb_utils.processDataForScoreDecilTable = function (data_cell, decil_selected){
 
   var cell_array = cell_decil_filter_array.map(function(d){return d.gridid})
   
-  debug(cell_array)
+  // debug(cell_array)
 
 
   var map_spid = d3.map([])
@@ -1015,13 +1015,22 @@ verb_utils.processDataForScoreCellValidation = function (data, apriori, mapa_pro
     })
 
   })
+
+
   training_cells = df.keys()
+
+  // debug(training_cells)
+  // debug(df.values())
+
   scored_training_cells = []
+
   training_cells.forEach(function(cell) {
     scored_training_cells.push({gridid: parseInt(cell), tscore:df.get(cell)})
   })
-  //debug(scored_training_cells)
+
+  // debug(scored_training_cells)
   return scored_training_cells
+
 }
 
 
@@ -1910,14 +1919,21 @@ verb_utils.get_target_cells = function(gridid, where_target, view, region, cells
   var validation_data = []
 
   var train_cells = verb_utils.processDataForScoreCellValidation(data, apriori, mapa_prob, [], false)
+  
+  //TODO: la funcion processDataForScoreCellValidation ya obtiene un mapa, retornar mejor el mapa
   var temp_map = d3.map([])
+
   train_cells.forEach(function(obj){
-
     temp_map.set(obj.gridid, obj.tscore)
-
   })
 
-  var scored_target_cells = []        
+  var scored_target_cells = [] 
+
+  // debug(target_cells)   
+
+  // Verifica que celdas de la especie objetivo se encuentran en el  conjunto de entrenamiento,
+  // si es así, le asigna el score de esta celda
+
   target_cells.forEach(function(cell){
 
     var scored_cell = {}
@@ -1937,11 +1953,37 @@ verb_utils.get_target_cells = function(gridid, where_target, view, region, cells
 
   })
 
+  debug("scored_target_cells.length: " + scored_target_cells.length)
+
+
+  // Los nulos estan siendo contados en N, este debe ser aplicado?
+  // Verircar resultados cuando se filtrna los nulos del analisis
+
   var sorted_scores = temp_map.values()
+  // var sorted_scores = temp_map.values().map(function(d){return d})
+
+
   sorted_scores.sort(function(a, b){return a-b})
+  debug("sorted_scores.length: " + sorted_scores.length)
+  // debug(sorted_scores)
+
+
+  debug("sorted_scores.max: " + d3.max(sorted_scores))
+  debug("sorted_scores.min: " + d3.min(sorted_scores))
+
+  debug("sorted_scores 0: " + sorted_scores[0])
+  debug("sorted_scores N: " + sorted_scores[sorted_scores.length-1])
+
+  
+
   var N = sorted_scores.length
+
+  // debug("*** N: " + N)
+
+
   var partition = []
   var delta_N = N / 10
+  
   for (var i = 0; i < 10; i++){
 
     if(i == 0 ) {
@@ -1955,15 +1997,34 @@ verb_utils.get_target_cells = function(gridid, where_target, view, region, cells
     }
 
   }
+
   partition.push(sorted_scores[N - 1])
   partition = partition.reverse()
-  // debug(partition)
+  
+
+  debug(partition)
+
+
+  debug("partition[1]: " + partition[1])
+  var temp_train = sorted_scores.filter(function (d) {return parseFloat(d) >= partition[1]})
+  debug("temp_train.length: " + temp_train.length)
+
+  var temp_target = scored_target_cells.filter(function (d) {return parseFloat(d.score) >= partition[1]})
+  debug("temp_target.length: " + temp_target.length)
+
+
+  // Los verdaderos positivos son aquellos que hacen empalme entre la especie objetivo y las celdas
+  // de los resultados pobtidos.
+  // Para visualizar este efecto, se puede revisar el mapa y activando uno de los deciles 
+  // la intersección entre la presencia del decil y la especie objetivo deben ser los VP reportados en la gráfica de recall
 
   var vp = []
   var fn = []
   var nulo = []
 
   for (var i = 0; i < 10; i ++) {
+
+    debug(partition[i+1])
 
     vp.push(0)
     fn.push(0)
@@ -1973,7 +2034,7 @@ verb_utils.get_target_cells = function(gridid, where_target, view, region, cells
 
       if(item.score != null){
 
-        if (item.score > partition[i+1]){
+        if (item.score >= partition[i+1]){
 
           vp[i] += 1
 
@@ -2002,11 +2063,11 @@ verb_utils.get_target_cells = function(gridid, where_target, view, region, cells
 
     })
 
-    // debug(validation_data)
-
-
-
+    
   }
+
+  // debug(validation_data)
+
 
   return validation_data  
 
@@ -2153,7 +2214,7 @@ verb_utils.getValidationValues = function (data_group){
 
         if(row_value.score === null){
           nulo_temp++
-        } else if(row_value.score > limites[decil-1]){
+        } else if(row_value.score >= limites[decil-1]){
           /*if(decil == 10){
             debug(row_value.cell, row_value.score, limites[decil-1])  
           }*/

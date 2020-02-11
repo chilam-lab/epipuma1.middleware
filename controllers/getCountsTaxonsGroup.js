@@ -80,7 +80,8 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
     where_filter_target += " OR ejemplarfosil = 'SI'"
   }
 
-  // debug("where_filter_target: " + where_filter_target)
+  debug("where_filter_target: " + where_filter_target)
+
   data_request["where_filter_target"] = where_filter_target
 
 
@@ -144,7 +145,6 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
   pool.task(t => {
 
-    //TODO: No esta filtrando las especies fosil, sin fecha y rangos
     var query = queries.getGridSpeciesNiche.getTargetCells
 
     return t.one(query, {
@@ -159,6 +159,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
     }).then(resp => {
 
+      // Celdas ocupadas por la especie objetivo dado un conjunto de parametros
       data_request["target_cells"] = resp["target_cells"]      
 
       var query = data_request.idtabla === "" ? "select array[]::integer[] as total_cells" : queries.validationProcess.getTotalCells
@@ -275,7 +276,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
             debug("analisis basico")
 
             // debug(query_analysis)
-            debug(data_request)
+            // debug(data_request)
 
             const query1 = pgp.as.format(query_analysis, data_request)
             // debug("iter " + iter + query1)
