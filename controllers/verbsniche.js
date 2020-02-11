@@ -2161,19 +2161,19 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
   var where_filter    = ''
 
   if (sfecha){
-    where_filter += ' AND ( ( aniocolecta BETWEEN ' + liminf + ' AND ' + limsup + ' ) OR aniocolecta = 9999 )'
+    where_filter += ' AND ( ( ( aniocolecta BETWEEN ' + liminf + ' AND ' + limsup + ' ) OR aniocolecta = 9999 )'
   }
   else{
     // Esta condicion esta filtrando tmb los fosiles, ya que los registros fosiles tienen año 9999
-    where_filter += ' AND ( aniocolecta BETWEEN ' + liminf + ' AND ' + limsup + ' ) '
+    where_filter += ' AND ( ( aniocolecta BETWEEN ' + liminf + ' AND ' + limsup + ' ) '
   }
 
   if(!sfosil){
-    where_filter += " AND (ejemplarfosil != 'SI' or ejemplarfosil isnull)"
+    where_filter += " AND (ejemplarfosil != 'SI' or ejemplarfosil isnull) )"
   }
   else{
     // TODO: Se debe validar si se piden o no foisles y agregar la sentencia de OR ejemplarfosil = 'SI'
-    where_filter += " OR ejemplarfosil = 'SI'"
+    where_filter += " OR ejemplarfosil = 'SI' )"
   }
 
 

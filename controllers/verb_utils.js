@@ -1929,11 +1929,17 @@ verb_utils.get_target_cells = function(gridid, where_target, view, region, cells
 
   var scored_target_cells = [] 
 
-  // debug(target_cells)   
+  
 
-  // Verifica que celdas de la especie objetivo se encuentran en el  conjunto de entrenamiento,
+  // ¿Por que los nulos no deben de variar sin importar la especie objetivo? 
+  // Los nulos salen de la intersección entre las celdas de la especie objetivo con el conjunto de celdas 
+  // de los datos resultantes del análisis
+  // debug(temp_map)   
+
+
+
+  // Verifica que celdas de la especie objetivo se encuentran en el conjunto de entrenamiento,
   // si es así, le asigna el score de esta celda
-
   target_cells.forEach(function(cell){
 
     var scored_cell = {}
