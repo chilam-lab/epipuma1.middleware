@@ -1135,7 +1135,7 @@ exports.getGroupCountGridid = function (req, res) {
   nodes.forEach((group, index) => {
 
     merge_vars = group['merge_vars']
-    debug(group)
+    // debug(group)
     where_clause = verb_utils.getWhereClauseFromGroupTaxonArray(merge_vars, false)
 
     if (group['biotic'] === 'true' || group['biotic'] === true) { 
@@ -1608,7 +1608,7 @@ exports.getSpeciesTaxonNiche = function (req, res, next) {
       })
 
       var str_taxones = verb_utils.getWhereClauseFromGroupTaxonArray(array_taxon, true)
-      debug(str_taxones)
+      // debug(str_taxones)
       // debug(str_taxones)
 
       // debug(spids.toString())
@@ -2148,11 +2148,10 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
   var grid_res          = getParam(req, 'grid_res', 16)
   var region            = getParam(req, 'region', 1)
 
-  console.log("liminf: " + liminf)
-  console.log("limsup: " + limsup)
-
-  console.log("sfecha: " + sfecha)
-  console.log("sfosil: " + sfosil)
+  // console.log("liminf: " + liminf)
+  // console.log("limsup: " + limsup)
+  // console.log("sfecha: " + sfecha)
+  // console.log("sfosil: " + sfosil)
 
   var species_filter  = verb_utils.getWhereClauseFromGroupTaxonArray(target_taxons, true)
   var resolution_view = 'grid_geojson_' + grid_res + 'km_aoi'
@@ -2177,13 +2176,20 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
   }
 
 
+  // debug("resolution_view: " + resolution_view)
+  // debug("region: " + region)
+  // debug("gridid: " + gridid)
+  // debug("snib_grid_xxkm: " + snib_grid_xxkm)
+  // debug("where_filter: " + where_filter)
+
+
   const query1 = pgp.as.format(queries.getGridSpeciesNiche.getGridSpeciesTaxons, {'species_filter' : species_filter, 
             'resolution_view': resolution_view,
             'region'         : region,
             'gridid'         : gridid,
             'snib_grid_xxkm' : snib_grid_xxkm,
             'where_filter'   : where_filter})
-  debug(query1)
+  // debug(query1)
 
   pool.any(queries.getGridSpeciesNiche.getGridSpeciesTaxons, {
             'species_filter' : species_filter, 
@@ -2312,6 +2318,7 @@ exports.getCellOcurrences = function(req, res) {
   var longitud          = getParam(req, 'longitud', 0)
   var latitud           = getParam(req, 'latitud', 0)
 
+  
   var species_filter  = verb_utils.getWhereClauseFromGroupTaxonArray(target_taxons, true)
   var resolution_view = 'grid_geojson_' + grid_res + 'km_aoi'
   var gridid          = 'gridid_' + grid_res + 'km'
@@ -2335,6 +2342,15 @@ exports.getCellOcurrences = function(req, res) {
             'longitud'       : longitud,
             'latitud'       : latitud})
   debug(query1)*/
+
+  // debug("region: " + region)
+  // debug("species_filter: " + species_filter)
+  // debug("resolution_view: " + resolution_view)
+  // debug("gridid: " + gridid)
+  // debug("grid_table: " + grid_table)
+  // debug("where_filter: " + where_filter)
+  // debug("longitud: " + longitud)
+  // debug("latitud: " + latitud)
 
   pool.any(queries.basicAnalysis.getCellOcurrences, {
             'species_filter' : species_filter, 
