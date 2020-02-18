@@ -2343,14 +2343,14 @@ exports.getCellOcurrences = function(req, res) {
             'latitud'       : latitud})
   debug(query1)*/
 
-  // debug("region: " + region)
-  // debug("species_filter: " + species_filter)
-  // debug("resolution_view: " + resolution_view)
-  // debug("gridid: " + gridid)
-  // debug("grid_table: " + grid_table)
-  // debug("where_filter: " + where_filter)
-  // debug("longitud: " + longitud)
-  // debug("latitud: " + latitud)
+  debug("region: " + region)
+  debug("species_filter: " + species_filter)
+  debug("resolution_view: " + resolution_view)
+  debug("gridid: " + gridid)
+  debug("grid_table: " + grid_table)
+  debug("where_filter: " + where_filter)
+  debug("longitud: " + longitud)
+  debug("latitud: " + latitud)
 
   pool.any(queries.basicAnalysis.getCellOcurrences, {
             'species_filter' : species_filter, 
