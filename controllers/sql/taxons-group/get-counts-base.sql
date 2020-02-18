@@ -21,7 +21,9 @@ WITH aux_target AS (
 	   array_length(array_agg(a.cells) - (${excluded_cells:raw}::integer[] + ${source_cells:raw}::integer[]),1) as ni
 	FROM aux_target as a
 ),${groups:raw}
-SELECT 	target.target_name as target_name,
+SELECT 	
+		covars.group_name as group_name,
+		-- target.target_name as target_name,
 		covars.reinovalido, 
 		covars.phylumdivisionvalido,
 		covars.clasevalida,

@@ -3340,6 +3340,7 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
   var coa =  queries.countsTaxonGroups.getCellsByGroupAbio.toString()
   var cov = ""
   var cova = ""
+  var group_name = ""
 
   debug(size + " groups in niche analysis")
 
@@ -3352,6 +3353,9 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
       group_fields = verb_utils.getGroupFieldsFromLevel(group['merge_vars'][0]['level']) 
       fields = verb_utils.getFieldsFromLevel(group['merge_vars'][0]['level'])
 
+      group_name = size > 1 ? "Total" : group['name']
+      co = co.toString().replace(/{name}/g, group_name)
+
       if( index === 0){
 
         query_covar = queries.countsTaxonGroups.covarBioGroup.toString()
@@ -3360,10 +3364,9 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
           query_covar = query_covar.toString().replace(/{groups}/g, "," + queries.countsTaxonGroups.getCountsCovars.toString())
           query_covar = query_covar.toString().replace(/{groups}/g, co + group['name'])
         } else {
-
           cov = co + group['name']
-
         }
+
 
       } else if(index === size - 1){
         
@@ -3379,6 +3382,8 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
 
       }
 
+      // debug("**** cov: " + cov)
+
       //debug(data_request["total_cells"])
       query_covar = query_covar.toString().replace(/{fields:raw}/g, fields)
       query_covar = query_covar.toString().replace(/{group_fields:raw}/g, group_fields)
@@ -3391,6 +3396,9 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
       query_covar = query_covar.toString().replace(/{min_occ:raw}/g, data_request["min_occ"])
        
     } else {
+
+      group_name = size > 1 ? "Total" : group['name']
+      coa = coa.toString().replace(/{name}/g, group_name)
 
       where_covar = verb_utils.getWhereClauseFromGroupTaxonArray(group['merge_vars'], false)
       group_fields = verb_utils.getGroupFieldsFromLevel(group['merge_vars'][0]['level']) 
@@ -3437,8 +3445,10 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
     }
     
   })
-  
+
+  // debug(co)
   // debug(query_covar)
+
   return query_covar  
 }
 
