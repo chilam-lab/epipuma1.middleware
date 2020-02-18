@@ -87,7 +87,8 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
 
 
   var covars_groups = verb_utils.getParam(req, 'covariables', []) 
-  //debug(covars_groups)
+  debug(covars_groups)
+  
   //data_request['groups'] = verb_utils.getCovarGroupQueries(queries, data_request, covars_groups)
 
   data_request["alpha"] = undefined
