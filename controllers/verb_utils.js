@@ -3346,6 +3346,9 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
 
   covars_groups.forEach( function (group, index) {
 
+    var co = queries.countsTaxonGroups.getCellsByGroupBio.toString()
+    var coa =  queries.countsTaxonGroups.getCellsByGroupAbio.toString()
+
     if(group['biotic']){
 
       where_covar = verb_utils.getWhereClauseFromGroupTaxonArray(group['merge_vars'], false)
@@ -3353,7 +3356,9 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
       group_fields = verb_utils.getGroupFieldsFromLevel(group['merge_vars'][0]['level']) 
       fields = verb_utils.getFieldsFromLevel(group['merge_vars'][0]['level'])
 
-      group_name = size > 1 ? "Total" : group['name']
+      //group_name = size > 1 ? "Total" : group['name']
+      group_name = group['name']
+
       co = co.toString().replace(/{name}/g, group_name)
 
       if( index === 0){
@@ -3397,7 +3402,8 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
        
     } else {
 
-      group_name = size > 1 ? "Total" : group['name']
+      //group_name = size > 1 ? "Total" : group['name']
+      group_name = group['name']
       coa = coa.toString().replace(/{name}/g, group_name)
 
       where_covar = verb_utils.getWhereClauseFromGroupTaxonArray(group['merge_vars'], false)
@@ -3447,7 +3453,7 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
   })
 
   // debug(co)
-  // debug(query_covar)
+  //debug(query_covar)
 
   return query_covar  
 }
