@@ -74,7 +74,8 @@ var queryProvider = {
 
   users: {
     getUser: sqlPath('users/getUserReg.sql'),
-    setUserReg: sqlPath('users/setUserReg.sql')
+    setUserReg: sqlPath('users/setUserReg.sql'),
+    saveFeedBack: sqlPath('users/saveFeedBack.sql')
   },
   getValuesFromToken: {
     getValues: sqlPath('especie/get_values_token.sql')

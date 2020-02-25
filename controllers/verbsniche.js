@@ -2454,19 +2454,38 @@ exports.sendFeedBack = function(req, res){
       if (error) {
         debug(error);
 
-        res.json({
+        return res.json({
           ok: false,
           err: error,
           message: "Error al enviar retroalimentación"
         });
+
       } else {
 
         debug('Message %s sent: %s', info.messageId, info.response);
 
-        res.json({
+        pool.any(queries.users.saveFeedBack, 
+                      {
+                        rating: rating, 
+                        comment: comment,
+                        email: to})
+        .then(function (data) {
+
+          return res.json({
             ok: true,
             message: "Retroalimentación enviada correctamente"
           });
+
+        })
+        .catch(function (error) {
+          debug(error)
+
+          return res.json({
+            ok: false,
+            err: error,
+            message: "Error al enviar retroalimentación"
+          });
+        });
 
       }
    
