@@ -702,7 +702,7 @@ verb_utils.processDataForScoreDecilTable = function (data_cell, decil_selected){
   debug(cell_decil_filter_array.length)
   // debug(cell_decil_filter_array)
 
-  var cell_array = cell_decil_filter_array.map(function(d){return d.gridid})
+  var cell_array = cell_decil_filter_array.map(function(d){return {cell: d.gridid, score: d.tscore} })
   
   // debug(cell_array)
 
@@ -1218,6 +1218,9 @@ verb_utils.processCellDecilPerIter = function(data_group, apriori, mapa_prob, al
     var decil_list = item.list
 
     // debug(item.decil_cells)
+    // debug("*************")
+    // debug(JSON.stringify({a:12,b:14})  === JSON.stringify({a:12,b:14}))
+    // debug("*************")
     
     decil_cells = verb_utils.arrayUnique(decil_cells.concat(item.decil_cells))
     // decil_cells = item.decil_cells
@@ -2671,7 +2674,7 @@ verb_utils.arrayUnique = function(array) {
     var a = array.concat();
     for(var i=0; i<a.length; ++i) {
         for(var j=i+1; j<a.length; ++j) {
-            if(a[i] === a[j])
+            if(JSON.stringify(a[i]) === JSON.stringify(a[j]))
                 a.splice(j--, 1);
         }
     }
