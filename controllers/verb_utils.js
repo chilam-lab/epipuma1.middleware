@@ -702,7 +702,7 @@ verb_utils.processDataForScoreDecilTable = function (data_cell, decil_selected){
   debug(cell_decil_filter_array.length)
   // debug(cell_decil_filter_array)
 
-  var cell_array = cell_decil_filter_array.map(function(d){return {cell: d.gridid, score: d.tscore} })
+  var cell_array = cell_decil_filter_array.map(function(d){return {cell: d.gridid, decile: d.decile} })
   
   // debug(cell_array)
 
