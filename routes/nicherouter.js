@@ -26,6 +26,7 @@ var getGridSpeciesNiche = require('../controllers/getGridSpeciesNiche')
 var gridScores = require('../controllers/getGridScores') 
 var bioScores = require('../controllers/getBioScores') 
 var mdAtenticacion = require("../md-auth/autenticacion.js")
+var countsTaxonsGroupGivenPoints = require('../controllers/countsTaxonsGroupGivenPoints.js')
 
 
 /**
@@ -236,5 +237,9 @@ router.route('/getTaxonsGroupNodes')
 router.route('/getTaxonsGroupEdges')
   .get(getTaxonsGroupEdges.getTaxonsGroupEdges)
   .post(getTaxonsGroupEdges.getTaxonsGroupEdges)
+
+
+router.route('/countsTaxonsGroupGivenPoints')
+  .post(countsTaxonsGroupGivenPoints.countsTaxonsGroupGivenPoints)
 
 module.exports = router
