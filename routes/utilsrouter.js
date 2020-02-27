@@ -25,6 +25,9 @@ var verbsCtrl = require('../controllers/verbsniche')
  */
 
 
+router.route('/sendFeedBack')
+  .post(verbsCtrl.sendFeedBack)
+
 router.route('/especie/getUserReg')
   .get(verbsCtrl.getUserReg)
   .post(verbsCtrl.getUserReg)

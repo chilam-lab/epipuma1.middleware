@@ -11,8 +11,11 @@ var queries = require('./sql/queryProvider.js')
 
 var jwt = require('jsonwebtoken')
 
+var nodeMailer = require('nodemailer')
+
 var SEED = require('../config').SEED
 var TIME_TOKEN = require('../config').TIME_TOKEN
+var config = require('../config')
 
 var pool = verb_utils.pool
 // var N = verb_utils.N
@@ -22,7 +25,7 @@ var limite = verb_utils.limite
 var min_taxon_name = verb_utils.min_taxon_name
 var max_taxon_name = verb_utils.max_taxon_name
 var default_region = verb_utils.region_mx
-
+var email_config = config.email
 
 
 /**
@@ -2414,7 +2417,82 @@ exports.getIDCellFromCoordinates =  function(req, res) {
 }
 
 
+exports.sendFeedBack = function(req, res){
 
+   debug("sendBackFeed")
+  
+   var rating     = getParam(req, 'rating');
+   var comment    = getParam(req, 'comment');
+   var to         = getParam(req, 'to');
+
+   /*debug(rating)
+   debug(comment)
+   debug(to)*/
+
+   var transporter = nodeMailer.createTransport({
+          host: email_config['host'],
+          port: email_config['port'],
+          auth: {
+              user: email_config['user'],
+              pass: email_config['pass']
+          }
+   });
+
+   var mailOptions = {
+      from: email_config['user'],
+      to: [to, email_config['user']],
+      subject: 'Retroalimentación',
+      html: `<div style="text-align:center;"> 
+              <p><b>SPECIES recibió una retroalimentación:</b></p> 
+              <p><b>Calificación:</b> ${rating} </p>
+              <p><b>Comentario:</b> ${comment}</p>
+            </div>`,
+   };
+
+   transporter.sendMail(mailOptions, (error, info) => {
+   
+      if (error) {
+        debug(error);
+
+        return res.json({
+          ok: false,
+          err: error,
+          message: "Error al enviar retroalimentación"
+        });
+
+      } else {
+
+        debug('Message %s sent: %s', info.messageId, info.response);
+
+        pool.any(queries.users.saveFeedBack, 
+                      {
+                        rating: rating, 
+                        comment: comment,
+                        email: to})
+        .then(function (data) {
+
+          return res.json({
+            ok: true,
+            message: "Retroalimentación enviada correctamente"
+          });
+
+        })
+        .catch(function (error) {
+          debug(error)
+
+          return res.json({
+            ok: false,
+            err: error,
+            message: "Error al enviar retroalimentación"
+          });
+        });
+
+      }
+   
+   });
+
+
+}
 
 
 

@@ -10,6 +10,11 @@ config.db.host = process.env.DBHOST
 config.db.port = process.env.DBPORT
 config.db.application_name = 'expressMiddleware'
 config.port = process.env.PORT
+config.email = {}
+config.email.user = process.env.EUSER
+config.email.pass = process.env.EPASS
+config.email.host = process.env.EHOST
+config.email.port = process.env.EPORT
 
 
 // Configure pool of connections

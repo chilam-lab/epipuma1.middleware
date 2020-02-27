@@ -74,7 +74,8 @@ var queryProvider = {
 
   users: {
     getUser: sqlPath('users/getUserReg.sql'),
-    setUserReg: sqlPath('users/setUserReg.sql')
+    setUserReg: sqlPath('users/setUserReg.sql'),
+    saveFeedBack: sqlPath('users/saveFeedBack.sql')
   },
   getValuesFromToken: {
     getValues: sqlPath('especie/get_values_token.sql')
@@ -319,7 +320,8 @@ var queryProvider = {
     getCountsBase: sqlPath("taxons-group/get-counts-base.sql"),
     getCountsCovars: tmplPath("taxons-group/get-counts-covars.tmpl"),
     getCellsByGroupBio: tmplPath("taxons-group/get-cells-group-bio.tmpl"),
-    getCellsByGroupAbio: tmplPath("taxons-group/get-cells-group-abio.tmpl")
+    getCellsByGroupAbio: tmplPath("taxons-group/get-cells-group-abio.tmpl"),
+    getCellSincePoint: sqlPath("taxons-group/get-cell-since-point.sql")
   },
 
   taxonsGroupNodes:{

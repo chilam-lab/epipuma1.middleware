@@ -61,6 +61,16 @@ config.db.host = localhost
 config.db.port = 5352
 ```
 
+and the email configuration
+
+```javascript
+config.email.user = xxxxx@xxx.com
+config.email.pass = passwordemail
+config.email.host = localhost
+config.email.port = port
+````
+
+
 or add the following variable to you environment:
 
 - DBNAME
@@ -68,6 +78,10 @@ or add the following variable to you environment:
 - DBPWD
 - DBHOST
 - DBPORT
+- EUSER
+- EPASS
+- EHOST
+- EPORT
 
 On MacOS we can do this in a Terminal as follows
 
@@ -77,6 +91,10 @@ $ export DBUSER=admin
 $ export DBPWD=admin123
 $ export DBHOST=localhost
 $ export DBPORT=5352
+$ export EUSER=xxxxx@xxx.com
+$ export EPASS=passwordemail 
+$ export EHOST=localhost
+$ export EPORT=myport
 ```
 
 After edit the `config.js` file, the application can be started executing
