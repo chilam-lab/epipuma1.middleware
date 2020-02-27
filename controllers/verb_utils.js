@@ -702,7 +702,7 @@ verb_utils.processDataForScoreDecilTable = function (data_cell, decil_selected){
   debug(cell_decil_filter_array.length)
   // debug(cell_decil_filter_array)
 
-  var cell_array = cell_decil_filter_array.map(function(d){return d.gridid})
+  var cell_array = cell_decil_filter_array.map(function(d){return {cell: d.gridid, score: d.tscore} })
   
   // debug(cell_array)
 
@@ -1218,6 +1218,9 @@ verb_utils.processCellDecilPerIter = function(data_group, apriori, mapa_prob, al
     var decil_list = item.list
 
     // debug(item.decil_cells)
+    // debug("*************")
+    // debug(JSON.stringify({a:12,b:14})  === JSON.stringify({a:12,b:14}))
+    // debug("*************")
     
     decil_cells = verb_utils.arrayUnique(decil_cells.concat(item.decil_cells))
     // decil_cells = item.decil_cells
@@ -2671,7 +2674,7 @@ verb_utils.arrayUnique = function(array) {
     var a = array.concat();
     for(var i=0; i<a.length; ++i) {
         for(var j=i+1; j<a.length; ++j) {
-            if(a[i] === a[j])
+            if(JSON.stringify(a[i]) === JSON.stringify(a[j]))
                 a.splice(j--, 1);
         }
     }
@@ -3346,6 +3349,9 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
 
   covars_groups.forEach( function (group, index) {
 
+    var co = queries.countsTaxonGroups.getCellsByGroupBio.toString()
+    var coa =  queries.countsTaxonGroups.getCellsByGroupAbio.toString()
+
     if(group['biotic']){
 
       where_covar = verb_utils.getWhereClauseFromGroupTaxonArray(group['merge_vars'], false)
@@ -3353,7 +3359,9 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
       group_fields = verb_utils.getGroupFieldsFromLevel(group['merge_vars'][0]['level']) 
       fields = verb_utils.getFieldsFromLevel(group['merge_vars'][0]['level'])
 
-      group_name = size > 1 ? "Total" : group['name']
+      //group_name = size > 1 ? "Total" : group['name']
+      group_name = group['name']
+
       co = co.toString().replace(/{name}/g, group_name)
 
       if( index === 0){
@@ -3397,7 +3405,8 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
        
     } else {
 
-      group_name = size > 1 ? "Total" : group['name']
+      //group_name = size > 1 ? "Total" : group['name']
+      group_name = group['name']
       coa = coa.toString().replace(/{name}/g, group_name)
 
       where_covar = verb_utils.getWhereClauseFromGroupTaxonArray(group['merge_vars'], false)
@@ -3447,7 +3456,7 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
   })
 
   // debug(co)
-  // debug(query_covar)
+  //debug(query_covar)
 
   return query_covar  
 }
