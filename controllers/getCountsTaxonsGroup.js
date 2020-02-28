@@ -74,7 +74,7 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   }
 
   if(!fosil){
-    where_filter_target += " AND (ejemplarfosil != 'SI' or ejemplarfosil isnull) )"
+    where_filter_target += " AND (ejemplarfosil != 'SI' or ejemplarfosil is null) )"
   }
   else{
     where_filter_target += " OR ejemplarfosil = 'SI' )"
@@ -160,6 +160,8 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
     }).then(resp => {
 
+      debug(resp['target_cells'].length)
+
       // Celdas ocupadas por la especie objetivo dado un conjunto de parametros
       data_request["target_cells"] = resp["target_cells"]      
 
@@ -196,6 +198,8 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
           res_grid_column: data_request.res_celda_snib
 
         }).then(resp => {
+
+          debug(resp.source_cells)
 
           data_request["source_cells"] = resp.source_cells
 

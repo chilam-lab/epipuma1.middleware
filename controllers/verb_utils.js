@@ -3400,7 +3400,12 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
       query_covar = query_covar.toString().replace(/{where_covars:raw}/g, where_covar)
       query_covar = query_covar.toString().replace(/{excluded_cells:raw}/g, data_request["excluded_cells"].toString())
       query_covar = query_covar.toString().replace(/{total_cells:raw}/g, data_request["total_cells"])
-      query_covar = query_covar.toString().replace(/{where_exclude_target:raw}/g, data_request["where_exclude_target"])
+
+      if(data_request["where_exclude_target"] != null){
+        query_covar = query_covar.toString().replace(/{where_exclude_target:raw}/g, data_request["where_exclude_target"])
+      } else {
+        query_covar = query_covar.toString().replace(/{where_exclude_target:raw}/g, '')
+      }
       query_covar = query_covar.toString().replace(/{min_occ:raw}/g, data_request["min_occ"])
        
     } else {
