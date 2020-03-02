@@ -86,7 +86,8 @@ var queryProvider = {
   getValidationTables: {
     createTables: sqlPath('especie/get_validation_tables.sql'),
     createGroupTables: sqlPath('especie/get_group_validation_tables.sql'),
-    createGroupTables_2: sqlPath('especie/get_group_validation_tables_2.sql')
+    createGroupTables_2: sqlPath('especie/get_group_validation_tables_2.sql'),
+    createGivenPointsTables: sqlPath('especie/get_given_points_validation_tables.sql')
   },
   processValidationTables: {
     processTables: sqlPath('especie/process_validation_tables.sql')

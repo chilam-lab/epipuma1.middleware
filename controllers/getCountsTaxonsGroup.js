@@ -160,10 +160,9 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
     }).then(resp => {
 
-      debug(resp['target_cells'].length)
-
       // Celdas ocupadas por la especie objetivo dado un conjunto de parametros
       data_request["target_cells"] = resp["target_cells"]      
+
 
       var query = data_request.idtabla === "" ? "select array[]::integer[] as total_cells" : queries.validationProcess.getTotalCells
       //debug(query)

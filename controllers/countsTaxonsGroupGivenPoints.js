@@ -34,6 +34,8 @@ exports.countsTaxonsGroupGivenPoints = function(req, res, next) {
   var lim_sup = verb_utils.getParam(req, 'lim_sup', 2020)
   var cells = verb_utils.getParam(req, 'excluded_cells', [])
 
+  data_request['lim_inf'] = lim_inf
+  data_request['lim_sup'] = lim_sup
   data_request["excluded_cells"] = cells
   data_request["fosil"] = fosil
   data_request["date"] = date
@@ -111,16 +113,21 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
 	  	if(data_request["date"]){
 
-  			if(number_occ > 0) {
-  		  		points += ', '
-  		  	}  
+        if((occ['anio'] >= data_request['lim_inf'] && occ['anio'] <= data_request['lim_sup']) || occ['anio'] == 9999){
+          
+          if(number_occ > 0) {
+            points += ', '
+          }  
 
-  		  	points += 'ST_SetSRID('+ 'ST_Point('+ occ['longitud'] + ', ' + occ['latitud'] +')' +', 4326)'
-  		  	number_occ += 1
+          points += 'ST_SetSRID('+ 'ST_Point('+ occ['longitud'] + ', ' + occ['latitud'] +')' +', 4326)'
+          number_occ += 1
+
+        }
+  			
 
   		} else { 
 
-  		  	if(occ['anio'] != 9999){
+  		  	if(occ['anio'] >= data_request['lim_inf'] && occ['anio'] <= data_request['lim_sup']){
 
   		  		if(number_occ > 0) {
   			  		points += ', '
@@ -139,16 +146,20 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
 	  		if(data_request["date"]){
 
-  				if(number_occ > 0) {
-  			  		points += ', '
-  			  	}  
+  				if((occ['anio'] >= data_request['lim_inf'] && occ['anio'] <= data_request['lim_sup']) || occ['anio'] !== 9999){
+          
+            if(number_occ > 0) {
+              points += ', '
+            }  
 
-  			  	points += 'ST_SetSRID('+ 'ST_Point('+ occ['longitud'] + ', ' + occ['latitud'] +')' +', 4326)'
-  			  	number_occ += 1
+            points += 'ST_SetSRID('+ 'ST_Point('+ occ['longitud'] + ', ' + occ['latitud'] +')' +', 4326)'
+            number_occ += 1
+
+          }
 
   			} else {
 
-  			  	if(occ['anio'] != 9999){
+  			  	if(occ['anio'] >= data_request['lim_inf'] && occ['anio'] <= data_request['lim_sup']){
 
   			  		if(number_occ > 0) {
   				  		points += ', '
@@ -159,7 +170,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
   			  	
   			  	}
 
-			}
+			 }
 
 	  	}  
 
@@ -194,13 +205,17 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
         resp['target_cells'].push(item['gridid'])
       });
 
-      debug(resp['target_cells'].length)
+      //debug(resp['target_cells'].length) Numero de puntos dado por el usuario
 
-      data_request["target_cells"] = resp["target_cells"]
+      const unique_set = new Set(resp["target_cells"])
+
+      data_request["target_cells"] = Array.from(unique_set)
+
+      debug(data_request["target_cells"].length)      
 
       /* AQUI SE HACE LA VALIDACION TAMBIEN FALTA CORREGIR FILTROS DE TARGET */
 
-      data_request["total_cells"] = resp["target_cells"]
+      data_request["total_cells"] = []
       data_request["source_cells"] = []
 
 

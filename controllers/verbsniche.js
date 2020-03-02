@@ -2495,6 +2495,189 @@ exports.sendFeedBack = function(req, res){
 }
 
 
+exports.getGivenPointaValidationTables = function(req, res, next){
+
+
+  debug('getGivenPointaValidationTables')
+
+  var idtbl =  'tbl_' + new Date().getTime() 
+  var iter = getParam(req, 'iterations',iterations)
+
+  var grid_resolution = parseInt(verb_utils.getParam(req, 'grid_resolution', 16)) 
+  var fosil = verb_utils.getParam(req, 'fosil', true)
+  var date  = verb_utils.getParam(req, 'date', true)
+  var lim_inf = verb_utils.getParam(req, 'lim_inf', 1500)
+  var lim_sup = verb_utils.getParam(req, 'lim_sup', 2020)
+  var target_points = verb_utils.getParam(req, 'target_points', [])
+  var region = parseInt(getParam(req, 'region', default_region))
+  
+  var points = '['
+  var number_occ = 0
+
+  target_points.forEach(function(occ) {
+    
+    if(fosil){
+
+      if(date){
+
+        if((occ['anio'] >= lim_inf && occ['anio'] <= lim_sup) || occ['anio'] == 9999){
+          
+          if(number_occ > 0) {
+            points += ', '
+          }  
+
+          points += 'ST_SetSRID('+ 'ST_Point('+ occ['longitud'] + ', ' + occ['latitud'] +')' +', 4326)'
+          number_occ += 1
+
+        }
+        
+
+      } else { 
+
+          if(occ['anio'] >= lim_inf && occ['anio'] <= lim_sup){
+
+            if(number_occ > 0) {
+              points += ', '
+            } 
+
+            points += 'ST_SetSRID('+ 'ST_Point('+ occ['longitud'] + ', ' + occ['latitud'] +')' +', 4326)'
+            number_occ += 1
+          
+          }
+
+    }
+
+  } else {
+
+      if(!occ['fosil']){
+
+        if(date){
+
+          if((occ['anio'] >= lim_inf && occ['anio'] <= lim_sup) || occ['anio'] !== 9999){
+          
+            if(number_occ > 0) {
+              points += ', '
+            }  
+
+            points += 'ST_SetSRID('+ 'ST_Point('+ occ['longitud'] + ', ' + occ['latitud'] +')' +', 4326)'
+            number_occ += 1
+
+          }
+
+        } else {
+
+            if(occ['anio'] >= lim_inf && occ['anio'] <= lim_sup){
+
+              if(number_occ > 0) {
+                points += ', '
+              }  
+
+              points += 'ST_SetSRID('+ 'ST_Point('+ occ['longitud'] + ', ' + occ['latitud'] +')' +', 4326)'
+              number_occ += 1
+            
+            }
+
+       }
+
+      }  
+
+  }
+
+  });
+
+  points += ']'
+
+  pool.task(t => {
+
+    var query = queries.countsTaxonGroups.getCellSincePoint
+
+    /*const query1 = pgp.as.format(query, {
+
+      res: grid_resolution,
+      points: points
+
+    })
+    debug(query1)*/
+
+    return t.any(query, {
+
+      res: grid_resolution,
+      points: points
+
+    }).then(data => {
+
+
+      var target_cells = []
+
+      data.forEach(item => {
+        target_cells.push(item['gridid'])
+      });
+
+      const unique_set = new Set(target_cells)
+      target_cells = Array.from(unique_set)
+
+      debug(target_cells.length)  
+
+      const query1 = pgp.as.format(queries.getValidationTables.createGivenPointsTables, {
+
+        iterations: iter,
+        idtbl: idtbl,
+        res: grid_resolution,
+        target_cells: '[' + target_cells.toString() + ']',
+        res_celda_snib_tb: 'grid_geojson_' + grid_resolution + 'km_aoi',
+        region: region
+
+    })
+    //debug(query1)
+
+      pool.any(queries.getValidationTables.createGivenPointsTables, {
+        iterations: iter,
+        idtbl: idtbl,
+        res: grid_resolution,
+        target_cells: '[' + target_cells.toString() + ']',
+        region: region,
+        res_celda_snib_tb: 'grid_geojson_' + grid_resolution + 'km_aoi'
+      }).then(function (data) {
+
+          var item = data[0]
+          item['tblname'] = idtbl
+          
+          debug(data)
+
+          res.json({'data': data})
+        })
+
+    }).catch(error => {
+
+      debug(error)
+      
+      res.json({
+            ok: false,
+            message: "Error al ejecutar la petición",
+            data:[],
+            error: error
+          })
+
+  });
+
+
+
+  }).catch(error => {
+
+    debug(error)
+    
+    res.json({
+          ok: false,
+          message: "Error al ejecutar la petición",
+          data:[],
+          error: error
+        })
+
+  });
+        
+
+}
+
 
 
 
