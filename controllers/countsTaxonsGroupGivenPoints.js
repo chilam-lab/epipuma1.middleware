@@ -213,18 +213,41 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
       debug(data_request["target_cells"].length)      
 
-      /* AQUI SE HACE LA VALIDACION TAMBIEN FALTA CORREGIR FILTROS DE TARGET */
+      
+     var query = data_request.idtabla === "" ? "select array[]::integer[] as total_cells" : queries.validationProcess.getTotalCells
 
-      data_request["total_cells"] = []
-      data_request["source_cells"] = []
+     return t.one(query, {
 
+          tbl_process: data_request.idtabla,
+          iter: (iter+1)
 
+      }).then(resp => { 
 
-      return t.one(queries.basicAnalysis.getN, {
+        data_request["total_cells"] = resp.total_cells
 
-            grid_resolution: data_request.grid_resolution,
-            footprint_region: data_request.region
+        var query = data_request.idtabla === "" ? "select array[]::integer[] as source_cells" : queries.validationProcess.getSourceCells
 
+        return t.one(query, {
+        
+          tbl_process: data_request.idtabla,
+          iter: (iter+1),
+          res_grid_tbl: data_request.res_grid_tbl,
+          res_grid_column: data_request.res_celda_snib
+
+        }).then(resp => {
+
+          debug(resp.source_cells)
+
+          data_request["source_cells"] = resp.source_cells
+
+          return t.one(queries.basicAnalysis.getN, {
+
+                grid_resolution: data_request.grid_resolution,
+                footprint_region: data_request.region
+
+          })
+
+        })
       }).then(resp => {
 
         data_request["N"] = resp.n 
