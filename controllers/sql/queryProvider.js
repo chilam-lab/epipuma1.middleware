@@ -74,7 +74,8 @@ var queryProvider = {
 
   users: {
     getUser: sqlPath('users/getUserReg.sql'),
-    setUserReg: sqlPath('users/setUserReg.sql')
+    setUserReg: sqlPath('users/setUserReg.sql'),
+    saveFeedBack: sqlPath('users/saveFeedBack.sql')
   },
   getValuesFromToken: {
     getValues: sqlPath('especie/get_values_token.sql')
@@ -85,7 +86,8 @@ var queryProvider = {
   getValidationTables: {
     createTables: sqlPath('especie/get_validation_tables.sql'),
     createGroupTables: sqlPath('especie/get_group_validation_tables.sql'),
-    createGroupTables_2: sqlPath('especie/get_group_validation_tables_2.sql')
+    createGroupTables_2: sqlPath('especie/get_group_validation_tables_2.sql'),
+    createGivenPointsTables: sqlPath('especie/get_given_points_validation_tables.sql')
   },
   processValidationTables: {
     processTables: sqlPath('especie/process_validation_tables.sql')
@@ -319,7 +321,9 @@ var queryProvider = {
     getCountsBase: sqlPath("taxons-group/get-counts-base.sql"),
     getCountsCovars: tmplPath("taxons-group/get-counts-covars.tmpl"),
     getCellsByGroupBio: tmplPath("taxons-group/get-cells-group-bio.tmpl"),
-    getCellsByGroupAbio: tmplPath("taxons-group/get-cells-group-abio.tmpl")
+    getCellsByGroupAbio: tmplPath("taxons-group/get-cells-group-abio.tmpl"),
+    getCellSincePoint: sqlPath("taxons-group/get-cell-since-point.sql"),
+    getCountsBaseGivenPoints: sqlPath("taxons-group/get-counts-base-given-points.sql")
   },
 
   taxonsGroupNodes:{
