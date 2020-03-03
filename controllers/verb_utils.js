@@ -809,7 +809,10 @@ verb_utils.processGroupDataForCellId = function (data, apriori, mapa_prob, gridi
         bid: d.bid,
         icat: d.icat,
         tag: d.tag,
-        tipo: type
+        tipo: type,
+        label: d.label,
+        coeficiente: d.coeficiente,
+        unidad: d.unidad
       }
     }
   })
@@ -840,7 +843,10 @@ verb_utils.processGroupDataForCellId = function (data, apriori, mapa_prob, gridi
                           bid: item.bid,
                           icat: item.icat,
                           tag: item.tag,
-                          tipo: item.tipo
+                          tipo: item.tipo,
+                          label: item.label,
+                          coeficiente: item.coeficiente,
+                          unidad: item.unidad
                         })
       tscore = tscore + item.score  
 
