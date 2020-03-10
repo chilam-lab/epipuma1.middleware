@@ -69,7 +69,7 @@ exports.countsTaxonsGroupGivenPoints = function(req, res, next) {
 
   //debug(data_request["target_points"])
 
-  var NIterations = verb_utils.getParam(req, 'iterations', iterations)
+  var NIterations = verb_utils.getParam(req, 'iterations', 1)
   var iter = 0
   var json_response = {}
 
