@@ -12,15 +12,16 @@ var zlib = require('zlib')
 var compression = require('compression')
 var log = debug('snib-middleware:log')
 var error = debug('snib-middleware:error')
+var bodyParser = require('body-parser');
+
 var app = express()
 
+//app.set('view engine', 'ejs');
+//app.use(express.static('public'));
 app.use(compression({filter:shouldCompress, level:zlib.Z_BEST_COMPRESSION}))
 app.use(cors())
-app.use(bodyParser.json())
-app.use(bodyParser.json({limit: '50mb'}))
-app.use(bodyParser.urlencoded({limit: '50mb',
-  extended: true,
-  parameterLimit:50000}))
+app.use(bodyParser.json({limit: '50mb', extended: true}))
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true}))
 //app.use(bodyParser.urlencoded({extended: true}))
 
 function shouldCompress (req, res) {

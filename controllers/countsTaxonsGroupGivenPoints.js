@@ -1,13 +1,4 @@
-/**
-* @module controllers/getCountsTaxonsGroup
-* @requires debug
-* @requires pg-promise
-* @requires moment
-* @requires config
-* @requires module:controllers/verb_utils
-* @requires module:controllers/sql/queryProvider
-**/
-var debug = require('debug')('verbs:getCountsTaxonsGroup')
+var debug = require('debug')('verbs:countsTaxonsGroupGivenPoints')
 var moment = require('moment')
 var verb_utils = require('./verb_utils')
 var queries = require('./sql/queryProvider')
@@ -23,16 +14,10 @@ var default_region = verb_utils.region_mx
 var max_score = verb_utils.maxscore
 var min_score = verb_utils.minscore
 var request_counter_map = d3.map([]);
-/**
- * @function
- * @param {express.Request} req - Express request object
- * @param {express.Response} res - Express response object 
- * @param {function} next - Express next middleware function
- **/
 
-exports.getTaxonsGroupRequestV2 = function(req, res, next) {
+exports.countsTaxonsGroupGivenPoints = function(req, res, next) {
 
-  debug('getTaxonsGroupRequestV2')
+  debug('countsTaxonsGroupGivenPoints')
 
   var data_request = {}
   var data_target = {}
@@ -49,7 +34,11 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   var lim_sup = verb_utils.getParam(req, 'lim_sup', 2020)
   var cells = verb_utils.getParam(req, 'excluded_cells', [])
 
+  data_request['lim_inf'] = lim_inf
+  data_request['lim_sup'] = lim_sup
   data_request["excluded_cells"] = cells
+  data_request["fosil"] = fosil
+  data_request["date"] = date
   data_request["region"] = region
   data_request["grid_resolution"] = grid_resolution
   data_request["res_celda"] = "cells_"+grid_resolution+"km"
@@ -59,38 +48,11 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   data_request["res_grid_tbl"] = "grid_" + data_request.grid_resolution + "km_aoi"
   data_request["min_occ"] = verb_utils.getParam(req, 'min_cells', 1)
 
-  var target_group = verb_utils.getParam(req, 'target_taxons', []) 
   data_request["target_name"] = verb_utils.getParam(req, 'target_name', 'target_group')
-  data_request["where_target"] = verb_utils.getWhereClauseFromGroupTaxonArray(target_group, true)
-  data_request["where_exclude_target"] = verb_utils.getExcludeTargetWhereClause(target_group)
-  // debug(target_group)
-
-  var where_filter_target    = ''
-  if (date){
-    where_filter_target += ' AND ( ( ( aniocolecta BETWEEN ' + lim_inf + ' AND ' + lim_sup + ' ) OR aniocolecta = 9999 )'
-  }
-  else{
-    where_filter_target += ' AND ( ( aniocolecta BETWEEN ' + lim_inf + ' AND ' + lim_sup + ' ) '
-  }
-
-  if(!fosil){
-    where_filter_target += " AND (ejemplarfosil != 'SI' or ejemplarfosil is null) )"
-  }
-  else{
-    where_filter_target += " OR ejemplarfosil = 'SI' )"
-  }
-
-  debug("where_filter_target: " + where_filter_target)
-
-  data_request["where_filter_target"] = where_filter_target
-
-
-
+  
   var covars_groups = verb_utils.getParam(req, 'covariables', []) 
   debug(covars_groups)
   
-  //data_request['groups'] = verb_utils.getCovarGroupQueries(queries, data_request, covars_groups)
-
   data_request["alpha"] = undefined
   data_request["idtabla"] = verb_utils.getParam(req, 'idtabla', "")
   data_request["get_grid_species"] = verb_utils.getParam(req, 'get_grid_species', false)
@@ -103,8 +65,11 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   data_request["with_data_score_cell"] = verb_utils.getParam(req, 'with_data_score_cell', true)
   data_request["with_data_freq_cell"] = verb_utils.getParam(req, 'with_data_freq_cell', true)
   data_request["with_data_score_decil"] = verb_utils.getParam(req, 'with_data_score_decil', true)
-   
-  var NIterations = verb_utils.getParam(req, 'iterations', iterations)
+  data_request["target_points"] = verb_utils.getParam(req, 'target_points', [])
+
+  //debug(data_request["target_points"])
+
+  var NIterations = verb_utils.getParam(req, 'iterations', 1)
   var iter = 0
   var json_response = {}
 
@@ -115,10 +80,6 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
     return t.one(query, data_request).then(resp => {
 
       data_request["gid"] = resp.gid
-      //debug(data_request["gid"])
-      data_request["where_filter"] = verb_utils.getWhereClauseFilter(fosil, date, lim_inf, lim_sup, cells, data_request["res_celda_snib"], data_request["region"], data_request["gid"])
-
-      // debug("filter: " + data_request["where_filter"])
       
       debug("Iteraciones: " + NIterations)
 
@@ -141,33 +102,121 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
   debug('iter:' + (iter + 1))
 
   var data_request = JSON.parse(JSON.stringify(data))
-  
-  // debug(data_request)
+  debug('resolution: ' + data_request["grid_resolution"])
 
+  var points = '['
+  var number_occ = 0
+
+  data_request["target_points"].forEach(function(occ) {
+  	
+  	if(data_request["fosil"]){
+
+	  	if(data_request["date"]){
+
+        if((occ['anio'] >= data_request['lim_inf'] && occ['anio'] <= data_request['lim_sup']) || occ['anio'] == 9999){
+          
+          if(number_occ > 0) {
+            points += ', '
+          }  
+
+          points += 'ST_SetSRID('+ 'ST_Point('+ occ['longitud'] + ', ' + occ['latitud'] +')' +', 4326)'
+          number_occ += 1
+
+        }
+  			
+
+  		} else { 
+
+  		  	if(occ['anio'] >= data_request['lim_inf'] && occ['anio'] <= data_request['lim_sup']){
+
+  		  		if(number_occ > 0) {
+  			  		points += ', '
+  			  	} 
+
+  		  		points += 'ST_SetSRID('+ 'ST_Point('+ occ['longitud'] + ', ' + occ['latitud'] +')' +', 4326)'
+  		  		number_occ += 1
+  		  	
+  		  	}
+
+		}
+
+	} else {
+
+	  	if(!occ['fosil']){
+
+	  		if(data_request["date"]){
+
+  				if((occ['anio'] >= data_request['lim_inf'] && occ['anio'] <= data_request['lim_sup']) || occ['anio'] !== 9999){
+          
+            if(number_occ > 0) {
+              points += ', '
+            }  
+
+            points += 'ST_SetSRID('+ 'ST_Point('+ occ['longitud'] + ', ' + occ['latitud'] +')' +', 4326)'
+            number_occ += 1
+
+          }
+
+  			} else {
+
+  			  	if(occ['anio'] >= data_request['lim_inf'] && occ['anio'] <= data_request['lim_sup']){
+
+  			  		if(number_occ > 0) {
+  				  		points += ', '
+  				  	}  
+
+  			  		points += 'ST_SetSRID('+ 'ST_Point('+ occ['longitud'] + ', ' + occ['latitud'] +')' +', 4326)'
+  			  		number_occ += 1
+  			  	
+  			  	}
+
+			 }
+
+	  	}  
+
+	}
+
+  });
+
+  points += ']'
+  
   pool.task(t => {
 
-    var query = queries.getGridSpeciesNiche.getTargetCells
+    var query = queries.countsTaxonGroups.getCellSincePoint
 
-    return t.one(query, {
+    const query1 = pgp.as.format(query, {
 
-      gridid: data_request["res_celda_snib"],
-      where_target: data_request["where_target"].replace('WHERE', ''),
-      view: data_request["res_celda_snib_tb"],
-      region: data_request["region"],
-      cells: data_request["res_celda_sp"],
-      grid_resolution:data_request["grid_resolution"],
-      where_filter: data_request["where_filter_target"]
+    	res: data_request["grid_resolution"],
+    	points: points
 
-    }).then(resp => {
+    })
+    //debug(query1)
 
-      // Celdas ocupadas por la especie objetivo dado un conjunto de parametros
-      data_request["target_cells"] = resp["target_cells"]      
+    return t.any(query, {
 
+    	res: data_request["grid_resolution"],
+    	points: points
 
-      var query = data_request.idtabla === "" ? "select array[]::integer[] as total_cells" : queries.validationProcess.getTotalCells
-      //debug(query)
+    }).then(data => {
 
-      return t.one(query, {
+      var resp = {target_cells:[]}
+
+      data.forEach(item => {
+        resp['target_cells'].push(item['gridid'])
+      });
+
+      //debug(resp['target_cells'].length) Numero de puntos dado por el usuario
+
+      const unique_set = new Set(resp["target_cells"])
+
+      data_request["target_cells"] = Array.from(unique_set)
+
+      debug(data_request["target_cells"].length)      
+
+      
+     var query = data_request.idtabla === "" ? "select array[]::integer[] as total_cells" : queries.validationProcess.getTotalCells
+
+     return t.one(query, {
 
           tbl_process: data_request.idtabla,
           iter: (iter+1)
@@ -177,17 +226,6 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
         data_request["total_cells"] = resp.total_cells
 
         var query = data_request.idtabla === "" ? "select array[]::integer[] as source_cells" : queries.validationProcess.getSourceCells
-        //debug(query)
-
-        /*const query1 = pgp.as.format(query, {
-        
-          tbl_process: data_request.idtabla,
-          iter: (iter+1),
-          res_grid_tbl: data_request.res_grid_tbl,
-          res_grid_column: data_request.res_celda_snib
-
-        })
-        debug(query1)*/
 
         return t.one(query, {
         
@@ -212,25 +250,13 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
         })
       }).then(resp => {
 
-         data_request["N"] = resp.n 
-         data_request["alpha"] = data_request["alpha"] !== undefined ? data_request["alpha"] : 1.0/resp.n
+        data_request["N"] = resp.n 
+        data_request["alpha"] = data_request["alpha"] !== undefined ? data_request["alpha"] : 1.0/resp.n
 
-         // debug("------------")
-         // debug("N:" + data_request["N"])
-         // debug("alpha:" + data_request["alpha"])
-         // debug("source_cells:" + data_request["source_cells"].length)
-         // debug("total_cells:" + data_request["total_cells"].length)
-         // debug("------------")
+        var query_analysis = queries.countsTaxonGroups.getCountsBaseGivenPoints
+        data_request['groups'] = verb_utils.getCovarGroupQueries(queries, data_request, covars_groups)
 
-         // se genera query
-         var query_analysis = queries.countsTaxonGroups.getCountsBase
-         //data_request["where_filter"] = verb_utils.getWhereClauseFilter(fosil, date, lim_inf, lim_sup, cells, data_request["res_celda_snib"])
-         //data_request["where_target"] = verb_utils.getWhereClauseFromGroupTaxonArray(target_group, true)
-         data_request['groups'] = verb_utils.getCovarGroupQueries(queries, data_request, covars_groups)
-         
-         if( data_request["get_grid_species"] !== false ) {
-
-          debug('--------------------------------------------------')
+        if( data_request["get_grid_species"] !== false ) {
 
           debug("analisis en celda")
 
@@ -256,15 +282,13 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
           })
 
-         } else {
+        } else {
 
-           debug("analisis general")
+          debug("analisis general")
 
-           data_request["cell_id"] = 0
+          data_request["cell_id"] = 0
 
-           //debug(JSON.parse(data_request.apriori))
-           //debug(JSON.parse(data_request.mapa_prob))
-           if(JSON.parse(data_request.apriori) === true || JSON.parse(data_request.mapa_prob) === true) {
+          if(JSON.parse(data_request.apriori) === true || JSON.parse(data_request.mapa_prob) === true) {
 
 
             return t.one(queries.basicAnalysis.getAllGridId, data_request).then(data => {
@@ -275,40 +299,24 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
             })
 
 
-           } else {
+          } else {
 
             debug("analisis basico")
 
-            // debug(query_analysis)
-            // debug(data_request)
+            //const query1 = pgp.as.format(query_analysis, data_request)
+            //debug(query1)
 
-            const query1 = pgp.as.format(query_analysis, data_request)
-            // debug("iter " + iter + query1)
-            
             return t.any(query_analysis, data_request)
 
            }
 
          }
 
-
       })
-      
-      
-    })    
+    
+    }).then(data_iteration => {
 
-  }).then(data_iteration => {
-
-      // debug(data_iteration)
-      // debug("data_iteration[0].ni: " + data_iteration[0].ni)
-      // debug("data_iteration.length: " + data_iteration.length)
-      // debug("target_cells.length: " +  data_request["target_cells"].length)
-
-      // debug("source_cells.length: " +  data_request["source_cells"].length)
-      // debug("total_cells.length: " +  data_request["total_cells"].length)
-
-
-     var decil_selected = data_request["decil_selected"]
+      var decil_selected = data_request["decil_selected"]
     
     
       var data_response = {iter: (iter+1), data: data_iteration, test_cells: data_request["source_cells"], target_cells: data_request["target_cells"], apriori: data_request.apriori, mapa_prob: data_request.mapa_prob }
@@ -453,8 +461,8 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
       }
 
     }).catch(error => {
-      
-      debug("ERROR EN PROMESA" + error)
+
+    	debug("ERROR EN PROMESA" + error)
 
       res.json({
           ok: false,
@@ -462,6 +470,8 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
           data:[],
           error: error
         })
-    })
 
+    });
+  
+  });
 }

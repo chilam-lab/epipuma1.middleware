@@ -11,8 +11,11 @@ var queries = require('./sql/queryProvider.js')
 
 var jwt = require('jsonwebtoken')
 
+var nodeMailer = require('nodemailer')
+
 var SEED = require('../config').SEED
 var TIME_TOKEN = require('../config').TIME_TOKEN
+var config = require('../config')
 
 var pool = verb_utils.pool
 // var N = verb_utils.N
@@ -22,7 +25,7 @@ var limite = verb_utils.limite
 var min_taxon_name = verb_utils.min_taxon_name
 var max_taxon_name = verb_utils.max_taxon_name
 var default_region = verb_utils.region_mx
-
+var email_config = config.email
 
 
 /**
@@ -2414,8 +2417,266 @@ exports.getIDCellFromCoordinates =  function(req, res) {
 }
 
 
+exports.sendFeedBack = function(req, res){
+
+   debug("sendBackFeed")
+  
+   var rating     = getParam(req, 'rating');
+   var comment    = getParam(req, 'comment');
+   var to         = getParam(req, 'to');
+
+   /*debug(rating)
+   debug(comment)
+   debug(to)*/
+
+   var transporter = nodeMailer.createTransport({
+          host: email_config['host'],
+          port: email_config['port'],
+          auth: {
+              user: email_config['user'],
+              pass: email_config['pass']
+          }
+   });
+
+   var mailOptions = {
+      from: email_config['user'],
+      to: [to, email_config['user']],
+      subject: 'Retroalimentación',
+      html: `<div style="text-align:center;"> 
+              <p><b>SPECIES recibió una retroalimentación:</b></p> 
+              <p><b>Calificación:</b> ${rating} </p>
+              <p><b>Comentario:</b> ${comment}</p>
+            </div>`,
+   };
+
+   transporter.sendMail(mailOptions, (error, info) => {
+   
+      if (error) {
+        debug(error);
+
+        return res.json({
+          ok: false,
+          err: error,
+          message: "Error al enviar retroalimentación"
+        });
+
+      } else {
+
+        debug('Message %s sent: %s', info.messageId, info.response);
+
+        pool.any(queries.users.saveFeedBack, 
+                      {
+                        rating: rating, 
+                        comment: comment,
+                        email: to})
+        .then(function (data) {
+
+          return res.json({
+            ok: true,
+            message: "Retroalimentación enviada correctamente"
+          });
+
+        })
+        .catch(function (error) {
+          debug(error)
+
+          return res.json({
+            ok: false,
+            err: error,
+            message: "Error al enviar retroalimentación"
+          });
+        });
+
+      }
+   
+   });
 
 
+}
+
+
+exports.getGivenPointaValidationTables = function(req, res, next){
+
+
+  debug('getGivenPointaValidationTables')
+
+  var idtbl =  'tbl_' + new Date().getTime() 
+  var iter = getParam(req, 'iterations',iterations)
+
+  var grid_resolution = parseInt(verb_utils.getParam(req, 'grid_resolution', 16)) 
+  var fosil = verb_utils.getParam(req, 'fosil', true)
+  var date  = verb_utils.getParam(req, 'date', true)
+  var lim_inf = verb_utils.getParam(req, 'lim_inf', 1500)
+  var lim_sup = verb_utils.getParam(req, 'lim_sup', 2020)
+  var target_points = verb_utils.getParam(req, 'target_points', [])
+  var region = parseInt(getParam(req, 'region', default_region))
+  
+  var points = '['
+  var number_occ = 0
+
+  target_points.forEach(function(occ) {
+    
+    if(fosil){
+
+      if(date){
+
+        if((occ['anio'] >= lim_inf && occ['anio'] <= lim_sup) || occ['anio'] == 9999){
+          
+          if(number_occ > 0) {
+            points += ', '
+          }  
+
+          points += 'ST_SetSRID('+ 'ST_Point('+ occ['longitud'] + ', ' + occ['latitud'] +')' +', 4326)'
+          number_occ += 1
+
+        }
+        
+
+      } else { 
+
+          if(occ['anio'] >= lim_inf && occ['anio'] <= lim_sup){
+
+            if(number_occ > 0) {
+              points += ', '
+            } 
+
+            points += 'ST_SetSRID('+ 'ST_Point('+ occ['longitud'] + ', ' + occ['latitud'] +')' +', 4326)'
+            number_occ += 1
+          
+          }
+
+    }
+
+  } else {
+
+      if(!occ['fosil']){
+
+        if(date){
+
+          if((occ['anio'] >= lim_inf && occ['anio'] <= lim_sup) || occ['anio'] !== 9999){
+          
+            if(number_occ > 0) {
+              points += ', '
+            }  
+
+            points += 'ST_SetSRID('+ 'ST_Point('+ occ['longitud'] + ', ' + occ['latitud'] +')' +', 4326)'
+            number_occ += 1
+
+          }
+
+        } else {
+
+            if(occ['anio'] >= lim_inf && occ['anio'] <= lim_sup){
+
+              if(number_occ > 0) {
+                points += ', '
+              }  
+
+              points += 'ST_SetSRID('+ 'ST_Point('+ occ['longitud'] + ', ' + occ['latitud'] +')' +', 4326)'
+              number_occ += 1
+            
+            }
+
+       }
+
+      }  
+
+  }
+
+  });
+
+  points += ']'
+
+  pool.task(t => {
+
+    var query = queries.countsTaxonGroups.getCellSincePoint
+
+    /*const query1 = pgp.as.format(query, {
+
+      res: grid_resolution,
+      points: points
+
+    })
+    debug(query1)*/
+
+    return t.any(query, {
+
+      res: grid_resolution,
+      points: points
+
+    }).then(data => {
+
+
+      var target_cells = []
+
+      data.forEach(item => {
+        target_cells.push(item['gridid'])
+      });
+
+      const unique_set = new Set(target_cells)
+      target_cells = Array.from(unique_set)
+
+      debug(target_cells.length)  
+
+      const query1 = pgp.as.format(queries.getValidationTables.createGivenPointsTables, {
+
+        iterations: iter,
+        idtbl: idtbl,
+        res: grid_resolution,
+        target_cells: '[' + target_cells.toString() + ']',
+        res_celda_snib_tb: 'grid_geojson_' + grid_resolution + 'km_aoi',
+        region: region
+
+    })
+    //debug(query1)
+
+      pool.any(queries.getValidationTables.createGivenPointsTables, {
+        iterations: iter,
+        idtbl: idtbl,
+        res: grid_resolution,
+        target_cells: '[' + target_cells.toString() + ']',
+        region: region,
+        res_celda_snib_tb: 'grid_geojson_' + grid_resolution + 'km_aoi'
+      }).then(function (data) {
+
+          var item = data[0]
+          item['tblname'] = idtbl
+          
+          debug(data)
+
+          res.json({'data': data})
+        })
+
+    }).catch(error => {
+
+      debug(error)
+      
+      res.json({
+            ok: false,
+            message: "Error al ejecutar la petición",
+            data:[],
+            error: error
+          })
+
+  });
+
+
+
+  }).catch(error => {
+
+    debug(error)
+    
+    res.json({
+          ok: false,
+          message: "Error al ejecutar la petición",
+          data:[],
+          error: error
+        })
+
+  });
+        
+
+}
 
 
 
