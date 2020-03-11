@@ -66,7 +66,7 @@ router.route('/especie/getValidationTables')
 router.route('/especie/getGroupValidationTables')
   .post(verbsCtrl.getGroupValidationTables)
 
-router.route('/especie/getGivenPointaValidationTables')
+router.route('/especie/getGivenPointsValidationTables')
   .post(verbsCtrl.getGivenPointaValidationTables)
 
 router.route('/especie/processValidationTables')
