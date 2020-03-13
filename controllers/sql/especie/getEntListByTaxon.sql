@@ -9,6 +9,7 @@ where
 		$<epiteto:raw>
 		$<infra:raw>
 		-- no importa que resolución sea, importa la región donde se esta buscando
-		and array_length(cells_8km_$<region:raw>,1) > 0
+		--and array_length(cells_64km_$<region:raw>,1) > 0
+		and cells_64km_$<region:raw> <> array[]::integer[]
 $<limite:raw>
 -- limit 15

@@ -13,12 +13,39 @@ exports.getTaxonsGroupEdges = function (req, res) {
 	debug("getEdgesTaxonsGroup")
 
 	var min_occ = verb_utils.getParam(req, 'min_occ', 5)
-  	var grid_res = verb_utils.getParam(req, 'grid_res', 16)
-  	var footprint_region = verb_utils.getParam(req, 'region', 1) 
-  	var source = verb_utils.getParam(req, 'source', [])
-  	var target = verb_utils.getParam(req, 'target', [])
-  	var biotic_source = verb_utils.getParam(req, 'biotic_source', true)
-  	var biotic_target = verb_utils.getParam(req, 'biotic_target', true)
+	var grid_res = verb_utils.getParam(req, 'grid_res', 16)
+	var footprint_region = verb_utils.getParam(req, 'footprint_region', 1) 
+	var source = verb_utils.getParam(req, 'source', [])
+	var target = verb_utils.getParam(req, 'target', [])
+	var biotic_source = verb_utils.getParam(req, 'biotic_source', true)
+	var biotic_target = verb_utils.getParam(req, 'biotic_target', true)
+
+  var fosil = verb_utils.getParam(req, 'fosil', true)
+  var date  = verb_utils.getParam(req, 'date', true)
+  var lim_inf = verb_utils.getParam(req, 'lim_inf', 1500)
+  var lim_sup = verb_utils.getParam(req, 'lim_sup', 2020)
+
+  // debug("fosil: " + fosil)
+  // debug("date: " + date)
+
+  var where_filter_cell    = ''
+  if (date){
+    where_filter_cell += ' AND ( ( aniocolecta BETWEEN ' + lim_inf + ' AND ' + lim_sup + ' ) OR aniocolecta = 9999 )'
+  }
+  else{
+    where_filter_cell += ' AND ( aniocolecta BETWEEN ' + lim_inf + ' AND ' + lim_sup + ' ) '
+  }
+
+  if(!fosil){
+    where_filter_cell += " AND (ejemplarfosil != 'SI' or ejemplarfosil isnull)"
+  }
+  else{
+    where_filter_cell += " OR ejemplarfosil = 'SI'"
+  }
+
+  debug("where_filter_cell: " + where_filter_cell)
+
+
 
   	// Defining useful variables
 	var region_cells  =  "cells_" + grid_res + "km_" + footprint_region
@@ -70,15 +97,17 @@ exports.getTaxonsGroupEdges = function (req, res) {
 
   		// Creating queries
 	    var query = queries.taxonsGroupNodes.getEdgesBase
-	    var source_query = verb_utils.getCommunityAnalysisQuery(queries, footprint_region, res_cells, region_cells, res_views, source, false, where_bio_source, where_abio_source)
-	    var target_query = verb_utils.getCommunityAnalysisQuery(queries, footprint_region, res_cells, region_cells, res_views, target, true, where_bio_source, where_abio_source).slice(5)
+	    var source_query = verb_utils.getCommunityAnalysisQuery(queries, footprint_region, res_cells, region_cells, res_views, source, false, where_bio_source, where_abio_source, where_filter_cell, gridid, grid_res)
+	    var target_query = verb_utils.getCommunityAnalysisQuery(queries, footprint_region, res_cells, region_cells, res_views, target, true, where_bio_source, where_abio_source, where_filter_cell, gridid, grid_res).slice(5)
+
+      // debug("source_query: " + source_query)
+      // debug("target_query: " + target_query)
 
 	    //const query1 = pgp.as.format(query, {source: source_query, target: target_query, res_views: res_views, region: footprint_region, min_occ: min_occ})
       //debug(query1)
 
         // Executing queries
 	    return t.any(query, {
-
 	    	source: source_query,
 	    	target: target_query,
 	    	res_views: res_views,

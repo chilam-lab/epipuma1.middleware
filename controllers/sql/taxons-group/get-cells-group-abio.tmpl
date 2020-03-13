@@ -1,4 +1,5 @@
 SELECT 
+       '{name}' as group_name,
        reinovalido, 
        phylumdivisionvalido,
        clasevalida,
@@ -8,9 +9,12 @@ SELECT
        especieepiteto,
        nombreinfra,
        type::varchar,
+       label,
        layer,
        bid::varchar,
        icat::varchar,
+       unidad::varchar,
+       coeficiente::varchar,
        tag,
        cells, 
        nj,

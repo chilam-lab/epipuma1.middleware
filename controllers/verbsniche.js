@@ -11,8 +11,11 @@ var queries = require('./sql/queryProvider.js')
 
 var jwt = require('jsonwebtoken')
 
+var nodeMailer = require('nodemailer')
+
 var SEED = require('../config').SEED
 var TIME_TOKEN = require('../config').TIME_TOKEN
+var config = require('../config')
 
 var pool = verb_utils.pool
 // var N = verb_utils.N
@@ -22,7 +25,7 @@ var limite = verb_utils.limite
 var min_taxon_name = verb_utils.min_taxon_name
 var max_taxon_name = verb_utils.max_taxon_name
 var default_region = verb_utils.region_mx
-
+var email_config = config.email
 
 
 /**
@@ -851,6 +854,12 @@ exports.getGridGeoJsonNiche = function (req, res, next) {
     })
       .then(data => {
 
+          var N = data[0].json['features'].length;
+          for(var i = 0; i < N; i++) {
+            if(typeof(data[0].json['features'][i]) == 'string'){
+              data[0].json['features'][i] = JSON.parse(data[0].json['features'][i]);  
+            }
+          } 
           res.json(data[0].json)
 
       })
@@ -969,6 +978,7 @@ exports.getRasterNiche = function (req, res, next) {
 
   var field = getParam(req, 'field', '')
   var level = parseInt(getParam(req, 'level', 0))
+  debug(level + ' kjrwnvnrwenjnvrjvrjkrvkn')
   var region = parseInt(getParam(req, 'footprint_region', default_region))
   var type = parseInt(getParam(req, 'type', 1))
 
@@ -1128,7 +1138,7 @@ exports.getGroupCountGridid = function (req, res) {
   nodes.forEach((group, index) => {
 
     merge_vars = group['merge_vars']
-    debug(group)
+    // debug(group)
     where_clause = verb_utils.getWhereClauseFromGroupTaxonArray(merge_vars, false)
 
     if (group['biotic'] === 'true' || group['biotic'] === true) { 
@@ -1601,7 +1611,7 @@ exports.getSpeciesTaxonNiche = function (req, res, next) {
       })
 
       var str_taxones = verb_utils.getWhereClauseFromGroupTaxonArray(array_taxon, true)
-      debug(str_taxones)
+      // debug(str_taxones)
       // debug(str_taxones)
 
       // debug(spids.toString())
@@ -1866,14 +1876,15 @@ exports.getEntListNiche = function (req, res, next) {
     var region    = parseInt(getParam(req, 'footprint_region',default_region))
     var nivel     = getParam(req, 'nivel', min_taxon_name)
     
-    var grid_resolution = getParam(req, 'grid_res',16)
-    var res_celda_sp =  'cells_'+grid_resolution+'km_'+region
-    var res_celda_snib =  'gridid_'+grid_resolution+'km'
+    var grid_resolution   = getParam(req, 'grid_res',16)
+    var res_celda_sp      =  'cells_'+grid_resolution+'km_'+region
+    var res_celda_snib    =  'gridid_'+grid_resolution+'km'
     var res_celda_snib_tb = 'grid_'+grid_resolution+'km_aoi'
     
     // res_celda_sp = (source == 1) ? res_celda_sp : 'array[]::int[]'
     // var val_tree = (source == 1) ? ' and icount('+res_celda_sp+') > 0 ' : ''
     var val_tree = ' and icount('+res_celda_sp+') > 0 '
+    var region_col = ' and region_' + region
 
     var txt_limite = has_limit === false ? '' : 'limit ' + limite
 
@@ -1911,6 +1922,25 @@ exports.getEntListNiche = function (req, res, next) {
 
     debug('Parsea datos, (antes de ejecutar query) en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
 
+    /*debug("---------------------------------------");
+    debug('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+    const query1 = pgp.as.format(queries.getEntListNiche.getEntList, {
+                                    str: str,
+                                    columnas: columnas,
+                                    nivel: nivel,
+                                    res_celda_sp: res_celda_sp,
+                                    res_celda_snib: res_celda_snib,
+                                    res_celda_snib_tb: res_celda_snib_tb,
+                                    val_tree: val_tree,
+                                    limite: txt_limite,
+                                    region: region,
+                                    ad_param: ad_param,
+                                    region_col: region_col
+                                  });
+    debug('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+    debug(query1);
+    debug("---------------------------------------")*/
+
     pool.any(queries.getEntListNiche.getEntList, {
       str: str,
       columnas: columnas,
@@ -1921,7 +1951,8 @@ exports.getEntListNiche = function (req, res, next) {
       val_tree: val_tree,
       limite: txt_limite,
       region: region,
-      ad_param: ad_param
+      ad_param: ad_param,
+      region_col: region_col
     })
     .then(function (data) {
 
@@ -2080,15 +2111,6 @@ exports.getAvailableCountriesFootprint = function(req, res) {
 }
 
 
-/**
-* getAvailableCountriesFootprint
-*
-* Obtiene la el footprint_region del pais que estan disponibles en el sistema
-* 
-* @param {express.Request} req
-* @param {express.Response} res
-*
-*/
 exports.getIdFromName = function(req, res) {
 
     debug("getIdFromName");
@@ -2117,14 +2139,544 @@ exports.getIdFromName = function(req, res) {
 }
 
 
+exports.getGridSpeciesTaxonNiche = function (req, res, next) {
+
+  debug("getGridSpeciesTaxonNiche")
+  
+  var target_taxons     = getParam(req, 'target_taxons')
+  var sfecha            = getParam(req, 'sfecha', false)
+  var sfosil            = getParam(req, 'sfosil', false)
+  var liminf            = getParam(req, 'liminf', 1500)
+  var limsup            = getParam(req, 'limsup', 2019)
+  var grid_res          = getParam(req, 'grid_res', 16)
+  var region            = getParam(req, 'region', 1)
+
+  // console.log("liminf: " + liminf)
+  // console.log("limsup: " + limsup)
+  // console.log("sfecha: " + sfecha)
+  // console.log("sfosil: " + sfosil)
+
+  var species_filter  = verb_utils.getWhereClauseFromGroupTaxonArray(target_taxons, true)
+  var resolution_view = 'grid_geojson_' + grid_res + 'km_aoi'
+  var gridid          = 'gridid_' + grid_res + 'km'
+  var snib_grid_xxkm  = 'snib_grid_' + grid_res + 'km'
+  var where_filter    = ''
+
+  if (sfecha){
+    where_filter += ' AND ( ( ( aniocolecta BETWEEN ' + liminf + ' AND ' + limsup + ' ) OR aniocolecta = 9999 )'
+  }
+  else{
+    // Esta condicion esta filtrando tmb los fosiles, ya que los registros fosiles tienen año 9999
+    where_filter += ' AND ( ( aniocolecta BETWEEN ' + liminf + ' AND ' + limsup + ' ) '
+  }
+
+  if(!sfosil){
+    where_filter += " AND (ejemplarfosil != 'SI' or ejemplarfosil isnull) )"
+  }
+  else{
+    // TODO: Se debe validar si se piden o no foisles y agregar la sentencia de OR ejemplarfosil = 'SI'
+    where_filter += " OR ejemplarfosil = 'SI' )"
+  }
+
+
+  // debug("resolution_view: " + resolution_view)
+  // debug("region: " + region)
+  // debug("gridid: " + gridid)
+  // debug("snib_grid_xxkm: " + snib_grid_xxkm)
+  // debug("where_filter: " + where_filter)
+
+
+  const query1 = pgp.as.format(queries.getGridSpeciesNiche.getGridSpeciesTaxons, {'species_filter' : species_filter, 
+            'resolution_view': resolution_view,
+            'region'         : region,
+            'gridid'         : gridid,
+            'snib_grid_xxkm' : snib_grid_xxkm,
+            'where_filter'   : where_filter})
+  // debug(query1)
+
+  pool.any(queries.getGridSpeciesNiche.getGridSpeciesTaxons, {
+            'species_filter' : species_filter, 
+            'resolution_view': resolution_view,
+            'region'         : region,
+            'gridid'         : gridid,
+            'snib_grid_xxkm' : snib_grid_xxkm,
+            'where_filter'   : where_filter}
+      ).then(function (data) {
+        debug(data.length + ' ocurrence cells')
+        res.json({
+          ok: true,
+          'data': data
+        })
+    }).catch(function (error) {
+      return res.json({
+        err: error,
+        ok: false,
+        message: "Error al procesar la query"
+      })
+    })
+  
+}
+
+exports.getCountByYear = function(req, res) {
+
+  debug("getCountByYear")
+  
+  var target_taxons     = getParam(req, 'target_taxons')
+  var sfecha            = getParam(req, 'sfecha', false)
+  var sfosil            = getParam(req, 'sfosil', false)
+  var liminf            = getParam(req, 'liminf', 1500)
+  var limsup            = getParam(req, 'limsup', 2019)
+  var grid_res          = getParam(req, 'grid_res', 16)
+  var region            = getParam(req, 'region', 1)
+
+  var species_filter  = verb_utils.getWhereClauseFromGroupTaxonArray(target_taxons, true)
+  var resolution_view = 'grid_geojson_' + grid_res + 'km_aoi'
+  var gridid          = 'gridid_' + grid_res + 'km'
+  var snib_grid_xxkm  = 'snib_grid_' + grid_res + 'km'
+  var where_filter    = ''
+  var where_filter_fosil    = ''
+
+  if (sfecha){
+    where_filter += ' AND ( ( aniocolecta BETWEEN ' + liminf + ' AND ' + limsup + ' ) OR aniocolecta = 9999 )'
+    where_filter_fosil += ' AND ( ( aniocolecta BETWEEN ' + liminf + ' AND ' + limsup + ' ) OR aniocolecta = 9999 )'
+  }
+  else{
+    // Esta condicion esta filtrando tmb los fosiles, ya que los registros fosiles tienen año 9999
+    where_filter += ' AND ( aniocolecta BETWEEN ' + liminf + ' AND ' + limsup + ' ) ' 
+    where_filter_fosil += ' AND ( aniocolecta BETWEEN ' + liminf + ' AND ' + limsup + ' ) ' 
+    
+    if(sfosil){
+      where_filter_fosil += " OR ejemplarfosil = 'SI'"
+    }
+
+  }
+
+  if(!sfosil){
+    where_filter += " AND (ejemplarfosil != 'SI' or ejemplarfosil isnull)"
+    where_filter_fosil += " AND (ejemplarfosil != 'SI' or ejemplarfosil isnull)"
+  }
+  else{
+    // TODO: Se debe validar si se piden o no foisles y agregar la sentencia de OR ejemplarfosil = 'SI'
+    if(sfecha){
+      where_filter += " OR ejemplarfosil = 'SI'"  
+    }
+    
+  }
+
+  where_filter_fosil += " AND (ejemplarfosil = 'SI') "
+    
+  
+
+  /*const query1 = pgp.as.format(queries.basicAnalysis.getCountByYear, {'species_filter' : species_filter, 
+            'resolution_view': resolution_view,
+            'region'         : region,
+            'gridid'         : gridid,
+            'snib_grid_xxkm' : snib_grid_xxkm,
+            'where_filter'   : where_filter})
+  debug(query1)*/
+
+  debug("species_filter: " + species_filter)
+  debug("snib_grid_xxkm: " + snib_grid_xxkm)
+  debug("where_filter: " + where_filter)
+  debug("where_filter_fosil: " + where_filter_fosil)
+  debug("gridid: " + gridid)
+  debug("resolution_view: " + resolution_view)
+
+  pool.any(queries.basicAnalysis.getCountByYear, {
+            'species_filter' : species_filter, 
+            'resolution_view': resolution_view,
+            'region'         : region,
+            'gridid'         : gridid,
+            'snib_grid_xxkm' : snib_grid_xxkm,
+            'where_filter'   : where_filter,
+            'where_filter_fosil' : where_filter_fosil}
+      ).then(function (data) {
+        // debug(data.length + ' ocurrence years')
+        res.json({
+          ok: true,
+          'data': data
+        })
+    }).catch(function (error) {
+      return res.json({
+        err: error,
+        ok: false,
+        message: "Error al procesar la query"
+      })
+    })
+
+}
+
+
+exports.getCellOcurrences = function(req, res) {
+
+  debug("getCellOcurrences")
+  
+  var target_taxons     = getParam(req, 'target_taxons')
+  var sfecha            = getParam(req, 'sfecha', false)
+  var sfosil            = getParam(req, 'sfosil', false)
+  var liminf            = getParam(req, 'liminf', 1500)
+  var limsup            = getParam(req, 'limsup', 2019)
+  var grid_res          = getParam(req, 'grid_res', 16)
+  var region            = getParam(req, 'region', 1)
+  var longitud          = getParam(req, 'longitud', 0)
+  var latitud           = getParam(req, 'latitud', 0)
+
+  
+  var species_filter  = verb_utils.getWhereClauseFromGroupTaxonArray(target_taxons, true)
+  var resolution_view = 'grid_geojson_' + grid_res + 'km_aoi'
+  var gridid          = 'gridid_' + grid_res + 'km'
+  var where_filter    = ''
+  var grid_table      = 'grid_'+ grid_res + 'km_aoi'
+
+  if (sfecha)
+    where_filter += ' AND ( ( aniocolecta BETWEEN ' + liminf + ' AND ' + limsup + ' ) OR aniocolecta = 9999 )'
+  else
+    where_filter += ' AND ( aniocolecta BETWEEN ' + liminf + ' AND ' + limsup + ' ) '
+
+  if(!sfosil)
+    where_filter += " AND (ejemplarfosil != 'SI' or ejemplarfosil isnull)"
+
+  /*const query1 = pgp.as.format(queries.basicAnalysis.getCellOcurrences, {'species_filter' : species_filter, 
+            'resolution_view': resolution_view,
+            'region'         : region,
+            'gridid'         : gridid,
+            'grid_table'     : grid_table,
+            'where_filter'   : where_filter,
+            'longitud'       : longitud,
+            'latitud'       : latitud})
+  debug(query1)*/
+
+  debug("region: " + region)
+  debug("species_filter: " + species_filter)
+  debug("resolution_view: " + resolution_view)
+  debug("gridid: " + gridid)
+  debug("grid_table: " + grid_table)
+  debug("where_filter: " + where_filter)
+  debug("longitud: " + longitud)
+  debug("latitud: " + latitud)
+
+  pool.any(queries.basicAnalysis.getCellOcurrences, {
+            'species_filter' : species_filter, 
+            'resolution_view': resolution_view,
+            'region'         : region,
+            'gridid'         : gridid,
+            'grid_table'     : grid_table,
+            'where_filter'   : where_filter,
+            'longitud'       : longitud,
+            'latitud'       : latitud}
+      ).then(function (data) {
+        debug(data.length + ' ocurrences')
+        res.json({
+          ok: true,
+          'data': data
+        })
+    }).catch(function (error) {
+      return res.json({
+        err: error,
+        ok: false,
+        message: "Error al procesar la query"
+      })
+    })
+
+}
 
 
 
+exports.getIDCellFromCoordinates =  function(req, res) {
+
+  debug("getIDCellFromCoordinates")
+  
+  var longitud   = getParam(req, 'longitud')
+  var latitud    = getParam(req, 'latitud')
+  var resolution = getParam(req, 'res')
+
+  pool.any(queries.getCells.fromCoordinates, {
+    longitud: longitud,
+    latitud : latitud,
+    res: resolution
+  }).then(function (data) {
+
+    data.forEach(function (element){
+      element['the_geom'] = JSON.parse(element['the_geom'])
+    })
+    
+    res.json({
+      ok: true,
+      'data': data
+    })
+    
+  }).catch(function (error) {
+    res.json({
+        ok: false,
+        err: error,
+        data: [],
+        message: "Error al procesar la query"
+      })
+  })
+
+}
+
+
+exports.sendFeedBack = function(req, res){
+
+   debug("sendBackFeed")
+  
+   var rating     = getParam(req, 'rating');
+   var comment    = getParam(req, 'comment');
+   var to         = getParam(req, 'to');
+
+   /*debug(rating)
+   debug(comment)
+   debug(to)*/
+
+   var transporter = nodeMailer.createTransport({
+          host: email_config['host'],
+          port: email_config['port'],
+          auth: {
+              user: email_config['user'],
+              pass: email_config['pass']
+          }
+   });
+
+   var mailOptions = {
+      from: email_config['user'],
+      to: [to, email_config['user']],
+      subject: 'Retroalimentación',
+      html: `<div style="text-align:center;"> 
+              <p><b>SPECIES recibió una retroalimentación:</b></p> 
+              <p><b>Calificación:</b> ${rating} </p>
+              <p><b>Comentario:</b> ${comment}</p>
+            </div>`,
+   };
+
+   transporter.sendMail(mailOptions, (error, info) => {
+   
+      if (error) {
+        debug(error);
+
+        return res.json({
+          ok: false,
+          err: error,
+          message: "Error al enviar retroalimentación"
+        });
+
+      } else {
+
+        debug('Message %s sent: %s', info.messageId, info.response);
+
+        pool.any(queries.users.saveFeedBack, 
+                      {
+                        rating: rating, 
+                        comment: comment,
+                        email: to})
+        .then(function (data) {
+
+          return res.json({
+            ok: true,
+            message: "Retroalimentación enviada correctamente"
+          });
+
+        })
+        .catch(function (error) {
+          debug(error)
+
+          return res.json({
+            ok: false,
+            err: error,
+            message: "Error al enviar retroalimentación"
+          });
+        });
+
+      }
+   
+   });
+
+
+}
+
+
+exports.getGivenPointaValidationTables = function(req, res, next){
+
+
+  debug('getGivenPointaValidationTables')
+
+  var idtbl =  'tbl_' + new Date().getTime() 
+  var iter = getParam(req, 'iterations',iterations)
+
+  var grid_resolution = parseInt(verb_utils.getParam(req, 'grid_resolution', 16)) 
+  var fosil = verb_utils.getParam(req, 'fosil', true)
+  var date  = verb_utils.getParam(req, 'date', true)
+  var lim_inf = verb_utils.getParam(req, 'lim_inf', 1500)
+  var lim_sup = verb_utils.getParam(req, 'lim_sup', 2020)
+  var target_points = verb_utils.getParam(req, 'target_points', [])
+  var region = parseInt(getParam(req, 'region', default_region))
+  
+  var points = '['
+  var number_occ = 0
+
+  target_points.forEach(function(occ) {
+    
+    if(fosil){
+
+      if(date){
+
+        if((occ['anio'] >= lim_inf && occ['anio'] <= lim_sup) || occ['anio'] == 9999){
+          
+          if(number_occ > 0) {
+            points += ', '
+          }  
+
+          points += 'ST_SetSRID('+ 'ST_Point('+ occ['longitud'] + ', ' + occ['latitud'] +')' +', 4326)'
+          number_occ += 1
+
+        }
+        
+
+      } else { 
+
+          if(occ['anio'] >= lim_inf && occ['anio'] <= lim_sup){
+
+            if(number_occ > 0) {
+              points += ', '
+            } 
+
+            points += 'ST_SetSRID('+ 'ST_Point('+ occ['longitud'] + ', ' + occ['latitud'] +')' +', 4326)'
+            number_occ += 1
+          
+          }
+
+    }
+
+  } else {
+
+      if(!occ['fosil']){
+
+        if(date){
+
+          if((occ['anio'] >= lim_inf && occ['anio'] <= lim_sup) || occ['anio'] !== 9999){
+          
+            if(number_occ > 0) {
+              points += ', '
+            }  
+
+            points += 'ST_SetSRID('+ 'ST_Point('+ occ['longitud'] + ', ' + occ['latitud'] +')' +', 4326)'
+            number_occ += 1
+
+          }
+
+        } else {
+
+            if(occ['anio'] >= lim_inf && occ['anio'] <= lim_sup){
+
+              if(number_occ > 0) {
+                points += ', '
+              }  
+
+              points += 'ST_SetSRID('+ 'ST_Point('+ occ['longitud'] + ', ' + occ['latitud'] +')' +', 4326)'
+              number_occ += 1
+            
+            }
+
+       }
+
+      }  
+
+  }
+
+  });
+
+  points += ']'
+
+  pool.task(t => {
+
+    var query = queries.countsTaxonGroups.getCellSincePoint
+
+    /*const query1 = pgp.as.format(query, {
+
+      res: grid_resolution,
+      points: points
+
+    })
+    debug(query1)*/
+
+    return t.any(query, {
+
+      res: grid_resolution,
+      points: points
+
+    }).then(data => {
+
+
+      var target_cells = []
+
+      data.forEach(item => {
+        target_cells.push(item['gridid'])
+      });
+
+      const unique_set = new Set(target_cells)
+      target_cells = Array.from(unique_set)
+
+      debug(target_cells.length)  
+
+      const query1 = pgp.as.format(queries.getValidationTables.createGivenPointsTables, {
+
+        iterations: iter,
+        idtbl: idtbl,
+        res: grid_resolution,
+        target_cells: '[' + target_cells.toString() + ']',
+        res_celda_snib_tb: 'grid_geojson_' + grid_resolution + 'km_aoi',
+        region: region
+
+    })
+    //debug(query1)
+
+      pool.any(queries.getValidationTables.createGivenPointsTables, {
+        iterations: iter,
+        idtbl: idtbl,
+        res: grid_resolution,
+        target_cells: '[' + target_cells.toString() + ']',
+        region: region,
+        res_celda_snib_tb: 'grid_geojson_' + grid_resolution + 'km_aoi'
+      }).then(function (data) {
+
+          var item = data[0]
+          item['tblname'] = idtbl
+          
+          debug(data)
+
+          res.json({'data': data})
+        })
+
+    }).catch(error => {
+
+      debug(error)
+      
+      res.json({
+            ok: false,
+            message: "Error al ejecutar la petición",
+            data:[],
+            error: error
+          })
+
+  });
 
 
 
+  }).catch(error => {
 
+    debug(error)
+    
+    res.json({
+          ok: false,
+          message: "Error al ejecutar la petición",
+          data:[],
+          error: error
+        })
 
+  });
+        
+
+}
 
 
 

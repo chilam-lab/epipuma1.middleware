@@ -25,6 +25,9 @@ var verbsCtrl = require('../controllers/verbsniche')
  */
 
 
+router.route('/sendFeedBack')
+  .post(verbsCtrl.sendFeedBack)
+
 router.route('/especie/getUserReg')
   .get(verbsCtrl.getUserReg)
   .post(verbsCtrl.getUserReg)
@@ -62,6 +65,9 @@ router.route('/especie/getValidationTables')
 
 router.route('/especie/getGroupValidationTables')
   .post(verbsCtrl.getGroupValidationTables)
+
+router.route('/especie/getGivenPointsValidationTables')
+  .post(verbsCtrl.getGivenPointaValidationTables)
 
 router.route('/especie/processValidationTables')
   .get(verbsCtrl.processValidationTables)
@@ -119,6 +125,11 @@ router.route('/especie/getSpeciesTaxon')
   .post(verbsCtrl.getSpeciesTaxonNiche)
 
 
+router.route('/especie/getGridSpeciesTaxon')
+  .get(verbsCtrl.getGridSpeciesTaxonNiche)
+  .post(verbsCtrl.getGridSpeciesTaxonNiche)
+
+
 router.route('/especie/getSubAOI')
   .post(verbsCtrl.getSubAOI)
 
@@ -135,12 +146,24 @@ router.route('/especie/getAvailableCountries')
 
 router.route('/especie/getAvailableCountriesFootprint')
   .get(verbsCtrl.getAvailableCountriesFootprint)
-  .post(verbsCtrl.getAvailableCountriesFootprint)  
+  .post(verbsCtrl.getAvailableCountriesFootprint) 
+
+router.route('/especie/getCountByYear')
+  .get(verbsCtrl.getCountByYear)
+  .post(verbsCtrl.getCountByYear)  
 
 
 router.route('/especie/getIdFromName')
   .get(verbsCtrl.getIdFromName)
   .post(verbsCtrl.getIdFromName)  
 
+router.route('/especie/getCellOcurrences')
+  .get(verbsCtrl.getCellOcurrences)
+  .post(verbsCtrl.getCellOcurrences)
+
+
+router.route('/especie/getIDCellFromCoordinates')
+  .get(verbsCtrl.getIDCellFromCoordinates)
+  .post(verbsCtrl.getIDCellFromCoordinates)
 
 module.exports = router
