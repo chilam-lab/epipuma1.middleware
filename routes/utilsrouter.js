@@ -85,6 +85,10 @@ router.route('/especie/getGroupCountGridid')
   .get(verbsCtrl.getGroupCountGridid)
   .post(verbsCtrl.getGroupCountGridid)
 
+router.route('/especie/getGroupCountGrididByCell')
+  .get(verbsCtrl.getGroupCountGrididByCell)
+  .post(verbsCtrl.getGroupCountGrididByCell)
+
 router.route('/especie/getVariables')
   .get(verbsCtrl.getVariablesNiche)
   .post(verbsCtrl.getVariablesNiche)

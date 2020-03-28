@@ -274,7 +274,8 @@ var queryProvider = {
   getCells: {
     forSpecies: sqlPath('getCells/get_species_cells.sql'),
     forTaxon: sqlPath('getCells/get_taxon_cells.sql'),
-    fromCoordinates: sqlPath('getCells/get_gridid_from_coordinates.sql')
+    fromCoordinates: sqlPath('getCells/get_gridid_from_coordinates.sql'),
+    getSpCountsByCellId: sqlPath('getCells/get_sp_counts_bycellid.sql')
   },
 
   getSpecies: {
@@ -338,7 +339,9 @@ var queryProvider = {
     getGroupCount: sqlPath("nodes-taxons-group/get-group-count-grid-id.sql"),
     getCellsBio: tmplPath("nodes-taxons-group/get-cells-bio.tmpl"),
     getCellsAbio: tmplPath("nodes-taxons-group/get-cells-abio.tmpl"),
-    selectCount: tmplPath("nodes-taxons-group/select-count.tmpl")
+    selectCount: tmplPath("nodes-taxons-group/select-count.tmpl"),
+    getCellsBioSP: tmplPath("nodes-taxons-group/get-cells-bio-sp.tmpl"),
+    getCellsAbioSP: tmplPath("nodes-taxons-group/get-cells-abio-sp.tmpl"),
 
   },
 
