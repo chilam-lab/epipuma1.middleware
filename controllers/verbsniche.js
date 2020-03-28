@@ -1117,7 +1117,127 @@ exports.getCountGridid = function (req, res, next) {
   })
 }
 
+
+exports.getGroupCountGrididByCell = function (req, res) {
+
+
+  debug('getGroupCountGrididByCell')
+
+  // catching parameters
+  var footprint_region = getParam(req, 'region', default_region)
+  var grid_res = getParam(req, 'grid_res', 16)
+  var nodes = getParam(req, 'nodes', [])
+  // var cellselected = getParam(req, 'cellselected', false)
+  var lat = getParam(req, 'lat', 0)
+  var long = getParam(req, 'long', 0)
+
+  // debug("cellselected: " + cellselected)
+  debug("lat: " + lat)
+  debug("long: " + long)
+  
+
+  // defining necessary varaiables 
+  var region_cells = 'cells_' + grid_res + 'km_' + footprint_region
+  var res_views = 'grid_geojson_' + grid_res + 'km_aoi'
+  var res_cells = 'cells_' + grid_res + 'km'
+  var where_clause = ''
+  var nodes_bio = ""
+  var nodes_abio = ""
+  var first_bio = true
+  var first_abio = true
+
+
+  // getting all cells
+  nodes.forEach((group, index) => {
+
+    merge_vars = group['merge_vars']
+    // debug(group)
+
+    where_clause = verb_utils.getWhereClauseFromGroupTaxonArray(merge_vars, false)
+    where_clause = where_clause.replace("WHERE","")
+    // debug(where_clause)
+
+    if (group['biotic'] === 'true' || group['biotic'] === true) { 
+      
+      if (first_bio){
+        nodes_bio += where_clause
+        first_bio = false
+      }
+      else{
+        nodes_bio += " or " + where_clause
+      }
+        
+
+    } else {
+
+      if (first_abio){
+        nodes_abio += where_clause
+        first_abio = false
+      }
+      else{
+        nodes_abio += " or " + where_clause
+      }
+
+    }
+
+  })
+
+  // debug(nodes_bio)
+  // debug(nodes_abio)
+
+  var bio_select = ""
+  var abio_select = ""
+  var isunion_sp = false
+
+  if(nodes_bio != "" && nodes_abio != "")
+    isunion_sp = true
+
+  debug("isunion_sp: " + isunion_sp)
+
+  if(nodes_bio != ""){
+    bio_select = queries.taxonsGroupNodes.getCellsBioSP
+    bio_select = bio_select.toString().replace(/{res:raw}/g, grid_res)
+    bio_select = bio_select.toString().replace(/{region:raw}/g, footprint_region)
+    bio_select = bio_select.toString().replace(/{nodes_bio:raw}/g, nodes_bio)
+  }
+
+  if(nodes_abio != ""){
+    abio_select = isunion_sp ? " UNION " : ""
+    abio_select += queries.taxonsGroupNodes.getCellsAbioSP
+    abio_select = abio_select.toString().replace(/{res:raw}/g, grid_res)
+    abio_select = abio_select.toString().replace(/{region:raw}/g, footprint_region)
+    abio_select = abio_select.toString().replace(/{nodes_abio:raw}/g, nodes_abio)
+  }
+
+  debug(bio_select)
+  debug(abio_select)
+
+  pool.any(queries.getCells.getSpCountsByCellId, {
+       bio_select: bio_select,
+       abio_select: abio_select,
+       region: footprint_region,
+       res: grid_res,
+       latitud: lat,
+       longitud: long
+  }).then(function (data) {
+
+    res.json({"ok":true, "data": data})
+
+  }).catch(function (error) {
+      
+    res.json({"ok":true, "message": 'an error has ocurrred!', "error": error})
+
+  })
+
+
+
+}
+
+
+
+
 exports.getGroupCountGridid = function (req, res) {
+  
   debug('getGroupCountGridid')
 
   // catching parameters
@@ -1167,13 +1287,14 @@ exports.getGroupCountGridid = function (req, res) {
   query = queries.taxonsGroupNodes.getGroupCount
 
   //const query1 = pgp.as.format(query, {aux: q, summary: select})
-  //debug(query1)
+  // debug(q)
+  // debug(select)
+  // debug(query)
+
 
   pool.any(query, {
-
        aux: q,
        summary: select
-    
   }).then(function (data) {
 
     res.json({"ok":true, "data": data})
@@ -2354,6 +2475,8 @@ exports.getCellOcurrences = function(req, res) {
   debug("where_filter: " + where_filter)
   debug("longitud: " + longitud)
   debug("latitud: " + latitud)
+
+  // debug(queries.basicAnalysis.getCellOcurrences)
 
   pool.any(queries.basicAnalysis.getCellOcurrences, {
             'species_filter' : species_filter, 

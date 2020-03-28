@@ -3223,20 +3223,20 @@ verb_utils.getWhereClauseFromGroupTaxonArray = function (taxon_array, target){
     var key='rank'
   // mapeo de taxones
   var taxon_rank_map = {
-                          // biotic
-                          kingdom : 'reinovalido', 
-                          phylum  : 'phylumdivisionvalido',
-                          class   : 'clasevalida',
-                          order   : 'ordenvalido',
-                          family  : 'familiavalida',
-                          genus   : 'generovalido',
-                          species : ['generovalido', 'especieepiteto'],
-                          subspecies: ['generovalido', 'especieepiteto', 'nombreinfra'],
-                          // abiotic
-                          type    : 'type',
-                          layer   : 'layer',
-                          bid     : 'bid'
-                       }
+              // biotic
+              kingdom : 'reinovalido', 
+              phylum  : 'phylumdivisionvalido',
+              class   : 'clasevalida',
+              order   : 'ordenvalido',
+              family  : 'familiavalida',
+              genus   : 'generovalido',
+              species : ['generovalido', 'especieepiteto'],
+              subspecies: ['generovalido', 'especieepiteto', 'nombreinfra'],
+              // abiotic
+              type    : 'type',
+              layer   : 'layer',
+              bid     : 'bid'
+           }
   
   var whereClause = ''
   taxon_array.forEach ( function (taxon, index) {
