@@ -3,13 +3,13 @@ var config = {}
 
 
 config.db = {}
-config.db.database = process.env.DBNAME
-config.db.user = process.env.DBUSER
-config.db.password = process.env.DBPWD
-config.db.host = process.env.DBHOST
-config.db.port = process.env.DBPORT
+config.db.database = 'niche_candidate'
+config.db.user = 'postgres'
+config.db.password = '!37JzLg+9M2RAu72'
+config.db.host = '10.90.0.38'
+config.db.port = 5433
 config.db.application_name = 'expressMiddleware'
-config.port = process.env.PORT
+config.port = 8282
 config.email = {}
 config.email.user = process.env.EUSER
 config.email.pass = process.env.EPASS
