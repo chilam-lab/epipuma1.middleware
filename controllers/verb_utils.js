@@ -37,7 +37,7 @@ verb_utils.max_taxon_name = 'reinovalido' // nombre de columna del valor maximo 
 buckets = 20
 deciles = 10
 verb_utils.region_mx = 1
-verb_utils.covid_mx = "ageb"
+verb_utils.covid_mx = "state"
 verb_utils.min_occ = 5
 verb_utils.type_taxon = 0
 
@@ -3468,7 +3468,7 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
   })
 
   // debug(co)
-  //debug(query_covar)
+  debug(query_covar)
 
   return query_covar  
 }

@@ -20,6 +20,7 @@ var iterations = verb_utils.iterations
 var alpha = verb_utils.alpha
 var buckets = verb_utils.buckets
 var default_region = verb_utils.region_mx
+var default_resolution = verb_utils.covid_mx
 var max_score = verb_utils.maxscore
 var min_score = verb_utils.minscore
 var request_counter_map = d3.map([]);
@@ -41,13 +42,16 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
 
   data_request["decil_selected"] = verb_utils.getParam(req, 'decil_selected', [10])
 
-  var grid_resolution = parseInt(verb_utils.getParam(req, 'grid_resolution', 16)) 
+  // var grid_resolution = parseInt(verb_utils.getParam(req, 'grid_resolution', 16)) 
+  var grid_resolution = verb_utils.getParam(req, 'grid_resolution', default_resolution) 
   var region = parseInt(verb_utils.getParam(req, 'region', verb_utils.region_mx))
   var fosil = verb_utils.getParam(req, 'fosil', true)
   var date  = verb_utils.getParam(req, 'date', true)
   var lim_inf = verb_utils.getParam(req, 'lim_inf', 1500)
   var lim_sup = verb_utils.getParam(req, 'lim_sup', 2020)
   var cells = verb_utils.getParam(req, 'excluded_cells', [])
+
+  debug("grid_resolution: " + grid_resolution)
 
   data_request["excluded_cells"] = cells
   data_request["region"] = region
@@ -60,10 +64,17 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   data_request["min_occ"] = verb_utils.getParam(req, 'min_cells', 1)
 
   var target_group = verb_utils.getParam(req, 'target_taxons', []) 
+  
   data_request["target_name"] = verb_utils.getParam(req, 'target_name', 'target_group')
+  debug("*****1: " + data_request["target_name"])
+  
   data_request["where_target"] = verb_utils.getWhereClauseFromGroupTaxonArray(target_group, true)
+  debug("*****1: " + data_request["where_target"])
+
   data_request["where_exclude_target"] = verb_utils.getExcludeTargetWhereClause(target_group)
-  // debug(target_group)
+  debug("*****1: " + data_request["where_exclude_target"])
+
+ 
 
   var where_filter_target    = ''
   if (date){
@@ -216,7 +227,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
          data_request["alpha"] = data_request["alpha"] !== undefined ? data_request["alpha"] : 1.0/resp.n
 
          // debug("------------")
-         // debug("N:" + data_request["N"])
+         debug("N:" + data_request["N"])
          // debug("alpha:" + data_request["alpha"])
          // debug("source_cells:" + data_request["source_cells"].length)
          // debug("total_cells:" + data_request["total_cells"].length)
@@ -282,6 +293,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
             // debug(query_analysis)
             // debug(data_request)
 
+
             const query1 = pgp.as.format(query_analysis, data_request)
             // debug("iter " + iter + query1)
             
@@ -299,7 +311,9 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
   }).then(data_iteration => {
 
-      // debug(data_iteration)
+      debug(data_iteration)
+
+      
       // debug("data_iteration[0].ni: " + data_iteration[0].ni)
       // debug("data_iteration.length: " + data_iteration.length)
       // debug("target_cells.length: " +  data_request["target_cells"].length)

@@ -1,5 +1,5 @@
 WITH aux_target AS (
-	SELECT DISTINCT b.${res_celda_snib:raw} AS cells
+	SELECT DISTINCT cast (b.${res_celda_snib:raw} as integer) AS cells
 	FROM snib_grid_${grid_resolution:raw}km AS b
 	JOIN 
 		(
@@ -17,7 +17,7 @@ WITH aux_target AS (
 	AND b.${res_celda_snib:raw} is not null
 ), target AS (
 	SELECT '${target_name:raw}' as target_name,
-	   (array_agg(a.cells) - (${excluded_cells:raw}::integer[] + ${source_cells:raw}::integer[])) as cells,
+	   cast( (array_agg(a.cells) - (${excluded_cells:raw}::integer[] + ${source_cells:raw}::integer[])) as integer[]) as cells,
 	   array_length(array_agg(a.cells) - (${excluded_cells:raw}::integer[] + ${source_cells:raw}::integer[]),1) as ni
 	FROM aux_target as a
 ),${groups:raw}
