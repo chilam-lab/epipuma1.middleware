@@ -917,7 +917,9 @@ exports.getVariablesNiche = function (req, res, next) {
   debug("field: " + field)
   debug("ad_param: " + ad_param)
   debug("order_param: " + order_param)
-  // debug(parentfield)
+  debug("parentfield: " + parentfield)
+  debug("parent_valor: " + parentitem)
+  
   // debug(parentitem)
 
   if(field === max_taxon_name){

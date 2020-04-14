@@ -209,7 +209,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
         }).then(resp => {
 
-          debug(resp.source_cells)
+          // debug(resp.source_cells)
 
           data_request["source_cells"] = resp.source_cells
 
@@ -313,7 +313,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
       debug(data_iteration)
 
-      
+
       // debug("data_iteration[0].ni: " + data_iteration[0].ni)
       // debug("data_iteration.length: " + data_iteration.length)
       // debug("target_cells.length: " +  data_request["target_cells"].length)
@@ -428,6 +428,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
         // Obtiene la sumatoria de score por celdas contemplando si existe apriori o probabilidad
         var data_score_cell = []
+        // debug(data)
         data_score_cell = data_request.with_data_score_cell === true ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob, data_request.all_cells, is_validation) : []
 
 

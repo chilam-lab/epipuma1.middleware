@@ -1007,6 +1007,8 @@ verb_utils.processDataForScoreCellValidation = function (data, apriori, mapa_pro
 
   var cells_array = isvalidation ? data.map(function(d) {return {cells: d.cells_map, score: parseFloat(d.score)}}) : data.map(function(d) {return {cells: d.cells, score: parseFloat(d.score)}})
 
+  // debug(cells_array)
+
   var df = d3.map([])
 
   cells_array.forEach(function(obj) {
@@ -1122,7 +1124,7 @@ verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, all_cel
    for(var i=0; i<map_cell.length; i++){
 
         const entry = map_cell[i];
-        // debug(entry)
+        debug(entry)
 
 
         var tscore = parseFloat(entry["value"])
