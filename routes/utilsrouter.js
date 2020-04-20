@@ -134,6 +134,11 @@ router.route('/especie/getGridSpeciesTaxon')
   .post(verbsCtrl.getGridSpeciesTaxonNiche)
 
 
+  router.route('/especie/getGridGivenPoints')
+  .get(verbsCtrl.getGridGivenPoints)
+  .post(verbsCtrl.getGridGivenPoints)
+
+
 router.route('/especie/getSubAOI')
   .post(verbsCtrl.getSubAOI)
 
