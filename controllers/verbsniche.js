@@ -16,6 +16,7 @@ var nodeMailer = require('nodemailer')
 var SEED = require('../config').SEED
 var TIME_TOKEN = require('../config').TIME_TOKEN
 var config = require('../config')
+var d3 = require('d3')
 
 var pool = verb_utils.pool
 // var N = verb_utils.N
@@ -2257,6 +2258,153 @@ exports.getIdFromName = function(req, res) {
       })
     })
 
+}
+
+
+exports.getGridGivenPoints = function (req, res, next) {
+
+  debug("getGridGivenPoints")
+  
+  var target_points     = getParam(req, 'target_points', [])
+  var date            = getParam(req, 'date', false)
+  var fosil            = getParam(req, 'fosil', false)
+  var lim_inf            = getParam(req, 'lim_inf', 1500)
+  var lim_sup            = getParam(req, 'lim_sup', 2019)
+  var grid_resolution          = getParam(req, 'grid_resolution', 16)
+  var region            = getParam(req, 'region', 1)
+
+  var points = '['
+  var number_occ = 0
+
+  target_points.forEach(function(occ) {
+    
+    if(fosil){
+
+      if(date){
+
+        if((occ['anio'] >= lim_inf && occ['anio'] <= lim_sup) || occ['anio'] == 9999){
+          
+          if(number_occ > 0) {
+            points += ', '
+          }  
+
+          points += 'ST_SetSRID('+ 'ST_Point('+ occ['longitud'] + ', ' + occ['latitud'] +')' +', 4326)'
+          number_occ += 1
+
+        }
+        
+
+      } else { 
+
+          if(occ['anio'] >= lim_inf && occ['anio'] <= lim_sup){
+
+            if(number_occ > 0) {
+              points += ', '
+            } 
+
+            points += 'ST_SetSRID('+ 'ST_Point('+ occ['longitud'] + ', ' + occ['latitud'] +')' +', 4326)'
+            number_occ += 1
+          
+          }
+
+    }
+
+  } else {
+
+      if(!occ['fosil']){
+
+        if(date){
+
+          if((occ['anio'] >= lim_inf && occ['anio'] <= lim_sup) || occ['anio'] !== 9999){
+          
+            if(number_occ > 0) {
+              points += ', '
+            }  
+
+            points += 'ST_SetSRID('+ 'ST_Point('+ occ['longitud'] + ', ' + occ['latitud'] +')' +', 4326)'
+            number_occ += 1
+
+          }
+
+        } else {
+
+            if(occ['anio'] >= lim_inf && occ['anio'] <= lim_sup){
+
+              if(number_occ > 0) {
+                points += ', '
+              }  
+
+              points += 'ST_SetSRID('+ 'ST_Point('+ occ['longitud'] + ', ' + occ['latitud'] +')' +', 4326)'
+              number_occ += 1
+            
+            }
+
+       }
+
+      }  
+
+  }
+
+  });
+
+  points += ']'
+
+  pool.task(t => {
+
+    var query = queries.countsTaxonGroups.getCellSincePoint
+    const query1 = pgp.as.format(query, {
+
+      res: grid_resolution,
+      points: points
+
+    })
+    debug(query1)
+
+    return t.any(query, {
+
+      res: grid_resolution,
+      points: points
+
+    }).then(resp => {
+
+      var _data = {}
+      resp.forEach(cell => {
+        if(_data[cell['gridid']] != null ) {
+
+          _data[cell['gridid']] += 1
+
+        } else {
+
+          _data[cell['gridid']] = 1          
+
+        }
+      })
+
+      var data = []
+      Object.keys(_data).forEach(cell => {
+        data.push({gridid: cell, occ: _data[cell]})
+      })
+      
+      res.json({
+            ok: true,
+            data: data
+        })
+
+    });
+
+  }).catch(error => {
+
+      debug("ERROR EN PROMESA" + error)
+
+      res.json({
+          ok: false,
+          message: "Error al ejecutar la petición",
+          data:[],
+          error: error
+        })
+
+    });
+  
 }
 
 
