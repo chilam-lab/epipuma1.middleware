@@ -15,13 +15,6 @@ config.email.user = process.env.EUSER
 config.email.pass = process.env.EPASS
 config.email.host = process.env.EHOST
 config.email.port = process.env.EPORT
-config.db.database = 'niche_candidate'
-config.db.user = 'funny_darwin'
-config.db.password = 'y8$IYL0XKCW7'
-config.db.host = '200.12.166.56'
-config.db.port = 5432
-config.db.application_name = 'expressMiddleware'
-config.port = 8080
 
 
 // Configure pool of connections
