@@ -85,6 +85,10 @@ router.route('/especie/getGroupCountGridid')
   .get(verbsCtrl.getGroupCountGridid)
   .post(verbsCtrl.getGroupCountGridid)
 
+router.route('/especie/getGroupCountGrididByCell')
+  .get(verbsCtrl.getGroupCountGrididByCell)
+  .post(verbsCtrl.getGroupCountGrididByCell)
+
 router.route('/especie/getVariables')
   .get(verbsCtrl.getVariablesNiche)
   .post(verbsCtrl.getVariablesNiche)
@@ -128,6 +132,11 @@ router.route('/especie/getSpeciesTaxon')
 router.route('/especie/getGridSpeciesTaxon')
   .get(verbsCtrl.getGridSpeciesTaxonNiche)
   .post(verbsCtrl.getGridSpeciesTaxonNiche)
+
+
+  router.route('/especie/getGridGivenPoints')
+  .get(verbsCtrl.getGridGivenPoints)
+  .post(verbsCtrl.getGridGivenPoints)
 
 
 router.route('/especie/getSubAOI')

@@ -16,6 +16,7 @@ var nodeMailer = require('nodemailer')
 var SEED = require('../config').SEED
 var TIME_TOKEN = require('../config').TIME_TOKEN
 var config = require('../config')
+var d3 = require('d3')
 
 var pool = verb_utils.pool
 // var N = verb_utils.N
@@ -25,6 +26,7 @@ var limite = verb_utils.limite
 var min_taxon_name = verb_utils.min_taxon_name
 var max_taxon_name = verb_utils.max_taxon_name
 var default_region = verb_utils.region_mx
+var default_resolution = verb_utils.covid_mx
 var email_config = config.email
 
 
@@ -143,6 +145,7 @@ exports.getSpeciesByName = function (req, res, next) {
     next()
   }
 }
+
 
 /**
 * getSpecies regresa la clasificación de un número determinado de especies.
@@ -829,7 +832,7 @@ exports.getGridGeoJsonNiche = function (req, res, next) {
 
   debug('getGridGeoJsonNiche')
 
-  var grid_res = getParam(req, 'grid_res',16)
+  var grid_res = getParam(req, 'grid_res', default_resolution)
   var footprint_region = parseInt(getParam(req, 'footprint_region', default_region))
 
   debug("grid_res: " + grid_res)
@@ -844,15 +847,19 @@ exports.getGridGeoJsonNiche = function (req, res, next) {
 
       }).then(resp => {
 
-          // debug("TEST ...")
+          debug("Valor N: " + resp.n)
+
           return pool.any(queries.grid.gridxxkm, {
 
-                    grid_res: parseInt(grid_res),
+                    // grid_res: parseInt(grid_res),
+                    grid_res: grid_res,
                     region: footprint_region
                   })
       })
     })
       .then(data => {
+
+          // debug(data)
 
           var N = data[0].json['features'].length;
           for(var i = 0; i < N; i++) {
@@ -895,6 +902,10 @@ exports.getVariablesNiche = function (req, res, next) {
   var parentfield = getParam(req, 'parentfield','')
   var parentitem = getParam(req, 'parentitem','')
 
+  // debug("field: " + field)
+  // debug("parentfield: " + parentfield)
+  // debug("parentitem: " + parentitem)
+
   // Verificar si es necesario enviar el footprint_region, puede existir cambio de region despues 
   // de seleccionar las covariables
   var footprint_region = parseInt(getParam(req, 'footprint_region', default_region))
@@ -912,8 +923,9 @@ exports.getVariablesNiche = function (req, res, next) {
   debug("field: " + field)
   debug("ad_param: " + ad_param)
   debug("order_param: " + order_param)
-  // debug(parentfield)
-  // debug(parentitem)
+  debug("parentfield: " + parentfield)
+  // debug("parent_valor: " + parentitem)
+  debug("parentitem: " + parentitem)
 
   if(field === max_taxon_name){
 
@@ -1117,7 +1129,127 @@ exports.getCountGridid = function (req, res, next) {
   })
 }
 
+
+exports.getGroupCountGrididByCell = function (req, res) {
+
+
+  debug('getGroupCountGrididByCell')
+
+  // catching parameters
+  var footprint_region = getParam(req, 'region', default_region)
+  var grid_res = getParam(req, 'grid_res', 16)
+  var nodes = getParam(req, 'nodes', [])
+  // var cellselected = getParam(req, 'cellselected', false)
+  var lat = getParam(req, 'lat', 0)
+  var long = getParam(req, 'long', 0)
+
+  // debug("cellselected: " + cellselected)
+  debug("lat: " + lat)
+  debug("long: " + long)
+  
+
+  // defining necessary varaiables 
+  var region_cells = 'cells_' + grid_res + 'km_' + footprint_region
+  var res_views = 'grid_geojson_' + grid_res + 'km_aoi'
+  var res_cells = 'cells_' + grid_res + 'km'
+  var where_clause = ''
+  var nodes_bio = ""
+  var nodes_abio = ""
+  var first_bio = true
+  var first_abio = true
+
+
+  // getting all cells
+  nodes.forEach((group, index) => {
+
+    merge_vars = group['merge_vars']
+    // debug(group)
+
+    where_clause = verb_utils.getWhereClauseFromGroupTaxonArray(merge_vars, false)
+    where_clause = where_clause.replace("WHERE","")
+    // debug(where_clause)
+
+    if (group['biotic'] === 'true' || group['biotic'] === true) { 
+      
+      if (first_bio){
+        nodes_bio += where_clause
+        first_bio = false
+      }
+      else{
+        nodes_bio += " or " + where_clause
+      }
+        
+
+    } else {
+
+      if (first_abio){
+        nodes_abio += where_clause
+        first_abio = false
+      }
+      else{
+        nodes_abio += " or " + where_clause
+      }
+
+    }
+
+  })
+
+  // debug(nodes_bio)
+  // debug(nodes_abio)
+
+  var bio_select = ""
+  var abio_select = ""
+  var isunion_sp = false
+
+  if(nodes_bio != "" && nodes_abio != "")
+    isunion_sp = true
+
+  debug("isunion_sp: " + isunion_sp)
+
+  if(nodes_bio != ""){
+    bio_select = queries.taxonsGroupNodes.getCellsBioSP
+    bio_select = bio_select.toString().replace(/{res:raw}/g, grid_res)
+    bio_select = bio_select.toString().replace(/{region:raw}/g, footprint_region)
+    bio_select = bio_select.toString().replace(/{nodes_bio:raw}/g, nodes_bio)
+  }
+
+  if(nodes_abio != ""){
+    abio_select = isunion_sp ? " UNION " : ""
+    abio_select += queries.taxonsGroupNodes.getCellsAbioSP
+    abio_select = abio_select.toString().replace(/{res:raw}/g, grid_res)
+    abio_select = abio_select.toString().replace(/{region:raw}/g, footprint_region)
+    abio_select = abio_select.toString().replace(/{nodes_abio:raw}/g, nodes_abio)
+  }
+
+  debug(bio_select)
+  debug(abio_select)
+
+  pool.any(queries.getCells.getSpCountsByCellId, {
+       bio_select: bio_select,
+       abio_select: abio_select,
+       region: footprint_region,
+       res: grid_res,
+       latitud: lat,
+       longitud: long
+  }).then(function (data) {
+
+    res.json({"ok":true, "data": data})
+
+  }).catch(function (error) {
+      
+    res.json({"ok":true, "message": 'an error has ocurrred!', "error": error})
+
+  })
+
+
+
+}
+
+
+
+
 exports.getGroupCountGridid = function (req, res) {
+  
   debug('getGroupCountGridid')
 
   // catching parameters
@@ -1167,13 +1299,14 @@ exports.getGroupCountGridid = function (req, res) {
   query = queries.taxonsGroupNodes.getGroupCount
 
   //const query1 = pgp.as.format(query, {aux: q, summary: select})
-  //debug(query1)
+  // debug(q)
+  // debug(select)
+  // debug(query)
+
 
   pool.any(query, {
-
        aux: q,
        summary: select
-    
   }).then(function (data) {
 
     res.json({"ok":true, "data": data})
@@ -2139,6 +2272,153 @@ exports.getIdFromName = function(req, res) {
 }
 
 
+exports.getGridGivenPoints = function (req, res, next) {
+
+  debug("getGridGivenPoints")
+  
+  var target_points     = getParam(req, 'target_points', [])
+  var date            = getParam(req, 'date', false)
+  var fosil            = getParam(req, 'fosil', false)
+  var lim_inf            = getParam(req, 'lim_inf', 1500)
+  var lim_sup            = getParam(req, 'lim_sup', 2019)
+  var grid_resolution          = getParam(req, 'grid_resolution', 16)
+  var region            = getParam(req, 'region', 1)
+
+  var points = '['
+  var number_occ = 0
+
+  target_points.forEach(function(occ) {
+    
+    if(fosil){
+
+      if(date){
+
+        if((occ['anio'] >= lim_inf && occ['anio'] <= lim_sup) || occ['anio'] == 9999){
+          
+          if(number_occ > 0) {
+            points += ', '
+          }  
+
+          points += 'ST_SetSRID('+ 'ST_Point('+ occ['longitud'] + ', ' + occ['latitud'] +')' +', 4326)'
+          number_occ += 1
+
+        }
+        
+
+      } else { 
+
+          if(occ['anio'] >= lim_inf && occ['anio'] <= lim_sup){
+
+            if(number_occ > 0) {
+              points += ', '
+            } 
+
+            points += 'ST_SetSRID('+ 'ST_Point('+ occ['longitud'] + ', ' + occ['latitud'] +')' +', 4326)'
+            number_occ += 1
+          
+          }
+
+    }
+
+  } else {
+
+      if(!occ['fosil']){
+
+        if(date){
+
+          if((occ['anio'] >= lim_inf && occ['anio'] <= lim_sup) || occ['anio'] !== 9999){
+          
+            if(number_occ > 0) {
+              points += ', '
+            }  
+
+            points += 'ST_SetSRID('+ 'ST_Point('+ occ['longitud'] + ', ' + occ['latitud'] +')' +', 4326)'
+            number_occ += 1
+
+          }
+
+        } else {
+
+            if(occ['anio'] >= lim_inf && occ['anio'] <= lim_sup){
+
+              if(number_occ > 0) {
+                points += ', '
+              }  
+
+              points += 'ST_SetSRID('+ 'ST_Point('+ occ['longitud'] + ', ' + occ['latitud'] +')' +', 4326)'
+              number_occ += 1
+            
+            }
+
+       }
+
+      }  
+
+  }
+
+  });
+
+  points += ']'
+
+  pool.task(t => {
+
+    var query = queries.countsTaxonGroups.getCellSincePoint
+    const query1 = pgp.as.format(query, {
+
+      res: grid_resolution,
+      points: points
+
+    })
+    debug(query1)
+
+    return t.any(query, {
+
+      res: grid_resolution,
+      points: points
+
+    }).then(resp => {
+
+      var _data = {}
+      resp.forEach(cell => {
+        if(_data[cell['gridid']] != null ) {
+
+          _data[cell['gridid']] += 1
+
+        } else {
+
+          _data[cell['gridid']] = 1          
+
+        }
+      })
+
+      var data = []
+      Object.keys(_data).forEach(cell => {
+        data.push({gridid: cell, occ: _data[cell]})
+      })
+      
+      res.json({
+            ok: true,
+            data: data
+        })
+
+    });
+
+  }).catch(error => {
+
+      debug("ERROR EN PROMESA" + error)
+
+      res.json({
+          ok: false,
+          message: "Error al ejecutar la petición",
+          data:[],
+          error: error
+        })
+
+    });
+  
+}
+
+
 exports.getGridSpeciesTaxonNiche = function (req, res, next) {
 
   debug("getGridSpeciesTaxonNiche")
@@ -2147,7 +2427,7 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
   var sfecha            = getParam(req, 'sfecha', false)
   var sfosil            = getParam(req, 'sfosil', false)
   var liminf            = getParam(req, 'liminf', 1500)
-  var limsup            = getParam(req, 'limsup', 2019)
+  var limsup            = getParam(req, 'limsup', new Date().getFullYear())
   var grid_res          = getParam(req, 'grid_res', 16)
   var region            = getParam(req, 'region', 1)
 
@@ -2161,6 +2441,9 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
   var gridid          = 'gridid_' + grid_res + 'km'
   var snib_grid_xxkm  = 'snib_grid_' + grid_res + 'km'
   var where_filter    = ''
+
+
+
 
   if (sfecha){
     where_filter += ' AND ( ( ( aniocolecta BETWEEN ' + liminf + ' AND ' + limsup + ' ) OR aniocolecta = 9999 )'
@@ -2179,11 +2462,15 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
   }
 
 
-  // debug("resolution_view: " + resolution_view)
-  // debug("region: " + region)
-  // debug("gridid: " + gridid)
-  // debug("snib_grid_xxkm: " + snib_grid_xxkm)
-  // debug("where_filter: " + where_filter)
+  debug("species_filter: " + species_filter)
+  debug("resolution_view: " + resolution_view)
+  debug("region: " + region)
+  debug("gridid: " + gridid)
+  debug("snib_grid_xxkm: " + snib_grid_xxkm)
+  debug("where_filter: " + where_filter)
+  debug("liminf: " + liminf)
+  debug("limsup: " + limsup)
+
 
 
   const query1 = pgp.as.format(queries.getGridSpeciesNiche.getGridSpeciesTaxons, {'species_filter' : species_filter, 
@@ -2192,6 +2479,8 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
             'gridid'         : gridid,
             'snib_grid_xxkm' : snib_grid_xxkm,
             'where_filter'   : where_filter})
+  
+
   // debug(query1)
 
   pool.any(queries.getGridSpeciesNiche.getGridSpeciesTaxons, {
@@ -2202,11 +2491,13 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
             'snib_grid_xxkm' : snib_grid_xxkm,
             'where_filter'   : where_filter}
       ).then(function (data) {
+
         debug(data.length + ' ocurrence cells')
         res.json({
           ok: true,
           'data': data
         })
+
     }).catch(function (error) {
       return res.json({
         err: error,
@@ -2225,7 +2516,7 @@ exports.getCountByYear = function(req, res) {
   var sfecha            = getParam(req, 'sfecha', false)
   var sfosil            = getParam(req, 'sfosil', false)
   var liminf            = getParam(req, 'liminf', 1500)
-  var limsup            = getParam(req, 'limsup', 2019)
+  var limsup            = getParam(req, 'limsup', new Date().getFullYear())
   var grid_res          = getParam(req, 'grid_res', 16)
   var region            = getParam(req, 'region', 1)
 
@@ -2315,7 +2606,7 @@ exports.getCellOcurrences = function(req, res) {
   var sfecha            = getParam(req, 'sfecha', false)
   var sfosil            = getParam(req, 'sfosil', false)
   var liminf            = getParam(req, 'liminf', 1500)
-  var limsup            = getParam(req, 'limsup', 2019)
+  var limsup            = getParam(req, 'limsup', new Date().getFullYear())
   var grid_res          = getParam(req, 'grid_res', 16)
   var region            = getParam(req, 'region', 1)
   var longitud          = getParam(req, 'longitud', 0)
@@ -2354,6 +2645,8 @@ exports.getCellOcurrences = function(req, res) {
   debug("where_filter: " + where_filter)
   debug("longitud: " + longitud)
   debug("latitud: " + latitud)
+
+  // debug(queries.basicAnalysis.getCellOcurrences)
 
   pool.any(queries.basicAnalysis.getCellOcurrences, {
             'species_filter' : species_filter, 
