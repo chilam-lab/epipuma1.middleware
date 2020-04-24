@@ -37,6 +37,7 @@ verb_utils.max_taxon_name = 'reinovalido' // nombre de columna del valor maximo 
 buckets = 20
 deciles = 10
 verb_utils.region_mx = 1
+verb_utils.covid_mx = "state"
 verb_utils.min_occ = 5
 verb_utils.type_taxon = 0
 
@@ -1006,6 +1007,8 @@ verb_utils.processDataForScoreCellValidation = function (data, apriori, mapa_pro
 
   var cells_array = isvalidation ? data.map(function(d) {return {cells: d.cells_map, score: parseFloat(d.score)}}) : data.map(function(d) {return {cells: d.cells, score: parseFloat(d.score)}})
 
+  // debug(cells_array)
+
   var df = d3.map([])
 
   cells_array.forEach(function(obj) {
@@ -1121,7 +1124,7 @@ verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, all_cel
    for(var i=0; i<map_cell.length; i++){
 
         const entry = map_cell[i];
-        // debug(entry)
+        debug(entry)
 
 
         var tscore = parseFloat(entry["value"])
@@ -3467,7 +3470,7 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
   })
 
   // debug(co)
-  //debug(query_covar)
+  debug(query_covar)
 
   return query_covar  
 }

@@ -26,6 +26,7 @@ var limite = verb_utils.limite
 var min_taxon_name = verb_utils.min_taxon_name
 var max_taxon_name = verb_utils.max_taxon_name
 var default_region = verb_utils.region_mx
+var default_resolution = verb_utils.covid_mx
 var email_config = config.email
 
 
@@ -831,7 +832,7 @@ exports.getGridGeoJsonNiche = function (req, res, next) {
 
   debug('getGridGeoJsonNiche')
 
-  var grid_res = getParam(req, 'grid_res',16)
+  var grid_res = getParam(req, 'grid_res', default_resolution)
   var footprint_region = parseInt(getParam(req, 'footprint_region', default_region))
 
   debug("grid_res: " + grid_res)
@@ -846,15 +847,19 @@ exports.getGridGeoJsonNiche = function (req, res, next) {
 
       }).then(resp => {
 
-          // debug("TEST ...")
+          debug("Valor N: " + resp.n)
+
           return pool.any(queries.grid.gridxxkm, {
 
-                    grid_res: parseInt(grid_res),
+                    // grid_res: parseInt(grid_res),
+                    grid_res: grid_res,
                     region: footprint_region
                   })
       })
     })
       .then(data => {
+
+          // debug(data)
 
           var N = data[0].json['features'].length;
           for(var i = 0; i < N; i++) {
@@ -897,6 +902,10 @@ exports.getVariablesNiche = function (req, res, next) {
   var parentfield = getParam(req, 'parentfield','')
   var parentitem = getParam(req, 'parentitem','')
 
+  // debug("field: " + field)
+  // debug("parentfield: " + parentfield)
+  // debug("parentitem: " + parentitem)
+
   // Verificar si es necesario enviar el footprint_region, puede existir cambio de region despues 
   // de seleccionar las covariables
   var footprint_region = parseInt(getParam(req, 'footprint_region', default_region))
@@ -914,8 +923,9 @@ exports.getVariablesNiche = function (req, res, next) {
   debug("field: " + field)
   debug("ad_param: " + ad_param)
   debug("order_param: " + order_param)
-  // debug(parentfield)
-  // debug(parentitem)
+  debug("parentfield: " + parentfield)
+  // debug("parent_valor: " + parentitem)
+  debug("parentitem: " + parentitem)
 
   if(field === max_taxon_name){
 
@@ -2417,7 +2427,7 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
   var sfecha            = getParam(req, 'sfecha', false)
   var sfosil            = getParam(req, 'sfosil', false)
   var liminf            = getParam(req, 'liminf', 1500)
-  var limsup            = getParam(req, 'limsup', 2019)
+  var limsup            = getParam(req, 'limsup', new Date().getFullYear())
   var grid_res          = getParam(req, 'grid_res', 16)
   var region            = getParam(req, 'region', 1)
 
@@ -2431,6 +2441,9 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
   var gridid          = 'gridid_' + grid_res + 'km'
   var snib_grid_xxkm  = 'snib_grid_' + grid_res + 'km'
   var where_filter    = ''
+
+
+
 
   if (sfecha){
     where_filter += ' AND ( ( ( aniocolecta BETWEEN ' + liminf + ' AND ' + limsup + ' ) OR aniocolecta = 9999 )'
@@ -2449,11 +2462,15 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
   }
 
 
-  // debug("resolution_view: " + resolution_view)
-  // debug("region: " + region)
-  // debug("gridid: " + gridid)
-  // debug("snib_grid_xxkm: " + snib_grid_xxkm)
-  // debug("where_filter: " + where_filter)
+  debug("species_filter: " + species_filter)
+  debug("resolution_view: " + resolution_view)
+  debug("region: " + region)
+  debug("gridid: " + gridid)
+  debug("snib_grid_xxkm: " + snib_grid_xxkm)
+  debug("where_filter: " + where_filter)
+  debug("liminf: " + liminf)
+  debug("limsup: " + limsup)
+
 
 
   const query1 = pgp.as.format(queries.getGridSpeciesNiche.getGridSpeciesTaxons, {'species_filter' : species_filter, 
@@ -2462,6 +2479,8 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
             'gridid'         : gridid,
             'snib_grid_xxkm' : snib_grid_xxkm,
             'where_filter'   : where_filter})
+  
+
   // debug(query1)
 
   pool.any(queries.getGridSpeciesNiche.getGridSpeciesTaxons, {
@@ -2472,11 +2491,13 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
             'snib_grid_xxkm' : snib_grid_xxkm,
             'where_filter'   : where_filter}
       ).then(function (data) {
+
         debug(data.length + ' ocurrence cells')
         res.json({
           ok: true,
           'data': data
         })
+
     }).catch(function (error) {
       return res.json({
         err: error,
@@ -2495,7 +2516,7 @@ exports.getCountByYear = function(req, res) {
   var sfecha            = getParam(req, 'sfecha', false)
   var sfosil            = getParam(req, 'sfosil', false)
   var liminf            = getParam(req, 'liminf', 1500)
-  var limsup            = getParam(req, 'limsup', 2019)
+  var limsup            = getParam(req, 'limsup', new Date().getFullYear())
   var grid_res          = getParam(req, 'grid_res', 16)
   var region            = getParam(req, 'region', 1)
 
@@ -2585,7 +2606,7 @@ exports.getCellOcurrences = function(req, res) {
   var sfecha            = getParam(req, 'sfecha', false)
   var sfosil            = getParam(req, 'sfosil', false)
   var liminf            = getParam(req, 'liminf', 1500)
-  var limsup            = getParam(req, 'limsup', 2019)
+  var limsup            = getParam(req, 'limsup', new Date().getFullYear())
   var grid_res          = getParam(req, 'grid_res', 16)
   var region            = getParam(req, 'region', 1)
   var longitud          = getParam(req, 'longitud', 0)
