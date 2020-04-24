@@ -900,6 +900,10 @@ exports.getVariablesNiche = function (req, res, next) {
   var parentfield = getParam(req, 'parentfield','')
   var parentitem = getParam(req, 'parentitem','')
 
+  // debug("field: " + field)
+  // debug("parentfield: " + parentfield)
+  // debug("parentitem: " + parentitem)
+
   // Verificar si es necesario enviar el footprint_region, puede existir cambio de region despues 
   // de seleccionar las covariables
   var footprint_region = parseInt(getParam(req, 'footprint_region', default_region))
@@ -918,9 +922,8 @@ exports.getVariablesNiche = function (req, res, next) {
   debug("ad_param: " + ad_param)
   debug("order_param: " + order_param)
   debug("parentfield: " + parentfield)
-  debug("parent_valor: " + parentitem)
-  
-  // debug(parentitem)
+  // debug("parent_valor: " + parentitem)
+  debug("parentitem: " + parentitem)
 
   if(field === max_taxon_name){
 
@@ -2154,7 +2157,7 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
   var sfecha            = getParam(req, 'sfecha', false)
   var sfosil            = getParam(req, 'sfosil', false)
   var liminf            = getParam(req, 'liminf', 1500)
-  var limsup            = getParam(req, 'limsup', 2019)
+  var limsup            = getParam(req, 'limsup', new Date().getFullYear())
   var grid_res          = getParam(req, 'grid_res', 16)
   var region            = getParam(req, 'region', 1)
 
@@ -2195,6 +2198,8 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
   debug("gridid: " + gridid)
   debug("snib_grid_xxkm: " + snib_grid_xxkm)
   debug("where_filter: " + where_filter)
+  debug("liminf: " + liminf)
+  debug("limsup: " + limsup)
 
 
 
@@ -2206,7 +2211,7 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
             'where_filter'   : where_filter})
   
 
-  debug(query1)
+  // debug(query1)
 
   pool.any(queries.getGridSpeciesNiche.getGridSpeciesTaxons, {
             'species_filter' : species_filter, 
@@ -2241,7 +2246,7 @@ exports.getCountByYear = function(req, res) {
   var sfecha            = getParam(req, 'sfecha', false)
   var sfosil            = getParam(req, 'sfosil', false)
   var liminf            = getParam(req, 'liminf', 1500)
-  var limsup            = getParam(req, 'limsup', 2019)
+  var limsup            = getParam(req, 'limsup', new Date().getFullYear())
   var grid_res          = getParam(req, 'grid_res', 16)
   var region            = getParam(req, 'region', 1)
 
@@ -2331,7 +2336,7 @@ exports.getCellOcurrences = function(req, res) {
   var sfecha            = getParam(req, 'sfecha', false)
   var sfosil            = getParam(req, 'sfosil', false)
   var liminf            = getParam(req, 'liminf', 1500)
-  var limsup            = getParam(req, 'limsup', 2019)
+  var limsup            = getParam(req, 'limsup', new Date().getFullYear())
   var grid_res          = getParam(req, 'grid_res', 16)
   var region            = getParam(req, 'region', 1)
   var longitud          = getParam(req, 'longitud', 0)
