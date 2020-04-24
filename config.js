@@ -24,3 +24,5 @@ config.SEED = "@hardseedconabio2018";
 config.TIME_TOKEN = 14400;
 
 module.exports = config
+
+
