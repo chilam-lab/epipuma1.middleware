@@ -20,6 +20,7 @@ var iterations = verb_utils.iterations
 var alpha = verb_utils.alpha
 var buckets = verb_utils.buckets
 var default_region = verb_utils.region_mx
+var default_resolution = verb_utils.covid_mx
 var max_score = verb_utils.maxscore
 var min_score = verb_utils.minscore
 var request_counter_map = d3.map([]);
@@ -38,13 +39,19 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   var data_target = {}
   var str_query = ''
 
-  var grid_resolution = parseInt(verb_utils.getParam(req, 'grid_resolution', 16)) 
+
+  data_request["decil_selected"] = verb_utils.getParam(req, 'decil_selected', [10])
+
+  // var grid_resolution = parseInt(verb_utils.getParam(req, 'grid_resolution', 16)) 
+  var grid_resolution = verb_utils.getParam(req, 'grid_resolution', default_resolution) 
   var region = parseInt(verb_utils.getParam(req, 'region', verb_utils.region_mx))
   var fosil = verb_utils.getParam(req, 'fosil', true)
   var date  = verb_utils.getParam(req, 'date', true)
   var lim_inf = verb_utils.getParam(req, 'lim_inf', 1500)
   var lim_sup = verb_utils.getParam(req, 'lim_sup', 2020)
   var cells = verb_utils.getParam(req, 'excluded_cells', [])
+
+  debug("grid_resolution: " + grid_resolution)
 
   data_request["excluded_cells"] = cells
   data_request["region"] = region
@@ -57,13 +64,42 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   data_request["min_occ"] = verb_utils.getParam(req, 'min_cells', 1)
 
   var target_group = verb_utils.getParam(req, 'target_taxons', []) 
+  
   data_request["target_name"] = verb_utils.getParam(req, 'target_name', 'target_group')
+  debug("*****1: " + data_request["target_name"])
+  
   data_request["where_target"] = verb_utils.getWhereClauseFromGroupTaxonArray(target_group, true)
+  debug("*****1: " + data_request["where_target"])
+
   data_request["where_exclude_target"] = verb_utils.getExcludeTargetWhereClause(target_group)
-  debug(target_group)
+  debug("*****1: " + data_request["where_exclude_target"])
+
+ 
+
+  var where_filter_target    = ''
+  if (date){
+    where_filter_target += ' AND ( ( ( aniocolecta BETWEEN ' + lim_inf + ' AND ' + lim_sup + ' ) OR aniocolecta = 9999 )'
+  }
+  else{
+    where_filter_target += ' AND ( ( aniocolecta BETWEEN ' + lim_inf + ' AND ' + lim_sup + ' ) '
+  }
+
+  if(!fosil){
+    where_filter_target += " AND (ejemplarfosil != 'SI' or ejemplarfosil is null) )"
+  }
+  else{
+    where_filter_target += " OR ejemplarfosil = 'SI' )"
+  }
+
+  debug("where_filter_target: " + where_filter_target)
+
+  data_request["where_filter_target"] = where_filter_target
+
+
 
   var covars_groups = verb_utils.getParam(req, 'covariables', []) 
-  //debug(covars_groups)
+  debug(covars_groups)
+  
   //data_request['groups'] = verb_utils.getCovarGroupQueries(queries, data_request, covars_groups)
 
   data_request["alpha"] = undefined
@@ -77,6 +113,7 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   data_request["with_data_freq"] = verb_utils.getParam(req, 'with_data_freq', true)
   data_request["with_data_score_cell"] = verb_utils.getParam(req, 'with_data_score_cell', true)
   data_request["with_data_freq_cell"] = verb_utils.getParam(req, 'with_data_freq_cell', true)
+  data_request["with_data_score_decil"] = verb_utils.getParam(req, 'with_data_score_decil', true)
    
   var NIterations = verb_utils.getParam(req, 'iterations', iterations)
   var iter = 0
@@ -94,6 +131,8 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
 
       // debug("filter: " + data_request["where_filter"])
       
+      debug("Iteraciones: " + NIterations)
+
       for(var iter = 0; iter<NIterations; iter++){
 
         initialProcess(iter, NIterations, data_request, res, json_response, req, covars_groups)
@@ -118,7 +157,6 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
   pool.task(t => {
 
-
     var query = queries.getGridSpeciesNiche.getTargetCells
 
     return t.one(query, {
@@ -127,11 +165,15 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
       where_target: data_request["where_target"].replace('WHERE', ''),
       view: data_request["res_celda_snib_tb"],
       region: data_request["region"],
-      cells: data_request["res_celda_sp"], 
+      cells: data_request["res_celda_sp"],
+      grid_resolution:data_request["grid_resolution"],
+      where_filter: data_request["where_filter_target"]
 
     }).then(resp => {
 
+      // Celdas ocupadas por la especie objetivo dado un conjunto de parametros
       data_request["target_cells"] = resp["target_cells"]      
+
 
       var query = data_request.idtabla === "" ? "select array[]::integer[] as total_cells" : queries.validationProcess.getTotalCells
       //debug(query)
@@ -167,6 +209,8 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
         }).then(resp => {
 
+          // debug(resp.source_cells)
+
           data_request["source_cells"] = resp.source_cells
 
           return t.one(queries.basicAnalysis.getN, {
@@ -183,7 +227,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
          data_request["alpha"] = data_request["alpha"] !== undefined ? data_request["alpha"] : 1.0/resp.n
 
          // debug("------------")
-         // debug("N:" + data_request["N"])
+         debug("N:" + data_request["N"])
          // debug("alpha:" + data_request["alpha"])
          // debug("source_cells:" + data_request["source_cells"].length)
          // debug("total_cells:" + data_request["total_cells"].length)
@@ -197,6 +241,8 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
          
          if( data_request["get_grid_species"] !== false ) {
 
+          debug('--------------------------------------------------')
+
           debug("analisis en celda")
 
           debug("long: " + data_request.long)
@@ -208,6 +254,9 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
             'long'              : data_request.long,
             'lat'               : data_request.lat
           }
+
+          const query1 = pgp.as.format(queries.basicAnalysis.getGridIdByLatLong, data_temp)
+          debug("iter " + iter + query1)
 
           return t.one(queries.basicAnalysis.getGridIdByLatLong, data_temp).then(resp => {
 
@@ -240,11 +289,14 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
            } else {
 
             debug("analisis basico")
-            //const query1 = pgp.as.format(query_analysis, data_request)
-            //debug("iter " + iter + query1)
-            // debug(query_analysis)
-            //debug(data_request)
 
+            // debug(query_analysis)
+            // debug(data_request)
+
+
+            const query1 = pgp.as.format(query_analysis, data_request)
+            // debug("iter " + iter + query1)
+            
             return t.any(query_analysis, data_request)
 
            }
@@ -259,7 +311,21 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
   }).then(data_iteration => {
 
-      var data_response = {iter: (iter+1), data: data_iteration, test_cells: data_request["source_cells"], apriori: data_request.apriori, mapa_prob: data_request.mapa_prob }
+      debug(data_iteration)
+
+
+      // debug("data_iteration[0].ni: " + data_iteration[0].ni)
+      // debug("data_iteration.length: " + data_iteration.length)
+      // debug("target_cells.length: " +  data_request["target_cells"].length)
+
+      // debug("source_cells.length: " +  data_request["source_cells"].length)
+      // debug("total_cells.length: " +  data_request["total_cells"].length)
+
+
+     var decil_selected = data_request["decil_selected"]
+    
+    
+      var data_response = {iter: (iter+1), data: data_iteration, test_cells: data_request["source_cells"], target_cells: data_request["target_cells"], apriori: data_request.apriori, mapa_prob: data_request.mapa_prob }
       json_response["data_response"] = json_response["data_response"] === undefined ? [data_response] : json_response["data_response"].concat(data_response)
       
       if(!request_counter_map.has(data_request["title_valor"].title)){
@@ -279,25 +345,40 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
         
         debug("COUNT PROCESS FINISHED")
         var data = []
+        var data_avg = []
         var validation_data = []
         var is_validation = false
+        var data_freq = []
+        
 
         if(total_iterations !== 1){
+
           debug("PROCESS RESULTS FOR VALIDATION")
-
-          var items = json_response["data_response"]
-          // debug(items[0].data[0])
-
-          data = verb_utils.processGroupValidationData(json_response["data_response"])
-          // debug(data)
-
-          validation_data = verb_utils.getValidationValues(json_response["data_response"])
-
           is_validation = true
+
+
+          // Promedia los valores obtenidos en las N iteraciones para n, nj, nij, ni, epsilon y score. 
+          // Además obtiene un array de cobertura total por las celdas de cada especie
+
+          var dup_array = JSON.parse(JSON.stringify(json_response["data_response"]))
+
+          data = verb_utils.processGroupValidationData(dup_array)
+
+          // Obtiene los 20 rangos de epsilon y score por especie, utilizados para las gráficas en el cliente de frecuencia por especie. 
+          // En caso de ser validación se promedia cada rango
+          data_freq = data_request.with_data_freq === true ? verb_utils.processDataForFreqSpecie(json_response["data_response"], is_validation) : []
+
+          validation_data = data_request.with_data_score_decil === true ? verb_utils.getValidationValues(json_response["data_response"]) : []
+
+
         } else{
+
+          debug("PROCESS RESULTS")
+          is_validation = false
+
           data = data_iteration
 
-          validation_data = verb_utils.getValidationDataNoValidation(data, 
+          validation_data = data_request.with_data_score_decil === true ? verb_utils.getValidationDataNoValidation(data, 
                             data_request["target_cells"],
                             data_request["res_celda_snib"], 
                             data_request["where_target"], 
@@ -306,9 +387,14 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
                             data_request["res_celda_sp"], 
                             data_request["apriori"],
                             data_request["mapa_prob"],
-                            queries)
+                            queries) : []
 
-          is_validation = false
+          
+          // Obtiene los 20 rangos de epsilon y score por especie, utilizados para las gráficas en el cliente de frecuencia por especie. 
+          // En caso de ser validación se promedia cada rango
+          data_freq = data_request.with_data_freq === true ? verb_utils.processDataForFreqSpecie([data], is_validation) : []
+
+          
         }
 
         var apriori = false
@@ -323,6 +409,10 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
           mapa_prob = true          
         }
 
+
+        // TODO: Revisar comportamiento con seleccion de celda
+        // data = is_validation ? data_avg : data
+
         var cell_id = 0
         if(data_request.get_grid_species !== false){
 
@@ -331,14 +421,37 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
           data = verb_utils.processGroupDataForCellId(data, apriori, mapa_prob, cell_id)
         }
 
+
+
         debug("COMPUTE RESULT DATA FOR HISTOGRAMS")
-        var data_freq = data_request.with_data_freq === true ? verb_utils.processDataForFreqSpecie(data) : []
-        var data_score_cell = data_request.with_data_score_cell === true ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob, data_request.all_cells, is_validation) : []
-        var data_freq_cell = data_request.with_data_freq_cell === true ? verb_utils.processDataForFreqCell(data_score_cell) : []
+        
 
-
-        // debug("****** iter: " + iter)
+        // Obtiene la sumatoria de score por celdas contemplando si existe apriori o probabilidad
+        var data_score_cell = []
         // debug(data)
+        data_score_cell = data_request.with_data_score_cell === true ? verb_utils.processDataForScoreCell(data, apriori, mapa_prob, data_request.all_cells, is_validation) : []
+
+
+        // TODO: Revisar funcionamiento con validacion
+        var data_freq_cell = []
+        data_freq_cell = data_request.with_data_freq_cell === true ? verb_utils.processDataForFreqCell(data_score_cell) : []
+
+
+
+        // Obtiene el score por celda, asigna decil y Obtiene la lista de especies por decil seleccionado en las N iteraciones requeridas
+        // data = is_validation ? verb_utils.processCellDecilPerIter(json_response["data_response"], apriori, mapa_prob, data_request.all_cells, is_validation) : data
+        var percentage_occ = []
+        var decil_cells = []
+
+        if(data_request.with_data_score_decil === true ){
+
+          debug("Calcula valores decil")
+
+          var decilper_iter = verb_utils.processCellDecilPerIter(json_response["data_response"], apriori, mapa_prob, data_request.all_cells, is_validation, decil_selected) 
+          percentage_occ = decilper_iter.result_datapercentage
+          decil_cells = decilper_iter.decil_cells
+
+        }
 
 
         res.json({
@@ -347,10 +460,12 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
             data_freq: data_freq,
             data_score_cell: data_score_cell,
             data_freq_cell: data_freq_cell,
-            validation_data: validation_data
+            validation_data: validation_data,
+            percentage_avg: percentage_occ,
+            decil_cells: decil_cells
         })
         
-      }     
+      }
 
     }).catch(error => {
       
@@ -359,6 +474,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
       res.json({
           ok: false,
           message: "Error al ejecutar la petición",
+          data:[],
           error: error
         })
     })

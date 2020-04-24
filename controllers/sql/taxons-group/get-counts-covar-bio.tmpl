@@ -1,5 +1,5 @@
 aux_{name:raw} as (
-	SELECT DISTINCT unnest({res_celda_sp:raw}) as cell,
+	SELECT DISTINCT cast(unnest({res_celda_sp:raw}) as integer) as cell,
 			-- a.cells_16km_1 as cell,
 			{fields:raw}
 			-- a.generovalido as level

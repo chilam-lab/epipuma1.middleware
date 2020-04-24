@@ -74,7 +74,8 @@ var queryProvider = {
 
   users: {
     getUser: sqlPath('users/getUserReg.sql'),
-    setUserReg: sqlPath('users/setUserReg.sql')
+    setUserReg: sqlPath('users/setUserReg.sql'),
+    saveFeedBack: sqlPath('users/saveFeedBack.sql')
   },
   getValuesFromToken: {
     getValues: sqlPath('especie/get_values_token.sql')
@@ -85,7 +86,8 @@ var queryProvider = {
   getValidationTables: {
     createTables: sqlPath('especie/get_validation_tables.sql'),
     createGroupTables: sqlPath('especie/get_group_validation_tables.sql'),
-    createGroupTables_2: sqlPath('especie/get_group_validation_tables_2.sql')
+    createGroupTables_2: sqlPath('especie/get_group_validation_tables_2.sql'),
+    createGivenPointsTables: sqlPath('especie/get_given_points_validation_tables.sql')
   },
   processValidationTables: {
     processTables: sqlPath('especie/process_validation_tables.sql')
@@ -148,6 +150,7 @@ var queryProvider = {
     getGridSpeciesM: sqlPath('getGridSpecies/get_grid_species_M.sql'),
 
     getTargetCells: sqlPath('getGridSpecies/get_target_cells.sql'),
+    getGridSpeciesTaxons: sqlPath('especie/get_grid_species_taxons.sql')
 
   },
   getGeoRelNiche: {
@@ -217,7 +220,9 @@ var queryProvider = {
     getCountsFossil: sqlPath("basic-analysis/get-counts-fossil.sql"),
     getCountsTime: sqlPath("basic-analysis/get-counts-time.sql"),
 
-    getCountsGroupBio: sqlPath("basic-analysis/get-counts-group-bio.sql")
+    getCountsGroupBio: sqlPath("basic-analysis/get-counts-group-bio.sql"),
+    getCountByYear: sqlPath("especie/get-count-by-year.sql"),
+    getCellOcurrences: sqlPath("especie/get-cell-ocurrences.sql")
 
     // getSource: sqlPath("basic-analysis/get-source.sql"),
     // getSourceFossil: sqlPath("basic-analysis/get-source-fossil.sql"),
@@ -268,7 +273,9 @@ var queryProvider = {
 /************************************************************* VERBOS PARA OBTENER INFO de CELDAS ******************************/
   getCells: {
     forSpecies: sqlPath('getCells/get_species_cells.sql'),
-    forTaxon: sqlPath('getCells/get_taxon_cells.sql')
+    forTaxon: sqlPath('getCells/get_taxon_cells.sql'),
+    fromCoordinates: sqlPath('getCells/get_gridid_from_coordinates.sql'),
+    getSpCountsByCellId: sqlPath('getCells/get_sp_counts_bycellid.sql')
   },
 
   getSpecies: {
@@ -315,7 +322,9 @@ var queryProvider = {
     getCountsBase: sqlPath("taxons-group/get-counts-base.sql"),
     getCountsCovars: tmplPath("taxons-group/get-counts-covars.tmpl"),
     getCellsByGroupBio: tmplPath("taxons-group/get-cells-group-bio.tmpl"),
-    getCellsByGroupAbio: tmplPath("taxons-group/get-cells-group-abio.tmpl")
+    getCellsByGroupAbio: tmplPath("taxons-group/get-cells-group-abio.tmpl"),
+    getCellSincePoint: sqlPath("taxons-group/get-cell-since-point.sql"),
+    getCountsBaseGivenPoints: sqlPath("taxons-group/get-counts-base-given-points.sql")
   },
 
   taxonsGroupNodes:{
@@ -330,7 +339,9 @@ var queryProvider = {
     getGroupCount: sqlPath("nodes-taxons-group/get-group-count-grid-id.sql"),
     getCellsBio: tmplPath("nodes-taxons-group/get-cells-bio.tmpl"),
     getCellsAbio: tmplPath("nodes-taxons-group/get-cells-abio.tmpl"),
-    selectCount: tmplPath("nodes-taxons-group/select-count.tmpl")
+    selectCount: tmplPath("nodes-taxons-group/select-count.tmpl"),
+    getCellsBioSP: tmplPath("nodes-taxons-group/get-cells-bio-sp.tmpl"),
+    getCellsAbioSP: tmplPath("nodes-taxons-group/get-cells-abio-sp.tmpl"),
 
   },
 

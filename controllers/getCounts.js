@@ -30,6 +30,7 @@ var request_counter_map = d3.map([]);
 var pgp = require('pg-promise')
 
 
+
 /**
  * Obtiene el score por celda agrupado por decil con apriori
  *

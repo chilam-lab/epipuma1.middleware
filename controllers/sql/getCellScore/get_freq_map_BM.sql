@@ -9,7 +9,12 @@ with rawdata as (
 	group by gridid
 ),
 n_res AS (
-	SELECT count(*) AS n FROM $<res_celda_snib_tb:raw>
+	select count(*) AS n
+	from $<res_celda_snib_tb:raw> as grid 
+	join america as ame 
+	on st_intersects(grid.small_geom,ame.geom) 
+	where country = 'MEXICO'
+	--SELECT count(*) AS n FROM $<res_celda_snib_tb:raw>
 ),
 apriori as (
 	select ln( rawdata.ni / ( n_res.n - rawdata.ni::numeric) ) as val
@@ -31,7 +36,10 @@ select 	$<res_celda_snib_tb:raw>.$<res_celda_snib:raw> AS gridid,
 		end as tscore  
 from rawdata
 right join $<res_celda_snib_tb:raw>
-on rawdata.gridid = $<res_celda_snib_tb:raw>.$<res_celda_snib:raw>,
+on rawdata.gridid = $<res_celda_snib_tb:raw>.$<res_celda_snib:raw>
+join america as ame 
+on st_intersects($<res_celda_snib_tb:raw>.small_geom,ame.geom),
 apriori
+where country = 'MEXICO'
 order by tscore DESC
 

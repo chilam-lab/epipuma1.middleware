@@ -2,11 +2,7 @@
 * @Author: Raul Sierra
 * @Date:   2017-10-26 14:20:30
 * @Last Modified by:   Raul Sierra
-<<<<<<< HEAD
-* @Last Modified time: 2018-01-31 17:08:39
-=======
 * @Last Modified time: 2018-01-31 11:11:30
->>>>>>> 253d24ba57eec7b4e6781039f212f03ad7e590bd
 */
 /*getTaxonCells*/
 

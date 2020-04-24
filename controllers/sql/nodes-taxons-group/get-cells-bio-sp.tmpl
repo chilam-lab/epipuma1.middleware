@@ -1,0 +1,11 @@
+SELECT DISTINCT 
+	-- UNNEST(cells_16km_1) AS gridid, 
+	UNNEST(cells_{res:raw}km_{region:raw}) AS gridid, 
+generovalido, especieepiteto, 0 as coeficiente, 'na' as unidad, 'bio' as tipo
+FROM sp_snib
+ WHERE 
+ ( 
+ 	{nodes_bio:raw}
+ 	-- (generovalido = 'Aedes' AND especieepiteto = 'angustivittatus') or
+ 	-- (generovalido = 'Aedes' AND especieepiteto = 'albopictus')
+ ) 

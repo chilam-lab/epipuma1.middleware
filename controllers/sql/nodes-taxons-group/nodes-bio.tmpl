@@ -1,14 +1,30 @@
 WITH aux_{index:raw} AS (
-	SELECT DISTINCT 
-		{biotic:raw} AS biotic,
-		{fields:raw},
-		UNNEST({region_cells:raw}) AS cell
-	FROM sp_snib
-	{where_filter:raw}
+	select distinct 
+	biotic, {fields:raw},
+	b.{gridid:raw} AS cell
+	FROM snib_grid_{grid_res:raw}km AS b
+	JOIN(
+		SELECT DISTINCT 
+			spid,
+			{biotic:raw} AS biotic,
+			{fields:raw}
+		FROM sp_snib as a
+		{where_filter:raw}
+		and a.spid is not null
+	) AS c
+	ON b.spid = c.spid
+	JOIN (
+		SELECT UNNEST(gid) AS gid 
+		FROM grid_geojson_16km_aoi
+		WHERE footprint_region={region:raw}
+	) as d 
+	ON b.gid = d.gid
+	WHERE b.{gridid:raw} is not null
+	{where_filter_cell:raw}
 ) {aux:raw}
 SELECT 
 	biotic,
-	array_agg(distinct a.cell) AS cells,
+	array_agg(a.cell) AS cells,
 	{fields:raw}
 FROM (
 		SELECT

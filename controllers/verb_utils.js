@@ -37,6 +37,7 @@ verb_utils.max_taxon_name = 'reinovalido' // nombre de columna del valor maximo 
 buckets = 20
 deciles = 10
 verb_utils.region_mx = 1
+verb_utils.covid_mx = "state"
 verb_utils.min_occ = 5
 verb_utils.type_taxon = 0
 
@@ -674,11 +675,15 @@ verb_utils.processDataForScoreDecil = function (data_cell){
 }
 
 
-
+// Asigna decil a cada celda y realiza el conteo por especie en cada decil 
 verb_utils.processDataForScoreDecilTable = function (data_cell, decil_selected){
 
   var decile = deciles
   var delta = Math.floor(data_cell.length/decile)
+
+  debug(decil_selected)
+  // debug(data_cell)
+  debug("data_cell.length: " + data_cell.length)
 
   data_cell.reverse()
   data_cell.forEach(function (item, index){
@@ -686,46 +691,67 @@ verb_utils.processDataForScoreDecilTable = function (data_cell, decil_selected){
       item["decile"] = dec > decile ? decile : dec
   })
   data_cell.reverse()
-  // debug(data_cell)
 
-  // var cross_score = crossfilter(data_cell)
-  // cross_score.groupAll()
-  // var decil_dimension = cross_score.dimension(function(d) { return d.decile });
-  // decil_dimension.filter(10)
+  
 
-  var map_spid = d3.map([]);
+  // filtra las celdas del decil seleccionado
+  var cell_decil_filter_array = data_cell.filter(function(item){     
+    // return item.decile == decil_selected  
+    return decil_selected.indexOf(item.decile) === -1 ? false : true
+  });
 
-  data_cell.forEach(function (row_item, index){
+  debug(cell_decil_filter_array.length)
+  // debug(cell_decil_filter_array)
 
-    if(row_item.decile != decil_selected)
-      return;
+  var cell_array = cell_decil_filter_array.map(function(d){return {cell: d.gridid, decile: d.decile} })
+  
+  // debug(cell_array)
 
-    row_item.species.forEach(function (specie, index){
 
-        if(!map_spid.has(specie.spid)){
+  var map_spid = d3.map([])
+  var conteo_sp = 0
+
+  // obtiene un array con toda las especies del decil y el porcentaje de la especie en el decil
+  cell_decil_filter_array.forEach(function (cell_item, index) {
+
+    cell_item.species.forEach(function (specie, index){
+
+        // debug("**********-> sp: " + specie.name)
+        // if(specie.name.indexOf("Microtus pennsylvanicus") != -1){
+        //   conteo_sp++
+        //   debug(specie)
+        // }
+
+        if(!map_spid.has(specie.name+cell_item.decile)){
             var item = {};
-            item.decile = row_item.decile,
-            item.spid = specie.spid
+            item.decile = cell_item.decile,
+            // item.spid = specie.spid
             item.score = specie.score
             item.epsilon = specie.epsilon
             item.nj = specie.nj
             item.njd = 1
             item.name = specie.name
-            map_spid.set(specie.spid, item)
+            map_spid.set(specie.name+cell_item.decile, item)
         }
         else{
-            var item = map_spid.get(specie.spid);
+            var item = map_spid.get(specie.name+cell_item.decile);
             item.njd = item.njd + 1
-            map_spid.set(specie.spid, item)
+
+            // map_spid.set(specie.name, item)
         }
 
     })
 
   })
 
+  // debug("**********->")
+  // debug("conteo_sp: " + conteo_sp)
+  // conteo_sp = 0
+  // debug(map_spid.get("Microtus pennsylvanicus "))
+
   // debug(map_spid.values());
 
-  return map_spid.values();
+  return {cell_array: cell_array, decil_array: map_spid.values(), length_decil: cell_decil_filter_array.length} 
 
 
 }
@@ -784,7 +810,10 @@ verb_utils.processGroupDataForCellId = function (data, apriori, mapa_prob, gridi
         bid: d.bid,
         icat: d.icat,
         tag: d.tag,
-        tipo: type
+        tipo: type,
+        label: d.label,
+        coeficiente: d.coeficiente,
+        unidad: d.unidad
       }
     }
   })
@@ -815,7 +844,10 @@ verb_utils.processGroupDataForCellId = function (data, apriori, mapa_prob, gridi
                           bid: item.bid,
                           icat: item.icat,
                           tag: item.tag,
-                          tipo: item.tipo
+                          tipo: item.tipo,
+                          label: item.label,
+                          coeficiente: item.coeficiente,
+                          unidad: item.unidad
                         })
       tscore = tscore + item.score  
 
@@ -975,6 +1007,8 @@ verb_utils.processDataForScoreCellValidation = function (data, apriori, mapa_pro
 
   var cells_array = isvalidation ? data.map(function(d) {return {cells: d.cells_map, score: parseFloat(d.score)}}) : data.map(function(d) {return {cells: d.cells, score: parseFloat(d.score)}})
 
+  // debug(cells_array)
+
   var df = d3.map([])
 
   cells_array.forEach(function(obj) {
@@ -990,21 +1024,32 @@ verb_utils.processDataForScoreCellValidation = function (data, apriori, mapa_pro
     })
 
   })
+
+
   training_cells = df.keys()
+
+  // debug(training_cells)
+  // debug(df.values())
+
   scored_training_cells = []
+
   training_cells.forEach(function(cell) {
     scored_training_cells.push({gridid: parseInt(cell), tscore:df.get(cell)})
   })
-  //debug(scored_training_cells)
+
+  // debug(scored_training_cells)
   return scored_training_cells
+
 }
 
+
+// Obtiene la sumatoria de score por celdas contemplando si existe apriori o probabildad
 verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, all_cells = [], isvalidation = false){
 
-  debug("processDataForScoreCell")
-  // debug("isvalidation: " + isvalidation)
+    debug("processDataForScoreCell")
+    // debug("isvalidation: " + isvalidation)    
 
-  var cells_array = []
+    var cells_array = []
   
     cells_array = data.map(function(d) {
 
@@ -1030,32 +1075,31 @@ verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, all_cel
           id: iditem, cells: d.cells, score: parseFloat(d.score)
         }  
       }
+
       
     })
 
     
   // se obtiene cada celda con su score
-  // var cells = []
   var cell_map = d3.map([])
 
   cells_array.forEach(function (item, index){
 
     item.cells.forEach(function (cell_item, index){
+      
       var idsp = ""+item.id+cell_item
+        
         if(!cell_map.has(idsp)){
+          
           cell_map.set(idsp, {cell: cell_item, score: item.score})
+
         }
             
-      //cells.push({cell: cell_item, score: item.score})
-    
     })
 
   })
 
-  // debug("***** length CELLS MAP: " + cell_map.values().length)
-  // debug("***** length CELLS: " + cells.length)
-
-  // var cross_cells = crossfilter(cells)
+  
   var cross_cells = crossfilter(cell_map.values())
   
   cross_cells.groupAll();
@@ -1068,21 +1112,20 @@ verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, all_cel
   var cell_score_array = [];
 
    var val_apriori = 0
-   // debug("apriori: " + apriori)
-   // debug("mapa_prob: " + mapa_prob)
-
+   
    if(apriori || mapa_prob){
 
-      // debug("ni: " + data[0].ni)
-      // debug("n: " + data[0].n)
       // debug("aprior: " + Math.log(data[0].ni / (data[0].n- data[0].ni)) )
       val_apriori = parseFloat(Math.log(data[0].ni / (data[0].n- data[0].ni)).toFixed(3)) 
-      // debug("val_apriori: " + val_apriori)
+      
    }
 
+   // suma el apriori o prob a las celdas en caso de ser requerido
    for(var i=0; i<map_cell.length; i++){
 
         const entry = map_cell[i];
+        debug(entry)
+
 
         var tscore = parseFloat(entry["value"])
         var gridid = entry["key"]
@@ -1130,16 +1173,316 @@ verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, all_cel
         }
 
       }
+
+    }
+    
+    debug("cell_score_array.length: " + cell_score_array.length)
+
+    return cell_score_array
+      
+
+}
+
+
+
+// obtiene el score por celda, asigna decil y obitne las especies por decil por cada iteracion realizada
+verb_utils.processCellDecilPerIter = function(data_group, apriori, mapa_prob, all_cells = [], isvalidation = false, deciles = [10]){
+
+  debug("processCellDecilPerIter")
+
+  var percentagedecil_array = []
+
+
+  data_group.forEach(function (iter, index){
+
+    var data = iter.data
+
+    // debug(data[0].nj)
+
+    // Suma score por celda tomando encuenta apriori y probabilidad
+    var cellsarray_temp = verb_utils.processDataForScoreCellTable(data, apriori, mapa_prob)
+    // debug(cellsarray_temp)
+
+    // Asigna decil a cada celda y realiza el conteo por especie en cada decil 
+    var data_result = verb_utils.processDataForScoreDecilTable(cellsarray_temp, deciles)
+    // debug(data)
+
+    // Obtiene el porcentaje de la especie en el decil y el porcentaje del decil que abarca la especie
+    var decil_list = verb_utils.getPercentageOccPerDecil(data_result.decil_array, data_result.length_decil)
+    // debug(decil_list)
+
+    // decil_list es un array de las especies que pertenecen al decil seleccionado con su porcentaje de presencia en cada decil. Esto por cada iteración.
+    percentagedecil_array.push({list: decil_list, decil_cells: data_result.cell_array})
+
+  })
+
+
+  var decil_map = d3.map([]);
+  var decil_cells = []
+
+  percentagedecil_array.forEach(function (item, index){
+
+
+
+    var decil_list = item.list
+
+    // debug(item.decil_cells)
+    // debug("*************")
+    // debug(JSON.stringify({a:12,b:14})  === JSON.stringify({a:12,b:14}))
+    // debug("*************")
+    
+    decil_cells = verb_utils.arrayUnique(decil_cells.concat(item.decil_cells))
+    // decil_cells = item.decil_cells
+    // debug(decil_cells)
+
+        
+    decil_list.forEach(function (specie_decil_item, index){
+
+      // debug(specie_decil_item)
+
+      // La especie es unica por decil_list, no es necesario generar la llave con el decil. species es el nombre de la especie guardado en el arreglo. 
+      var key = specie_decil_item.decil+specie_decil_item.species
+
+      // debug(key)
+
+      if(!decil_map.has(key)){
+
+        specie_decil_item.count = 1
+        decil_map.set(key, specie_decil_item)
+
+      }
+      else{
+
+         
+          var item = decil_map.get(key)
+
+          // debug(item)
+          // debug(specie_decil_item)
+
+
+          item.epsilons += specie_decil_item.epsilons
+          item.scores += specie_decil_item.scores
+          item.occ_perdecile += specie_decil_item.occ_perdecile
+          item.occ +=  specie_decil_item.occ
+          item.count += 1
+          item.species = specie_decil_item.species
+
+          // decil_map.set(key, item)
+          // debug("item.count: " + item.count)
+          // debug("item.occ_perdecile: " + item.occ_perdecile)
+
+
+      }
+
+    })
+
+  })
+
+  // debug(decil_map.values())
+
+
+  var result_datapercentage = []
+  decil_map.values().forEach(function (decil_item, index){
+
+    // debug(decil_item)
+
+    var item_temp = {
+
+      decil: decil_item.decil,
+      epsilon: parseFloat(decil_item.epsilons / decil_item.count).toFixed(2),
+      score: parseFloat(decil_item.scores / decil_item.count).toFixed(2),
+      occ_perdecile:  parseFloat(decil_item.occ_perdecile / decil_item.count).toFixed(2) + "%",
+      occ: parseFloat(decil_item.occ / decil_item.count).toFixed(2) + "%",
+      species: decil_item.species
+
+    }
+    
+    result_datapercentage.push(item_temp)
+
+  })
+
+  // debug(result_datapercentage)
+
+  // se envia un promedio de las N iteraciones realizadas, cada valor relacioanda a la especie (epsilon, score, occ, occ_perdecile) se promedia con base al numero de ocasiones que aparecio en cada iteración
+  return {decil_cells: decil_cells, result_datapercentage: result_datapercentage} 
+
+
+}
+
+// Obtiene el porcentaje de la especie en el decil y el porcentaje del decil que abarca la especie
+verb_utils.getPercentageOccPerDecil = function(data, length_decil){
+
+  var  decil_list = []
+  
+
+  data.forEach(function (specie, index) {
+
+    // debug(specie)
+      
+      // porcentaje de la especie en el decil con relación a su total de occ de la especie
+      var per_decil = parseFloat(specie.njd / specie.nj * 100)
+
+      // porcentaje de occ de la especie con respecto a las occ totales de especies en el decil
+      var occ_perdecile = parseFloat(specie.njd / length_decil * 100)
+
+      var value_abio = specie.name;
+
+      // if(value_abio == "Microtus pennsylvanicus "){
+      //   debug("specie.njd: " + specie.njd)
+      //   debug("specie.nj: " + specie.nj)
+      //   debug("length_decil: " + length_decil)
+      //   debug("per_decil: " + per_decil)
+      //   debug("occ_perdecile: " + occ_perdecile)
+      // }
+
+      decil_list.push({decil: specie.decile, species: value_abio, epsilons: specie.epsilon, scores: specie.score, occ: per_decil, occ_perdecile: occ_perdecile});
+
+  });
+
+  return decil_list
+
+}
+
+
+verb_utils.compare_desc = function(a, b) {
+
+    // _VERBOSE ? console.log("_compare_desc") : _VERBOSE;
+    if (a.key > b.key)
+        return -1;
+    if (a.key < b.key)
+        return 1;
+    return 0;
+}
+
+verb_utils.sort_by_key = function(array, key)
+{
+ return array.sort(function(a, b)
+ {
+  var x = a[key]; var y = b[key];
+  return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+ });
+}
+
+
+
+// Obtiene la sumatoria de score por celdas contemplando si existe apriori o probabildad
+verb_utils.processDataForScoreCellWithExtraParams = function (data, apriori, mapa_prob, all_cells = [], isvalidation = false){
+
+    debug("processDataForScoreCell")
+    
+    var cells_array = []
+  
+    cells_array = data.map(function(d) {
+
+      var iditem = verb_utils.hashCode(d.reinovalido +
+                        d.phylumdivisionvalido + 
+                        d.clasevalida + 
+                        d.ordenvalido + 
+                        d.familiavalida + 
+                        d.generovalido + 
+                        d.especieepiteto + 
+                        d.nombreinfra +
+                        d.type + 
+                        d.layer + 
+                        d.bid)
+
+      return {id: iditem, cells: d.cells, score: parseFloat(d.score)}  
+      
+    })
+
+    
+  // se obtiene cada celda con su score
+  var cell_map = d3.map([])
+
+  cells_array.forEach(function (item, index){
+
+    item.cells.forEach(function (cell_item, index){
+      
+      var idsp = ""+item.id+cell_item
+        
+        if(!cell_map.has(idsp)){
+          
+          cell_map.set(idsp, {cell: cell_item, score: item.score})
+
+        }
+            
+    })
+
+  })
+
+  
+  
+
+
+
+
+
+
+
+   var val_apriori = 0
+   
+   if(apriori || mapa_prob){
+
+      // debug("aprior: " + Math.log(data[0].ni / (data[0].n- data[0].ni)) )
+      val_apriori = parseFloat(Math.log(data[0].ni / (data[0].n- data[0].ni)).toFixed(3)) 
+      
+   }
+
+   // suma el apriori o prob a las celdas en caso de ser requerido
+   for(var i=0; i<map_cell.length; i++){
+
+        const entry = map_cell[i];
+        // debug(entry)
+
+
+        var tscore = parseFloat(entry["value"])
+        var gridid = entry["key"]
+        keys.push(gridid)
+
+        var apriori_computed = false
+        if(apriori){
+          tscore = tscore + val_apriori
+          apriori_computed = true;
+        }
+        if(mapa_prob){
+          if(tscore <= verb_utils.minscore){
+            tscore = 0
+          }
+          else if(tscore >= verb_utils.maxscore){
+            tscore = 1 
+          }
+          else{
+            // verifica que el calculo de apriori no se calcule dos veces
+            tscore = apriori_computed ? tscore : tscore+val_apriori
+            tscore = Math.exp(tscore) /  (1+Math.exp(tscore))
+          }
+        }
+
+        // debug("tscore: " + tscore)
+        cell_score_array.push({gridid: gridid, tscore: parseFloat(tscore.toFixed(3))})
+        
     }
 
-    // debug("cell_score_array: " + cell_score_array.length)
-    // debug("gridid: " + cell_score_array[0].gridid)
-    // debug("tscore: " + cell_score_array[0].tscore)
+    // debug(keys)
 
-    // cell_score_array.sort(function(a, b){
-    //   return b.tscore-a.tscore
-    // });
+    var test = []
+    // debug(val_apriori)
+    // debug(all_cells)
+    // debug(all_cells["cells"])
+    
+    // agregando las celdas
+    if(all_cells["cells"]){
 
+      for(var i=0; i<all_cells.cells.length; i++){
+        var gridid = all_cells.cells[i];
+        // debug(gridid)
+        if(keys.indexOf(gridid) === -1){
+          cell_score_array.push({gridid: gridid, tscore: val_apriori})  
+        }
+
+      }
+
+    }
     
     return cell_score_array
       
@@ -1147,122 +1490,171 @@ verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, all_cel
 }
 
 
-verb_utils.processDataForScoreCellTable = function (data){
 
-  var cells_array = data.map(function(d) {
-    return {
-      cells: d.cells, 
-      score: parseFloat(d.score), 
-      spid: d.spid, 
-      epsilon: parseFloat(d.epsilon), 
-      score: parseFloat(d.score), 
-      nj: d.nj,
-      name: d.especievalidabusqueda
-    }
+
+
+// Suma score por celda tomando encuenta apriori y probabilidad
+verb_utils.processDataForScoreCellTable = function (data, apriori, mapa_prob){
+
+  var val_apriori = 0
+  var cells = d3.map([]);
+
+  // console.log(data)
+
+
+  data.forEach(function (item, index) {
+
+      // total_length = item.n
+
+      item.cells.forEach(function (cell_item, index) {
+      
+          // var name = item.reinovalido === "" ? (item.layer + " " + item.tag) : (item.generovalido +" "+item.especieepiteto+" "+item.nombreinfra)
+          var name = item.reinovalido === "" ? (item.label + "|" + item.tag + "|" + item.unidad + "|" + item.coeficiente) : (item.generovalido +" "+item.especieepiteto+" "+item.nombreinfra)
+
+          // debug(name + ": " + item.nj)
+          
+          var item_map = {
+              cell: cell_item,
+              score: parseFloat(item.score),
+              epsilon: parseFloat(item.epsilon),
+              nj: parseFloat(item.nj),
+              name: name
+          }
+
+          cells.set("" + cell_item + name, item_map)
+          
+      })
   })
 
-  var cells = []
-  cells_array.forEach(function (item, index){
-    item.cells.forEach(function (cell_item, index){
-          cells.push({
-            cell: cell_item, 
-            score: item.score, 
-            spid: item.spid, 
-            epsilon: item.epsilon, 
-            score: item.score, 
-            nj: item.nj,
-            name: item.name
-          })
-    })
-  })
-  // debug(cells)
 
-  var cross_cells = crossfilter(cells)
+  // no hay dobles de celda y especie
+
+  var cross_cells = crossfilter(cells.values())
   cross_cells.groupAll();
 
-  var cells_dimension = cross_cells.dimension(function(d) { return d.cell; });
+  var cells_dimension = cross_cells.dimension(function (d) {
+      return d.cell;
+  });
+
 
   var groupByScoreCell = cells_dimension.group().reduce(
-    function(item,add){
-      item.tscore = item.tscore + add.score
-      item.spids.push(add.spid)
-      item.epsilons.push(add.epsilon)
-      item.scores.push(add.score)
-      item.njs.push(add.nj)
-      item.names.push(add.name)
+    function (item, add) {
+        item.tscore = item.tscore + add.score
+        // item.spids.push(add.spid)
+        item.epsilons.push(add.epsilon)
+        item.scores.push(add.score)
+        item.njs.push(add.nj)
+        item.names.push(add.name)
+        item.ids.push(add.cell+add.name)
 
-      return item
+        return item
     },
-    function(item,remove){
-      item.tscore = item.tscore - remove.score
-      
-      var index = item.spids.indexOf(remove.spid);
-      if (index > -1) {item.spids.splice(index, 1);}
-
-      index = item.epsilons.indexOf(remove.epsilon);
-      if (index > -1) {item.epsilons.splice(index, 1);}
-
-      index = item.scores.indexOf(remove.score);
-      if (index > -1) {item.scores.splice(index, 1);}
-
-      index = item.njs.indexOf(remove.nj);
-      if (index > -1) {item.njs.splice(index, 1);}
-
-      index = item.names.indexOf(remove.name);
-      if (index > -1) {item.names.splice(index, 1);}
-      
-      return item
-    },
-    function(){
-      return {
-        tscore: 0,
-        spids: [],
-        epsilons: [],
-        scores: [],
-        njs: [],
-        names: []
+    function (item, remove) {
         
-      }
+        var index = item.ids.indexOf(remove.cell+remove.name);
+
+        if (index > -1) {
+            item.tscore = item.tscore - remove.score
+
+
+            item.epsilons.splice(index, 1);
+            item.scores.splice(index, 1);
+            item.njs.splice(index, 1);
+            item.names.splice(index, 1);
+            item.ids.splice(index, 1);
+        }
+
+        return item
+    },
+    function () {
+        return {
+            tscore: 0,
+            spids: [],
+            epsilons: [],
+            scores: [],
+            njs: [],
+            names: [],
+            ids: []
+
+        }
     }
   )
-  
+
   // var groupByCell = cells_dimension.group().reduceSum(function(d) { return parseFloat(parseFloat(d.score).toFixed(3)); });
   var map_cell = groupByScoreCell.top(Infinity);
-  // map_cell.sort(verb_utils.compare_desc);
-  // debug(map_cell)
-  // debug(map_cell[0]["value"])
 
- var cell_score_array = [];
+  // console.log("map_cell: " + map_cell.length)
 
- for(var i=0; i<map_cell.length; i++){
+  if(apriori || mapa_prob){
+      val_apriori = parseFloat(Math.log(data[0].ni / (data[0].n- data[0].ni)).toFixed(3)) 
+  }
+
+
+  // Obtiene un array con gridid, score total (key) y un array con las espcecies en la celda, cada especie con sus valores de epsilon, score y nj
+  var cell_score_array = [];
+  for (var i = 0; i < map_cell.length; i++) {
+      
+
       const entry = map_cell[i];
-      var len = entry["value"].spids.length;
-
+      var len = entry["value"].names.length;
+      
       var item = {};
       item.gridid = entry["key"];
-      item.key =  parseFloat((entry["value"].tscore).toFixed(3));
+
+      var tscore = entry["value"].tscore
+
+      // agrega apriori o prob al score total por celda
+      var apriori_computed = false
+      if(apriori){
+        tscore = tscore + val_apriori
+        apriori_computed = true;
+      }
+      if(mapa_prob){
+        if(tscore <= verb_utils.minscore){
+          tscore = 0
+        }
+        else if(tscore >= verb_utils.maxscore){
+          tscore = 1 
+        }
+        else{
+          // verifica que el calculo de apriori no se calcule dos veces
+          tscore = apriori_computed ? tscore : tscore+val_apriori
+          tscore = Math.exp(tscore) /  (1+Math.exp(tscore))
+        }
+      }
+
+      item.tscore = parseFloat((tscore).toFixed(3));
+
+      // if(entry["value"].names.indexOf())
+      // debug("*********>> names: " + map_cell.values()[0].names)
+
 
       var species = [];
-      for(var j=0; j<len; j++){
-        
-        var specie = {};
-        specie.spid = entry["value"].spids[j];
-        specie.epsilon = entry["value"].epsilons[j];
-        specie.score = entry["value"].scores[j];
-        specie.nj = entry["value"].njs[j];
-        specie.name = entry["value"].names[j];
+      for (var j = 0; j < len; j++) {
 
-        species.push(specie)        
-      } 
+
+          var specie = {};
+          // specie.spid = entry["value"].spids[j];
+          specie.epsilon = entry["value"].epsilons[j];
+          specie.score = entry["value"].scores[j];
+          specie.nj = entry["value"].njs[j];
+          specie.name = entry["value"].names[j];
+
+          species.push(specie)
+      }
       item.species = species;
-      cell_score_array.push(item)     
+      cell_score_array.push(item)
 
   }
-  cell_score_array.sort(verb_utils.compare_desc);
+
+  // debug(cell_score_array[0])
+  
+  // cell_score_array.sort(verb_utils.compare_desc);
+  cell_score_array = verb_utils.sort_by_key(cell_score_array, "tscore")
+  cell_score_array.reverse()
+  
   // debug(cell_score_array)
-  // debug(cell_score_array[0].gridid)
-  // debug(cell_score_array[0].tscore)
-  // debug(cell_score_array[0].species)
+
   return cell_score_array
 
 }
@@ -1314,57 +1706,131 @@ verb_utils.processDataForFreqCell = function (data){
 }
 
 
-verb_utils.processDataForFreqSpecie = function (data){
+// Obtiene los 20 rangos de epsilon y score por especie, utilizados para las gráficas en el cliente de frecuencia por especie. 
+// En caso de ser validación se promedia cada rango
+verb_utils.processDataForFreqSpecie = function (data_iter, validation = false){
 
   debug("processDataForFreqSpecie")
-
-  var min_eps = d3.min(data.map(function(d) {return parseFloat(d.epsilon);}));
-  debug("min_eps: " + min_eps)
-
-  var max_eps = d3.max(data.map(function(d) {return parseFloat(d.epsilon);}));
-  debug("max_eps: " + max_eps)
-
-  var min_scr = d3.min(data.map(function(d) {return parseFloat(d.score);}));
-  debug("min_scr: " + min_scr) 
-
-  var max_scr = d3.max(data.map(function(d) {return parseFloat(d.score);}));
-  debug("max_scr: " + max_scr)
-
-  var beans = d3.range(1,buckets+1,1);
-  var epsRange = d3.scaleQuantile().domain([min_eps, max_eps]).range(beans);
-  var scrRange = d3.scaleQuantile().domain([min_scr, max_scr]).range(beans);
-  // debug("epsRange: " + epsRange.invertExtent(1))
-  
-  var cross_species = crossfilter(data)
-  cross_species.groupAll();
-
-  var eps_dimension = cross_species.dimension(function(d) { return parseFloat(d.epsilon); });
-  var scr_dimension = cross_species.dimension(function(d) { return parseFloat(d.score); });
-
-  var groupByEpsilon = eps_dimension.group(function(d){
-    // debug("epsRange: " + epsRange(d))
-    return epsRange(d)
-  });
-
-  var groupByScore = scr_dimension.group(function(d){
-    return scrRange(d)
-  });
-
-  var data_eps = groupByEpsilon.top(Infinity);
-  data_eps.sort(verb_utils.compare);
-  // debug(data_eps);
-
-  var data_scr = groupByScore.top(Infinity);
-  data_scr.sort(verb_utils.compare);
-  // debug(data_scr);
-
   var data_freq = [];
 
-  data_freq = verb_utils.generateFrequencyBeans(data_eps, epsRange, "_epsilon",  data_freq, buckets);
-  data_freq = verb_utils.generateFrequencyBeans(data_scr, scrRange, "_score",  data_freq, buckets);
+
+  data_iter.forEach(function(iter){
+
+    // debug(data)
+    var data = validation ? iter.data : iter
+
+    var min_eps = d3.min(data.map(function(d) {return parseFloat(d.epsilon);}));
+    // debug("min_eps: " + min_eps)
+
+    var max_eps = d3.max(data.map(function(d) {return parseFloat(d.epsilon);}));
+    // debug("max_eps: " + max_eps)
+
+    var min_scr = d3.min(data.map(function(d) {return parseFloat(d.score);}));
+    // debug("min_scr: " + min_scr) 
+
+    var max_scr = d3.max(data.map(function(d) {return parseFloat(d.score);}));
+    // debug("max_scr: " + max_scr)
+
+
+    var beans = d3.range(1,buckets+1,1);
+    var epsRange = d3.scaleQuantile().domain([min_eps, max_eps]).range(beans);
+    var scrRange = d3.scaleQuantile().domain([min_scr, max_scr]).range(beans);
+    // debug("epsRange: " + epsRange.invertExtent(1))
+    
+    var cross_species = crossfilter(data)
+    cross_species.groupAll();
+
+    var eps_dimension = cross_species.dimension(function(d) { return parseFloat(d.epsilon); });
+    var scr_dimension = cross_species.dimension(function(d) { return parseFloat(d.score); });
+
+    var groupByEpsilon = eps_dimension.group(function(d){
+      // debug("epsRange: " + epsRange(d))
+      return epsRange(d)
+    });
+
+    var groupByScore = scr_dimension.group(function(d){
+      return scrRange(d)
+    });
+
+    var data_eps = groupByEpsilon.top(Infinity);
+    data_eps.sort(verb_utils.compare);
+    // debug(data_eps);
+
+    var data_scr = groupByScore.top(Infinity);
+    data_scr.sort(verb_utils.compare);
+    // debug(data_scr);
+
+    var temp_bucket = []
+
+    temp_bucket = verb_utils.generateFrequencyBeans(data_eps, epsRange, "_epsilon",  temp_bucket, buckets);
+    temp_bucket = verb_utils.generateFrequencyBeans(data_scr, scrRange, "_score",  temp_bucket, buckets);
+
+
+    data_freq.push(temp_bucket)
+
+  })
 
   // debug(data_freq);
-  return data_freq;
+
+  if(!validation){
+    return data_freq[0]
+  }  
+
+
+  var bucket_map = d3.map([])
+
+  data_freq.forEach(function(buckets){
+
+    buckets.forEach(function(item_bucket){
+
+      if(!bucket_map.has(item_bucket.bucket)){
+     
+        bucket_map.set(item_bucket.bucket, item_bucket)
+
+      }
+      else{
+
+        var item = bucket_map.get(item_bucket.bucket)
+
+        item.freq_epsilon += item_bucket.freq_epsilon
+        item.freq_score += item_bucket.freq_score
+        item.min_epsilon += item_bucket.min_epsilon
+        item.max_epsilon += item_bucket.max_epsilon
+        item.min_score += item_bucket.min_score
+        item.max_score += item_bucket.max_score
+
+      }
+
+    })
+
+  })
+
+  var length = data_iter.length
+  // debug("length: " + length)
+
+  var data_result = []
+
+  bucket_map.values().forEach(function (item, index){
+
+      var temp_item = {}
+      temp_item.bucket = item.bucket
+      temp_item.freq_epsilon = parseFloat(item.freq_epsilon / length).toFixed(2) 
+      temp_item.freq_score = parseFloat(item.freq_score / length) .toFixed(2)
+      temp_item.min_epsilon = parseFloat(item.min_epsilon / length).toFixed(2) 
+      temp_item.max_epsilon = parseFloat(item.max_epsilon / length) .toFixed(2)
+      temp_item.min_score = parseFloat(item.min_score / length) .toFixed(2)
+      temp_item.max_score = parseFloat(item.max_score / length) .toFixed(2)
+
+      data_result.push(temp_item)
+    
+  })
+
+  // debug(data_result)
+
+  return data_result
+
+
+  
 
 }
 
@@ -1465,14 +1931,27 @@ verb_utils.get_target_cells = function(gridid, where_target, view, region, cells
   var validation_data = []
 
   var train_cells = verb_utils.processDataForScoreCellValidation(data, apriori, mapa_prob, [], false)
+  
+  //TODO: la funcion processDataForScoreCellValidation ya obtiene un mapa, retornar mejor el mapa
   var temp_map = d3.map([])
+
   train_cells.forEach(function(obj){
-
     temp_map.set(obj.gridid, obj.tscore)
-
   })
 
-  var scored_target_cells = []        
+  var scored_target_cells = [] 
+
+  
+
+  // ¿Por que los nulos no deben de variar sin importar la especie objetivo? 
+  // Los nulos salen de la intersección entre las celdas de la especie objetivo con el conjunto de celdas 
+  // de los datos resultantes del análisis
+  // debug(temp_map)   
+
+
+
+  // Verifica que celdas de la especie objetivo se encuentran en el conjunto de entrenamiento,
+  // si es así, le asigna el score de esta celda
   target_cells.forEach(function(cell){
 
     var scored_cell = {}
@@ -1492,11 +1971,37 @@ verb_utils.get_target_cells = function(gridid, where_target, view, region, cells
 
   })
 
+  debug("scored_target_cells.length: " + scored_target_cells.length)
+
+
+  // Los nulos estan siendo contados en N, este debe ser aplicado?
+  // Verircar resultados cuando se filtrna los nulos del analisis
+
   var sorted_scores = temp_map.values()
+  // var sorted_scores = temp_map.values().map(function(d){return d})
+
+
   sorted_scores.sort(function(a, b){return a-b})
+  debug("sorted_scores.length: " + sorted_scores.length)
+  // debug(sorted_scores)
+
+
+  debug("sorted_scores.max: " + d3.max(sorted_scores))
+  debug("sorted_scores.min: " + d3.min(sorted_scores))
+
+  debug("sorted_scores 0: " + sorted_scores[0])
+  debug("sorted_scores N: " + sorted_scores[sorted_scores.length-1])
+
+  
+
   var N = sorted_scores.length
+
+  // debug("*** N: " + N)
+
+
   var partition = []
   var delta_N = N / 10
+  
   for (var i = 0; i < 10; i++){
 
     if(i == 0 ) {
@@ -1510,9 +2015,26 @@ verb_utils.get_target_cells = function(gridid, where_target, view, region, cells
     }
 
   }
+
   partition.push(sorted_scores[N - 1])
   partition = partition.reverse()
+  
+
   debug(partition)
+
+
+  debug("partition[1]: " + partition[1])
+  var temp_train = sorted_scores.filter(function (d) {return parseFloat(d) >= partition[1]})
+  debug("temp_train.length: " + temp_train.length)
+
+  var temp_target = scored_target_cells.filter(function (d) {return parseFloat(d.score) >= partition[1]})
+  debug("temp_target.length: " + temp_target.length)
+
+
+  // Los verdaderos positivos son aquellos que hacen empalme entre la especie objetivo y las celdas
+  // de los resultados pobtidos.
+  // Para visualizar este efecto, se puede revisar el mapa y activando uno de los deciles 
+  // la intersección entre la presencia del decil y la especie objetivo deben ser los VP reportados en la gráfica de recall
 
   var vp = []
   var fn = []
@@ -1520,15 +2042,17 @@ verb_utils.get_target_cells = function(gridid, where_target, view, region, cells
 
   for (var i = 0; i < 10; i ++) {
 
+    debug(partition[i+1])
+
     vp.push(0)
     fn.push(0)
     nulo.push(0)
 
     scored_target_cells.forEach(function(item) {
 
-      if(item.score != 'null'){
+      if(item.score != null){
 
-        if (item.score > partition[i+1]){
+        if (item.score >= partition[i+1]){
 
           vp[i] += 1
 
@@ -1557,13 +2081,18 @@ verb_utils.get_target_cells = function(gridid, where_target, view, region, cells
 
     })
 
+    
   }
+
+  // debug(validation_data)
+
 
   return validation_data  
 
  }
 
 verb_utils.getValidationValues = function (data_group){
+
 
   debug("getValidationValues")
 
@@ -1577,7 +2106,7 @@ verb_utils.getValidationValues = function (data_group){
     // debug(item.data)
     // debug(item.apriori)
     // debug(item.mapa_prob)
-
+    
     // obteniendo el score por celda del conjunto de entrenamiento
     var apriori = item.apriori !== false && item.data[0].ni !== undefined ? true : false
     var mapa_prob = item.mapa_prob !== false && item.data[0].ni !== undefined ? true : false
@@ -1600,7 +2129,17 @@ verb_utils.getValidationValues = function (data_group){
 
     // obtiene el score por celda del conjunto de test
     var temp_values = []
-    item.test_cells.forEach(function(cell_item){
+
+    // TODO: Asegurar que las test_cells no contengan las celdas que no tienen fosiles o registros sin fecha cuando son agregados
+    // debug("target_cells:" + item.target_cells.length)
+    // debug("test_cells:" + item.test_cells.length)
+
+    // Interseción entre las celdas sin fosiles y las celdas
+    var arg_temp = item.test_cells.filter(value => -1 !== item.target_cells.indexOf(value))
+    debug("arg_temp:" + arg_temp.length)
+
+
+    arg_temp.forEach(function(cell_item){
     
       var temp_value = {}
       temp_value.cell = cell_item
@@ -1693,7 +2232,7 @@ verb_utils.getValidationValues = function (data_group){
 
         if(row_value.score === null){
           nulo_temp++
-        } else if(row_value.score > limites[decil-1]){
+        } else if(row_value.score >= limites[decil-1]){
           /*if(decil == 10){
             debug(row_value.cell, row_value.score, limites[decil-1])  
           }*/
@@ -1821,13 +2360,18 @@ verb_utils.updateObj = function(arr) {
   });
 }
 
+
+// Promedia los valores obtenidos en las N iteraciones para n, nj, nij, ni, epsilon y score. 
+// Además obtiene un array de cobertura total por las celdas de cada especie.
 verb_utils.processGroupValidationData = function(data_group) {
 
   debug("processGroupValidationData")
 
   var data = []
   
-  data_group.forEach(function(item){
+
+  // Se agrega id a cada elemento de las N colecciones
+  data_group.forEach(function(item, index){
 
     item['data'].forEach(function(element){
 
@@ -1842,294 +2386,323 @@ verb_utils.processGroupValidationData = function(data_group) {
                       element.type + 
                       element.layer + 
                       element.bid)
+      element.iter = index
+
     })
     
   })
 
-  // P  se agrupan todos los array data_i en un solo array de arrays, esto es [data_1, data_2, data_3, data_4, data_5]
+  // Se agrupan todos los array data_i en un solo array de arrays, esto es [data_1, data_2, data_3, data_4, data_5]
   var data_map = data_group.map(function(d) {return  d.data})
 
   data_map.forEach(function(item) {
     data = data.concat(item)
   })
 
+  // debug(data[0].tempid)
 
-
-  /*var score_total = 0;
-  data.forEach(function(item){
-
-    item['cells'].forEach(function(cell){
-
-      if(cell == 56688) {
-
-
-        score_total += parseFloat(item['score']);
-        debug('iter ' + item['iter']+ ' score de variable ' + item['bid'] + ' ' + item['score'])
-      
-      }
-
-    })
-
-  })
-  debug("score_total " + score_total)*/
-
-  //debug('data ' + data.length/5)
-  // P data es un arreglo con los data_i concatenados
 
   /****** implementación con map ********/
 
-  // var data_map = d3.map([])
-  // var counter = 0;
+  var data_map = d3.map([])
+  var counter = 0;
 
-  // data.forEach(function (row_item, index){
+  data.forEach(function (row_item, index){
 
-  //   if(!data_map.has(row_item.tempid)){
-  //     row_item.count = 1
-  //     row_item.cells_map = []
-  //     row_item.epsilon = row_item.epsilon === undefined || row_item.epsilon === null  ? 0 : parseFloat(row_item.epsilon) 
-  //     row_item.score = row_item.score === undefined || row_item.score === null ? 0 : parseFloat(row_item.score) 
+    // if(row_item.tempid == 356184910){
+    //   debug("******** " + row_item.generovalido + " " + row_item.especieepiteto)
+    //   debug("******** " + row_item.cells.length)
+    // }
 
-  //     data_map.set(row_item.tempid,row_item)
-  //   }
-  //   else{
+    if(!data_map.has(row_item.tempid)){
       
-  //     // promedio (con n y ni variable) Varian por que existen especies que no estan en las 5 iteraciones, al promediar hacen variar la n y ni
-  //     var item = data_map.get(row_item.tempid)
-  //     item.n += row_item.n
-  //     item.ni += row_item.ni
-  //     item.nij += row_item.nij
-  //     item.nj += row_item.nj
-  //     item.epsilon += row_item.epsilon === undefined || row_item.epsilon === null  ? 0 : parseFloat(row_item.epsilon) 
-  //     item.score += row_item.score === undefined || row_item.score === null ? 0 : parseFloat(row_item.score) 
+      row_item.count = 1
+      row_item.epsilon = row_item.epsilon === undefined || row_item.epsilon === null  ? 0 : parseFloat(row_item.epsilon) 
+      row_item.score = row_item.score === undefined || row_item.score === null ? 0 : parseFloat(row_item.score) 
 
-  //     item.cells = item.cells.concat(row_item.cells)
-  //     // item.cells_map = item.cells.filter(function (item_dep, pos) {return item.cells.indexOf(item_dep) == pos})
-  //     item.cells_map = item.cells.filter(function (item_dep, pos) {return item.cells.indexOf(item_dep) == pos})
-  //     // item.cells_map = item.cells
+      row_item.cells_map = [row_item.cells]
+      row_item.cells_collection = [row_item.cells]
 
-  //     item.count++
-  //   }
+      data_map.set(row_item.tempid, row_item)
 
-  // })
+    }
+    else{
+      
+      // promedio (con n y ni variable) Varian por que existen especies que no estan en las 5 iteraciones, al promediar hacen variar la n y ni
+      var item = data_map.get(row_item.tempid)
+      item.n += row_item.n
+      item.ni += row_item.ni
+      item.nij += row_item.nij
+      item.nj += row_item.nj
+      item.epsilon += row_item.epsilon === undefined || row_item.epsilon === null  ? 0 : parseFloat(row_item.epsilon) 
+      item.score += row_item.score === undefined || row_item.score === null ? 0 : parseFloat(row_item.score) 
 
-  // var data_result = data_map.values()
+      item.cells = item.cells.concat(row_item.cells)
+      // item.cells_map = item.cells.filter(function (item_dep, pos) {return item.cells.indexOf(item_dep) == pos})
+
+      item.cells_map = item.cells.filter(function (item_dep, pos) {return item.cells.indexOf(item_dep) == pos})
+      // item.cells_map = item.cells
+
+      item.cells_collection.push(row_item.cells) 
+
+      item.count++
+    }
+
+  })
+
+  var data_result = data_map.values()
   
-  // data_result.forEach(function (item, index){
+  data_result.forEach(function (item, index){
 
-  //   // if(item.generovalido === "Microtus" && item.especieepiteto === "guatemalensis"){
-  //   //   debug("************")
-  //   //   debug("sp: " + item.generovalido + " " + item.especieepiteto )
-  //   //   debug("N: " + item.n)
-  //   //   debug("ni: " + item.ni)
-  //   //   debug("epsilon: " + item.epsilon)
-  //   //   debug("score: " + item.score)
-  //   //   debug("tempid: " + item.tempid)
-  //   //   debug("count: " + item.count)
-  //   //   debug("************")
-  //   // }
-
-  //     item.n = parseFloat(item.n / item.count).toFixed(2) 
-  //     item.ni = parseFloat(item.ni / item.count) .toFixed(2)
-  //     item.nij = parseFloat(item.nij / item.count).toFixed(2) 
-  //     item.nj = parseFloat(item.nj / item.count) .toFixed(2)
-  //     item.epsilon = parseFloat(item.epsilon / item.count) .toFixed(2)
-  //     item.score = parseFloat(item.score / item.count) .toFixed(2)
+      item.n = parseFloat(item.n / item.count).toFixed(2) 
+      item.ni = parseFloat(item.ni / item.count) .toFixed(2)
+      item.nij = parseFloat(item.nij / item.count).toFixed(2) 
+      item.nj = parseFloat(item.nj / item.count) .toFixed(2)
+      item.epsilon = parseFloat(item.epsilon / item.count) .toFixed(2)
+      item.score = parseFloat(item.score / item.count) .toFixed(2)
     
-  // })
+  })
 
   /****** termina implementación con map ********/
+
+
 
 
 
   /****** implementación con crossfilter ********/
 
   
-  var cross_group = crossfilter(data)
-  cross_group.groupAll()
+  // var cross_group = crossfilter(data)
+  // cross_group.groupAll()
   
-  // // debug(cross_group)
-  // // debug(verb_utils.hashCode("hola"))
-  // // debug(verb_utils.hashCode("hola"))
-  // // debug(verb_utils.hashCode("hola2"))
-  
+  // var name_dimension = cross_group.dimension(function(d) { return d.tempid})
 
-  // // var name_dimension = cross_group.dimension(function(d) { return d.name; })  
-  var name_dimension = cross_group.dimension(function(d) { return d.tempid})
-
-  var group_by_name = name_dimension.group().reduce(
+  // var group_by_name = name_dimension.group().reduce(
     
-    function(item, add){
+  //   function(item, add){
 
-      ++item.count
+  //     if(add.tempid == 356184910){
+  //       debug(add.generovalido + " " + add.especieepiteto)
+  //       debug(add.cells)
+  //     }
 
-      item.reinovalido = add.reinovalido
-      item.phylumdivisionvalido = add.phylumdivisionvalido
-      item.clasevalida = add.clasevalida
-      item.ordenvalido = add.ordenvalido
-      item.familiavalida = add.familiavalida
-      item.generovalido = add.generovalido
-      item.especieepiteto = add.especieepiteto
-      item.nombreinfra = add.nombreinfra
-      item.type = add.type
-      item.layer = add.layer
-      item.bid = add.bid
-      item.icat = add.icat
-      item.tag =  add.tag
+  //     ++item.count
+  //     item.reinovalido = add.reinovalido
+  //     item.phylumdivisionvalido = add.phylumdivisionvalido
+  //     item.clasevalida = add.clasevalida
+  //     item.ordenvalido = add.ordenvalido
+  //     item.familiavalida = add.familiavalida
+  //     item.generovalido = add.generovalido
+  //     item.especieepiteto = add.especieepiteto
+  //     item.nombreinfra = add.nombreinfra
+  //     item.type = add.type
+  //     item.layer = add.layer
+  //     item.bid = add.bid
+  //     item.icat = add.icat
+  //     item.tag =  add.tag
+  //     // item.cells_collection.push(add.cells)
 
-      item.cells = add.cells
+  //     item.cells = add.cells
+  //     // item.cells = item.cells.concat(add.cells).unique(); 
+  //     item.cells_map = item.cells_map.concat(add.cells) 
+  //     // item.cells_map = item.cells_map.concat(add.cells_map) 
 
-
-      item.cells_map = item.cells_map.concat(add.cells) 
-
-      item.nij += add.nij
-      item.nj += add.nj
+  //     item.nij += add.nij
+  //     item.nj += add.nj
       
-      item.ni += add.ni
-      item.n += add.n
+  //     item.ni += add.ni
+  //     item.n += add.n
 
-      if(add.epsilon !== undefined && add.epsilon !== null){
-        item.epsilon += parseFloat(add.epsilon)
-        ++item.count_eps
-      }
+  //     if(add.epsilon !== undefined && add.epsilon !== null){
+  //       item.epsilon += parseFloat(add.epsilon)
+  //       ++item.count_eps
+  //     }
       
-      if(add.score !== undefined && add.score !== null){
-        item.score += parseFloat(add.score)
-        ++item.count_scr
-      }
+  //     if(add.score !== undefined && add.score !== null){
+  //       item.score += parseFloat(add.score)
+  //       ++item.count_scr
+  //     }
       
-      item.tipo = add.tipo
+  //     item.tipo = add.tipo
 
-      return item
-    },
-    function(item,remove){
-      --item.count
-      item.reinovalido = remove.reinovalido
-      item.phylumdivisionvalido = remove.phylumdivisionvalido
-      item.clasevalida = remove.clasevalida
-      item.ordenvalido = remove.ordenvalido
-      item.familiavalida = remove.familiavalida
-      item.generovalido = remove.generovalido
-      item.especieepiteto = remove.especieepiteto
-      item.nombreinfra = remove.nombreinfra
-      item.type = remove.type
-      item.layer = remove.layer
-      item.bid = remove.bid
-      item.icat = remove.icat
-      item.tag = remove.tag
+
+
+  //     return item
+  //   },
+  //   function(item,remove){
+
+  //     if(remove.tempid == 356184910){
+  //       debug(remove.generovalido + " " + remove.especieepiteto)
+  //       debug(remove.cells)
+  //     }
+
+
+  //     --item.count
+  //     item.reinovalido = remove.reinovalido
+  //     item.phylumdivisionvalido = remove.phylumdivisionvalido
+  //     item.clasevalida = remove.clasevalida
+  //     item.ordenvalido = remove.ordenvalido
+  //     item.familiavalida = remove.familiavalida
+  //     item.generovalido = remove.generovalido
+  //     item.especieepiteto = remove.especieepiteto
+  //     item.nombreinfra = remove.nombreinfra
+  //     item.type = remove.type
+  //     item.layer = remove.layer
+  //     item.bid = remove.bid
+  //     item.icat = remove.icat
+  //     item.tag = remove.tag
+
       
-      item.cells = item.cells //remove.cells //
-      item.cells_map = item.cells_map
+  //     // item.cells = item.cells //remove.cells //
+  //     item.cells = remove.cells
+  //     // item.cells = item.cells.concat(remove.cells).unique(); 
 
-      item.nij -= remove.nij
-      item.nj -= remove.nj
+  //     item.cells_map = item.cells_map
+  //     // item.cells_map = item.cells_map.filter(f => !remove.cell_map.includes(f));
       
-      item.ni -= remove.ni
-      item.n -= remove.n
 
-      if(remove.epsilon !== undefined && remove.epsilon !== null){
-        item.epsilon -= parseFloat(remove.epsilon)
-        --item.count_eps
-      }
+  //     item.nij -= remove.nij
+  //     item.nj -= remove.nj
       
-      if(remove.score !== undefined && remove.score !== null){
-        item.score -= parseFloat(remove.score)
-        --item.count_scr
-      }
+  //     item.ni -= remove.ni
+  //     item.n -= remove.n
+
+  //     if(remove.epsilon !== undefined && remove.epsilon !== null){
+  //       item.epsilon -= parseFloat(remove.epsilon)
+  //       --item.count_eps
+  //     }
       
-      // item.epsilon -= parseFloat(remove.epsilon) 
-      // item.score -= parseFloat(remove.score) 
-      item.tipo = item.tipo
+  //     if(remove.score !== undefined && remove.score !== null){
+  //       item.score -= parseFloat(remove.score)
+  //       --item.count_scr
+  //     }
+      
+  //     // item.epsilon -= parseFloat(remove.epsilon) 
+  //     // item.score -= parseFloat(remove.score) 
+  //     item.tipo = item.tipo
 
-      return item
-    },
-    function(){
-      return {
-        count: 0,
-        count_eps: 0,
-        count_scr: 0,
-        reinovalido: "",
-        phylumdivisionvalido: "",
-        clasevalida: "",
-        ordenvalido: "",
-        familiavalida: "",
-        generovalido: "",
-        especieepiteto: "",
-        nombreinfra:"",
-        type:"",
-        layer:"",
-        bid:"",
-        icat:"",
-        tag:"",
-        cells: [],
-        cells_map: [],
-        nij: 0,
-        nj: 0,
-        ni: 0,
-        n: 0,
-        epsilon: 0,
-        score: 0,
-        tipo: 0
-      }
-    }
-  )
+  //     return item
+  //   },
+  //   function(){
+  //     return {
+  //       count: 0,
+  //       count_eps: 0,
+  //       count_scr: 0,
+  //       reinovalido: "",
+  //       phylumdivisionvalido: "",
+  //       clasevalida: "",
+  //       ordenvalido: "",
+  //       familiavalida: "",
+  //       generovalido: "",
+  //       especieepiteto: "",
+  //       nombreinfra:"",
+  //       type:"",
+  //       layer:"",
+  //       bid:"",
+  //       icat:"",
+  //       tag:"",
+  //       cells: [],
+  //       cells_map: [],
+  //       nij: 0,
+  //       nj: 0,
+  //       ni: 0,
+  //       n: 0,
+  //       epsilon: 0,
+  //       score: 0,
+  //       tipo: 0,
+  //       cells_counter: [],
+  //       cells_collection: []
+  //     }
+  //   }
+  // )
 
-  var reduced_data = group_by_name.top(Infinity);
+  // var reduced_data = group_by_name.top(Infinity);
 
-  var data_result = []
+  // var data_result = []
 
-  debug('reduced ' + reduced_data.length)
+  // debug('reduced ' + reduced_data.length)
 
-  for(var i=0; i<reduced_data.length; i++){
-      var entry = reduced_data[i]
-      var counter = parseInt(entry["value"].count)
-      var count_eps = parseInt(entry["value"].count_eps)
-      var count_scr = parseInt(entry["value"].count_scr)
+  // for(var i=0; i<reduced_data.length; i++){
+  //     var entry = reduced_data[i]
+  //     var counter = parseInt(entry["value"].count)
+  //     var count_eps = parseInt(entry["value"].count_eps)
+  //     var count_scr = parseInt(entry["value"].count_scr)
 
-      data_result.push({
-        reinovalido: entry["value"].reinovalido,
-        phylumdivisionvalido: entry["value"].phylumdivisionvalido,
-        clasevalida: entry["value"].clasevalida,
-        ordenvalido: entry["value"].ordenvalido,
-        familiavalida: entry["value"].familiavalida,
-        generovalido: entry["value"].generovalido,
-        especieepiteto: entry["value"].especieepiteto,
-        nombreinfra: entry["value"].nombreinfra,
-        type: entry["value"].type,
-        layer: entry["value"].layer,
-        bid: entry["value"].bid, 
-        icat: entry["value"].icat,
-        tag: entry["value"].tag,
+  //     data_result.push({
+  //       reinovalido: entry["value"].reinovalido,
+  //       phylumdivisionvalido: entry["value"].phylumdivisionvalido,
+  //       clasevalida: entry["value"].clasevalida,
+  //       ordenvalido: entry["value"].ordenvalido,
+  //       familiavalida: entry["value"].familiavalida,
+  //       generovalido: entry["value"].generovalido,
+  //       especieepiteto: entry["value"].especieepiteto,
+  //       nombreinfra: entry["value"].nombreinfra,
+  //       type: entry["value"].type,
+  //       layer: entry["value"].layer,
+  //       bid: entry["value"].bid, 
+  //       icat: entry["value"].icat,
+  //       tag: entry["value"].tag,
         
-        cells: entry["value"].cells,
-        cells_map: entry["value"].cells_map,
+  //       cells: entry["value"].cells,
+  //       cells_map: entry["value"].cells_map,
 
-        nij: parseFloat((entry["value"].nij/counter ).toFixed(2)),
-        nj: parseFloat((entry["value"].nj/counter ).toFixed(2)),
+  //       nij: parseFloat((entry["value"].nij/counter ).toFixed(2)),
+  //       nj: parseFloat((entry["value"].nj/counter ).toFixed(2)),
         
-        ni: parseFloat(parseInt(entry["value"].ni)/counter).toFixed(2),
-        n:  parseFloat(parseInt(entry["value"].n)/counter).toFixed(2),
+  //       ni: parseFloat(parseInt(entry["value"].ni)/counter).toFixed(2),
+  //       n:  parseFloat(parseInt(entry["value"].n)/counter).toFixed(2),
 
-        epsilon: parseFloat((entry["value"].epsilon/count_eps).toFixed(2)),
-        score: parseFloat((entry["value"].score/count_scr).toFixed(2)),
+  //       epsilon: parseFloat((entry["value"].epsilon/count_eps).toFixed(2)),
+  //       score: parseFloat((entry["value"].score/count_scr).toFixed(2)),
 
-        tipo: entry["value"].tipo
-      })
-  }
+  //       tipo: entry["value"].tipo
+  //     })
+  // }
 
-  // debug('............................................')
-  // debug(data_result.map(function(d) {return  d.ni}))
-  // debug(data_result.map(function(d) {return  d.n}))
-  // debug('............................................')
+  // // debug('............................................')
+  // // debug(data_result.map(function(d) {return  d.ni}))
+  // // debug(data_result.map(function(d) {return  d.n}))
+  // // debug('............................................')
 
-  data_result.forEach(function(item) {
+  // data_result.forEach(function(item) {
 
-    //debug('----------------> ' +  item['bid'])
-    item['cells_map'] = Array.from(new Set(item['cells_map']))
+  //   //debug('----------------> ' +  item['bid'])
+  //   item['cells_map'] = Array.from(new Set(item['cells_map']))
 
-  })
+  // })
+
+    /****** TERMINA implementación con crossfilter ********/
+
 
   return data_result
 }
+
+
+verb_utils.arrayUnique = function(array) {
+   
+    var a = array.concat();
+    for(var i=0; i<a.length; ++i) {
+        for(var j=i+1; j<a.length; ++j) {
+            if(JSON.stringify(a[i]) === JSON.stringify(a[j]))
+                a.splice(j--, 1);
+        }
+    }
+
+    return a;
+}
+
+
+Array.prototype.unique = function() {
+    var a = this.concat();
+    for(var i=0; i<a.length; ++i) {
+        for(var j=i+1; j<a.length; ++j) {
+            if(a[i] === a[j])
+                a.splice(j--, 1);
+        }
+    }
+
+    return a;
+};
 
 verb_utils.processValidationData = function (data_group){
 
@@ -2376,12 +2949,13 @@ verb_utils.getWhereClauseFilter = function(fosil, date, lim_inf, lim_sup, cells,
   whereClause += ') '
 
   if(!fosil){
-    whereClause += "AND (ejemplarfosil <>'SI' OR ejemplarfosil is null) "
+    whereClause += "AND (ejemplarfosil != 'SI' OR ejemplarfosil is null) "
   }
 
-  if(date) {
-    whereClause += 'AND aniocolecta >= ' + lim_inf + ' AND  aniocolecta <= ' + lim_sup + ' '
-  }
+  if(date) 
+    whereClause += 'AND ((aniocolecta BETWEEN ' + lim_inf + ' AND ' + lim_sup + ') OR aniocolecta = 9999 ) '
+  else
+    whereClause += 'AND (aniocolecta BETWEEN ' + lim_inf + ' AND ' + lim_sup + ')'
 
   cells.forEach(function(cell, index){
     whereClause += 'AND ' + gridid + ' <> ' + cell + ' ' 
@@ -2468,7 +3042,11 @@ verb_utils.getFieldsFromLevel = function (level) {
 
         } else {
 
-          fields += ", " + taxon_map[key] 
+          if(taxon_map[key] === 'type' || taxon_map[key] === 'bid')
+            fields += ", " + taxon_map[key] + '::varchar' 
+          else
+            fields += ", " + taxon_map[key]
+          //fields += ", " + taxon_map[key] 
         
         }
 
@@ -2498,12 +3076,19 @@ verb_utils.getFieldsFromLevel = function (level) {
       if (level === key) {
 
           notyet = false
-          fields += ", " + rank_map[key]
+          if(rank_map[key] === 'type' || rank_map[key] === 'bid')
+            fields += ", " + rank_map[key] + '::varchar' 
+          else
+            fields += ", " + rank_map[key]
 
 
       } else {
 
-          fields += ", " + rank_map[key] 
+          if(rank_map[key] === 'type' || rank_map[key] === 'bid')
+            fields += ", " + rank_map[key] + '::varchar' 
+          else
+            fields += ", " + rank_map[key]
+          //fields += ", " + rank_map[key] 
 
       }
 
@@ -2518,11 +3103,11 @@ verb_utils.getFieldsFromLevel = function (level) {
   }
 
   if (level === 'layer')
-    fields  += ", icat, layer, tag "
+    fields  += ", icat::varchar, layer, tag, unidad, coeficiente::varchar "
   else if(level === 'bid')
-    fields  += ", icat, label, tag "
+    fields  += ", icat::varchar, label, tag, unidad, coeficiente::varchar "
   else 
-    fields  += ", '' AS icat, '' AS label, '' AS tag "
+    fields  += ", '' AS icat, '' AS label, '' AS tag, '' AS unidad, '' AS coeficiente "
 
   //debug("fields === " + fields)
   return fields
@@ -2619,9 +3204,9 @@ verb_utils.getGroupFieldsFromLevel = function (level) {
     }
 
    if(level === 'layer')
-        group_fields += ", icat, layer, tag "
+        group_fields += ", icat, layer, tag, unidad, coeficiente "
   else if(level === 'bid')
-        group_fields  += ", icat, label, tag "
+        group_fields  += ", icat, label, tag, unidad, coeficiente "
 
   }
 
@@ -2641,34 +3226,36 @@ verb_utils.getWhereClauseFromGroupTaxonArray = function (taxon_array, target){
     var key='rank'
   // mapeo de taxones
   var taxon_rank_map = {
-                          // biotic
-                          kingdom : 'reinovalido', 
-                          phylum  : 'phylumdivisionvalido',
-                          class   : 'clasevalida',
-                          order   : 'ordenvalido',
-                          family  : 'familiavalida',
-                          genus   : 'generovalido',
-                          species : ['generovalido', 'especieepiteto'],
-                          subspecies: ['generovalido', 'especieepiteto', 'nombreinfra'],
-                          // abiotic
-                          type    : 'type',
-                          layer   : 'layer',
-                          bid     : 'bid'
-                       }
+              // biotic
+              kingdom : 'reinovalido', 
+              phylum  : 'phylumdivisionvalido',
+              class   : 'clasevalida',
+              order   : 'ordenvalido',
+              family  : 'familiavalida',
+              genus   : 'generovalido',
+              species : ['generovalido', 'especieepiteto'],
+              subspecies: ['generovalido', 'especieepiteto', 'nombreinfra'],
+              // abiotic
+              type    : 'type',
+              layer   : 'layer',
+              bid     : 'bid'
+           }
   
   var whereClause = ''
   taxon_array.forEach ( function (taxon, index) {
-    //debug(taxon_rank_map[taxon[key]], taxon[key])
+    // debug(taxon_rank_map[taxon[key]], taxon[key])
+
+
     if (index === 0){
       
       if (taxon[key] === 'species') {
         var value = taxon['value'].split(' ')
-        whereClause += " WHERE (" + taxon_rank_map[taxon[key]][0] + " = '" + value[0] + "' AND " + taxon_rank_map[taxon[key]][1] + " = '" + value[1] + "')"
+        whereClause += " WHERE ((" + taxon_rank_map[taxon[key]][0] + " = '" + value[0] + "' AND " + taxon_rank_map[taxon[key]][1] + " = '" + value[1] + "')"
       } else if(taxon[key] === 'subspecies') {
         var value = taxon['value'].split(' ')
-        whereClause += " WHERE (" + taxon_rank_map[taxon[key]][0] + " = '" + value[0] + "' AND " + taxon_rank_map[taxon[key]][1] + " = '" + value[1] + "' AND " + taxon_rank_map[taxon[key]][2] + " = '" + value[2] + "')"
+        whereClause += " WHERE ((" + taxon_rank_map[taxon[key]][0] + " = '" + value[0] + "' AND " + taxon_rank_map[taxon[key]][1] + " = '" + value[1] + "' AND " + taxon_rank_map[taxon[key]][2] + " = '" + value[2] + "')"
       } else {
-        whereClause += " WHERE " + taxon_rank_map[taxon[key]] + " = '" + taxon['value'] + "'"
+        whereClause += " WHERE (" + taxon_rank_map[taxon[key]] + " = '" + taxon['value'] + "'"
       }
 
     } else{
@@ -2687,7 +3274,8 @@ verb_utils.getWhereClauseFromGroupTaxonArray = function (taxon_array, target){
       
   })
 
-  return whereClause
+  whereClause += ')';
+  return whereClause;
 
 }
 
@@ -2764,10 +3352,14 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
   var coa =  queries.countsTaxonGroups.getCellsByGroupAbio.toString()
   var cov = ""
   var cova = ""
+  var group_name = ""
 
   debug(size + " groups in niche analysis")
 
   covars_groups.forEach( function (group, index) {
+
+    var co = queries.countsTaxonGroups.getCellsByGroupBio.toString()
+    var coa =  queries.countsTaxonGroups.getCellsByGroupAbio.toString()
 
     if(group['biotic']){
 
@@ -2775,6 +3367,11 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
       //debug("level = " + group['merge_vars'][0]['level'])
       group_fields = verb_utils.getGroupFieldsFromLevel(group['merge_vars'][0]['level']) 
       fields = verb_utils.getFieldsFromLevel(group['merge_vars'][0]['level'])
+
+      //group_name = size > 1 ? "Total" : group['name']
+      group_name = group['name']
+
+      co = co.toString().replace(/{name}/g, group_name)
 
       if( index === 0){
 
@@ -2784,10 +3381,9 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
           query_covar = query_covar.toString().replace(/{groups}/g, "," + queries.countsTaxonGroups.getCountsCovars.toString())
           query_covar = query_covar.toString().replace(/{groups}/g, co + group['name'])
         } else {
-
           cov = co + group['name']
-
         }
+
 
       } else if(index === size - 1){
         
@@ -2803,6 +3399,8 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
 
       }
 
+      // debug("**** cov: " + cov)
+
       //debug(data_request["total_cells"])
       query_covar = query_covar.toString().replace(/{fields:raw}/g, fields)
       query_covar = query_covar.toString().replace(/{group_fields:raw}/g, group_fields)
@@ -2811,10 +3409,19 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
       query_covar = query_covar.toString().replace(/{where_covars:raw}/g, where_covar)
       query_covar = query_covar.toString().replace(/{excluded_cells:raw}/g, data_request["excluded_cells"].toString())
       query_covar = query_covar.toString().replace(/{total_cells:raw}/g, data_request["total_cells"])
-      query_covar = query_covar.toString().replace(/{where_exclude_target:raw}/g, data_request["where_exclude_target"])
+
+      if(data_request["where_exclude_target"] != null){
+        query_covar = query_covar.toString().replace(/{where_exclude_target:raw}/g, data_request["where_exclude_target"])
+      } else {
+        query_covar = query_covar.toString().replace(/{where_exclude_target:raw}/g, '')
+      }
       query_covar = query_covar.toString().replace(/{min_occ:raw}/g, data_request["min_occ"])
        
     } else {
+
+      //group_name = size > 1 ? "Total" : group['name']
+      group_name = group['name']
+      coa = coa.toString().replace(/{name}/g, group_name)
 
       where_covar = verb_utils.getWhereClauseFromGroupTaxonArray(group['merge_vars'], false)
       group_fields = verb_utils.getGroupFieldsFromLevel(group['merge_vars'][0]['level']) 
@@ -2861,12 +3468,14 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
     }
     
   })
-  
-  //debug(query_covar)
+
+  // debug(co)
+  debug(query_covar)
+
   return query_covar  
 }
 
-verb_utils.getCommunityAnalysisQuery = function(queries, region, res_cells, region_cells, res_views, source, is_target, where_bio_source, where_abio_source){
+verb_utils.getCommunityAnalysisQuery = function(queries, region, res_cells, region_cells, res_views, source, is_target, where_bio_source, where_abio_source, where_filter_cell, gridid, grid_res){
 
   debug("getCommunityAnalysisQuery")
 
@@ -2894,15 +3503,25 @@ verb_utils.getCommunityAnalysisQuery = function(queries, region, res_cells, regi
 
         q = q.toString().replace(/{index:raw}/g, index)
         q = q.toString().replace(/{fields:raw}/g, fields)
+        //q = q.toString().replace(/type/g, 'type::varchar')
         q = q.toString().replace(/{biotic:raw}/g, 'true')
         q = q.toString().replace(/{region_cells:raw}/g, region_cells)
         q = q.toString().replace(/{where_filter:raw}/g, where)
         q = q.toString().replace(/{level:raw}/g, level)
         q = q.toString().replace(/{group_fields:raw}/g, group_fields)
+        q = q.toString().replace(/{region:raw}/g, region)
+
+        // Se añade replace para añadir filtro fecha y fosil
+        q = q.toString().replace(/{gridid:raw}/g, gridid)
+        q = q.toString().replace(/{grid_res:raw}/g, grid_res)
+        q = q.toString().replace(/{where_filter_cell:raw}/g, where_filter_cell)
+
+        q = q.toString().replace(/{region:raw}/g, region)
+        
 
       } else {
 
-        q_aux    =  queries.taxonsGroupNodes.covarBio
+        q_aux    = ", aux_" + index + " AS ( " + queries.taxonsGroupNodes.covarBio + " )"
         q_select = " UNION " + queries.taxonsGroupNodes.selectNodes
         
         level = taxon["level"]
@@ -2915,8 +3534,18 @@ verb_utils.getCommunityAnalysisQuery = function(queries, region, res_cells, regi
         q_aux = q_aux.toString().replace(/{index:raw}/g, index)
         q_aux = q_aux.toString().replace(/{biotic:raw}/g, 'true')
         q_aux = q_aux.toString().replace(/{fields:raw}/g, fields)
+        //q_aux = q_aux.toString().replace(/type/g, 'type::varchar')
         q_aux = q_aux.toString().replace(/{region_cells:raw}/g, region_cells)
         q_aux = q_aux.toString().replace(/{where_filter:raw}/g, where)
+
+        // Se añade replace para añadir filtro fecha y fosil
+        q_aux = q_aux.toString().replace(/{gridid:raw}/g, gridid)
+        q_aux = q_aux.toString().replace(/{grid_res:raw}/g, grid_res)
+        q_aux = q_aux.toString().replace(/{where_filter_cell:raw}/g, where_filter_cell)
+        q_aux = q_aux.toString().replace(/{region:raw}/g, region)
+
+
+
     
         q_select = q_select.toString().replace(/{index:raw}/g, index)
         q_select = q_select.toString().replace(/{fields:raw}/g, fields)
@@ -2925,6 +3554,10 @@ verb_utils.getCommunityAnalysisQuery = function(queries, region, res_cells, regi
         q = q.toString().replace(/{aux:raw}/g, q_aux + ' {aux:raw}')
         q = q.toString().replace(/{union:raw}/g, q_select + ' {union:raw}')
 
+
+        q = q.toString().replace(/{region:raw}/g, region)
+
+        
       }
 
     } else {

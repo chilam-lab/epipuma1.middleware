@@ -1,11 +1,9 @@
 ${aux:raw},
 summary AS (
-
 	${summary:raw}
-
 ) 
 SELECT 
-	gridid,
+	gridid, 
 	count(*) AS conteo
 FROM 
 	summary
