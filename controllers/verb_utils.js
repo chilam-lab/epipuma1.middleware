@@ -2948,14 +2948,22 @@ verb_utils.getWhereClauseFilter = function(fosil, date, lim_inf, lim_sup, cells,
   })
   whereClause += ') '
 
-  if(!fosil){
-    whereClause += "AND (ejemplarfosil != 'SI' OR ejemplarfosil is null) "
-  }
+  whereClause += " and (make_date(aniocolecta, mescolecta, diacolecta) between "
+                + "'" + lim_inf + "' and '" + lim_sup + "'"
+                + " and diacolecta <> 99 and diacolecta <> -1"
+                + " and mescolecta <> 99 and mescolecta <> -1"
+                + " and aniocolecta <> 9999 and aniocolecta <> -1) "
 
-  if(date) 
-    whereClause += 'AND ((aniocolecta BETWEEN ' + lim_inf + ' AND ' + lim_sup + ') OR aniocolecta = 9999 ) '
-  else
-    whereClause += 'AND (aniocolecta BETWEEN ' + lim_inf + ' AND ' + lim_sup + ')'
+  
+
+  // if(!fosil){
+  //   whereClause += "AND (ejemplarfosil != 'SI' OR ejemplarfosil is null) "
+  // }
+
+  // if(date) 
+  //   whereClause += 'AND ((aniocolecta BETWEEN ' + lim_inf + ' AND ' + lim_sup + ') OR aniocolecta = 9999 ) '
+  // else
+  //   whereClause += 'AND (aniocolecta BETWEEN ' + lim_inf + ' AND ' + lim_sup + ')'
 
   cells.forEach(function(cell, index){
     whereClause += 'AND ' + gridid + ' <> ' + cell + ' ' 
