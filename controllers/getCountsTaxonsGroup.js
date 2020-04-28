@@ -51,21 +51,12 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   var grid_resolution = verb_utils.getParam(req, 'grid_resolution', default_resolution) 
   var region = parseInt(verb_utils.getParam(req, 'region', verb_utils.region_mx))
   var fosil = verb_utils.getParam(req, 'fosil', true)
-<<<<<<< Updated upstream
-  var date  = verb_utils.getParam(req, 'date', true)
-  var day_inf = verb_utils.getParam(req, 'day_inf', 1500)
-  var day_sup = verb_utils.getParam(req, 'day_sup', 2020)
-  var month_inf = verb_utils.getParam(req, 'month_inf', 1500)
-  var month_sup = verb_utils.getParam(req, 'month_sup', 2020)
-  var year_inf = verb_utils.getParam(req, 'year_inf', 1500)
-  var year_sup = verb_utils.getParam(req, 'year_sup', 2020)
-=======
+
   var date  = false //verb_utils.getParam(req, 'date', true)
 
   var lim_inf = verb_utils.getParam(req, 'lim_inf', new Date("1500-01-01"))
   var lim_sup = verb_utils.getParam(req, 'lim_sup',  year+"-"+month+"-"+day)
 
->>>>>>> Stashed changes
   var cells = verb_utils.getParam(req, 'excluded_cells', [])
 
   debug("grid_resolution: " + grid_resolution)
@@ -91,23 +82,8 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   data_request["where_exclude_target"] = verb_utils.getExcludeTargetWhereClause(target_group)
   debug("*****1: " + data_request["where_exclude_target"])
 
- 
 
   var where_filter_target    = ''
-<<<<<<< Updated upstream
-  if (date){
-    where_filter_target += ' AND ( ( ( aniocolecta BETWEEN ' + year_inf + ' AND ' + year_sup + ' ) '
-    where_filter_target += ' AND ( mescolecta BETWEEN ' + month_inf + ' AND ' + month_sup + ' ) '
-    where_filter_target += ' AND ( diacolecta BETWEEN ' + day_inf + ' AND ' + day_sup + ' ) '
-    where_filter_target += ' OR aniocolecta = 9999 OR diacolecta is null OR mescolecta null ) '
-  }
-  else{
-    where_filter_target += ' AND ( ( aniocolecta BETWEEN ' + year_inf + ' AND ' + year_sup + ' ) '
-    where_filter_target += ' AND ( mescolecta BETWEEN ' + month_inf + ' AND ' + month_sup + ' ) '
-    where_filter_target += ' AND ( diacolecta BETWEEN ' + day_inf + ' AND ' + day_sup + ' ) '
-  }
-=======
->>>>>>> Stashed changes
 
   where_filter_target = " and (make_date(aniocolecta, mescolecta, diacolecta) between "
                 + "'" + lim_inf + "' and '" + lim_sup + "'"
