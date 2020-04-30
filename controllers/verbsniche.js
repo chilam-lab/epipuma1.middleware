@@ -946,22 +946,48 @@ exports.getVariablesNiche = function (req, res, next) {
   }
   else{
 
-    pool.any(queries.getVariablesNiche.getVariables, {
-      taxon: field,
-      ad_param: ad_param,
-      order_param: order_param,
-      parent_taxon: parentfield,
-      parent_valor: parentitem,
-      region:footprint_region
-    })
-        .then(function (data) {
-              // debug(data)
-          res.json({'data': data})
-        })
-        .catch(function (error) {
-          debug(error)
-          next(error)
-        })
+    if(parentfield!=='generovalido'){
+
+      pool.any(queries.getVariablesNiche.getVariables, {
+        taxon: field,
+        ad_param: ad_param,
+        order_param: order_param,
+        parent_taxon: parentfield,
+        parent_valor: parentitem,
+        region:footprint_region
+      })
+          .then(function (data) {
+                // debug(data)
+            res.json({'data': data})
+          })
+          .catch(function (error) {
+            debug(error)
+            next(error)
+          })
+
+
+    } else {
+
+
+      pool.any(queries.getVariablesNiche.getVariablesSpecies, {
+        taxon: field,
+        ad_param: ad_param,
+        order_param: order_param,
+        parent_taxon: parentfield,
+        parent_valor: parentitem,
+        region:footprint_region
+      })
+          .then(function (data) {
+                // debug(data)
+            res.json({'data': data})
+          })
+          .catch(function (error) {
+            debug(error)
+            next(error)
+          })
+
+
+    }
 
   }
 
@@ -1100,7 +1126,7 @@ exports.getCountGridid = function (req, res, next) {
   var isNicho = getParam(req, 'nicho', false)
   var footprint_region = getParam(req, 'footprint_region', default_region)
 
-  var grid_res = getParam(req, 'grid_res', 16)
+  var grid_res = getParam(req, 'grid_res', default_resolution)
 
   var res_celda = 'cells_' + grid_res + 'km'
   var res_grid = 'gridid_' + grid_res + 'km'
@@ -1136,7 +1162,7 @@ exports.getGroupCountGrididByCell = function (req, res) {
 
   // catching parameters
   var footprint_region = getParam(req, 'region', default_region)
-  var grid_res = getParam(req, 'grid_res', 16)
+  var grid_res = getParam(req, 'grid_res', default_resolution)
   var nodes = getParam(req, 'nodes', [])
   // var cellselected = getParam(req, 'cellselected', false)
   var lat = getParam(req, 'lat', 0)
@@ -1253,7 +1279,7 @@ exports.getGroupCountGridid = function (req, res) {
 
   // catching parameters
   var footprint_region = getParam(req, 'region', default_region)
-  var grid_res = getParam(req, 'grid_res', 16)
+  var grid_res = getParam(req, 'grid_res', default_resolution)
   var nodes = getParam(req, 'nodes', [])
 
   // defining necessary varaiables 
@@ -1336,7 +1362,7 @@ exports.getGrididsNiche = function (req, res, next) {
 
   debug(getParam(req, 'qtype'))
   debug('getGrididsNiche')
-  var res_celda = getParam(req, 'res_celda', 'gridid_16km')
+  var res_celda = getParam(req, 'res_celda', default_resolution)
 
   pool.any(queries.getGrididsNiche.getGridids, {
     res_celda: res_celda
@@ -2430,9 +2456,9 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
   var target_taxons     = getParam(req, 'target_taxons')
   var sfecha            = false // getParam(req, 'sfecha', false)
   // var sfosil            = getParam(req, 'sfosil', false)
-  var liminf            = getParam(req, 'liminf', new Date("1500-01-01"))
+  var liminf            = getParam(req, 'liminf', verb_utils.formatDate(new Date("1500-01-01")) )
   var limsup            = getParam(req, 'limsup',  year+"-"+month+"-"+day)
-  var grid_res          = getParam(req, 'grid_res', 16)
+  var grid_res          = getParam(req, 'grid_res', default_resolution)
   var region            = getParam(req, 'region', 1)
 
   console.log("liminf: " + liminf)
@@ -2605,12 +2631,12 @@ exports.getCellOcurrences = function(req, res) {
   var target_taxons     = getParam(req, 'target_taxons')
   var sfecha            = false //getParam(req, 'sfecha', false)
   // var sfosil            = getParam(req, 'sfosil', false)
-  var liminf            = getParam(req, 'liminf', new Date("1500-01-01"))
+  var liminf            = getParam(req, 'lininf', verb_utils.formatDate(new Date("1500-01-01")) )
   var limsup            = getParam(req, 'limsup',  year+"-"+month+"-"+day)
   // var liminf            = getParam(req, 'liminf', 1500)
   // var limsup            = getParam(req, 'limsup', new Date().getFullYear())
-  var grid_res          = getParam(req, 'grid_res', 16)
-  var region            = getParam(req, 'region', 1)
+  var grid_res          = getParam(req, 'grid_res', default_resolution)
+  var region            = getParam(req, 'region', default_region)
   var longitud          = getParam(req, 'longitud', 0)
   var latitud           = getParam(req, 'latitud', 0)
 
@@ -2629,7 +2655,7 @@ exports.getCellOcurrences = function(req, res) {
                 + " and aniocolecta <> 9999 and aniocolecta <> -1)"
 
   if(sfecha === true){
-    where_filter += " or (true and a.gridid_statekm is not null)"
+    where_filter += " or (true and a.gridid_"+grid_res+"km is not null)"
   }
 
   
