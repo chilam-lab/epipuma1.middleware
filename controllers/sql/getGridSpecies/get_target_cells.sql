@@ -13,9 +13,9 @@ FROM (
 	ON b.spid = c.spid
 	WHERE b.$<gridid:raw> is not null
 	$<where_filter:raw>
-		  AND b.gid = ANY(ARRAY(
-						SELECT unnest(gid)
-						FROM $<view:raw>
-						WHERE footprint_region = $<region:raw>
-					))
+	  AND b.gid = ANY(ARRAY(
+					SELECT unnest(gid)
+					FROM $<view:raw>
+					WHERE footprint_region = $<region:raw>
+				))
 ) as tab_a

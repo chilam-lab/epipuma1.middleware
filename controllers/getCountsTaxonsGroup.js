@@ -39,6 +39,11 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   var data_target = {}
   var str_query = ''
 
+  var date_new = new Date()
+  var day = date_new.getDate()
+  var month = date_new.getMonth() + 1
+  var year = date_new.getFullYear()
+
 
   data_request["decil_selected"] = verb_utils.getParam(req, 'decil_selected', [10])
 
@@ -46,9 +51,12 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   var grid_resolution = verb_utils.getParam(req, 'grid_resolution', default_resolution) 
   var region = parseInt(verb_utils.getParam(req, 'region', verb_utils.region_mx))
   var fosil = verb_utils.getParam(req, 'fosil', true)
-  var date  = verb_utils.getParam(req, 'date', true)
-  var lim_inf = verb_utils.getParam(req, 'lim_inf', 1500)
-  var lim_sup = verb_utils.getParam(req, 'lim_sup', 2020)
+
+  var date  = false //verb_utils.getParam(req, 'date', true)
+
+  var lim_inf = verb_utils.getParam(req, 'lim_inf', new Date("1500-01-01"))
+  var lim_sup = verb_utils.getParam(req, 'lim_sup',  year+"-"+month+"-"+day)
+
   var cells = verb_utils.getParam(req, 'excluded_cells', [])
 
   debug("grid_resolution: " + grid_resolution)
@@ -74,21 +82,17 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   data_request["where_exclude_target"] = verb_utils.getExcludeTargetWhereClause(target_group)
   debug("*****1: " + data_request["where_exclude_target"])
 
- 
 
   var where_filter_target    = ''
-  if (date){
-    where_filter_target += ' AND ( ( ( aniocolecta BETWEEN ' + lim_inf + ' AND ' + lim_sup + ' ) OR aniocolecta = 9999 )'
-  }
-  else{
-    where_filter_target += ' AND ( ( aniocolecta BETWEEN ' + lim_inf + ' AND ' + lim_sup + ' ) '
-  }
 
-  if(!fosil){
-    where_filter_target += " AND (ejemplarfosil != 'SI' or ejemplarfosil is null) )"
-  }
-  else{
-    where_filter_target += " OR ejemplarfosil = 'SI' )"
+  where_filter_target = " and (make_date(aniocolecta, mescolecta, diacolecta) between "
+                + "'" + lim_inf + "' and '" + lim_sup + "'"
+                + " and diacolecta <> 99 and diacolecta <> -1"
+                + " and mescolecta <> 99 and mescolecta <> -1"
+                + " and aniocolecta <> 9999 and aniocolecta <> -1) "
+
+  if(date === true){
+    where_filter_target += " or (true and b.gridid_statekm is not null)"
   }
 
   debug("where_filter_target: " + where_filter_target)

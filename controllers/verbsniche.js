@@ -990,7 +990,6 @@ exports.getRasterNiche = function (req, res, next) {
 
   var field = getParam(req, 'field', '')
   var level = parseInt(getParam(req, 'level', 0))
-  debug(level + ' kjrwnvnrwenjnvrjvrjkrvkn')
   var region = parseInt(getParam(req, 'footprint_region', default_region))
   var type = parseInt(getParam(req, 'type', 1))
 
@@ -2422,18 +2421,23 @@ exports.getGridGivenPoints = function (req, res, next) {
 exports.getGridSpeciesTaxonNiche = function (req, res, next) {
 
   debug("getGridSpeciesTaxonNiche")
+
+  var date = new Date()
+  var day = date.getDate()
+  var month = date.getMonth() + 1
+  var year = date.getFullYear()
   
   var target_taxons     = getParam(req, 'target_taxons')
-  var sfecha            = getParam(req, 'sfecha', false)
-  var sfosil            = getParam(req, 'sfosil', false)
-  var liminf            = getParam(req, 'liminf', 1500)
-  var limsup            = getParam(req, 'limsup', new Date().getFullYear())
+  var sfecha            = false // getParam(req, 'sfecha', false)
+  // var sfosil            = getParam(req, 'sfosil', false)
+  var liminf            = getParam(req, 'liminf', new Date("1500-01-01"))
+  var limsup            = getParam(req, 'limsup',  year+"-"+month+"-"+day)
   var grid_res          = getParam(req, 'grid_res', 16)
   var region            = getParam(req, 'region', 1)
 
-  // console.log("liminf: " + liminf)
-  // console.log("limsup: " + limsup)
-  // console.log("sfecha: " + sfecha)
+  console.log("liminf: " + liminf)
+  console.log("limsup: " + limsup)
+  console.log("sfecha: " + sfecha)
   // console.log("sfosil: " + sfosil)
 
   var species_filter  = verb_utils.getWhereClauseFromGroupTaxonArray(target_taxons, true)
@@ -2443,33 +2447,24 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
   var where_filter    = ''
 
 
+  where_filter = " and (make_date(aniocolecta, mescolecta, diacolecta) between "
+                + "'" + liminf + "' and '" + limsup + "'"
+                + " and diacolecta <> 99 and diacolecta <> -1"
+                + " and mescolecta <> 99 and mescolecta <> -1"
+                + " and aniocolecta <> 9999 and aniocolecta <> -1)"
 
-
-  if (sfecha){
-    where_filter += ' AND ( ( ( aniocolecta BETWEEN ' + liminf + ' AND ' + limsup + ' ) OR aniocolecta = 9999 )'
-  }
-  else{
-    // Esta condicion esta filtrando tmb los fosiles, ya que los registros fosiles tienen año 9999
-    where_filter += ' AND ( ( aniocolecta BETWEEN ' + liminf + ' AND ' + limsup + ' ) '
-  }
-
-  if(!sfosil){
-    where_filter += " AND (ejemplarfosil != 'SI' or ejemplarfosil isnull) )"
-  }
-  else{
-    // TODO: Se debe validar si se piden o no foisles y agregar la sentencia de OR ejemplarfosil = 'SI'
-    where_filter += " OR ejemplarfosil = 'SI' )"
+  if(sfecha === true){
+    where_filter += " or (true and a.gridid_statekm is not null)"
   }
 
-
-  debug("species_filter: " + species_filter)
-  debug("resolution_view: " + resolution_view)
-  debug("region: " + region)
-  debug("gridid: " + gridid)
-  debug("snib_grid_xxkm: " + snib_grid_xxkm)
-  debug("where_filter: " + where_filter)
-  debug("liminf: " + liminf)
-  debug("limsup: " + limsup)
+  // debug("species_filter: " + species_filter)
+  // debug("resolution_view: " + resolution_view)
+  // debug("region: " + region)
+  // debug("gridid: " + gridid)
+  // debug("snib_grid_xxkm: " + snib_grid_xxkm)
+  // debug("where_filter: " + where_filter)
+  // debug("liminf: " + liminf)
+  // debug("limsup: " + limsup)
 
 
 
@@ -2601,12 +2596,19 @@ exports.getCountByYear = function(req, res) {
 exports.getCellOcurrences = function(req, res) {
 
   debug("getCellOcurrences")
+
+  var date = new Date()
+  var day = date.getDate()
+  var month = date.getMonth() + 1
+  var year = date.getFullYear()
   
   var target_taxons     = getParam(req, 'target_taxons')
-  var sfecha            = getParam(req, 'sfecha', false)
-  var sfosil            = getParam(req, 'sfosil', false)
-  var liminf            = getParam(req, 'liminf', 1500)
-  var limsup            = getParam(req, 'limsup', new Date().getFullYear())
+  var sfecha            = false //getParam(req, 'sfecha', false)
+  // var sfosil            = getParam(req, 'sfosil', false)
+  var liminf            = getParam(req, 'liminf', new Date("1500-01-01"))
+  var limsup            = getParam(req, 'limsup',  year+"-"+month+"-"+day)
+  // var liminf            = getParam(req, 'liminf', 1500)
+  // var limsup            = getParam(req, 'limsup', new Date().getFullYear())
   var grid_res          = getParam(req, 'grid_res', 16)
   var region            = getParam(req, 'region', 1)
   var longitud          = getParam(req, 'longitud', 0)
@@ -2619,14 +2621,18 @@ exports.getCellOcurrences = function(req, res) {
   var where_filter    = ''
   var grid_table      = 'grid_'+ grid_res + 'km_aoi'
 
-  if (sfecha)
-    where_filter += ' AND ( ( aniocolecta BETWEEN ' + liminf + ' AND ' + limsup + ' ) OR aniocolecta = 9999 )'
-  else
-    where_filter += ' AND ( aniocolecta BETWEEN ' + liminf + ' AND ' + limsup + ' ) '
 
-  if(!sfosil)
-    where_filter += " AND (ejemplarfosil != 'SI' or ejemplarfosil isnull)"
+  where_filter = " and (make_date(aniocolecta, mescolecta, diacolecta) between "
+                + "'" + liminf + "' and '" + limsup + "'"
+                + " and diacolecta <> 99 and diacolecta <> -1"
+                + " and mescolecta <> 99 and mescolecta <> -1"
+                + " and aniocolecta <> 9999 and aniocolecta <> -1)"
 
+  if(sfecha === true){
+    where_filter += " or (true and a.gridid_statekm is not null)"
+  }
+
+  
   /*const query1 = pgp.as.format(queries.basicAnalysis.getCellOcurrences, {'species_filter' : species_filter, 
             'resolution_view': resolution_view,
             'region'         : region,
@@ -2645,8 +2651,6 @@ exports.getCellOcurrences = function(req, res) {
   debug("where_filter: " + where_filter)
   debug("longitud: " + longitud)
   debug("latitud: " + latitud)
-
-  // debug(queries.basicAnalysis.getCellOcurrences)
 
   pool.any(queries.basicAnalysis.getCellOcurrences, {
             'species_filter' : species_filter, 

@@ -6,7 +6,8 @@ SELECT
 	raster_bins.tag,
 	raster_bins."type",
 	raster_bins.coeficiente,
-	raster_bins.unidad
+	raster_bins.unidad,
+	raster_bins.description
 FROM raster_bins 
 	LEFT JOIN fuentes_bioclimaticas 
 	ON "type" = fuentes_bioclimaticas.id 
