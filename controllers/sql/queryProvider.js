@@ -97,7 +97,8 @@ var queryProvider = {
   },
   getVariablesNiche: {
     getVariablesReino: sqlPath('especie/get_variables_reino.sql'),
-    getVariables: sqlPath('especie/get_variables.sql')
+    getVariables: sqlPath('especie/get_variables.sql'),
+    getVariablesSpecies: sqlPath('especie/get_variables_species.sql')
   },
   getRasterNiche: {
     getRasterAvailableVariables: sqlPath('raster/raster_available_variables.sql'),

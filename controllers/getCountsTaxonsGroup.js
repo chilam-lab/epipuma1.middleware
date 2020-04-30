@@ -54,7 +54,7 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
 
   var date  = false //verb_utils.getParam(req, 'date', true)
 
-  var lim_inf = verb_utils.getParam(req, 'lim_inf', new Date("1500-01-01"))
+  var lim_inf = verb_utils.getParam(req, 'lim_inf', verb_utils.formatDate(new Date("1500-01-01")) )
   var lim_sup = verb_utils.getParam(req, 'lim_sup',  year+"-"+month+"-"+day)
 
   var cells = verb_utils.getParam(req, 'excluded_cells', [])
