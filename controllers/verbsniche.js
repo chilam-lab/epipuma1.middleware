@@ -946,22 +946,48 @@ exports.getVariablesNiche = function (req, res, next) {
   }
   else{
 
-    pool.any(queries.getVariablesNiche.getVariables, {
-      taxon: field,
-      ad_param: ad_param,
-      order_param: order_param,
-      parent_taxon: parentfield,
-      parent_valor: parentitem,
-      region:footprint_region
-    })
-        .then(function (data) {
-              // debug(data)
-          res.json({'data': data})
-        })
-        .catch(function (error) {
-          debug(error)
-          next(error)
-        })
+    if(parentfield!=='generovalido'){
+
+      pool.any(queries.getVariablesNiche.getVariables, {
+        taxon: field,
+        ad_param: ad_param,
+        order_param: order_param,
+        parent_taxon: parentfield,
+        parent_valor: parentitem,
+        region:footprint_region
+      })
+          .then(function (data) {
+                // debug(data)
+            res.json({'data': data})
+          })
+          .catch(function (error) {
+            debug(error)
+            next(error)
+          })
+
+
+    } else {
+
+
+      pool.any(queries.getVariablesNiche.getVariablesSpecies, {
+        taxon: field,
+        ad_param: ad_param,
+        order_param: order_param,
+        parent_taxon: parentfield,
+        parent_valor: parentitem,
+        region:footprint_region
+      })
+          .then(function (data) {
+                // debug(data)
+            res.json({'data': data})
+          })
+          .catch(function (error) {
+            debug(error)
+            next(error)
+          })
+
+
+    }
 
   }
 
