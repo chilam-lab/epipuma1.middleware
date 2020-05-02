@@ -1,6 +1,7 @@
 -- TODO: Se puede agregar los filtros como el verbo getSpecies
-select 	
+select 	DISTINCT
 		$<columnas:raw>,
+		description,
 		(generovalido || ' ' || especieepiteto || ' ' || nombreinfra) as especievalidabusqueda,
 		icount($<res_celda_sp:raw>) as occ
 from sp_snib
