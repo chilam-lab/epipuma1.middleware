@@ -914,8 +914,7 @@ exports.getVariablesNiche = function (req, res, next) {
   if(field === "especieepiteto"){
     ad_param = " (generovalido || ' ' || especieepiteto) "
     order_param = " generovalido, especieepiteto "
-  }
-  else{
+  } else{
     ad_param = field
     order_param = field
   }
@@ -946,7 +945,27 @@ exports.getVariablesNiche = function (req, res, next) {
   }
   else{
 
-    if(parentfield!=='generovalido'){
+    if( field === 'especievalidabusqueda'){
+
+      pool.any(queries.getVariablesNiche.getSpeciesVariables, {
+        taxon: field,
+        ad_param: ad_param,
+        order_param: order_param,
+        parent_valor: parentitem,
+        region:footprint_region
+      })
+          .then(function (data) {
+                // debug(data)
+            res.json({'data': data})
+          })
+          .catch(function (error) {
+            debug(error)
+            next(error)
+          })
+
+
+
+    }else if(parentfield!=='generovalido'){
 
       pool.any(queries.getVariablesNiche.getVariables, {
         taxon: field,
@@ -2080,7 +2099,7 @@ exports.getEntListNiche = function (req, res, next) {
 
     debug('Parsea datos, (antes de ejecutar query) en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
 
-    /*debug("---------------------------------------");
+    debug("---------------------------------------");
     debug('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
     const query1 = pgp.as.format(queries.getEntListNiche.getEntList, {
                                     str: str,
@@ -2097,7 +2116,7 @@ exports.getEntListNiche = function (req, res, next) {
                                   });
     debug('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
     debug(query1);
-    debug("---------------------------------------")*/
+    debug("---------------------------------------");
 
     pool.any(queries.getEntListNiche.getEntList, {
       str: str,
