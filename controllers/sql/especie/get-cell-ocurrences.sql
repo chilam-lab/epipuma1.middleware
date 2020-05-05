@@ -10,7 +10,7 @@ gids_countries AS (
 	WHERE footprint_region=$<region:raw>
 ),
 grid_ids AS(
-	SELECT cast(a.$<gridid:raw> as text) AS gridid, "NOM_ENT" as entidad
+	SELECT cast(a.$<gridid:raw> as text) AS gridid, "$<col_name:raw>" as entidad
 	FROM $<grid_table:raw> AS a 
 	WHERE ST_Intersects(a.the_geom, ST_SetSRID(ST_Point($<longitud:raw>, $<latitud:raw>), 4326))
 )
