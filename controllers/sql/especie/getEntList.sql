@@ -1,12 +1,13 @@
 -- TODO: Se puede agregar los filtros como el verbo getSpecies
 -- Requiere realizar la agrupación de todas las especies que considen con una cadena dada,
 -- esto consume tiempo excesivo para un operación rápida que se necesita
-select 	
-		$<columnas:raw>
+select
+		$<columnas:raw>,
 		--reinovalido, phylumdivisionvalido, clasevalida, ordenvalido, familiavalida, generovalido, especievalidabusqueda,
 		--distinct clasevalida,
 		--icount(array[]::int[]) as occ
 		--icount($<res_celda_sp:raw>) as occ
+		case '$(nivel:raw)' WHEN 'generovalido' THEN description ELSE '' END  as description
 from sp_snib_region
 where   
 		--lower(clasevalida) like lower('Ma%')

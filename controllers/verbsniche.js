@@ -914,8 +914,7 @@ exports.getVariablesNiche = function (req, res, next) {
   if(field === "especieepiteto"){
     ad_param = " (generovalido || ' ' || especieepiteto) "
     order_param = " generovalido, especieepiteto "
-  }
-  else{
+  } else{
     ad_param = field
     order_param = field
   }
@@ -946,7 +945,27 @@ exports.getVariablesNiche = function (req, res, next) {
   }
   else{
 
-    if(parentfield!=='generovalido'){
+    if( field === 'especievalidabusqueda'){
+
+      pool.any(queries.getVariablesNiche.getSpeciesVariables, {
+        taxon: field,
+        ad_param: ad_param,
+        order_param: order_param,
+        parent_valor: parentitem,
+        region:footprint_region
+      })
+          .then(function (data) {
+                // debug(data)
+            res.json({'data': data})
+          })
+          .catch(function (error) {
+            debug(error)
+            next(error)
+          })
+
+
+
+    }else if(parentfield!=='generovalido'){
 
       pool.any(queries.getVariablesNiche.getVariables, {
         taxon: field,
@@ -2080,7 +2099,7 @@ exports.getEntListNiche = function (req, res, next) {
 
     debug('Parsea datos, (antes de ejecutar query) en: ' + verb_utils.parseHrtimeToSeconds(process.hrtime(startTime)) + 'segundos');
 
-    /*debug("---------------------------------------");
+    debug("---------------------------------------");
     debug('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
     const query1 = pgp.as.format(queries.getEntListNiche.getEntList, {
                                     str: str,
@@ -2097,7 +2116,7 @@ exports.getEntListNiche = function (req, res, next) {
                                   });
     debug('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
     debug(query1);
-    debug("---------------------------------------")*/
+    debug("---------------------------------------");
 
     pool.any(queries.getEntListNiche.getEntList, {
       str: str,
@@ -2640,6 +2659,15 @@ exports.getCellOcurrences = function(req, res) {
   var longitud          = getParam(req, 'longitud', 0)
   var latitud           = getParam(req, 'latitud', 0)
 
+  debug("res: " + grid_res)
+
+  var col_name = ""
+  if(grid_res == "mun")
+    col_name = "NOM_MUN"
+  else if(grid_res == "state" || grid_res == "ageb")
+     col_name = "NOM_ENT"
+   else
+     col_name = ""
   
   var species_filter  = verb_utils.getWhereClauseFromGroupTaxonArray(target_taxons, true)
   var resolution_view = 'grid_geojson_' + grid_res + 'km_aoi'
@@ -2677,6 +2705,8 @@ exports.getCellOcurrences = function(req, res) {
   debug("where_filter: " + where_filter)
   debug("longitud: " + longitud)
   debug("latitud: " + latitud)
+  debug("col_name: " + col_name)
+  
 
   pool.any(queries.basicAnalysis.getCellOcurrences, {
             'species_filter' : species_filter, 
@@ -2686,7 +2716,8 @@ exports.getCellOcurrences = function(req, res) {
             'grid_table'     : grid_table,
             'where_filter'   : where_filter,
             'longitud'       : longitud,
-            'latitud'       : latitud}
+            'latitud'       : latitud,
+            'col_name'      : col_name}
       ).then(function (data) {
         debug(data.length + ' ocurrences')
         res.json({

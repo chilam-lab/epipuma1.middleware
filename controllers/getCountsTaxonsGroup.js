@@ -260,7 +260,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
           }
 
           const query1 = pgp.as.format(queries.basicAnalysis.getGridIdByLatLong, data_temp)
-          debug("iter " + iter + query1)
+          // debug("iter " + iter + query1)
 
           return t.one(queries.basicAnalysis.getGridIdByLatLong, data_temp).then(resp => {
 
@@ -315,8 +315,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
   }).then(data_iteration => {
 
-      debug(data_iteration)
-
+      // debug(data_iteration)
 
       // debug("data_iteration[0].ni: " + data_iteration[0].ni)
       // debug("data_iteration.length: " + data_iteration.length)
