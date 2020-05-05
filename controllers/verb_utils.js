@@ -785,7 +785,13 @@ verb_utils.processGroupDataForCellId = function (data, apriori, mapa_prob, gridi
   }  
 
   var groups = data.map(function(d) {
-    if(d.cells.indexOf(gridid) !== -1){
+
+    // debug(d.cells)
+    // debug(gridid)
+    
+    if(d.cells.indexOf(parseInt(gridid)) !== -1){
+
+      // debug("********** entra")
       
       var type = d.tipo === 0 ? "bio" : "raster"
 
@@ -794,7 +800,6 @@ verb_utils.processGroupDataForCellId = function (data, apriori, mapa_prob, gridi
       else
         hasraster = true
       
-      //debug(d)
       return {
         score: parseFloat(d.score),  
         reinovalido: d.reinovalido, 
@@ -817,6 +822,9 @@ verb_utils.processGroupDataForCellId = function (data, apriori, mapa_prob, gridi
       }
     }
   })
+
+
+  debug(groups)
 
 
   groups.forEach(function (item, index){
@@ -879,7 +887,7 @@ verb_utils.processGroupDataForCellId = function (data, apriori, mapa_prob, gridi
     debug("mapa_prob: " + val_mapa_prob)
   }
 
-  //debug(info_incell)
+  debug(info_incell)
 
   return info_incell
 
@@ -1046,7 +1054,7 @@ verb_utils.processDataForScoreCellValidation = function (data, apriori, mapa_pro
 // Obtiene la sumatoria de score por celdas contemplando si existe apriori o probabildad
 verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, all_cells = [], isvalidation = false){
 
-    debug("processDataForScoreCell")
+    debug("****************************** processDataForScoreCell")
     // debug("isvalidation: " + isvalidation)    
 
     var cells_array = []
@@ -1086,6 +1094,11 @@ verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, all_cel
   cells_array.forEach(function (item, index){
 
     item.cells.forEach(function (cell_item, index){
+
+      // debug(cell_item)
+      // if(cell_item == 268 || cell_item == 269){
+      //   debug("******* si esta: " + cell_item)  
+      // }
       
       var idsp = ""+item.id+cell_item
         
@@ -1124,12 +1137,19 @@ verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, all_cel
    for(var i=0; i<map_cell.length; i++){
 
         const entry = map_cell[i];
-        debug(entry)
+        // debug(entry)
 
 
         var tscore = parseFloat(entry["value"])
         var gridid = entry["key"]
         keys.push(gridid)
+
+
+        // debug(gridid)
+        // if(gridid == 268 || gridid == 269){
+        //   debug("******* si esta: " + gridid)  
+        // }
+        
 
         var apriori_computed = false
         if(apriori){
@@ -1160,14 +1180,16 @@ verb_utils.processDataForScoreCell = function (data, apriori, mapa_prob, all_cel
     var test = []
     // debug(val_apriori)
     // debug(all_cells)
-    // debug(all_cells["cells"])
+    // debug("length: " + all_cells["cells"].length)
+
+
     
     // agregando las celdas
     if(all_cells["cells"]){
 
       for(var i=0; i<all_cells.cells.length; i++){
         var gridid = all_cells.cells[i];
-        // debug(gridid)
+
         if(keys.indexOf(gridid) === -1){
           cell_score_array.push({gridid: gridid, tscore: val_apriori})  
         }
@@ -2020,7 +2042,7 @@ verb_utils.get_target_cells = function(gridid, where_target, view, region, cells
   partition = partition.reverse()
   
 
-  debug(partition)
+  // debug(partition)
 
 
   debug("partition[1]: " + partition[1])
@@ -2042,7 +2064,7 @@ verb_utils.get_target_cells = function(gridid, where_target, view, region, cells
 
   for (var i = 0; i < 10; i ++) {
 
-    debug(partition[i+1])
+    // debug(partition[i+1])
 
     vp.push(0)
     fn.push(0)
@@ -3492,7 +3514,7 @@ verb_utils.getCovarGroupQueries = function (queries, data_request, covars_groups
   })
 
   // debug(co)
-  debug(query_covar)
+  // debug(query_covar)
 
   return query_covar  
 }
