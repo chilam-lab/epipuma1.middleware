@@ -785,7 +785,13 @@ verb_utils.processGroupDataForCellId = function (data, apriori, mapa_prob, gridi
   }  
 
   var groups = data.map(function(d) {
-    if(d.cells.indexOf(gridid) !== -1){
+
+    // debug(d.cells)
+    // debug(gridid)
+    
+    if(d.cells.indexOf(parseInt(gridid)) !== -1){
+
+      // debug("********** entra")
       
       var type = d.tipo === 0 ? "bio" : "raster"
 
@@ -794,7 +800,6 @@ verb_utils.processGroupDataForCellId = function (data, apriori, mapa_prob, gridi
       else
         hasraster = true
       
-      //debug(d)
       return {
         score: parseFloat(d.score),  
         reinovalido: d.reinovalido, 
@@ -817,6 +822,9 @@ verb_utils.processGroupDataForCellId = function (data, apriori, mapa_prob, gridi
       }
     }
   })
+
+
+  debug(groups)
 
 
   groups.forEach(function (item, index){
@@ -879,7 +887,7 @@ verb_utils.processGroupDataForCellId = function (data, apriori, mapa_prob, gridi
     debug("mapa_prob: " + val_mapa_prob)
   }
 
-  //debug(info_incell)
+  debug(info_incell)
 
   return info_incell
 
