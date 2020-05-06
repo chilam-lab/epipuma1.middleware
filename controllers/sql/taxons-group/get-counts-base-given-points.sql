@@ -22,6 +22,7 @@ SELECT
         covars.tag,
         covars.unidad,
        	covars.coeficiente,
+       	covars.description,
 		--covars.name as name,
 		covars.cells  as cells,
 		icount(target.cells & covars.cells) AS nij,

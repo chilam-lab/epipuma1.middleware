@@ -38,6 +38,7 @@ SELECT
         covars.bid,
         covars.icat,
         covars.tag,
+        covars.description,
         covars.unidad,
        	covars.coeficiente,
 		--covars.name as name,

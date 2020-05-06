@@ -1,5 +1,5 @@
 /**
-* @module controllers/getCountsTaxonsGroup
+* @module controllers/countsTaxonsGroupTimeValidation
 * @requires debug
 * @requires pg-promise
 * @requires moment
@@ -7,7 +7,7 @@
 * @requires module:controllers/verb_utils
 * @requires module:controllers/sql/queryProvider
 **/
-var debug = require('debug')('verbs:getCountsTaxonsGroup')
+var debug = require('debug')('verbs:countsTaxonsGroupTimeValidation')
 var moment = require('moment')
 var verb_utils = require('./verb_utils')
 var queries = require('./sql/queryProvider')
@@ -31,13 +31,18 @@ var request_counter_map = d3.map([]);
  * @param {function} next - Express next middleware function
  **/
 
-exports.getTaxonsGroupRequestV2 = function(req, res, next) {
+exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
 
-  debug('getTaxonsGroupRequestV2')
+  debug('countsTaxonsGroupTimeValidation')
 
   var data_request = {}
   var data_target = {}
   var str_query = ''
+
+  var date_new = new Date()
+  var day = date_new.getDate()
+  var month = date_new.getMonth() + 1
+  var year = date_new.getFullYear()
 
 
   data_request["decil_selected"] = verb_utils.getParam(req, 'decil_selected', [10])
@@ -46,9 +51,12 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   var grid_resolution = verb_utils.getParam(req, 'grid_resolution', default_resolution) 
   var region = parseInt(verb_utils.getParam(req, 'region', verb_utils.region_mx))
   var fosil = verb_utils.getParam(req, 'fosil', true)
-  var date  = verb_utils.getParam(req, 'date', true)
-  var lim_inf = verb_utils.getParam(req, 'lim_inf', 1500)
-  var lim_sup = verb_utils.getParam(req, 'lim_sup', 2020)
+
+  var date  = false //verb_utils.getParam(req, 'date', true)
+
+  var lim_inf = verb_utils.getParam(req, 'lim_inf', verb_utils.formatDate(new Date("1500-01-01")) )
+  var lim_sup = verb_utils.getParam(req, 'lim_sup',  year+"-"+month+"-"+day)
+
   var cells = verb_utils.getParam(req, 'excluded_cells', [])
 
   debug("grid_resolution: " + grid_resolution)
@@ -74,21 +82,17 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   data_request["where_exclude_target"] = verb_utils.getExcludeTargetWhereClause(target_group)
   debug("*****1: " + data_request["where_exclude_target"])
 
- 
 
   var where_filter_target    = ''
-  if (date){
-    where_filter_target += ' AND ( ( ( aniocolecta BETWEEN ' + lim_inf + ' AND ' + lim_sup + ' ) OR aniocolecta = 9999 )'
-  }
-  else{
-    where_filter_target += ' AND ( ( aniocolecta BETWEEN ' + lim_inf + ' AND ' + lim_sup + ' ) '
-  }
 
-  if(!fosil){
-    where_filter_target += " AND (ejemplarfosil != 'SI' or ejemplarfosil is null) )"
-  }
-  else{
-    where_filter_target += " OR ejemplarfosil = 'SI' )"
+  where_filter_target = " and (make_date(aniocolecta, mescolecta, diacolecta) between "
+                + "'" + lim_inf + "' and '" + lim_sup + "'"
+                + " and diacolecta <> 99 and diacolecta <> -1"
+                + " and mescolecta <> 99 and mescolecta <> -1"
+                + " and aniocolecta <> 9999 and aniocolecta <> -1) "
+
+  if(date === true){
+    where_filter_target += " or (true and b.gridid_statekm is not null)"
   }
 
   debug("where_filter_target: " + where_filter_target)
@@ -256,7 +260,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
           }
 
           const query1 = pgp.as.format(queries.basicAnalysis.getGridIdByLatLong, data_temp)
-          debug("iter " + iter + query1)
+          // debug("iter " + iter + query1)
 
           return t.one(queries.basicAnalysis.getGridIdByLatLong, data_temp).then(resp => {
 
@@ -295,7 +299,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
 
             const query1 = pgp.as.format(query_analysis, data_request)
-            debug("iter " + iter + query1)
+            // debug("iter " + iter + query1)
             
             return t.any(query_analysis, data_request)
 
@@ -312,7 +316,6 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
   }).then(data_iteration => {
 
       debug(data_iteration)
-
 
       // debug("data_iteration[0].ni: " + data_iteration[0].ni)
       // debug("data_iteration.length: " + data_iteration.length)
@@ -416,9 +419,13 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
         var cell_id = 0
         if(data_request.get_grid_species !== false){
 
+          // debug(data)
           cell_id = data_request.cell_id
           debug("cell_id last: " + cell_id)
           data = verb_utils.processGroupDataForCellId(data, apriori, mapa_prob, cell_id)
+
+
+
         }
 
 
@@ -450,8 +457,6 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
           var decilper_iter = verb_utils.processCellDecilPerIter(json_response["data_response"], apriori, mapa_prob, data_request.all_cells, is_validation, decil_selected) 
           percentage_occ = decilper_iter.result_datapercentage
           decil_cells = decilper_iter.decil_cells
-
-          //debug(percentage_occ);
 
         }
 

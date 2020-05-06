@@ -16,6 +16,3 @@ WHERE
 --order by phylumdivisionvalido
 GROUP BY $<order_param:raw> ,
 		description
-
-ORDER BY $<ad_param:raw>,
-	description
