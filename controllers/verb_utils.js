@@ -731,6 +731,7 @@ verb_utils.processDataForScoreDecilTable = function (data_cell, decil_selected){
             item.nj = specie.nj
             item.njd = 1
             item.name = specie.name
+            item.description = specie.description
             map_spid.set(specie.name+cell_item.decile, item)
         }
         else{
@@ -1279,7 +1280,8 @@ verb_utils.processCellDecilPerIter = function(data_group, apriori, mapa_prob, al
           var item = decil_map.get(key)
 
           // debug(item)
-          // debug(specie_decil_item)
+          debud('--------------------------------------------------------------------------')
+          debug(specie_decil_item)
 
 
           item.epsilons += specie_decil_item.epsilons
@@ -1288,6 +1290,7 @@ verb_utils.processCellDecilPerIter = function(data_group, apriori, mapa_prob, al
           item.occ +=  specie_decil_item.occ
           item.count += 1
           item.species = specie_decil_item.species
+          item.description = specie_decil_item.description
 
           // decil_map.set(key, item)
           // debug("item.count: " + item.count)
@@ -1315,7 +1318,8 @@ verb_utils.processCellDecilPerIter = function(data_group, apriori, mapa_prob, al
       score: parseFloat(decil_item.scores / decil_item.count).toFixed(2),
       occ_perdecile:  parseFloat(decil_item.occ_perdecile / decil_item.count).toFixed(2) + "%",
       occ: parseFloat(decil_item.occ / decil_item.count).toFixed(2) + "%",
-      species: decil_item.species
+      species: decil_item.species,
+      description: decil_item.description
 
     }
     
@@ -1357,7 +1361,7 @@ verb_utils.getPercentageOccPerDecil = function(data, length_decil){
       //   debug("occ_perdecile: " + occ_perdecile)
       // }
 
-      decil_list.push({decil: specie.decile, species: value_abio, epsilons: specie.epsilon, scores: specie.score, occ: per_decil, occ_perdecile: occ_perdecile});
+      decil_list.push({decil: specie.decile, species: value_abio, epsilons: specie.epsilon, description: specie.description, scores: specie.score, occ: per_decil, occ_perdecile: occ_perdecile});
 
   });
 
@@ -1529,7 +1533,7 @@ verb_utils.processDataForScoreCellTable = function (data, apriori, mapa_prob){
       // total_length = item.n
 
       item.cells.forEach(function (cell_item, index) {
-      
+          
           // var name = item.reinovalido === "" ? (item.layer + " " + item.tag) : (item.generovalido +" "+item.especieepiteto+" "+item.nombreinfra)
           var name = item.reinovalido === "" ? (item.label + "|" + item.tag + "|" + item.unidad + "|" + item.coeficiente) : (item.generovalido +" "+item.especieepiteto+" "+item.nombreinfra)
 
@@ -1540,7 +1544,8 @@ verb_utils.processDataForScoreCellTable = function (data, apriori, mapa_prob){
               score: parseFloat(item.score),
               epsilon: parseFloat(item.epsilon),
               nj: parseFloat(item.nj),
-              name: name
+              name: name,
+              description: item.description
           }
 
           cells.set("" + cell_item + name, item_map)
@@ -1568,6 +1573,7 @@ verb_utils.processDataForScoreCellTable = function (data, apriori, mapa_prob){
         item.njs.push(add.nj)
         item.names.push(add.name)
         item.ids.push(add.cell+add.name)
+        item.descriptions.push(add.description)
 
         return item
     },
@@ -1584,6 +1590,7 @@ verb_utils.processDataForScoreCellTable = function (data, apriori, mapa_prob){
             item.njs.splice(index, 1);
             item.names.splice(index, 1);
             item.ids.splice(index, 1);
+            item.descriptions.splice(index, 1);
         }
 
         return item
@@ -1596,7 +1603,8 @@ verb_utils.processDataForScoreCellTable = function (data, apriori, mapa_prob){
             scores: [],
             njs: [],
             names: [],
-            ids: []
+            ids: [],
+            descriptions: []
 
         }
     }
@@ -1661,6 +1669,7 @@ verb_utils.processDataForScoreCellTable = function (data, apriori, mapa_prob){
           specie.score = entry["value"].scores[j];
           specie.nj = entry["value"].njs[j];
           specie.name = entry["value"].names[j];
+          specie.description = entry['value'].descriptions[j];
 
           species.push(specie)
       }
@@ -3133,13 +3142,16 @@ verb_utils.getFieldsFromLevel = function (level) {
   }
 
   if (level === 'layer')
-    fields  += ", icat::varchar, layer, tag, unidad, coeficiente::varchar "
+    fields  += ", icat::varchar, layer, tag, unidad, coeficiente::varchar, description "
   else if(level === 'bid')
-    fields  += ", icat::varchar, label, tag, unidad, coeficiente::varchar "
+    fields  += ", icat::varchar, label, tag, unidad, coeficiente::varchar, description "
   else 
     fields  += ", '' AS icat, '' AS label, '' AS tag, '' AS unidad, '' AS coeficiente "
 
   //debug("fields === " + fields)
+  if (level === 'genus' || level === 'species')
+    fields += ', description';
+
   return fields
 
 }
@@ -3234,12 +3246,15 @@ verb_utils.getGroupFieldsFromLevel = function (level) {
     }
 
    if(level === 'layer')
-        group_fields += ", icat, layer, tag, unidad, coeficiente "
+        group_fields += ", icat, layer, tag, unidad, coeficiente, description "
   else if(level === 'bid')
-        group_fields  += ", icat, label, tag, unidad, coeficiente "
+        group_fields  += ", icat, label, tag, unidad, coeficiente, description "
 
   }
 
+
+  if (level === 'genus' || level === 'species')
+    group_fields += ', description';
 
   //debug("group fields ="  + group_fields)
   return group_fields
