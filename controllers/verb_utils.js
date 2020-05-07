@@ -1280,8 +1280,8 @@ verb_utils.processCellDecilPerIter = function(data_group, apriori, mapa_prob, al
           var item = decil_map.get(key)
 
           // debug(item)
-          debud('--------------------------------------------------------------------------')
-          debug(specie_decil_item)
+          //debug('--------------------------------------------------------------------------')
+          //debug(specie_decil_item)
 
 
           item.epsilons += specie_decil_item.epsilons
@@ -2148,12 +2148,14 @@ verb_utils.getValidationValues = function (data_group){
     var repeated_cells = d3.map([])
 
     // Esta dejando el ultimo registro, no realiza un promedio del tscore de las celdas repetidas
+
+    debug('--------------------> DEBUG: --------------------->')
+    debug(train_cells)
     train_cells.forEach(function(item){
 
       temp_map.set(item.gridid, item.tscore)
 
     })
-
     // debug(item.data)
     // debug(temp_map.values())
     // debug(item.test_cells)
@@ -2166,9 +2168,15 @@ verb_utils.getValidationValues = function (data_group){
     // debug("test_cells:" + item.test_cells.length)
 
     // Interseción entre las celdas sin fosiles y las celdas
-    var arg_temp = item.test_cells.filter(value => -1 !== item.target_cells.indexOf(value))
+    debug('--------------------> ITEM: --------------------->')
+    debug(item)
+    debug('--------------------> END ITEM: --------------------->')
+    var arg_temp = item.test_cells
     debug("arg_temp:" + arg_temp.length)
 
+    debug('-------------------------> ARG MAP:---------------------------->')
+    debug(arg_temp)
+    debug('-------------------------> END ARG MAP:---------------------------->')
 
     arg_temp.forEach(function(cell_item){
     
@@ -2184,6 +2192,9 @@ verb_utils.getValidationValues = function (data_group){
 
     })
 
+    debug('-------------------------> TEMP VALUES:---------------------------->')
+    debug(temp_values)
+    debug('-------------------------> END TEMP VALUES:---------------------------->')
 
     var array = temp_map.values()
     array.sort(function(a, b){return a-b})
@@ -2207,9 +2218,11 @@ verb_utils.getValidationValues = function (data_group){
     limites.push(array[Math.floor(len*.8) - 1])
     limites.push(array[Math.floor(len*.9) - 1])
     limites.push(array[Math.floor(len) - 1])
-    
-    //debug(limites)
-    
+      
+    debug('-----------> LIMITES: ----------------->')
+    debug(limites)
+    debug('-----------> END LIMITES: ----------------->')
+
     // obtiene los deciles para obtener las métricas basados en lso resultados del conjunto de test
     var num_deciles = 11
 
@@ -2260,7 +2273,6 @@ verb_utils.getValidationValues = function (data_group){
         // debug("es VP:" + rango_deciles(row_value.score) > 9)
         //debug("decil: " + decil)
 
-
         if(row_value.score === null){
           nulo_temp++
         } else if(row_value.score >= limites[decil-1]){
@@ -2284,13 +2296,13 @@ verb_utils.getValidationValues = function (data_group){
         
       })
 
-      // debug("*****************")
-      // debug("umbral: " + limites[decil-1])
-      // debug("decil: " + decil)
-      // debug("vp_temp: " + vp_temp)
-      // debug("fn_temp: " + fn_temp)
-      // debug("nulo_temp: " + nulo_temp)
-      // debug("*****************")
+      debug("*****************")
+      debug("umbral: " + limites[decil-1])
+      debug("decil: " + decil)
+      debug("vp_temp: " + vp_temp)
+      debug("fn_temp: " + fn_temp)
+      debug("nulo_temp: " + nulo_temp)
+      debug("*****************")
 
       var result_iter = {}
       
@@ -2308,8 +2320,7 @@ verb_utils.getValidationValues = function (data_group){
 
   })
 
-  // debug(result_test_cells)
-
+  debug(result_test_cells)
 
   var cross_cells = crossfilter(result_test_cells)
   cross_cells.groupAll();
@@ -2371,7 +2382,7 @@ verb_utils.getValidationValues = function (data_group){
   }
 
   // debug(data_result)
-
+   debug('--------------------> END DEBUG: --------------------->')
   return data_result
 
 }
