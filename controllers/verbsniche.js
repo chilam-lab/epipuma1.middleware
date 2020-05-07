@@ -722,6 +722,14 @@ exports.getGroupValidationTables = function (req, res, next) {
   var res_celda_snib_tb = 'grid_geojson_'+grid_resolution+'km_aoi'
   var res_grid_id = 'gridid_'+grid_resolution+'km'
 
+  debug(filter);
+  debug(iter);
+  debug(idtbl);
+  debug(res_celda_sp);
+  debug(res_celda_snib_tb);
+  debug(footprint_region);
+  debug(res_grid_id);
+  debug(grid_resolution);
 
   pool.any(queries.getValidationTables.createGroupTables, {
     filter: filter,

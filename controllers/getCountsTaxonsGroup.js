@@ -327,7 +327,6 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
      var decil_selected = data_request["decil_selected"]
     
-    
       var data_response = {iter: (iter+1), data: data_iteration, test_cells: data_request["source_cells"], target_cells: data_request["target_cells"], apriori: data_request.apriori, mapa_prob: data_request.mapa_prob }
       json_response["data_response"] = json_response["data_response"] === undefined ? [data_response] : json_response["data_response"].concat(data_response)
       
@@ -480,9 +479,21 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
       
       debug("ERROR EN PROMESA" + error)
 
+      var message = '';
+
+      if(error.received === 0 && error.query.indexOf('select array_agg(cell) as total_cells') != -1){
+
+        message = 'No hay datos de validación espacial';
+
+      } else {
+        
+        message = "Error al ejecutar la petición";
+
+      }
+
       res.json({
           ok: false,
-          message: "Error al ejecutar la petición",
+          message: message,
           data:[],
           error: error
         })
