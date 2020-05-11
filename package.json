@@ -36,6 +36,7 @@
     "mocha": "^3.1.2",
     "moment": "^2.15.1",
     "nodemailer": "^6.4.4",
+    "pandas-js": "^0.2.4",
     "pg-promise": "^8.4.4"
   },
   "devDependencies": {

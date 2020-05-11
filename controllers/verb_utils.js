@@ -2990,11 +2990,11 @@ verb_utils.getWhereClauseFilter = function(fosil, date, lim_inf, lim_sup, cells,
   })
   whereClause += ') '
 
-  whereClause += " and (make_date(aniocolecta, mescolecta, diacolecta) between "
-                + "'" + lim_inf + "' and '" + lim_sup + "'"
-                + " and diacolecta <> 99 and diacolecta <> -1"
+  whereClause += " and (diacolecta <> 99 and diacolecta <> -1"
                 + " and mescolecta <> 99 and mescolecta <> -1"
-                + " and aniocolecta <> 9999 and aniocolecta <> -1) "
+                + " and aniocolecta <> 9999 and aniocolecta <> -1 "
+                + " and (make_date(aniocolecta, mescolecta, diacolecta) between "
+                + "'" + lim_inf + "' and '" + lim_sup + "'))"
 
   
 
@@ -3694,6 +3694,116 @@ verb_utils.getCommunityAnalysisQuery = function(queries, region, res_cells, regi
 
   //debug(query)
   return query
+}
+
+
+verb_utils.getScoreMap = function(data) {
+
+  var score_map = {}
+  var total_cells = 0;
+  data.forEach(covar => {
+
+    covar['cells'].forEach(cell => {
+
+      //debug(score_map[cell])
+      if(score_map[cell] == null){
+
+        score_map[cell] = parseFloat(covar['score'])
+        total_cells += 1
+
+
+      } else {
+
+        score_map[cell] += parseFloat(covar['score'])        
+
+      }
+
+    })
+
+  })
+
+  //debug(total_cells)
+  return score_map;
+
+}
+
+verb_utils.getTimeValidation = function(score_map, validation_cells) {
+
+  var time_validation = []
+  var score_validation_cells = {}
+
+  var scores_per_cell = Object.values(score_map);
+  scores_per_cell = scores_per_cell.sort(function(a,b){return b-a})
+
+  //debug(scores_per_cell)
+
+  var number_scored_cells = scores_per_cell.length
+  var limits = []
+
+  for(var i=1; i<=10; i++){
+
+    limits.push(scores_per_cell[parseInt((number_scored_cells * i)/10) - parseInt(i/10)])
+
+  }
+
+  //debug(limits)
+
+  var decil = 10
+  limits.forEach(limit => {
+
+    var null_freq = 0
+    var true_positive = 0
+    var false_negative = 0
+    var pre = 0
+    var fre = 0
+    var rre = 0
+
+    validation_cells.forEach(cell => {
+
+      if(score_map[parseInt(cell['gridid'])] == null){
+
+        null_freq += 1
+
+      } else if(score_map[parseInt(cell['gridid'])] >= limit){
+
+        true_positive += 1
+
+        if(cell['pre'] == true){
+
+          pre += 1
+        }
+
+      } else {
+
+        false_negative += 1
+
+        if(cell['pre'] == true){
+
+            fre += 1
+        }
+
+      }
+
+    })
+
+    time_validation.push({
+
+      decil: decil,
+      vp: true_positive,
+      fn: false_negative,
+      null: null_freq,
+      recall: true_positive/(true_positive + false_negative),
+      vvp: pre,
+      vfn: fre,
+      vrecall: pre/(pre + fre)
+
+    })
+
+    decil -= 1
+
+  })
+
+  return time_validation
 }
 
 module.exports = verb_utils
