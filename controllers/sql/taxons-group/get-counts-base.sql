@@ -1,6 +1,6 @@
 WITH aux_target AS (
 	SELECT DISTINCT cast (b.${res_celda_snib:raw} as integer) AS cells
-	FROM snib_grid_${grid_resolution:raw}km AS b
+	FROM snib AS b
 	JOIN 
 		(
 			SELECT spid

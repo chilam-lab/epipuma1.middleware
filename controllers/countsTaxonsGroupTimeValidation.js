@@ -179,11 +179,10 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
 
               debug("analisis basico")
 
-              //const query1 = pgp.as.format(query_analysis, data_request)
-              //debug(query1)
+              const query1 = pgp.as.format(query_analysis, data_request)
+              debug(query1)
 
-              /*
-                Se genera analisis
+              /*                Se genera analisis
               */
               return t.any(query_analysis, data_request)
 
