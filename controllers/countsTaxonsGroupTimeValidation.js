@@ -215,14 +215,15 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
               score_map = verb_utils.getScoreMap(data)
               time_validation = verb_utils.getTimeValidation(score_map, validation_data)
 
+              var score_array = verb_utils.scoreMapToScoreArray(score_map)
               //debug(time_validation)
 
               res.json({
                 ok: true,
                 data: data,
                 validation_data: validation_data['target_cells'],
-                score_map: score_map,
-                time_validation : time_validation
+                data_score_cell: score_array,
+                time_validation: time_validation
               })
 
           })
