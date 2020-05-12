@@ -3722,6 +3722,21 @@ verb_utils.getScoreMap = function(data) {
 
 }
 
+
+verb_utils.scoreMapToScoreArray = function(score_map){
+
+  var cells = Object.keys(score_map);
+  var score_array = []
+  cells.forEach(cell => {
+
+      score_array.push({'gridid': cell, 'tscore': score_map[cell]})
+
+  });
+
+  return score_array;
+
+}
+
 verb_utils.getTimeValidation = function(score_map, validation_cells) {
 
   var time_validation = []
