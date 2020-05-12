@@ -1,7 +1,7 @@
 SELECT array_agg(cells) AS target_cells
 FROM (
 	SELECT DISTINCT b.$<gridid:raw> AS cells
-	FROM snib_grid_$<grid_resolution:raw>km AS b
+	FROM snib AS b
 	JOIN 
 		(
 			SELECT spid
