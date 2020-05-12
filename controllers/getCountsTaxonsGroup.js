@@ -86,11 +86,8 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   var where_filter_target    = ''
 
   where_filter_target = " and (make_date(aniocolecta, mescolecta, diacolecta) between "
-                + "'" + lim_inf + "' and '" + lim_sup + "'"
-                + " and diacolecta <> 99 and diacolecta <> -1"
-                + " and mescolecta <> 99 and mescolecta <> -1"
-                + " and aniocolecta <> 9999 and aniocolecta <> -1) "
-
+                + "'" + lim_inf + "' and '" + lim_sup + "')"
+          
   if(date === true){
     where_filter_target += " or (true and b.gridid_statekm is not null)"
   }
@@ -162,6 +159,20 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
   pool.task(t => {
 
     var query = queries.getGridSpeciesNiche.getTargetCells
+
+    const query1 = pgp.as.format(query, {
+
+      gridid: data_request["res_celda_snib"],
+      where_target: data_request["where_target"].replace('WHERE', ''),
+      view: data_request["res_celda_snib_tb"],
+      region: data_request["region"],
+      cells: data_request["res_celda_sp"],
+      grid_resolution:data_request["grid_resolution"],
+      where_filter: data_request["where_filter_target"]
+
+    });
+
+    debug(query1)
 
     return t.one(query, {
 
