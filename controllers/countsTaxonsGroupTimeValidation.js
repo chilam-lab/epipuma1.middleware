@@ -218,12 +218,20 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
               var score_array = verb_utils.scoreMapToScoreArray(score_map)
               //debug(time_validation)
 
+              var data_freq = verb_utils.processDataForFreqSpecie([data], false)
+
+              var data_freq_cell = []
+              data_freq_cell = verb_utils.processDataForFreqCell(score_array)
+
+
               res.json({
                 ok: true,
                 data: data,
                 validation_data: validation_data['target_cells'],
                 data_score_cell: score_array,
-                time_validation: time_validation
+                time_validation: time_validation,
+                data_freq_cell: data_freq_cell,
+                data_freq: data_freq
               })
 
           })
