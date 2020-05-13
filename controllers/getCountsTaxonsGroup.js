@@ -309,8 +309,8 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
             // debug(data_request)
 
 
-            //const query1 = pgp.as.format(query_analysis, data_request)
-            //debug("iter " + iter + query1)
+            const query1 = pgp.as.format(query_analysis, data_request)
+            debug("iter " + iter + query1)
             
             return t.any(query_analysis, data_request)
 
