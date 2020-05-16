@@ -86,11 +86,8 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   var where_filter_target    = ''
 
   where_filter_target = " and (make_date(aniocolecta, mescolecta, diacolecta) between "
-                + "'" + lim_inf + "' and '" + lim_sup + "'"
-                + " and diacolecta <> 99 and diacolecta <> -1"
-                + " and mescolecta <> 99 and mescolecta <> -1"
-                + " and aniocolecta <> 9999 and aniocolecta <> -1) "
-
+                + "'" + lim_inf + "' and '" + lim_sup + "')"
+          
   if(date === true){
     where_filter_target += " or (true and b.gridid_statekm is not null)"
   }
@@ -162,6 +159,20 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
   pool.task(t => {
 
     var query = queries.getGridSpeciesNiche.getTargetCells
+
+    const query1 = pgp.as.format(query, {
+
+      gridid: data_request["res_celda_snib"],
+      where_target: data_request["where_target"].replace('WHERE', ''),
+      view: data_request["res_celda_snib_tb"],
+      region: data_request["region"],
+      cells: data_request["res_celda_sp"],
+      grid_resolution:data_request["grid_resolution"],
+      where_filter: data_request["where_filter_target"]
+
+    });
+
+    debug(query1)
 
     return t.one(query, {
 
@@ -259,8 +270,8 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
             'lat'               : data_request.lat
           }
 
-          const query1 = pgp.as.format(queries.basicAnalysis.getGridIdByLatLong, data_temp)
-          // debug("iter " + iter + query1)
+          //const query1 = pgp.as.format(queries.basicAnalysis.getGridIdByLatLong, data_temp)
+          //debug("iter " + iter + query1)
 
           return t.one(queries.basicAnalysis.getGridIdByLatLong, data_temp).then(resp => {
 
@@ -299,7 +310,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
 
             const query1 = pgp.as.format(query_analysis, data_request)
-            // debug("iter " + iter + query1)
+            debug("iter " + iter + query1)
             
             return t.any(query_analysis, data_request)
 
@@ -315,7 +326,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
   }).then(data_iteration => {
 
-      debug(data_iteration)
+      //debug(data_iteration)
 
       // debug("data_iteration[0].ni: " + data_iteration[0].ni)
       // debug("data_iteration.length: " + data_iteration.length)
@@ -326,7 +337,6 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
 
      var decil_selected = data_request["decil_selected"]
-    
     
       var data_response = {iter: (iter+1), data: data_iteration, test_cells: data_request["source_cells"], target_cells: data_request["target_cells"], apriori: data_request.apriori, mapa_prob: data_request.mapa_prob }
       json_response["data_response"] = json_response["data_response"] === undefined ? [data_response] : json_response["data_response"].concat(data_response)
@@ -458,6 +468,8 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
           percentage_occ = decilper_iter.result_datapercentage
           decil_cells = decilper_iter.decil_cells
 
+          //debug(percentage_occ);
+
         }
 
 
@@ -478,9 +490,21 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
       
       debug("ERROR EN PROMESA" + error)
 
+      var message = '';
+
+      if(error.received === 0 && error.query.indexOf('select array_agg(cell) as total_cells') != -1){
+
+        message = 'No hay datos de validación espacial';
+
+      } else {
+        
+        message = "Error al ejecutar la petición";
+
+      }
+
       res.json({
           ok: false,
-          message: "Error al ejecutar la petición",
+          message: message,
           data:[],
           error: error
         })

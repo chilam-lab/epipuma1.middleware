@@ -731,6 +731,7 @@ verb_utils.processDataForScoreDecilTable = function (data_cell, decil_selected){
             item.nj = specie.nj
             item.njd = 1
             item.name = specie.name
+            item.description = specie.description
             map_spid.set(specie.name+cell_item.decile, item)
         }
         else{
@@ -1279,7 +1280,8 @@ verb_utils.processCellDecilPerIter = function(data_group, apriori, mapa_prob, al
           var item = decil_map.get(key)
 
           // debug(item)
-          // debug(specie_decil_item)
+          //debug('--------------------------------------------------------------------------')
+          //debug(specie_decil_item)
 
 
           item.epsilons += specie_decil_item.epsilons
@@ -1288,6 +1290,7 @@ verb_utils.processCellDecilPerIter = function(data_group, apriori, mapa_prob, al
           item.occ +=  specie_decil_item.occ
           item.count += 1
           item.species = specie_decil_item.species
+          item.description = specie_decil_item.description
 
           // decil_map.set(key, item)
           // debug("item.count: " + item.count)
@@ -1315,7 +1318,8 @@ verb_utils.processCellDecilPerIter = function(data_group, apriori, mapa_prob, al
       score: parseFloat(decil_item.scores / decil_item.count).toFixed(2),
       occ_perdecile:  parseFloat(decil_item.occ_perdecile / decil_item.count).toFixed(2) + "%",
       occ: parseFloat(decil_item.occ / decil_item.count).toFixed(2) + "%",
-      species: decil_item.species
+      species: decil_item.species,
+      description: decil_item.description
 
     }
     
@@ -1357,7 +1361,7 @@ verb_utils.getPercentageOccPerDecil = function(data, length_decil){
       //   debug("occ_perdecile: " + occ_perdecile)
       // }
 
-      decil_list.push({decil: specie.decile, species: value_abio, epsilons: specie.epsilon, scores: specie.score, occ: per_decil, occ_perdecile: occ_perdecile});
+      decil_list.push({decil: specie.decile, species: value_abio, epsilons: specie.epsilon, description: specie.description, scores: specie.score, occ: per_decil, occ_perdecile: occ_perdecile});
 
   });
 
@@ -1529,7 +1533,7 @@ verb_utils.processDataForScoreCellTable = function (data, apriori, mapa_prob){
       // total_length = item.n
 
       item.cells.forEach(function (cell_item, index) {
-      
+          
           // var name = item.reinovalido === "" ? (item.layer + " " + item.tag) : (item.generovalido +" "+item.especieepiteto+" "+item.nombreinfra)
           var name = item.reinovalido === "" ? (item.label + "|" + item.tag + "|" + item.unidad + "|" + item.coeficiente) : (item.generovalido +" "+item.especieepiteto+" "+item.nombreinfra)
 
@@ -1540,7 +1544,8 @@ verb_utils.processDataForScoreCellTable = function (data, apriori, mapa_prob){
               score: parseFloat(item.score),
               epsilon: parseFloat(item.epsilon),
               nj: parseFloat(item.nj),
-              name: name
+              name: name,
+              description: item.description
           }
 
           cells.set("" + cell_item + name, item_map)
@@ -1568,6 +1573,7 @@ verb_utils.processDataForScoreCellTable = function (data, apriori, mapa_prob){
         item.njs.push(add.nj)
         item.names.push(add.name)
         item.ids.push(add.cell+add.name)
+        item.descriptions.push(add.description)
 
         return item
     },
@@ -1584,6 +1590,7 @@ verb_utils.processDataForScoreCellTable = function (data, apriori, mapa_prob){
             item.njs.splice(index, 1);
             item.names.splice(index, 1);
             item.ids.splice(index, 1);
+            item.descriptions.splice(index, 1);
         }
 
         return item
@@ -1596,7 +1603,8 @@ verb_utils.processDataForScoreCellTable = function (data, apriori, mapa_prob){
             scores: [],
             njs: [],
             names: [],
-            ids: []
+            ids: [],
+            descriptions: []
 
         }
     }
@@ -1661,6 +1669,7 @@ verb_utils.processDataForScoreCellTable = function (data, apriori, mapa_prob){
           specie.score = entry["value"].scores[j];
           specie.nj = entry["value"].njs[j];
           specie.name = entry["value"].names[j];
+          specie.description = entry['value'].descriptions[j];
 
           species.push(specie)
       }
@@ -2139,12 +2148,14 @@ verb_utils.getValidationValues = function (data_group){
     var repeated_cells = d3.map([])
 
     // Esta dejando el ultimo registro, no realiza un promedio del tscore de las celdas repetidas
+
+    debug('--------------------> DEBUG: --------------------->')
+    debug(train_cells)
     train_cells.forEach(function(item){
 
       temp_map.set(item.gridid, item.tscore)
 
     })
-
     // debug(item.data)
     // debug(temp_map.values())
     // debug(item.test_cells)
@@ -2157,9 +2168,15 @@ verb_utils.getValidationValues = function (data_group){
     // debug("test_cells:" + item.test_cells.length)
 
     // Interseción entre las celdas sin fosiles y las celdas
-    var arg_temp = item.test_cells.filter(value => -1 !== item.target_cells.indexOf(value))
+    debug('--------------------> ITEM: --------------------->')
+    debug(item)
+    debug('--------------------> END ITEM: --------------------->')
+    var arg_temp = item.test_cells
     debug("arg_temp:" + arg_temp.length)
 
+    debug('-------------------------> ARG MAP:---------------------------->')
+    debug(arg_temp)
+    debug('-------------------------> END ARG MAP:---------------------------->')
 
     arg_temp.forEach(function(cell_item){
     
@@ -2175,6 +2192,9 @@ verb_utils.getValidationValues = function (data_group){
 
     })
 
+    debug('-------------------------> TEMP VALUES:---------------------------->')
+    debug(temp_values)
+    debug('-------------------------> END TEMP VALUES:---------------------------->')
 
     var array = temp_map.values()
     array.sort(function(a, b){return a-b})
@@ -2198,9 +2218,11 @@ verb_utils.getValidationValues = function (data_group){
     limites.push(array[Math.floor(len*.8) - 1])
     limites.push(array[Math.floor(len*.9) - 1])
     limites.push(array[Math.floor(len) - 1])
-    
-    //debug(limites)
-    
+      
+    debug('-----------> LIMITES: ----------------->')
+    debug(limites)
+    debug('-----------> END LIMITES: ----------------->')
+
     // obtiene los deciles para obtener las métricas basados en lso resultados del conjunto de test
     var num_deciles = 11
 
@@ -2251,7 +2273,6 @@ verb_utils.getValidationValues = function (data_group){
         // debug("es VP:" + rango_deciles(row_value.score) > 9)
         //debug("decil: " + decil)
 
-
         if(row_value.score === null){
           nulo_temp++
         } else if(row_value.score >= limites[decil-1]){
@@ -2275,13 +2296,13 @@ verb_utils.getValidationValues = function (data_group){
         
       })
 
-      // debug("*****************")
-      // debug("umbral: " + limites[decil-1])
-      // debug("decil: " + decil)
-      // debug("vp_temp: " + vp_temp)
-      // debug("fn_temp: " + fn_temp)
-      // debug("nulo_temp: " + nulo_temp)
-      // debug("*****************")
+      debug("*****************")
+      debug("umbral: " + limites[decil-1])
+      debug("decil: " + decil)
+      debug("vp_temp: " + vp_temp)
+      debug("fn_temp: " + fn_temp)
+      debug("nulo_temp: " + nulo_temp)
+      debug("*****************")
 
       var result_iter = {}
       
@@ -2299,8 +2320,7 @@ verb_utils.getValidationValues = function (data_group){
 
   })
 
-  // debug(result_test_cells)
-
+  debug(result_test_cells)
 
   var cross_cells = crossfilter(result_test_cells)
   cross_cells.groupAll();
@@ -2362,7 +2382,7 @@ verb_utils.getValidationValues = function (data_group){
   }
 
   // debug(data_result)
-
+   debug('--------------------> END DEBUG: --------------------->')
   return data_result
 
 }
@@ -2971,12 +2991,7 @@ verb_utils.getWhereClauseFilter = function(fosil, date, lim_inf, lim_sup, cells,
   whereClause += ') '
 
   whereClause += " and (make_date(aniocolecta, mescolecta, diacolecta) between "
-                + "'" + lim_inf + "' and '" + lim_sup + "'"
-                + " and diacolecta <> 99 and diacolecta <> -1"
-                + " and mescolecta <> 99 and mescolecta <> -1"
-                + " and aniocolecta <> 9999 and aniocolecta <> -1) "
-
-  
+                + "'" + lim_inf + "' and '" + lim_sup + "')"
 
   // if(!fosil){
   //   whereClause += "AND (ejemplarfosil != 'SI' OR ejemplarfosil is null) "
@@ -3133,13 +3148,16 @@ verb_utils.getFieldsFromLevel = function (level) {
   }
 
   if (level === 'layer')
-    fields  += ", icat::varchar, layer, tag, unidad, coeficiente::varchar "
+    fields  += ", icat::varchar, layer, tag, unidad, coeficiente::varchar, description "
   else if(level === 'bid')
-    fields  += ", icat::varchar, label, tag, unidad, coeficiente::varchar "
+    fields  += ", icat::varchar, label, tag, unidad, coeficiente::varchar, description "
   else 
     fields  += ", '' AS icat, '' AS label, '' AS tag, '' AS unidad, '' AS coeficiente "
 
   //debug("fields === " + fields)
+  if (level === 'genus' || level === 'species')
+    fields += ', description';
+
   return fields
 
 }
@@ -3234,12 +3252,15 @@ verb_utils.getGroupFieldsFromLevel = function (level) {
     }
 
    if(level === 'layer')
-        group_fields += ", icat, layer, tag, unidad, coeficiente "
+        group_fields += ", icat, layer, tag, unidad, coeficiente, description "
   else if(level === 'bid')
-        group_fields  += ", icat, label, tag, unidad, coeficiente "
+        group_fields  += ", icat, label, tag, unidad, coeficiente, description "
 
   }
 
+
+  if (level === 'genus' || level === 'species')
+    group_fields += ', description';
 
   //debug("group fields ="  + group_fields)
   return group_fields
@@ -3668,6 +3689,131 @@ verb_utils.getCommunityAnalysisQuery = function(queries, region, res_cells, regi
 
   //debug(query)
   return query
+}
+
+
+verb_utils.getScoreMap = function(data) {
+
+  var score_map = {}
+  var total_cells = 0;
+  data.forEach(covar => {
+
+    covar['cells'].forEach(cell => {
+
+      //debug(score_map[cell])
+      if(score_map[cell] == null){
+
+        score_map[cell] = parseFloat(covar['score'])
+        total_cells += 1
+
+
+      } else {
+
+        score_map[cell] += parseFloat(covar['score'])        
+
+      }
+
+    })
+
+  })
+
+  //debug(total_cells)
+  return score_map;
+
+}
+
+
+verb_utils.scoreMapToScoreArray = function(score_map){
+
+  var cells = Object.keys(score_map);
+  var score_array = []
+  cells.forEach(cell => {
+
+      score_array.push({'gridid': cell, 'tscore': score_map[cell]})
+
+  });
+
+  return score_array;
+
+}
+
+verb_utils.getTimeValidation = function(score_map, validation_cells) {
+
+  var time_validation = []
+  var score_validation_cells = {}
+
+  var scores_per_cell = Object.values(score_map);
+  scores_per_cell = scores_per_cell.sort(function(a,b){return b-a})
+
+  //debug(scores_per_cell)
+
+  var number_scored_cells = scores_per_cell.length
+  var limits = []
+
+  for(var i=1; i<=10; i++){
+
+    limits.push(scores_per_cell[parseInt((number_scored_cells * i)/10) - parseInt(i/10)])
+
+  }
+
+  //debug(limits)
+
+  var decil = 10
+  limits.forEach(limit => {
+
+    var null_freq = 0
+    var true_positive = 0
+    var false_negative = 0
+    var pre = 0
+    var fre = 0
+    var rre = 0
+
+    validation_cells.forEach(cell => {
+
+      if(score_map[parseInt(cell['gridid'])] == null){
+
+        null_freq += 1
+
+      } else if(score_map[parseInt(cell['gridid'])] >= limit){
+
+        true_positive += 1
+
+        if(cell['pre'] == true){
+
+          pre += 1
+        }
+
+      } else {
+
+        false_negative += 1
+
+        if(cell['pre'] == true){
+
+            fre += 1
+        }
+
+      }
+
+    })
+
+    time_validation.push({
+
+      decil: decil,
+      vp: true_positive,
+      fn: false_negative,
+      null: null_freq,
+      recall: true_positive/(true_positive + false_negative),
+      vvp: pre,
+      vfn: fre,
+      vrecall: pre/(pre + fre)
+
+    })
+
+    decil -= 1
+
+  })
+
+  return time_validation
 }
 
 module.exports = verb_utils
