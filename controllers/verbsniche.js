@@ -2857,6 +2857,84 @@ exports.sendFeedBack = function(req, res){
 }
 
 
+exports.getColumnsGrid = function(req, res, next){
+
+    debug('getColumnsGrid')
+
+    var grid_resolution = verb_utils.getParam(req, 'grid_resolution', 16)
+    var columns = verb_utils.getParam(req, 'columns', [])
+    var gridids = verb_utils.getParam(req, 'gridids', [])
+    var where = ''
+
+    debug(grid_resolution)
+    debug(columns)
+    debug(gridids)
+
+    var columns_string = ''
+
+    columns.forEach(colum => {
+
+      columns_string += '"' + colum + '", '
+
+    })
+
+    if(gridids.length == 0) {
+
+      where = ''
+
+    } else {
+
+
+      where = ' WHERE gridid_' + grid_resolution + 'km = ANY(array[' + gridids.toString() + ']::integer[])'
+
+    }
+
+     pool.task(t => {
+
+      var query = queries.grid.getColumnsGrid
+
+      const query1 = pgp.as.format(query, {
+
+        grid_resolution: grid_resolution,
+        columns: columns_string,
+        where_filter: where
+
+      })
+      debug(query1)
+
+      return t.any(query, {
+
+        grid_resolution: grid_resolution,
+        columns: columns_string,
+        where_filter: where
+
+      }).then(data => {
+
+        res.json({
+
+          ok: true,
+          data: data
+
+        })
+
+      })
+
+    }).catch(error => {
+
+      debug(error)
+    
+      res.json({
+          ok: false,
+          message: "Error al ejecutar la petición",
+          data:[],
+          error: error
+      })      
+
+    })
+
+
+  }
+
 exports.getGivenPointaValidationTables = function(req, res, next){
 
 

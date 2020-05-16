@@ -231,6 +231,7 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
               var data_freq_cell = []
               data_freq_cell = verb_utils.processDataForFreqCell(score_array)
 
+              var cell_summary = verb_utils.cellSummary(data)
 
 
               if(data_request.with_data_score_decil === true ){
@@ -251,13 +252,13 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
               res.json({
                 ok: true,
                 data: data,
-                validation_data: validation_data['target_cells'],
                 data_score_cell: score_array,
                 time_validation: time_validation,
                 data_freq_cell: data_freq_cell,
                 data_freq: data_freq,
                 percentage_avg: percentage_occ,
-                decil_cells: decil_cells
+                decil_cells: decil_cells,
+                cell_summary: cell_summary
               })
 
           })
