@@ -44,6 +44,9 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
   var month = date_new.getMonth() + 1
   var year = date_new.getFullYear()
 
+
+  data_request["decil_selected"] = verb_utils.getParam(req, 'decil_selected', [10])
+
   var grid_resolution = verb_utils.getParam(req, 'grid_resolution', default_resolution) 
   var region = parseInt(verb_utils.getParam(req, 'region', verb_utils.region_mx))
   var fosil = verb_utils.getParam(req, 'fosil', true)
@@ -212,6 +215,11 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
           }).then(validation_data => {
 
               debug(validation_data)
+              debug(data)
+
+              var decil_selected = data_request["decil_selected"]
+
+
               score_map = verb_utils.getScoreMap(data)
               time_validation = verb_utils.getTimeValidation(score_map, validation_data)
 
@@ -224,6 +232,22 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
               data_freq_cell = verb_utils.processDataForFreqCell(score_array)
 
 
+
+              if(data_request.with_data_score_decil === true ){
+
+                debug("Calcula valores decil")
+
+                var data_response = {iter: 1, data: data, test_cells: data_request["source_cells"], target_cells: data_request["target_cells"], apriori: data_request.apriori, mapa_prob: data_request.mapa_prob }
+
+                var decilper_iter = verb_utils.processCellDecilPerIter([data_response], JSON.parse(data_request.apriori), JSON.parse(data_request.mapa_prob), data_request.all_cells, true, decil_selected) 
+                percentage_occ = decilper_iter.result_datapercentage
+                decil_cells = decilper_iter.decil_cells
+
+              }
+
+
+
+
               res.json({
                 ok: true,
                 data: data,
@@ -231,7 +255,9 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
                 data_score_cell: score_array,
                 time_validation: time_validation,
                 data_freq_cell: data_freq_cell,
-                data_freq: data_freq
+                data_freq: data_freq,
+                percentage_avg: percentage_occ,
+                decil_cells: decil_cells
               })
 
           })
