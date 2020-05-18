@@ -24,7 +24,8 @@ function tmplPath (file) {
  */
 var queryProvider = {
   grid: {
-    gridxxkm: sqlPath('grids/grid_xxkm.sql') 
+    gridxxkm: sqlPath('grids/grid_xxkm.sql'),
+    getColumnsGrid: sqlPath('grids/get_columns_grid.sql')
   },
   layers: {
     getStatesMX: sqlPath('layers/get_states.sql')

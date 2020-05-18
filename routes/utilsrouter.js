@@ -175,4 +175,8 @@ router.route('/especie/getIDCellFromCoordinates')
   .get(verbsCtrl.getIDCellFromCoordinates)
   .post(verbsCtrl.getIDCellFromCoordinates)
 
+
+router.route('/especie/getColumnsGrid')
+  .post(verbsCtrl.getColumnsGrid)
+
 module.exports = router
