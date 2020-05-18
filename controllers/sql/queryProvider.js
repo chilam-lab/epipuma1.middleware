@@ -111,7 +111,8 @@ var queryProvider = {
     
   },
   getTimeValidation: {
-    getCellValidation: sqlPath('time-validation/get_cells_validation.sql')
+    getCellValidation: sqlPath('time-validation/get_cells_validation.sql'),
+    getCellTraining: sqlPath('time-validation/get_cells_training.sql')
   },
   getSpeciesNiche: {
     getSpecies: sqlPath('especie/getSpecies.sql'),
