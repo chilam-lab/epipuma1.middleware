@@ -47,6 +47,7 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
   var grid_resolution = verb_utils.getParam(req, 'grid_resolution', default_resolution) 
   var region = parseInt(verb_utils.getParam(req, 'region', verb_utils.region_mx))
   var fosil = verb_utils.getParam(req, 'fosil', true)
+  var memory = verb_utils.getParam(req, 'memory', false)
 
   var date  = false //verb_utils.getParam(req, 'date', true)
 
@@ -70,6 +71,8 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
   data_request["min_occ"] = verb_utils.getParam(req, 'min_cells', 1)
   data_request['lim_inf_validation'] = lim_inf_validation
   data_request['lim_sup_validation'] = lim_sup_validation
+  data_request['lim_inf'] = lim_inf
+  data_request['lim_sup'] = lim_sup
 
   var target_group = verb_utils.getParam(req, 'target_taxons', []) 
   
@@ -125,120 +128,135 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
 
   pool.task(t => {
 
+    var query  = queries.getTimeValidation.getCellTraining
 
-    var query = queries.subaoi.getCountriesRegion
+    return t.one(query,  {
+              where_target: data_request["where_target"].replace('WHERE', ''),
+              grid_resolution: data_request["grid_resolution"],
+              lim_inf: data_request['lim_inf'],
+              lim_sup: data_request['lim_sup']
+    }).then(resp => {
 
-    /*
-      Se obtiene filtro para target 
-    */
-    return t.one(query, data_request).then(resp => {
+      var training_cells = resp['training_cells']
+      var query = queries.subaoi.getCountriesRegion
 
-      data_request["gid"] = resp.gid
-      data_request["where_filter"] = verb_utils.getWhereClauseFilter(fosil, date, lim_inf, lim_sup, cells, data_request["res_celda_snib"], data_request["region"], data_request["gid"])
-      
-    }).then(resp=> {
+      /*
+        Se obtiene filtro para target 
+      */
+      return t.one(query, data_request).then(resp => {
 
-        data_request['source_cells'] = []
-        data_request['total_cells'] = []
+        data_request["gid"] = resp.gid
+        data_request["where_filter"] = verb_utils.getWhereClauseFilter(fosil, date, lim_inf, lim_sup, cells, data_request["res_celda_snib"], data_request["region"], data_request["gid"])
+        if(!memory){
+          data_request["where_filter"] += ' AND gridid_' + grid_resolution + 'km = ANY(ARRAY[' + training_cells.toString() + ']::text[])'
+        }
+        //debug(data_request["where_filter"])
 
-        /*
-          Se obtiene el numero de celdas totales
-        */
-        return t.one(queries.basicAnalysis.getN, {
+      }).then(resp=> {
 
-            grid_resolution: data_request['grid_resolution'],
-            footprint_region: data_request['region']
-        
-        }).then(data => {
+          data_request['source_cells'] = []
+          data_request['total_cells'] = []
 
+          /*
+            Se obtiene el numero de celdas totales
+          */
+          return t.one(queries.basicAnalysis.getN, {
 
-            data_request['N'] = data['n']
-            data_request["alpha"] = data_request["alpha"] !== undefined ? data_request["alpha"] : 1.0/data_request['N']
-
-            debug("N:" + data_request['N'])
-
-            var query_analysis = queries.countsTaxonGroups.getCountsBase
-            data_request['groups'] = verb_utils.getCovarGroupQueries(queries, data_request, covars_groups)
-
-            debug('grupos covariables ' + covars_groups)
-
-            data_request["cell_id"] = 0
-
-            if(JSON.parse(data_request.apriori) === true || JSON.parse(data_request.mapa_prob) === true) {
+              grid_resolution: data_request['grid_resolution'],
+              footprint_region: data_request['region']
+          
+          }).then(data => {
 
 
-              return t.one(queries.basicAnalysis.getAllGridId, data_request).then(data => {
+              data_request['N'] = data['n']
+              data_request["alpha"] = data_request["alpha"] !== undefined ? data_request["alpha"] : 1.0/data_request['N']
 
-                data_request.all_cells = data
+              debug("N:" + data_request['N'])
+
+              var query_analysis = queries.countsTaxonGroups.getCountsBase
+              data_request['groups'] = verb_utils.getCovarGroupQueries(queries, data_request, covars_groups)
+
+              debug('grupos covariables ' + covars_groups)
+
+              data_request["cell_id"] = 0
+
+              if(JSON.parse(data_request.apriori) === true || JSON.parse(data_request.mapa_prob) === true) {
+
+
+                return t.one(queries.basicAnalysis.getAllGridId, data_request).then(data => {
+
+                  data_request.all_cells = data
+                  return t.any(query_analysis, data_request)
+
+                })
+
+
+              } else {
+
+                debug("analisis basico")
+
+                const query1 = pgp.as.format(query_analysis, data_request)
+                debug(query1)
+
+                /*                Se genera analisis
+                */
                 return t.any(query_analysis, data_request)
 
-              })
+              }
 
+          }).then(data => {
 
-            } else {
+            var query = queries.getTimeValidation.getCellValidation
 
-              debug("analisis basico")
+            const query1 = pgp.as.format(query, {
 
-              const query1 = pgp.as.format(query_analysis, data_request)
-              debug(query1)
+              where_target: data_request["where_target"].replace('WHERE', ''),
+              grid_resolution: data_request["grid_resolution"],
+              lim_inf_validation: data_request['lim_inf_validation'],
+              lim_sup_validation: data_request['lim_sup_validation']
 
-              /*                Se genera analisis
-              */
-              return t.any(query_analysis, data_request)
+            })
+            debug(query1)
 
-            }
+            return t.any(query, {
 
-        }).then(data => {
+              where_target: data_request["where_target"].replace('WHERE', ''),
+              grid_resolution: data_request["grid_resolution"],
+              lim_inf_validation: data_request['lim_inf_validation'],
+              lim_sup_validation: data_request['lim_sup_validation']
 
-          var query = queries.getTimeValidation.getCellValidation
+            }).then(validation_data => {
 
-          const query1 = pgp.as.format(query, {
+                debug(validation_data)
+                score_map = verb_utils.getScoreMap(data)
+                time_validation = verb_utils.getTimeValidation(score_map, validation_data)
 
-            where_target: data_request["where_target"].replace('WHERE', ''),
-            grid_resolution: data_request["grid_resolution"],
-            lim_inf_validation: data_request['lim_inf_validation'],
-            lim_sup_validation: data_request['lim_sup_validation']
+                var score_array = verb_utils.scoreMapToScoreArray(score_map)
+                //debug(time_validation)
 
-          })
-          debug(query1)
+                var data_freq = verb_utils.processDataForFreqSpecie([data], false)
 
-          return t.any(query, {
+                var data_freq_cell = []
+                data_freq_cell = verb_utils.processDataForFreqCell(score_array)
 
-            where_target: data_request["where_target"].replace('WHERE', ''),
-            grid_resolution: data_request["grid_resolution"],
-            lim_inf_validation: data_request['lim_inf_validation'],
-            lim_sup_validation: data_request['lim_sup_validation']
+                var cell_summary = verb_utils.cellSummary(data)
 
-          }).then(validation_data => {
+                res.json({
+                  ok: true,
+                  data: data,
+                  data_score_cell: score_array,
+                  data_freq_cell: data_freq_cell,
+                  data_freq: data_freq,
+                  cell_summary: cell_summary,
+                  time_validation: time_validation
+                })
 
-              debug(validation_data)
-              score_map = verb_utils.getScoreMap(data)
-              time_validation = verb_utils.getTimeValidation(score_map, validation_data)
-
-              var score_array = verb_utils.scoreMapToScoreArray(score_map)
-              //debug(time_validation)
-
-              var data_freq = verb_utils.processDataForFreqSpecie([data], false)
-
-              var data_freq_cell = []
-              data_freq_cell = verb_utils.processDataForFreqCell(score_array)
-
-              var cell_summary = verb_utils.cellSummary(data)
-
-              res.json({
-                ok: true,
-                data: data,
-                data_score_cell: score_array,
-                time_validation: time_validation,
-                data_freq_cell: data_freq_cell,
-                data_freq: data_freq,
-                cell_summary: cell_summary
-              })
+            })
 
           })
+          
+      })
 
-        })
-        
     })
 
   }).catch(error => {
