@@ -103,8 +103,8 @@ exports.getTaxonsGroupEdges = function (req, res) {
       // debug("source_query: " + source_query)
       // debug("target_query: " + target_query)
 
-	    const query1 = pgp.as.format(query, {source: source_query, target: target_query, res_views: res_views, region: footprint_region, min_occ: min_occ})
-      debug(query1)
+	    //const query1 = pgp.as.format(query, {source: source_query, target: target_query, res_views: res_views, region: footprint_region, min_occ: min_occ})
+      //debug(query1)
 
         // Executing queries
 	    return t.any(query, {
