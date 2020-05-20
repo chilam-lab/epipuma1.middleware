@@ -110,10 +110,10 @@ exports.getTaxonsGroupNodes = function(req, res) {
       // debug("source_query: " + source_query)
       // debug("target_query: " + target_query)
 
-	    //const query1 = pgp.as.format(query, {source: source_query, target: target_query})
-      //debug(query1)
+	    const query1 = pgp.as.format(query, {source: source_query, target: target_query})
+      debug(query1)
 
-        // Executing queries
+      // Executing queries
 	    return t.any(query, {
 
 	    	source: source_query,
