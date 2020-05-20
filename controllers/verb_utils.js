@@ -3817,7 +3817,10 @@ verb_utils.getTimeValidation = function(score_map, validation_cells) {
 }
 
 
-verb_utils.cellSummary = function(data){
+verb_utils.cellSummary = function(data, training_cells, validation_cells){
+
+  //debug(training_cells)
+  //debug(validation_cells)
 
   var cells_map = {}
 
@@ -3912,6 +3915,24 @@ verb_utils.cellSummary = function(data){
   var BreakException = {}
 
   Object.keys(cells_map).forEach(cell => {
+
+
+    if(training_cells.includes(parseInt(cell))) {
+
+      cells_map[cell]['training_period'] = 1
+      cells_map[cell]['validation_period'] = 1
+
+    }else {
+
+      cells_map[cell]['training_period'] = 0
+
+      if(validation_cells.includes(cell)) {
+        cells_map[cell]['validation_period'] = 1
+      } else {
+        cells_map[cell]['validation_period'] = 0
+      }
+
+    }
 
     try {
       limits.forEach(limit => {

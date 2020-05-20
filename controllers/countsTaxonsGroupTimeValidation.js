@@ -230,7 +230,7 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
 
             }).then(validation_data => {
 
-                debug(validation_data)
+                //debug(validation_data)
                 score_map = verb_utils.getScoreMap(data)
                 time_validation = verb_utils.getTimeValidation(score_map, validation_data)
 
@@ -254,7 +254,17 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
                 var data_freq_cell = []
                 data_freq_cell = verb_utils.processDataForFreqCell(score_array)
 
-                var cell_summary = verb_utils.cellSummary(data)
+                var validation_cells = []
+
+                validation_data.forEach(item => {
+
+                  if(item['pre'] == true){
+                    validation_cells.push(item['gridid'])
+                  }
+        
+                })
+
+                var cell_summary = verb_utils.cellSummary(data, training_cells, validation_cells)
 
                 res.json({
                   ok: true,
@@ -265,7 +275,9 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
                   percentage_avg: percentage_occ,
                   decil_cells: decil_cells,
                   cell_summary: cell_summary,
-                  time_validation: time_validation
+                  time_validation: time_validation,
+                  training_cells: training_cells,
+                  validation_data: validation_data
                 })
 
             })
