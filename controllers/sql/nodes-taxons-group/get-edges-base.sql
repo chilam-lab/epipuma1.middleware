@@ -30,14 +30,14 @@ counts AS (
 			target.type AS type_t,
 			target.layer AS layer_t,
 		    target.bid AS bid_t,
-			icount(array_intersection(source.cells, target.cells)) AS niyj,
-			icount(target.cells) AS nj,
-			icount(source.cells) AS ni,
+			icount(array_intersection(source.cells::integer[], target.cells::integer[])) AS niyj,
+			icount(target.cells::integer[]) AS nj,
+			icount(source.cells::integer[]) AS ni,
 			n_res.n AS n
 	FROM source, target, n_res
 	--where icount(source.cells & target.cells) > 0
-	where icount(target.cells) > $<min_occ:raw>
-	and icount(source.cells) > 0
+	where icount(target.cells::integer[]) > $<min_occ:raw>
+	and icount(source.cells::integer[]) > 0
 ) 
 SELECT 	counts.biotic_s, 
 		--counts.reinovalido_s, 
