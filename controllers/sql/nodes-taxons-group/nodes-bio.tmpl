@@ -15,7 +15,7 @@ WITH aux_{index:raw} AS (
 	ON b.spid = c.spid
 	JOIN (
 		SELECT UNNEST(gid) AS gid 
-		FROM grid_geojson_16km_aoi
+		FROM grid_geojson_{grid_res:raw}km_aoi
 		WHERE footprint_region={region:raw}
 	) as d 
 	ON b.gid = d.gid

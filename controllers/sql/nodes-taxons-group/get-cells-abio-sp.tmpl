@@ -3,7 +3,7 @@ SELECT DISTINCT
 	UNNEST(cells_{res:raw}km & b.cells) AS gridid,
 	label as generovalido, tag as especieepiteto, coeficiente, unidad, 'abio' as tipo
 -- FROM raster_bins AS a, grid_geojson_16km_aoi AS b
-FROM raster_bins AS a, grid_geojson_{res:raw}km_aoi AS b
+FROM raster_bins AS a, grid_geojson_{grid_res:raw}km_aoi AS b
  WHERE 	(
  			{nodes_abio:raw}
  			-- (bid = '300818') or 
