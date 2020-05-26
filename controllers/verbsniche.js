@@ -543,6 +543,8 @@ exports.getToken = function (req, res, next) {
 
   var sfilters = verb_utils.getParam(req, 'sfilters',[])
   var val_process = getParam(req, 'val_process')
+  var val_process_temp = getParam(req, 'val_process_temp')
+  
   // var idtabla = getParam(req, 'idtabla')
   var mapa_prob = getParam(req, 'mapa_prob')
   var fossil = getParam(req, 'fossil')
@@ -550,6 +552,8 @@ exports.getToken = function (req, res, next) {
   var sfecha = getParam(req, 'sfecha')
   var lim_inf = getParam(req, 'lim_inf')
   var lim_sup = getParam(req, 'lim_sup')
+  var lim_inf_valtemp = getParam(req, 'lim_inf_valtemp')
+  var lim_sup_valtemp = getParam(req, 'lim_sup_valtemp')
   var min_occ = getParam(req, 'min_occ')
   var grid_res = getParam(req, 'grid_res')
   var footprint_region = getParam(req, 'footprint_region')
@@ -561,6 +565,7 @@ exports.getToken = function (req, res, next) {
 
   // link_str += "sp_data=" + JSON.stringify({"spid": spid.toString(), "label":label}) + "&"
   link_str += "chkVal=" + val_process + "&"
+  link_str += "chkValTemp=" + val_process_temp + "&"
   // link_str += "idtabla=" + idtabla + "&"
   link_str += "chkPrb=" + mapa_prob + "&"
   link_str += "chkFosil=" + fossil + "&"
@@ -568,6 +573,8 @@ exports.getToken = function (req, res, next) {
   link_str += "chkFec=" + sfecha + "&"
   link_str += lim_inf === undefined ? "" : "minFec=" + lim_inf + "&"
   link_str += lim_sup === undefined ? "" : "maxFec=" + lim_sup + "&"
+  link_str += lim_inf_valtemp === undefined ? "" : "minFecVal=" + lim_inf_valtemp + "&"
+  link_str += lim_sup_valtemp === undefined ? "" : "maxFecVal=" + lim_sup_valtemp + "&"
   link_str += "chkOcc=" + min_occ + "&"
   link_str += "gridRes=" + grid_res + "&"
   link_str += "region=" + footprint_region + "&"
