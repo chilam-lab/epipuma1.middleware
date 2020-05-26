@@ -127,6 +127,8 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
   data_request["with_data_score_cell"] = verb_utils.getParam(req, 'with_data_score_cell', true)
   data_request["with_data_freq_cell"] = verb_utils.getParam(req, 'with_data_freq_cell', true)
   data_request["with_data_score_decil"] = verb_utils.getParam(req, 'with_data_score_decil', true)
+  data_request["long"] = verb_utils.getParam(req, 'longitud', 0)
+  data_request["lat"] = verb_utils.getParam(req, 'latitud', 0)
   
 
   pool.task(t => {
@@ -196,18 +198,75 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
 
               } else {
 
-                debug("analisis basico")
 
-                const query1 = pgp.as.format(query_analysis, data_request)
-                debug(query1)
+                if( data_request["get_grid_species"] !== false ) {
 
-                /*                Se genera analisis
-                */
-                return t.any(query_analysis, data_request)
+                  debug('--------------------------------------------------')
 
+                  debug("analisis en celda")
+
+                  debug("long: " + data_request.long)
+                  debug("lat: " + data_request.lat)
+
+                  data_temp = {
+                    'res_celda_snib'    : data_request.res_celda_snib, 
+                    'res_celda_snib_tb' : data_request.res_grid_tbl,
+                    'long'              : data_request.long,
+                    'lat'               : data_request.lat
+                  }
+
+                  //const query1 = pgp.as.format(queries.basicAnalysis.getGridIdByLatLong, data_temp)
+                  //debug(query1)
+
+                  return t.one(queries.basicAnalysis.getGridIdByLatLong, data_temp).then(resp => {
+
+                        data_request["cell_id"] = resp.gridid
+                        debug("cell_id: " + data_request.cell_id)
+                        
+                        return t.any(query_analysis, data_request).then(covars => {
+
+
+                          var new_covars = []
+
+                          var score = 0;
+                          covars.forEach(covar => {
+
+                            if(covar['cells'].includes(parseInt(data_request["cell_id"])) ) {
+
+                              score += parseFloat(covar.score);
+                              new_covars.push(covar)
+                          
+                            }
+
+                          })
+
+                          debug(score)
+
+                          return new_covars;
+
+
+                        })  
+
+                  })
+
+                } else {
+
+                  debug("analisis basico")
+
+                  //const query1 = pgp.as.format(query_analysis, data_request)
+                  //debug(query1)
+
+                  /*                Se genera analisis
+                  */
+                  return t.any(query_analysis, data_request)
+
+
+                }
               }
 
           }).then(data => {
+
+            debug(data.length)
 
             var query = queries.getTimeValidation.getCellValidation
 
@@ -230,7 +289,7 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
 
             }).then(validation_data => {
 
-                //debug(validation_data)
+                debug(validation_data)
                 score_map = verb_utils.getScoreMap(data)
                 time_validation = verb_utils.getTimeValidation(score_map, validation_data)
 
