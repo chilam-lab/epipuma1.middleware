@@ -495,6 +495,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
       if(error.received === 0 && error.query.indexOf('select array_agg(cell) as total_cells') != -1){
 
         message = 'No hay datos de validación espacial';
+        debug(message)
 
       } else {
         
