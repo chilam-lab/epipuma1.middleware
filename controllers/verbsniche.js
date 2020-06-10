@@ -916,6 +916,7 @@ exports.getVariablesNiche = function (req, res, next) {
   var field = getParam(req, 'field','')
   var parentfield = getParam(req, 'parentfield','')
   var parentitem = getParam(req, 'parentitem','')
+  var grid_res = getParam(req, 'grid_res','mun')
 
   // debug("field: " + field)
   // debug("parentfield: " + parentfield)
@@ -944,8 +945,17 @@ exports.getVariablesNiche = function (req, res, next) {
   if(field === max_taxon_name){
 
         // debug("entra reino")
+
+    const query1 = pgp.as.format(queries.getVariablesNiche.getVariablesReino, {
+      taxon: field,
+      grid_res: grid_res,
+      region:footprint_region
+    })
+    debug(query1)
+
     pool.any(queries.getVariablesNiche.getVariablesReino, {
       taxon: field,
+      grid_res: grid_res,
       region:footprint_region
     })
         .then(function (data) {
@@ -960,12 +970,23 @@ exports.getVariablesNiche = function (req, res, next) {
   }
   else{
 
+    const query1 = pgp.as.format(queries.getVariablesNiche.getSpeciesVariables, {
+      taxon: field,
+      ad_param: ad_param,
+      order_param: order_param,
+      grid_res: grid_res,
+      parent_valor: parentitem,
+      region:footprint_region
+    })
+    debug(query1)
+
     if( field === 'especievalidabusqueda'){
 
       pool.any(queries.getVariablesNiche.getSpeciesVariables, {
         taxon: field,
         ad_param: ad_param,
         order_param: order_param,
+        grid_res: grid_res,
         parent_valor: parentitem,
         region:footprint_region
       })
@@ -982,11 +1003,23 @@ exports.getVariablesNiche = function (req, res, next) {
 
     }else if(parentfield!=='generovalido'){
 
+      const query1 = pgp.as.format(queries.getVariablesNiche.getVariables, {
+        taxon: field,
+        ad_param: ad_param,
+        order_param: order_param,
+        parent_taxon: parentfield,
+        grid_res: grid_res,
+        parent_valor: parentitem,
+        region:footprint_region
+      })
+      debug(query1)
+
       pool.any(queries.getVariablesNiche.getVariables, {
         taxon: field,
         ad_param: ad_param,
         order_param: order_param,
         parent_taxon: parentfield,
+        grid_res: grid_res,
         parent_valor: parentitem,
         region:footprint_region
       })
@@ -1002,6 +1035,17 @@ exports.getVariablesNiche = function (req, res, next) {
 
     } else {
 
+      const query1 = pgp.as.format(queries.getVariablesNiche.getVariablesSpecies, {
+        taxon: field,
+        ad_param: ad_param,
+        order_param: order_param,
+        parent_taxon: parentfield,
+        parent_valor: parentitem,
+        region:footprint_region,
+        grid_res: grid_res
+      })
+      debug(query1)
+
 
       pool.any(queries.getVariablesNiche.getVariablesSpecies, {
         taxon: field,
@@ -1009,7 +1053,8 @@ exports.getVariablesNiche = function (req, res, next) {
         order_param: order_param,
         parent_taxon: parentfield,
         parent_valor: parentitem,
-        region:footprint_region
+        region:footprint_region,
+        grid_res: grid_res
       })
           .then(function (data) {
                 // debug(data)
