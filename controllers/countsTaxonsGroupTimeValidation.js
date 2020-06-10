@@ -304,6 +304,9 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
                 debug(validation_data)
                 score_map = verb_utils.getScoreMap(data)
                 time_validation = verb_utils.getTimeValidation(score_map, validation_data)
+                var percentage_occ = []
+                var decil_cells = []
+                var info_cell = []
 
                 var score_array = verb_utils.scoreMapToScoreArray(score_map)
                 //debug(time_validation)
@@ -336,8 +339,6 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
                 })
 
                 var cell_summary = verb_utils.cellSummary(data, training_cells, validation_cells)
-
-                var info_cell = []
 
                 info_cell.push({
                   cve_ent: data_request.cve_ent,
