@@ -208,11 +208,17 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
                   debug("long: " + data_request.long)
                   debug("lat: " + data_request.lat)
 
+                  var extra_columns = ""
+                  if(data_request.grid_resolution == "mun"){
+                    extra_columns = ', "CVE_MUN" as cve_mun, "NOM_MUN" as nom_mun '
+                  }
+
                   data_temp = {
                     'res_celda_snib'    : data_request.res_celda_snib, 
                     'res_celda_snib_tb' : data_request.res_grid_tbl,
                     'long'              : data_request.long,
-                    'lat'               : data_request.lat
+                    'lat'               : data_request.lat,
+                    'extra_columns' : extra_columns
                   }
 
                   //const query1 = pgp.as.format(queries.basicAnalysis.getGridIdByLatLong, data_temp)
@@ -222,6 +228,13 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
 
                         data_request["cell_id"] = resp.gridid
                         debug("cell_id: " + data_request.cell_id)
+
+                        // valores de la celda seleccionada
+                        data_request["cell_id"] = resp.gridid
+                        data_request["cve_ent"] = resp.cve_ent
+                        data_request["nom_ent"] = resp.nom_ent
+                        data_request["cve_mun"] = resp.cve_mun
+                        data_request["nom_mun"] = resp.nom_mun
                         
                         return t.any(query_analysis, data_request).then(covars => {
 
@@ -241,7 +254,6 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
                           })
 
                           debug(score)
-
                           return new_covars;
 
 
@@ -325,18 +337,28 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
 
                 var cell_summary = verb_utils.cellSummary(data, training_cells, validation_cells)
 
+                var info_cell = []
+
+                info_cell.push({
+                  cve_ent: data_request.cve_ent,
+                  nom_ent: data_request.nom_ent,
+                  cve_mun: data_request.cve_mun,
+                  nom_mun: data_request.nom_mun
+                })
+
                 res.json({
                   ok: true,
                   data: data,
-                  data_score_cell: score_array,
-                  data_freq_cell: data_freq_cell,
-                  data_freq: data_freq,
+                  data_score_cell: data_request.with_data_score_cell ? score_array : [],
+                  data_freq_cell: data_request.with_data_freq_cell ? data_freq_cell : [],
+                  data_freq: data_request.with_data_freq ? data_freq : [],
                   percentage_avg: percentage_occ,
                   decil_cells: decil_cells,
                   cell_summary: cell_summary,
                   time_validation: time_validation,
                   training_cells: training_cells,
-                  validation_data: validation_data
+                  validation_data: validation_data,
+                  info_cell: info_cell
                 })
 
             })
