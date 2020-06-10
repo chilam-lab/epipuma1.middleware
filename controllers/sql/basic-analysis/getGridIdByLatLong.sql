@@ -1,6 +1,8 @@
 SELECT 
 	--gridid_16km as gridid
-	$<res_celda_snib:raw> as gridid
+	$<res_celda_snib:raw> as gridid,
+	"CVE_ENT" as cve_ent, "NOM_ENT" as nom_ent
+	$<extra_columns:raw>
 from
 	$<res_celda_snib_tb:raw>
 	--grid_16km_aoi 

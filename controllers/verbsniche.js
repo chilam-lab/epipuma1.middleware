@@ -1061,13 +1061,13 @@ exports.getRasterNiche = function (req, res, next) {
 
   if(level === 0){
 
-    debug('root request')
+    debug('root requesttttt')
 
     pool.any(queries.getRasterNiche.getRasterAvailableVariables, {
       region: region
     })
         .then(function (data) {
-              // debug(data)
+              debug(data)
           res.json({'data': data})
         })
         .catch(function (error) {
