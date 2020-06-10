@@ -825,7 +825,7 @@ verb_utils.processGroupDataForCellId = function (data, apriori, mapa_prob, gridi
   })
 
 
-  debug(groups)
+  // debug(groups)
 
 
   groups.forEach(function (item, index){
@@ -888,7 +888,7 @@ verb_utils.processGroupDataForCellId = function (data, apriori, mapa_prob, gridi
     debug("mapa_prob: " + val_mapa_prob)
   }
 
-  debug(info_incell)
+  // debug(info_incell)
 
   return info_incell
 
