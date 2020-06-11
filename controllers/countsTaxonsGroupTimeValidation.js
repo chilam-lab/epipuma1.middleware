@@ -135,6 +135,16 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
 
     var query  = queries.getTimeValidation.getCellTraining
 
+    const query1 = pgp.as.format(query, {
+
+      where_target: data_request["where_target"].replace('WHERE', ''),
+      grid_resolution: data_request["grid_resolution"],
+      lim_inf: data_request['lim_inf'],
+      lim_sup: data_request['lim_sup']
+
+    })
+    debug(query1)
+
     return t.one(query,  {
               where_target: data_request["where_target"].replace('WHERE', ''),
               grid_resolution: data_request["grid_resolution"],
@@ -286,6 +296,8 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
 
               where_target: data_request["where_target"].replace('WHERE', ''),
               grid_resolution: data_request["grid_resolution"],
+              lim_inf: data_request['lim_inf'],
+              lim_sup: data_request['lim_sup'],
               lim_inf_validation: data_request['lim_inf_validation'],
               lim_sup_validation: data_request['lim_sup_validation']
 
@@ -296,6 +308,8 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
 
               where_target: data_request["where_target"].replace('WHERE', ''),
               grid_resolution: data_request["grid_resolution"],
+              lim_inf: data_request['lim_inf'],
+              lim_sup: data_request['lim_sup'],
               lim_inf_validation: data_request['lim_inf_validation'],
               lim_sup_validation: data_request['lim_sup_validation']
 
