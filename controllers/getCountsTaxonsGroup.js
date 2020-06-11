@@ -238,85 +238,96 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
         })
       }).then(resp => {
 
-         data_request["N"] = resp.n 
-         data_request["alpha"] = data_request["alpha"] !== undefined ? data_request["alpha"] : 1.0/resp.n
+           data_request["N"] = resp.n 
+           data_request["alpha"] = data_request["alpha"] !== undefined ? data_request["alpha"] : 1.0/resp.n
 
-         // debug("------------")
-         debug("N:" + data_request["N"])
-         // debug("alpha:" + data_request["alpha"])
-         // debug("source_cells:" + data_request["source_cells"].length)
-         // debug("total_cells:" + data_request["total_cells"].length)
-         // debug("------------")
+           // debug("------------")
+           debug("N:" + data_request["N"])
+           // debug("alpha:" + data_request["alpha"])
+           // debug("source_cells:" + data_request["source_cells"].length)
+           // debug("total_cells:" + data_request["total_cells"].length)
+           // debug("------------")
 
-         // se genera query
-         var query_analysis = queries.countsTaxonGroups.getCountsBase
-         //data_request["where_filter"] = verb_utils.getWhereClauseFilter(fosil, date, lim_inf, lim_sup, cells, data_request["res_celda_snib"])
-         //data_request["where_target"] = verb_utils.getWhereClauseFromGroupTaxonArray(target_group, true)
-         data_request['groups'] = verb_utils.getCovarGroupQueries(queries, data_request, covars_groups)
-         
-         if( data_request["get_grid_species"] !== false ) {
+           // se genera query
+           var query_analysis = queries.countsTaxonGroups.getCountsBase
+           //data_request["where_filter"] = verb_utils.getWhereClauseFilter(fosil, date, lim_inf, lim_sup, cells, data_request["res_celda_snib"])
+           //data_request["where_target"] = verb_utils.getWhereClauseFromGroupTaxonArray(target_group, true)
+           data_request['groups'] = verb_utils.getCovarGroupQueries(queries, data_request, covars_groups)
+           
+           if( data_request["get_grid_species"] !== false ) {
 
-          debug('--------------------------------------------------')
+              debug('--------------------------------------------------')
+              debug("analisis en celda")
+              debug("long: " + data_request.long)
+              debug("lat: " + data_request.lat)
 
-          debug("analisis en celda")
+              var extra_columns = ""
+              
+              if(data_request.grid_resolution == "mun"){
+                extra_columns = ', "CVE_MUN" as cve_mun, "NOM_MUN" as nom_mun '
+              }
 
-          debug("long: " + data_request.long)
-          debug("lat: " + data_request.lat)
+              data_temp = {
+                'res_celda_snib'    : data_request.res_celda_snib, 
+                'res_celda_snib_tb' : data_request.res_grid_tbl,
+                'long'              : data_request.long,
+                'lat'               : data_request.lat,
+                'extra_columns' : extra_columns
+              }
 
-          data_temp = {
-            'res_celda_snib'    : data_request.res_celda_snib, 
-            'res_celda_snib_tb' : data_request.res_grid_tbl,
-            'long'              : data_request.long,
-            'lat'               : data_request.lat
-          }
+              //const query1 = pgp.as.format(queries.basicAnalysis.getGridIdByLatLong, data_temp)
+              //debug("iter " + iter + query1)
 
-          //const query1 = pgp.as.format(queries.basicAnalysis.getGridIdByLatLong, data_temp)
-          //debug("iter " + iter + query1)
+              return t.one(queries.basicAnalysis.getGridIdByLatLong, data_temp).then(resp => {
 
-          return t.one(queries.basicAnalysis.getGridIdByLatLong, data_temp).then(resp => {
+                    data_request["cell_id"] = resp.gridid
+                    data_request["cve_ent"] = resp.cve_ent
+                    data_request["nom_ent"] = resp.nom_ent
+                    data_request["cve_mun"] = resp.cve_mun
+                    data_request["nom_mun"] = resp.nom_mun
 
-                data_request["cell_id"] = resp.gridid
-                debug("cell_id: " + data_request.cell_id)
-                
-                return t.any(query_analysis, data_request)  
+                    debug("cell_id: " + data_request.cell_id)
 
-          })
+                    return t.any(query_analysis, data_request)  
 
-         } else {
+              })
 
-           debug("analisis general")
+           } 
+           else {
 
-           data_request["cell_id"] = 0
+             debug("analisis general")
 
-           //debug(JSON.parse(data_request.apriori))
-           //debug(JSON.parse(data_request.mapa_prob))
-           if(JSON.parse(data_request.apriori) === true || JSON.parse(data_request.mapa_prob) === true) {
+             data_request["cell_id"] = 0
+
+             //debug(JSON.parse(data_request.apriori))
+             //debug(JSON.parse(data_request.mapa_prob))
+             if(JSON.parse(data_request.apriori) === true || JSON.parse(data_request.mapa_prob) === true) {
 
 
-            return t.one(queries.basicAnalysis.getAllGridId, data_request).then(data => {
+              return t.one(queries.basicAnalysis.getAllGridId, data_request).then(data => {
 
-              data_request.all_cells = data
+                data_request.all_cells = data
+                return t.any(query_analysis, data_request)
+
+              })
+
+
+             } else {
+
+              debug("analisis basico")
+
+              // debug(query_analysis)
+              // debug(data_request)
+
+
+              const query1 = pgp.as.format(query_analysis, data_request)
+              debug("iter " + iter + query1)
+              
               return t.any(query_analysis, data_request)
 
-            })
-
-
-           } else {
-
-            debug("analisis basico")
-
-            // debug(query_analysis)
-            // debug(data_request)
-
-
-            const query1 = pgp.as.format(query_analysis, data_request)
-            debug("iter " + iter + query1)
-            
-            return t.any(query_analysis, data_request)
+             }
 
            }
-
-         }
 
 
       })
@@ -362,6 +373,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
         var validation_data = []
         var is_validation = false
         var data_freq = []
+        var info_cell = []
         
 
         if(total_iterations !== 1){
@@ -435,6 +447,13 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
           data = verb_utils.processGroupDataForCellId(data, apriori, mapa_prob, cell_id)
 
 
+          info_cell.push({
+            cve_ent: data_request.cve_ent,
+            nom_ent: data_request.nom_ent,
+            cve_mun: data_request.cve_mun,
+            nom_mun: data_request.nom_mun
+          })
+
 
         }
 
@@ -476,12 +495,13 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
         res.json({
             ok: true,
             data: data,
-            data_freq: data_freq,
-            data_score_cell: data_score_cell,
-            data_freq_cell: data_freq_cell,
+            data_freq: data_request.with_data_freq ? data_freq : [],
+            data_score_cell: data_request.with_data_score_cell ? data_score_cell : [],
+            data_freq_cell: data_request.with_data_freq_cell ? data_freq_cell : [],
             validation_data: validation_data,
             percentage_avg: percentage_occ,
-            decil_cells: decil_cells
+            decil_cells: decil_cells,
+            info_cell: info_cell
         })
         
       }
