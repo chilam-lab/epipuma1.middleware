@@ -39,7 +39,7 @@ function shouldCompress (req, res) {
 
 var port = config.port   // set our port
 
-console.log("port: " + port)
+//console.log("port: " + port)
 
 // Routes for our api
 var nicheRouter = require('./routes/nicherouter')

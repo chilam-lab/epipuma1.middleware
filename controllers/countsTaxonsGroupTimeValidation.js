@@ -347,6 +347,8 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
                   nom_mun: data_request.nom_mun
                 })
 
+                debug(time_validation)
+
                 res.json({
                   ok: true,
                   data: data,
