@@ -3742,21 +3742,41 @@ verb_utils.getTimeValidation = function(score_map, validation_cells) {
   var time_validation = []
   var score_validation_cells = {}
 
-  var scores_per_cell = Object.values(score_map);
+  var score_map_aux = {}
+
+  validation_cells.forEach(cell => {
+
+    if(score_map[parseInt(cell['gridid'])] != null){
+      score_map_aux[parseInt(cell['gridid'])] = score_map[parseInt(cell['gridid'])]    
+    }
+
+  })
+
+  var scores_per_cell = Object.values(score_map_aux);
   scores_per_cell = scores_per_cell.sort(function(a,b){return b-a})
 
-  //debug(scores_per_cell)
+  debug('===========================Number of score_map===========================')
+  debug( Object.keys(score_map_aux).length)
+  debug('===========================Number of validation===========================')
+  debug(validation_cells.length)
+  debug('===========================scores_per_cell===========================')
+  debug(scores_per_cell)
+  debug('===========================Number of scores_per_cell===========================')
 
   var number_scored_cells = scores_per_cell.length
   var limits = []
 
+  debug(number_scored_cells)
+
   for(var i=1; i<=10; i++){
 
+
+    debug(parseInt((number_scored_cells * i)/10) - parseInt(i/10))
     limits.push(scores_per_cell[parseInt((number_scored_cells * i)/10) - parseInt(i/10)])
 
   }
-
-  //debug(limits)
+  debug('===========================  Limits  ===========================')
+  debug(limits)
 
   var decil = 10
   limits.forEach(limit => {
@@ -3813,6 +3833,7 @@ verb_utils.getTimeValidation = function(score_map, validation_cells) {
 
   })
 
+  debug('===========================+++++++++++++===========================')
   return time_validation
 }
 

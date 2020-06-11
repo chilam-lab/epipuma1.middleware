@@ -325,6 +325,8 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
 
                 var cell_summary = verb_utils.cellSummary(data, training_cells, validation_cells)
 
+                debug(time_validation)
+
                 res.json({
                   ok: true,
                   data: data,
