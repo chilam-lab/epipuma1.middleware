@@ -3693,6 +3693,7 @@ verb_utils.getCommunityAnalysisQuery = function(queries, region, res_cells, regi
 
 
 verb_utils.getScoreMap = function(data) {
+  debug("getScoreMap")
 
   var score_map = {}
   var total_cells = 0;
@@ -3700,7 +3701,7 @@ verb_utils.getScoreMap = function(data) {
 
     covar['cells'].forEach(cell => {
 
-      //debug(score_map[cell])
+      //debug(cell, score_map[cell])
       if(score_map[cell] == null){
 
         score_map[cell] = parseFloat(covar['score'])
@@ -3717,7 +3718,8 @@ verb_utils.getScoreMap = function(data) {
 
   })
 
-  //debug(total_cells)
+  debug('score_map ' + total_cells)
+  //debug(score_map)
   return score_map;
 
 }
@@ -3739,18 +3741,25 @@ verb_utils.scoreMapToScoreArray = function(score_map){
 
 verb_utils.getTimeValidation = function(score_map, validation_cells) {
 
+  debug('getTimeValidation')
+
   var time_validation = []
   var score_validation_cells = {}
 
   var score_map_aux = {}
 
+
+  debug('===========================Nulls===========================')  
   validation_cells.forEach(cell => {
 
     if(score_map[parseInt(cell['gridid'])] != null){
       score_map_aux[parseInt(cell['gridid'])] = score_map[parseInt(cell['gridid'])]    
+    }else{
+      debug(cell['gridid'], score_map[parseInt(cell['gridid'])])  
     }
 
   })
+  debug('===========================+++++===========================')
 
   var scores_per_cell = Object.values(score_map_aux);
   scores_per_cell = scores_per_cell.sort(function(a,b){return b-a})
@@ -3788,6 +3797,8 @@ verb_utils.getTimeValidation = function(score_map, validation_cells) {
     var fre = 0
     var rre = 0
 
+    var total_validation_cells = 0
+
     validation_cells.forEach(cell => {
 
       if(score_map[parseInt(cell['gridid'])] == null){
@@ -3800,7 +3811,21 @@ verb_utils.getTimeValidation = function(score_map, validation_cells) {
 
         if(cell['pre'] == true){
 
+          if(limit==limits[0]) {
+
+            debug(cell['gridid']+","+score_map[parseInt(cell['gridid'])]+",1")
+
+          }
+
+          total_validation_cells += 1
+
           pre += 1
+        } else {
+          if(limit==limits[0]) {
+
+            debug(cell['gridid']+","+score_map[parseInt(cell['gridid'])]+",0")
+
+          }
         }
 
       } else {
@@ -3809,12 +3834,16 @@ verb_utils.getTimeValidation = function(score_map, validation_cells) {
 
         if(cell['pre'] == true){
 
+          total_validation_cells += 1
+
             fre += 1
         }
 
       }
 
     })
+
+    debug('TOTAL VALIDATION CELLS: ' + total_validation_cells)
 
     time_validation.push({
 
@@ -3840,8 +3869,26 @@ verb_utils.getTimeValidation = function(score_map, validation_cells) {
 
 verb_utils.cellSummary = function(data, training_cells, validation_cells){
 
-  //debug(training_cells)
-  //debug(validation_cells)
+  debug('cellSummary')
+  debug('===========================Number of training cells===========================')
+  debug(training_cells.length)
+  debug('===========================Number of validation cells===========================')
+  debug(validation_cells.length)
+  debug('===========================Comparison cells===========================')
+
+  training_cells.forEach(c1 => {
+
+    validation_cells.forEach(c2 => {
+
+      if(c1 === c2) {
+        debug(c1)
+      }
+
+    })
+
+  })
+
+  debug('===========================+++++++++++++===========================')
 
   var cells_map = {}
 
@@ -3935,8 +3982,9 @@ verb_utils.cellSummary = function(data, training_cells, validation_cells){
   var cell_summary = []
   var BreakException = {}
 
-  Object.keys(cells_map).forEach(cell => {
+  var total_validation_cells = 0
 
+  Object.keys(cells_map).forEach(cell => {
 
     if(training_cells.includes(parseInt(cell))) {
 
@@ -3949,6 +3997,8 @@ verb_utils.cellSummary = function(data, training_cells, validation_cells){
 
       if(validation_cells.includes(cell)) {
         cells_map[cell]['validation_period'] = 1
+        debug(cell+','+cells_map[cell]['score'])
+        total_validation_cells += 1
       } else {
         cells_map[cell]['validation_period'] = 0
       }
@@ -3973,6 +4023,8 @@ verb_utils.cellSummary = function(data, training_cells, validation_cells){
     }
 
   })
+
+  debug('TOTAL VALIDATION CELLS: ' + total_validation_cells)
 
   //debug(cells_map)
   return cell_summary
