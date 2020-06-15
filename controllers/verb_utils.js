@@ -3957,10 +3957,23 @@ verb_utils.cellSummary = function(data, training_cells, validation_cells){
       for(var i = 0; i < N ; i++) {
 
         cells_map[cell]['best_predictor_' + (i+1)] = cells_map[cell]['vars'][i]
-        cells_map[cell]['worst_predictor_' + (i+1)] = null
+        cells_map[cell]['worst_predictor_' + (i+1)] = ['-', 0]
 
       }
 
+      for(var i= N; i<5; i++){
+        cells_map[cell]['best_predictor_' + (i+1)] = ['-', 0]
+        cells_map[cell]['worst_predictor_' + (i+1)] = ['-', 0]
+      }
+
+
+
+      var lprint = []
+      for(var i=0; i<5; i++){
+        lprint.push(cells_map[cell]['best_predictor_' + (i+1)])
+        lprint.push(cells_map[cell]['worst_predictor_' + (i+1)])
+      }
+      debug(lprint);
     }
 
     delete cells_map[cell]['vars']

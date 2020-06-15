@@ -14,8 +14,7 @@ FROM (
 			  a.diacolecta <> 99 and
 			  a.diacolecta <> -1 and
 			  ${where_target:raw} and
-			  '${lim_inf:raw}' <= make_date(a.aniocolecta, a.mescolecta, a.diacolecta) and 
-			  make_date(a.aniocolecta, a.mescolecta, a.diacolecta) <= '${lim_sup:raw}'
+			  make_date(a.aniocolecta, a.mescolecta, a.diacolecta) < '${lim_inf_validation:raw}'
 		GROUP BY a.gridid_${grid_resolution:raw}km, a.aniocolecta, a.mescolecta, a.diacolecta
 	) as foo
 	RIGHT JOIN grid_${grid_resolution:raw}km_aoi as bar
