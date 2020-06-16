@@ -3739,7 +3739,7 @@ verb_utils.scoreMapToScoreArray = function(score_map){
 
 }
 
-verb_utils.getTimeValidation = function(score_map, validation_cells) {
+verb_utils.getTimeValidation = function(score_map, training_cells, validation_cells) {
 
   debug('getTimeValidation')
 
@@ -3749,16 +3749,22 @@ verb_utils.getTimeValidation = function(score_map, validation_cells) {
   var score_map_aux = {}
 
 
-  debug('===========================Nulls===========================')  
-  validation_cells.forEach(cell => {
+  debug('===========================Deleting training cells===========================')  
 
-    if(score_map[parseInt(cell['gridid'])] != null){
-      score_map_aux[parseInt(cell['gridid'])] = score_map[parseInt(cell['gridid'])]    
-    }else{
-      debug(cell['gridid'], score_map[parseInt(cell['gridid'])])  
+  var ttraining = 0
+  debug(training_cells)
+
+  Object.keys(score_map).forEach(cell => {
+
+    if(!training_cells.includes(parseInt(cell)) ){
+
+      ttraining += 1
+      score_map_aux[parseInt(cell)] = score_map[cell]      
+
     }
 
   })
+  debug(ttraining)
   debug('===========================+++++===========================')
 
   var scores_per_cell = Object.values(score_map_aux);
@@ -3997,22 +4003,29 @@ verb_utils.cellSummary = function(data, training_cells, validation_cells){
 
   var total_validation_cells = 0
 
+  debug('===========================Cells map===========================')
+  debug(Object.keys(cells_map))
+  debug(training_cells)
+  var detected_tcells = 0
+  debug('===========================+++++++++++++===========================')
+
   Object.keys(cells_map).forEach(cell => {
 
-    if(training_cells.includes(parseInt(cell))) {
+    if(training_cells.includes(parseInt(cell)) == true) {
 
       cells_map[cell]['training_period'] = 1
       cells_map[cell]['validation_period'] = 1
+      detected_tcells += 1
 
-    }else {
+    } else {
 
-      cells_map[cell]['training_period'] = 0
-
-      if(validation_cells.includes(cell)) {
+      if(validation_cells.includes(cell) == true) {
+        cells_map[cell]['training_period'] = 0
         cells_map[cell]['validation_period'] = 1
         debug(cell+','+cells_map[cell]['score'])
         total_validation_cells += 1
       } else {
+        cells_map[cell]['training_period'] = 0
         cells_map[cell]['validation_period'] = 0
       }
 
@@ -4036,6 +4049,8 @@ verb_utils.cellSummary = function(data, training_cells, validation_cells){
     }
 
   })
+
+  debug(detected_tcells)
 
   debug('TOTAL VALIDATION CELLS: ' + total_validation_cells)
 
