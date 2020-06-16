@@ -1,7 +1,7 @@
 SELECT 
 	ARRAY(
 		
-		SELECT 	gridid_${grid_resolution:raw}km as gridid
+		SELECT DISTINCT	gridid_${grid_resolution:raw}km as gridid
 		FROM snib_grid_${grid_resolution:raw}km AS a
 		JOIN sp_snib as b
 		ON a.spid = b.spid
