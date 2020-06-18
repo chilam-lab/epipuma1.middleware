@@ -51,7 +51,7 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
   var region = parseInt(verb_utils.getParam(req, 'region', verb_utils.region_mx))
   var fosil = verb_utils.getParam(req, 'fosil', true)
   var memory = verb_utils.getParam(req, 'memory', false)
-
+  
   var date  = false //verb_utils.getParam(req, 'date', true)
 
   var lim_inf = verb_utils.getParam(req, 'lim_inf', verb_utils.formatDate(new Date("1500-01-01")) )
@@ -76,14 +76,20 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
   data_request['lim_sup_validation'] = lim_sup_validation
   data_request['lim_inf'] = lim_inf
   data_request['lim_sup'] = lim_sup
+  
+  var target_group = verb_utils.getParam(req, 'target_taxons', [])
+  var validation_group = verb_utils.getParam(req, 'validation_taxons', [])
 
-  var target_group = verb_utils.getParam(req, 'target_taxons', []) 
+  debug(validation_group) 
   
   data_request["target_name"] = verb_utils.getParam(req, 'target_name', 'target_group')
   debug("*****1: " + data_request["target_name"])
   
   data_request["where_target"] = verb_utils.getWhereClauseFromGroupTaxonArray(target_group, true)
   debug("*****1: " + data_request["where_target"])
+
+  data_request["where_validation"] = verb_utils.getWhereClauseFromGroupTaxonArray(validation_group, true)
+  debug("*****1: " + data_request["where_validation"])
 
   data_request["where_exclude_target"] = verb_utils.getExcludeTargetWhereClause(target_group)
   debug("*****1: " + data_request["where_exclude_target"])
@@ -134,10 +140,15 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
   pool.task(t => {
 
     var query  = queries.getTimeValidation.getCellTraining
+    var where_validation = data_request["where_target"]
+
+    /*if(validation_group.length > 0){
+      where_validation = data_request["where_validation"]      
+    }*/
 
     const query1 = pgp.as.format(query, {
 
-      where_target: data_request["where_target"].replace('WHERE', ''),
+      where_target: where_validation.replace('WHERE', ''),
       grid_resolution: data_request["grid_resolution"],
       lim_inf: data_request['lim_inf'],
       lim_sup: data_request['lim_sup']
@@ -146,7 +157,7 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
     debug(query1)
 
     return t.one(query,  {
-              where_target: data_request["where_target"].replace('WHERE', ''),
+              where_target: where_validation.replace('WHERE', ''),
               grid_resolution: data_request["grid_resolution"],
               lim_inf: data_request['lim_inf'],
               lim_sup: data_request['lim_sup']
@@ -291,10 +302,15 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
             debug(data.length)
 
             var query = queries.getTimeValidation.getCellValidation
+            var where_validation = data_request["where_target"]
+
+            if(validation_group.length > 0){
+              where_validation = data_request["where_validation"]      
+            }
 
             const query1 = pgp.as.format(query, {
 
-              where_target: data_request["where_target"].replace('WHERE', ''),
+              where_target: where_validation.replace('WHERE', ''),
               grid_resolution: data_request["grid_resolution"],
               lim_inf: data_request['lim_inf'],
               lim_sup: data_request['lim_sup'],
@@ -306,7 +322,7 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
 
             return t.any(query, {
 
-              where_target: data_request["where_target"].replace('WHERE', ''),
+              where_target: where_validation.replace('WHERE', ''),
               grid_resolution: data_request["grid_resolution"],
               lim_inf: data_request['lim_inf'],
               lim_sup: data_request['lim_sup'],
