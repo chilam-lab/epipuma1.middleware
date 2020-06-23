@@ -137,6 +137,7 @@ var queryProvider = {
   },
   getEntListNiche: {
     getEntList: sqlPath('especie/getEntList.sql'),
+    getStateMunList: sqlPath('especie/getStateMunList.sql'),
     getEntListByTaxon: sqlPath('especie/getEntListByTaxon.sql')
   },
   getGrididsNiche: {
