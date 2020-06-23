@@ -43,6 +43,10 @@ router.route('/especie/getEntList')
   .get(verbsCtrl.getEntListNiche)
   .post(verbsCtrl.getEntListNiche)
 
+router.route('/especie/getStateMunList')
+  .get(verbsCtrl.getStateMunListNiche)
+  .post(verbsCtrl.getStateMunListNiche)
+
 router.route('/especie/getEntListByTaxon')
   .get(verbsCtrl.getEntListByTaxonNiche)
   .post(verbsCtrl.getEntListByTaxonNiche)

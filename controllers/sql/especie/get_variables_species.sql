@@ -11,7 +11,7 @@ WHERE
 	--and reinovalido = 'Animalia'
 	-- AND especievalidabusqueda <> ''
 	AND especieepiteto <> ''
-	AND array_length(cells_64km_$<region:raw>, 1) > 0 
+	AND array_length(cells_$<grid_res:raw>km_$<region:raw>, 1) > 0 
 --group by phylumdivisionvalido 
 --order by phylumdivisionvalido
 GROUP BY $<order_param:raw> ,

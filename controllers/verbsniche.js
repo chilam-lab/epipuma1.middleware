@@ -916,6 +916,7 @@ exports.getVariablesNiche = function (req, res, next) {
   var field = getParam(req, 'field','')
   var parentfield = getParam(req, 'parentfield','')
   var parentitem = getParam(req, 'parentitem','')
+  var grid_res = getParam(req, 'grid_res','mun')
 
   // debug("field: " + field)
   // debug("parentfield: " + parentfield)
@@ -944,8 +945,17 @@ exports.getVariablesNiche = function (req, res, next) {
   if(field === max_taxon_name){
 
         // debug("entra reino")
+
+    const query1 = pgp.as.format(queries.getVariablesNiche.getVariablesReino, {
+      taxon: field,
+      grid_res: grid_res,
+      region:footprint_region
+    })
+    debug(query1)
+
     pool.any(queries.getVariablesNiche.getVariablesReino, {
       taxon: field,
+      grid_res: grid_res,
       region:footprint_region
     })
         .then(function (data) {
@@ -960,12 +970,23 @@ exports.getVariablesNiche = function (req, res, next) {
   }
   else{
 
+    const query1 = pgp.as.format(queries.getVariablesNiche.getSpeciesVariables, {
+      taxon: field,
+      ad_param: ad_param,
+      order_param: order_param,
+      grid_res: grid_res,
+      parent_valor: parentitem,
+      region:footprint_region
+    })
+    debug(query1)
+
     if( field === 'especievalidabusqueda'){
 
       pool.any(queries.getVariablesNiche.getSpeciesVariables, {
         taxon: field,
         ad_param: ad_param,
         order_param: order_param,
+        grid_res: grid_res,
         parent_valor: parentitem,
         region:footprint_region
       })
@@ -982,11 +1003,23 @@ exports.getVariablesNiche = function (req, res, next) {
 
     }else if(parentfield!=='generovalido'){
 
+      const query1 = pgp.as.format(queries.getVariablesNiche.getVariables, {
+        taxon: field,
+        ad_param: ad_param,
+        order_param: order_param,
+        parent_taxon: parentfield,
+        grid_res: grid_res,
+        parent_valor: parentitem,
+        region:footprint_region
+      })
+      debug(query1)
+
       pool.any(queries.getVariablesNiche.getVariables, {
         taxon: field,
         ad_param: ad_param,
         order_param: order_param,
         parent_taxon: parentfield,
+        grid_res: grid_res,
         parent_valor: parentitem,
         region:footprint_region
       })
@@ -1002,6 +1035,17 @@ exports.getVariablesNiche = function (req, res, next) {
 
     } else {
 
+      const query1 = pgp.as.format(queries.getVariablesNiche.getVariablesSpecies, {
+        taxon: field,
+        ad_param: ad_param,
+        order_param: order_param,
+        parent_taxon: parentfield,
+        parent_valor: parentitem,
+        region:footprint_region,
+        grid_res: grid_res
+      })
+      debug(query1)
+
 
       pool.any(queries.getVariablesNiche.getVariablesSpecies, {
         taxon: field,
@@ -1009,7 +1053,8 @@ exports.getVariablesNiche = function (req, res, next) {
         order_param: order_param,
         parent_taxon: parentfield,
         parent_valor: parentitem,
-        region:footprint_region
+        region:footprint_region,
+        grid_res: grid_res
       })
           .then(function (data) {
                 // debug(data)
@@ -2042,7 +2087,65 @@ exports.getEntListByTaxonNiche = function (req, res, next) {
 
 
 
+exports.getStateMunListNiche = function (req, res, next) {
 
+    debug("getStateMunListNiche")
+
+    var str       = getParam(req, 'searchStr')
+    var has_limit = getParam(req, 'limit', false)
+    var region    = parseInt(getParam(req, 'footprint_region',default_region))
+    var grid_res    = getParam(req, 'grid_res',default_resolution)
+
+    var res_celda_snib    =  'gridid_'+grid_res+'km'
+    var res_celda_snib_tb = 'grid_'+grid_res+'km_aoi'
+    var txt_limite = has_limit === false ? '' : 'limit ' + limite
+
+    debug("str: " + str)
+    debug("has_limit: " + has_limit)
+    debug("region: " + region)
+    debug("grid_res: " + grid_res)
+    debug("txt_limite: " + txt_limite)
+
+    var col_name = ""
+    var selected_columns = ""
+
+    if(grid_res == "mun"){
+      col_name = "NOM_MUN"
+      selected_columns = '"NOM_ENT" as entidad, "NOM_MUN" as municipio'
+    }
+    else if(grid_res == "state" || grid_res == "ageb"){
+
+      col_name = "NOM_ENT"
+      selected_columns = '"NOM_ENT" as entidad'
+    }
+    else{
+      col_name = "NOM_ENT"
+      selected_columns = '"NOM_ENT" as entidad'
+    }
+
+    // debug(queries.getEntListNiche.getStateMunList)
+       
+    pool.any(queries.getEntListNiche.getStateMunList, {
+      str: str,
+      col_name: col_name,
+      selected_columns:selected_columns,
+      res_celda_snib: res_celda_snib,
+      res_celda_snib_tb: res_celda_snib_tb,
+      region: region,
+      limite: txt_limite
+    })
+    .then(function (data) {
+      debug(data)
+      res.json({'data': data})
+
+    })
+    .catch(function (error) {
+      debug(error)
+      next(error)
+    })
+
+
+}
 
 
 
@@ -2099,7 +2202,6 @@ exports.getEntListNiche = function (req, res, next) {
       }
 
     }
-
     
 
     debug("nivel: " + nivel)
