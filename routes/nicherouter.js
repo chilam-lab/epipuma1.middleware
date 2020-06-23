@@ -28,7 +28,7 @@ var bioScores = require('../controllers/getBioScores')
 var mdAtenticacion = require("../md-auth/autenticacion.js")
 var countsTaxonsGroupGivenPoints = require('../controllers/countsTaxonsGroupGivenPoints.js')
 var countsTaxonsGroupTimeValidation = require('../controllers/countsTaxonsGroupTimeValidation.js')
-
+var countsTaxonsGroupTrafficLight = require('../controllers/countsTaxonsGroupTrafficLight.js')
 
 /**
  * Ruta que muestra un mensaje de bienvenida 
@@ -245,5 +245,9 @@ router.route('/countsTaxonsGroupGivenPoints')
 
 router.route('/countsTaxonsGroupTimeValidation')
   .post(countsTaxonsGroupTimeValidation.countsTaxonsGroupTimeValidation)
+
+
+router.route('/countsTaxonsGroupTrafficLight')
+  .post(countsTaxonsGroupTrafficLight.countsTaxonsGroupTrafficLight)
 
 module.exports = router
