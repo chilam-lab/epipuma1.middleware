@@ -3967,7 +3967,7 @@ verb_utils.getTimeValidation = function(score_map, training_cells, validation_ce
 }
 
 
-verb_utils.cellSummary = function(data, training_cells, validation_cells){
+verb_utils.cellSummary = function(data, first_cells, training_cells, validation_cells){
 
   debug('cellSummary')
   debug('===========================Number of training cells===========================')
@@ -4104,6 +4104,12 @@ verb_utils.cellSummary = function(data, training_cells, validation_cells){
   debug('===========================+++++++++++++===========================')
 
   Object.keys(cells_map).forEach(cell => {
+
+    if(first_cells.includes(parseInt(cell)) == true){
+      cells_map[cell]['first_period'] = 1
+    } else {
+      cells_map[cell]['first_period'] = 0
+    }
 
     if(training_cells.includes(parseInt(cell)) == true) {
 
