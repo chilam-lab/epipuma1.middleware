@@ -112,7 +112,8 @@ var queryProvider = {
   },
   getTimeValidation: {
     getCellValidation: sqlPath('time-validation/get_cells_validation.sql'),
-    getCellTraining: sqlPath('time-validation/get_cells_training.sql')
+    getCellTraining: sqlPath('time-validation/get_cells_training.sql'),
+    getCellFirst: sqlPath('time-validation/get_cells_first.sql')
   },
   getTrafficLight:{
     getHistory: sqlPath('traffic-light/get-history.sql')
