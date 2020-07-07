@@ -3970,6 +3970,7 @@ verb_utils.getTimeValidation = function(score_map, training_cells, validation_ce
 verb_utils.cellSummary = function(data, first_cells, training_cells, validation_cells){
 
   debug('cellSummary')
+  debug(validation_cells)
   debug('===========================Number of training cells===========================')
   debug(training_cells.length)
   debug('===========================Number of validation cells===========================')
@@ -4133,7 +4134,7 @@ verb_utils.cellSummary = function(data, first_cells, training_cells, validation_
         }
 
       }
-      }
+    }
 
     try {
       limits.forEach(limit => {
