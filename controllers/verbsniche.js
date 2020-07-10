@@ -2607,6 +2607,7 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
   var gridid          = 'gridid_' + grid_res + 'km'
   var snib_grid_xxkm  = 'snib_grid_' + grid_res + 'km'
   var where_filter    = ''
+  var where_filter_first = ''
 
 
   where_filter = " and (make_date(aniocolecta, mescolecta, diacolecta) between "
@@ -2614,6 +2615,14 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
                 + " and diacolecta <> 99 and diacolecta <> -1"
                 + " and mescolecta <> 99 and mescolecta <> -1"
                 + " and aniocolecta <> 9999 and aniocolecta <> -1)"
+
+  where_filter_first = "(make_date(aniocolecta, mescolecta, diacolecta) < "
+                + "'" + liminf + "'" 
+                + " and diacolecta <> 99 and diacolecta <> -1"
+                + " and mescolecta <> 99 and mescolecta <> -1"
+                + " and aniocolecta <> 9999 and aniocolecta <> -1) "
+
+  debug(where_filter_first)
 
   if(sfecha === true){
     where_filter += " or (true and a.gridid_statekm is not null)"
@@ -2635,10 +2644,12 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
             'region'         : region,
             'gridid'         : gridid,
             'snib_grid_xxkm' : snib_grid_xxkm,
-            'where_filter'   : where_filter})
+            'where_filter'   : where_filter,
+            'where_filter_first': where_filter_first
+          })
   
 
-  // debug(query1)
+  debug(query1)
 
   pool.any(queries.getGridSpeciesNiche.getGridSpeciesTaxons, {
             'species_filter' : species_filter, 
@@ -2646,7 +2657,9 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
             'region'         : region,
             'gridid'         : gridid,
             'snib_grid_xxkm' : snib_grid_xxkm,
-            'where_filter'   : where_filter}
+            'where_filter'   : where_filter,
+            'where_filter_first': where_filter_first
+          }
       ).then(function (data) {
 
         debug(data.length + ' ocurrence cells')
