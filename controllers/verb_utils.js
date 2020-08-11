@@ -3970,6 +3970,7 @@ verb_utils.getTimeValidation = function(score_map, training_cells, validation_ce
 verb_utils.cellSummary = function(data, first_cells, training_cells, validation_cells){
 
   debug('cellSummary')
+  debug(validation_cells)
   debug('===========================Number of training cells===========================')
   debug(training_cells.length)
   debug('===========================Number of validation cells===========================')
@@ -4106,29 +4107,33 @@ verb_utils.cellSummary = function(data, first_cells, training_cells, validation_
   Object.keys(cells_map).forEach(cell => {
 
     if(first_cells.includes(parseInt(cell)) == true){
+      
       cells_map[cell]['first_period'] = 1
-    } else {
-      cells_map[cell]['first_period'] = 0
-    }
-
-    if(training_cells.includes(parseInt(cell)) == true) {
-
       cells_map[cell]['training_period'] = 1
       cells_map[cell]['validation_period'] = 1
-      detected_tcells += 1
-
+    
     } else {
+      cells_map[cell]['first_period'] = 0
 
-      if(validation_cells.includes(cell) == true) {
-        cells_map[cell]['training_period'] = 0
+      if(training_cells.includes(parseInt(cell)) == true) {
+
+        cells_map[cell]['training_period'] = 1
         cells_map[cell]['validation_period'] = 1
-        //debug(cell+','+cells_map[cell]['score'])
-        total_validation_cells += 1
-      } else {
-        cells_map[cell]['training_period'] = 0
-        cells_map[cell]['validation_period'] = 0
-      }
+        detected_tcells += 1
 
+      } else {
+
+        if(validation_cells.includes(cell) == true) {
+          cells_map[cell]['training_period'] = 0
+          cells_map[cell]['validation_period'] = 1
+          //debug(cell+','+cells_map[cell]['score'])
+          total_validation_cells += 1
+        } else {
+          cells_map[cell]['training_period'] = 0
+          cells_map[cell]['validation_period'] = 0
+        }
+
+      }
     }
 
     try {

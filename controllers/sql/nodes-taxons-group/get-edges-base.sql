@@ -36,8 +36,8 @@ counts AS (
 			n_res.n AS n
 	FROM source, target, n_res
 	--where icount(source.cells & target.cells) > 0
-	where icount(target.cells::integer[]) > $<min_occ:raw>
-	and icount(source.cells::integer[]) > 0
+	where icount(target.cells::integer[]) >= $<min_occ:raw>
+	and icount(source.cells::integer[]) >= 1
 ) 
 SELECT 	counts.biotic_s, 
 		--counts.reinovalido_s, 
