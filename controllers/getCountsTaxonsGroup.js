@@ -49,7 +49,7 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
 
   // var grid_resolution = parseInt(verb_utils.getParam(req, 'grid_resolution', 16)) 
   var grid_resolution = verb_utils.getParam(req, 'grid_resolution', default_resolution) 
-  var region = parseInt(verb_utils.getParam(req, 'region', verb_utils.region_mx))
+  var region = parseInt(verb_utils.getParam(req, 'region', default_region))
   var fosil = verb_utils.getParam(req, 'fosil', true)
 
   var date  = false //verb_utils.getParam(req, 'date', true)
@@ -74,13 +74,13 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
   var target_group = verb_utils.getParam(req, 'target_taxons', []) 
   
   data_request["target_name"] = verb_utils.getParam(req, 'target_name', 'target_group')
-  debug("*****1: " + data_request["target_name"])
+  // debug("*****1: " + data_request["target_name"])
   
   data_request["where_target"] = verb_utils.getWhereClauseFromGroupTaxonArray(target_group, true)
-  debug("*****1: " + data_request["where_target"])
+  // debug("*****1: " + data_request["where_target"])
 
   data_request["where_exclude_target"] = verb_utils.getExcludeTargetWhereClause(target_group)
-  debug("*****1: " + data_request["where_exclude_target"])
+  // debug("*****1: " + data_request["where_exclude_target"])
 
 
   var where_filter_target    = ''
@@ -99,7 +99,7 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
 
 
   var covars_groups = verb_utils.getParam(req, 'covariables', []) 
-  debug(covars_groups)
+  // debug(covars_groups)
   
   //data_request['groups'] = verb_utils.getCovarGroupQueries(queries, data_request, covars_groups)
 
@@ -172,7 +172,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
     });
 
-    debug(query1)
+    // debug(query1)
 
     return t.one(query, {
 

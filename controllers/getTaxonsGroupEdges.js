@@ -7,14 +7,16 @@ var queries = require('./sql/queryProvider')
 var pool = verb_utils.pool
 var alpha = verb_utils.alpha
 var N = verb_utils.N
+var default_region = verb_utils.region_mx
+var default_resolution = verb_utils.covid_mx
 
 exports.getTaxonsGroupEdges = function (req, res) {
 
 	debug("getEdgesTaxonsGroup")
 
-	var min_occ = verb_utils.getParam(req, 'min_occ', 5)
-	var grid_res = verb_utils.getParam(req, 'grid_res', 16)
-	var footprint_region = verb_utils.getParam(req, 'footprint_region', 1) 
+	var min_occ = verb_utils.getParam(req, 'min_occ', 1)
+	var grid_res = verb_utils.getParam(req, 'grid_res', default_resolution)
+	var footprint_region = verb_utils.getParam(req, 'footprint_region', default_region) 
 	var source = verb_utils.getParam(req, 'source', [])
 	var target = verb_utils.getParam(req, 'target', [])
 	var biotic_source = verb_utils.getParam(req, 'biotic_source', true)
@@ -25,8 +27,11 @@ exports.getTaxonsGroupEdges = function (req, res) {
   var lim_inf = verb_utils.getParam(req, 'lim_inf', 1500)
   var lim_sup = verb_utils.getParam(req, 'lim_sup', 2020)
 
-  // debug("fosil: " + fosil)
-  // debug("date: " + date)
+  debug("fosil: " + fosil)
+  debug("date: " + date)
+  debug("grid_res: " + grid_res)
+  debug("footprint_region: " + footprint_region)
+  
 
   var where_filter_cell    = ''
   if (date){
@@ -47,13 +52,13 @@ exports.getTaxonsGroupEdges = function (req, res) {
 
 
 
-  	// Defining useful variables
+  // Defining useful variables
 	var region_cells  =  "cells_" + grid_res + "km_" + footprint_region
 	var res_cells =  "cells_" + grid_res + "km"
 	var res_views = "grid_geojson_" + grid_res + "km_aoi"  
 	var gridid =  "gridid_" + grid_res + "km" 
 	var min_ep      = 0.0
-  	var max_edges   = 1000
+  var max_edges   = 1000
 	
   	if (source.length === 0 || target.length === 0) {
   		return res.json(
@@ -100,6 +105,7 @@ exports.getTaxonsGroupEdges = function (req, res) {
 	    var source_query = verb_utils.getCommunityAnalysisQuery(queries, footprint_region, res_cells, region_cells, res_views, source, false, where_bio_source, where_abio_source, where_filter_cell, gridid, grid_res)
 	    var target_query = verb_utils.getCommunityAnalysisQuery(queries, footprint_region, res_cells, region_cells, res_views, target, true, where_bio_source, where_abio_source, where_filter_cell, gridid, grid_res).slice(5)
 
+      // debug("query: " + query)
       // debug("source_query: " + source_query)
       // debug("target_query: " + target_query)
 

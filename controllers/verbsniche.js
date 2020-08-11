@@ -1130,7 +1130,7 @@ exports.getRasterNiche = function (req, res, next) {
       region: region
     })
         .then(function (data) {
-              // debug(data)
+              debug(data)
           res.json({'data': data})
         })
         .catch(function (error) {
