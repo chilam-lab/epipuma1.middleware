@@ -29,6 +29,7 @@ var mdAtenticacion = require("../md-auth/autenticacion.js")
 var countsTaxonsGroupGivenPoints = require('../controllers/countsTaxonsGroupGivenPoints.js')
 var countsTaxonsGroupTimeValidation = require('../controllers/countsTaxonsGroupTimeValidation.js')
 var countsTaxonsGroupTrafficLight = require('../controllers/countsTaxonsGroupTrafficLight.js')
+var generateTarget = require('../controllers/generateTarget.js')
 
 /**
  * Ruta que muestra un mensaje de bienvenida 
@@ -249,5 +250,9 @@ router.route('/countsTaxonsGroupTimeValidation')
 
 router.route('/countsTaxonsGroupTrafficLight')
   .post(countsTaxonsGroupTrafficLight.countsTaxonsGroupTrafficLight)
+
+
+router.route('/generateTarget')
+  .post(generateTarget.generateTarget)
 
 module.exports = router
