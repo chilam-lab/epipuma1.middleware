@@ -6,8 +6,7 @@ FROM (
 		   	WHEN b.occ is null THEN 0
 		   	ELSE b.occ
 		   END AS occ
-	FROM
-		( 
+	FROM ( 
 			SELECT DISTINCT gridid_${grid_resolution:raw}km AS gridid
 			FROM grid_${grid_resolution:raw}km_aoi 
 		) AS a

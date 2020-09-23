@@ -116,7 +116,11 @@ var queryProvider = {
     getCellFirst: sqlPath('time-validation/get_cells_first.sql'),
     getCountCellFirst: sqlPath('time-validation/get_count_cells_first.sql'),
     getCountCellTraining: sqlPath('time-validation/get_count_cells_training.sql'),
-    getCountCellValidation: sqlPath('time-validation/get_count_cells_validation.sql')
+    getCountCellValidation: sqlPath('time-validation/get_count_cells_validation.sql'),
+    getCountCellTrainingNewTarget: sqlPath('time-validation/get_count_cells_training_new_target.sql'),
+    getCountCellValidationNewTarget: sqlPath('time-validation/get_count_cells_validation_new_target.sql'),
+    getCountCellTrainingTop: sqlPath('time-validation/get_count_cells_training_top.sql'),
+    getCountCellValidationTop: sqlPath('time-validation/get_count_cells_validation_top.sql')
   },
   getTrafficLight:{
     getHistory: sqlPath('traffic-light/get-history.sql')

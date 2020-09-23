@@ -26,4 +26,4 @@ FROM (
 	) AS b
 	ON a.gridid=b.gridid::integer
 ) AS foo
-ORDER BY occ
+ORDER BY occ 

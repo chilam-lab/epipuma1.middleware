@@ -3976,25 +3976,20 @@ verb_utils.getCountTimeValidation = function(score_map, training_cells, validati
 
   var score_map_aux = {}
 
-
   debug('===========================Deleting training cells===========================')  
 
-  var ttraining = 0
   debug(training_cells.length)
 
   Object.keys(score_map).forEach(cell => {
 
     if(!training_cells.includes(parseInt(cell))){
-
-      ttraining += 1
       score_map_aux[parseInt(cell)] = score_map[cell]      
-
     }
 
   })
 
   debug(Object.keys(score_map).length)
-  debug(ttraining)
+  debug(Object.keys(score_map_aux).length)
   debug('===========================Validation cells in score map===========================')  
 
   var tcell_score_map = 0
@@ -4005,35 +4000,25 @@ verb_utils.getCountTimeValidation = function(score_map, training_cells, validati
     }
 
   })
-  debug(tcell_score_map)
 
+  debug(validation_cells.length)
+  debug(tcell_score_map)
   debug('===========================+++++===========================')
 
-  var scores_per_cell = Object.values(score_map_aux);
+  var scores_per_cell = Object.values(score_map_aux)
   scores_per_cell = scores_per_cell.sort(function(a,b){return b-a})
-
-  debug('=========================== score_map_aux length ===========================')
-  debug(Object.keys(score_map_aux).length)
-  debug('=========================== Number of validation ===========================')
-  debug(validation_cells.length)
-  debug('=========================== scores_per_cell ===========================')
-  debug(scores_per_cell)
-  debug('=========================== Position scores_per_cell ===========================')
 
   var number_scored_cells = scores_per_cell.length
   var limits = []
 
   for(var i=1; i<=10; i++){
 
-
-    debug(parseInt((number_scored_cells * i)/10) - parseInt(i/10))
     limits.push(scores_per_cell[parseInt((number_scored_cells * i)/10) - parseInt(i/10)])
-
+    //debug(parseInt((number_scored_cells * i)/10) - parseInt(i/10))  
   }
   debug('===========================  Limits  ===========================')
-  debug(limits)
-  debug(validation_cells.length)
-
+  debug('limits', limits)
+  
   var tcell_score_map = 0
   validation_cells.forEach(tcell => {
 
@@ -4045,13 +4030,9 @@ verb_utils.getCountTimeValidation = function(score_map, training_cells, validati
   debug(tcell_score_map)
 
   var score_map_aux_list = []
-  var aux = 0
   Object.keys(score_map_aux).forEach(vc => {
     score_map_aux_list.push([vc, score_map[vc]])
-    aux += 1
   })
-
-  debug(aux)
 
   var tcell_score_map = 0
   validation_cells.forEach(tcell => {
@@ -4068,11 +4049,9 @@ verb_utils.getCountTimeValidation = function(score_map, training_cells, validati
   })
   debug(tcell_score_map)
 
-   score_map_aux_list = score_map_aux_list.sort(function(a, b) {
-    return  b[1] - a[1];
-  });
+  score_map_aux_list = score_map_aux_list.sort(function(a, b) {return b[1]-a[1];});
 
-  debug(score_map_aux_list)
+  //debug(score_map_aux_list)
 
   var decil = 10
 
@@ -4082,8 +4061,6 @@ verb_utils.getCountTimeValidation = function(score_map, training_cells, validati
     validation_cells_map[cell] = true
   
   })
-
-
 
   //debug(validation_cells_map)
 
@@ -4097,10 +4074,8 @@ verb_utils.getCountTimeValidation = function(score_map, training_cells, validati
 
   debug(validation_ones)
 
-
   var Nscores = score_map_aux_list.length
-  debug(Nscores)
-
+  
   var indexes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
   var score_indexes = []
 
@@ -4112,12 +4087,7 @@ verb_utils.getCountTimeValidation = function(score_map, training_cells, validati
 
   debug(score_indexes)
 
-
-
-
   indexes.forEach(i => {
-    //debug(i)
-    //debug(limits[i])
 
     var null_freq = 0
     var true_positive = 0
@@ -4128,7 +4098,7 @@ verb_utils.getCountTimeValidation = function(score_map, training_cells, validati
 
     var total_validation_cells = 0
 
-    debug(score_map_aux_list.length, i, score_indexes[i])
+    //debug(score_map_aux_list.length, i, score_indexes[i])
     var score_index = -1;
 
     score_map_aux_list.forEach(cell => {
@@ -4172,6 +4142,7 @@ verb_utils.getCountTimeValidation = function(score_map, training_cells, validati
 
     })
 
+    debug(i, null_freq, pre, fre)
     time_validation.push({
 
       decil: decil,
@@ -4204,17 +4175,17 @@ verb_utils.cellSummary = function(data, first_cells, training_cells, validation_
   debug(validation_cells.length)
   debug('===========================Comparison cells===========================')
 
-  training_cells.forEach(c1 => {
+  /*training_cells.forEach(c1 => {
 
     validation_cells.forEach(c2 => {
 
       if(c1 === c2) {
-        debug(c1)
+        //debug(c1)
       }
 
     })
 
-  })
+  })*/
 
   debug('===========================+++++++++++++===========================')
 
@@ -4394,16 +4365,17 @@ verb_utils.cellSummary = function(data, first_cells, training_cells, validation_
 
 
 
-verb_utils.cellCountSummary = function(data, first_cells, training_cells, validation_cells){
+verb_utils.cellCountSummary = function(data, first_cells, training_cells, first_presence,
+                              validation_cells, training_presence, validation_presence){
 
   debug('cellCountSummary')
   //debug(first_cells)
   debug('===========================Number of first cells===========================')
   debug(first_cells.length)
   debug('===========================Number of training cells===========================')
-  debug(training_cells.length)
+  debug(training_cells.length, training_presence.length)
   debug('===========================Number of validation cells===========================')
-  debug(validation_cells.length)
+  debug(validation_cells.length, validation_presence.length)
   debug('===========================Comparison cells===========================')
 
   training_cells.forEach(c1 => {
@@ -4427,7 +4399,9 @@ verb_utils.cellCountSummary = function(data, first_cells, training_cells, valida
 
       if( cells_map[cell] == null ){
 
-        cells_map[cell] = {'vars': [], 'score': 0, 'positive_score': 0, 'negative_score': 0}
+        cells_map[cell] = {'vars': [], 'score': 0, 'positive_score': 0, 'negative_score': 0,
+                           'first_decile': 0, 'training_decile': 0, 'validation_decile': 0,
+                           'first_cases': 0, 'training_cases': 0, 'validation_cases': 0}
         
       }
 
@@ -4514,8 +4488,7 @@ verb_utils.cellCountSummary = function(data, first_cells, training_cells, valida
   N = all_scores.length
   var limits = []
   var riesgo = ['Muy alto', 'Alto', 'Mediano', 'Bajo', 'Muy bajo']
-
-
+  
   for (var i=1; i<=5; i++){
     limits.push([all_scores[parseInt(N*i/5) - parseInt(i/5)], riesgo[i-1]])
   }
@@ -4532,6 +4505,53 @@ verb_utils.cellCountSummary = function(data, first_cells, training_cells, valida
   //debug(training_cells)
   var detected_tcells = 0
   debug('===========================+++++++++++++===========================')
+
+  var percentile_size = parseInt(N/10)
+
+  var len_first = first_presence.length
+  var decil  = 10
+  for(var i = 1; i<=len_first; i++){
+
+    if(Object.keys(cells_map).includes(first_presence[i-1]['gridid'])){
+      cells_map[first_presence[i-1]['gridid']]['first_decile'] = decil
+      cells_map[first_presence[i-1]['gridid']]['first_cases'] = first_presence[i-1]['occ']
+    }
+
+    if(i % percentile_size == 0) {
+      decil -= 1
+    }
+
+  }
+
+  var len_training = training_presence.length
+  var decil  = 10
+  for(var i = 1; i<=len_training; i++){
+
+    if(Object.keys(cells_map).includes(training_presence[i-1]['gridid'])){
+      cells_map[training_presence[i-1]['gridid']]['training_decile'] = decil
+      cells_map[training_presence[i-1]['gridid']]['training_cases'] = training_presence[i-1]['occ']
+    }
+
+    if(i % percentile_size == 0) {
+      decil -= 1
+    }
+
+  }
+
+  var len_validation = validation_presence.length
+  var decil  = 10
+  for(var i = 1; i<=len_validation; i++){
+
+    if(Object.keys(cells_map).includes(validation_presence[i-1]['gridid'])){
+      cells_map[validation_presence[i-1]['gridid']]['validation_decile'] = decil
+      cells_map[validation_presence[i-1]['gridid']]['validation_cases'] = validation_presence[i-1]['occ']
+    }
+    
+    if(i % percentile_size == 0) {
+      decil -= 1
+    }
+
+  }
 
   Object.keys(cells_map).forEach(cell => {
 
@@ -4568,18 +4588,22 @@ verb_utils.cellCountSummary = function(data, first_cells, training_cells, valida
 
           cell_summary.push(cells_map[cell])
           throw BreakException
+
         }
 
       })
+
     } catch (e) {
       if (e !== BreakException) throw e;
     }
 
   })
 
-  debug(detected_tcells)
 
-  debug('TOTAL VALIDATION CELLS: ' + total_validation_cells)
+
+  //debug(detected_tcells)
+
+  //debug('TOTAL VALIDATION CELLS: ' + total_validation_cells)
 
   //debug(cells_map)
   return cell_summary

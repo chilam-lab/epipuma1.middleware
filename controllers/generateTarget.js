@@ -169,20 +169,29 @@ exports.generateTarget = function(req, res, next) {
       debug('FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD')
 
       var first = resp
-      debug(first)
-      var last_first = 0
+      
+      var first1s = 0;
+      var first0s = 0;
+      var first_presence = [] 
+      
+      first.forEach(item => {
+
+        if(parseInt(item['occ']) > 0) {
+          first1s += 1;
+
+          first_presence.push(item)
+
+        } else {
+          first0s += 1;
+        }
+
+      });
+
+      debug('first presence', first_presence.length)
+      debug('0s:', first0s, '1s:', first1s, 'total:', first0s + first1s)
+
       var bin = data_request['bin']
       var percentiles = parseInt(data_request['bining_parameter'])
-      
-      if(first.length < parseInt(Ncells/percentiles)){
-
-        last_first = parseInt(Ncells/percentiles)
-
-      } else {
-
-        last_first = first.length - 1 
-
-      }
 
       var limits = []
       var bin = data_request['bin']
@@ -201,15 +210,30 @@ exports.generateTarget = function(req, res, next) {
         debug(limits)
 
         var first_cells = []
-        for(var i=0; i<Ncells; i++){
+        if(first1s >= parseInt(Ncells / percentiles)){
 
-          if(limits[bin-1] <= i && i <= limits[bin]) {
+          for(var i=0; i<Ncells; i++){
 
-            first_cells.push(first[i]['gridid'])
+            if(limits[bin-1] <= i && i <= limits[bin]) {
+
+              first_cells.push(first[i]['gridid'])
+
+            }
 
           }
 
+        } else {
+
+          first.forEach(item => {
+
+            if(parseInt(item['occ']) > 0) {
+              first_cells.push(item['gridid']);
+            } 
+
+          });
+
         }
+          
 
       } else {
 
@@ -217,12 +241,15 @@ exports.generateTarget = function(req, res, next) {
 
       }
 
-
+      debug('celdas en decil 10 del primer periodo', first_cells.length)
+      first_presence = first_presence.sort(function(a, b) {return  parseInt(b['occ']) - parseInt(a['occ']);})
+      debug('celdas con presencia ', first_presence)
       data_request['first_cells'] = first_cells 
+      data_request['first_occur'] = first_presence
 
-      debug(data_request['first_cells'].length, data_request['first_cells'])
+      //debug(data_request['first_cells'].length, data_request['first_cells'])
       debug('FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD')
-      var query = queries.getTimeValidation.getCountCellTraining
+      var query = queries.getTimeValidation.getCountCellTrainingTop
       var where_validation = data_request["where_target"]
 
       const query1 = pgp.as.format(query, {
@@ -230,7 +257,8 @@ exports.generateTarget = function(req, res, next) {
         where_target: where_validation.replace('WHERE', ''),
         grid_resolution: data_request["grid_resolution"],
         lim_inf: data_request['lim_inf'],
-        lim_sup: data_request['lim_sup']
+        lim_sup: data_request['lim_sup'],
+        first_cells: data_request['first_cells'].length ==  0 ? '' : data_request['first_cells'] 
 
       })
       debug(query1)
@@ -239,27 +267,49 @@ exports.generateTarget = function(req, res, next) {
                 where_target: where_validation.replace('WHERE', ''),
                 grid_resolution: data_request["grid_resolution"],
                 lim_inf: data_request['lim_inf'],
-                lim_sup: data_request['lim_sup']
-      }).then(resp => {
+                lim_sup: data_request['lim_sup'],
+                first_cells: data_request['first_cells'].length ==  0 ? '' : data_request['first_cells']
 
+      }).then(resp => {
 
         debug('TRAINING PERIOD TRAINING PERIOD  TRAINING PERIOD  TRAINING PERIOD  TRAINING PERIOD  TRAINING PERIOD  TRAINING PERIOD ')
         var training = resp
-        debug(training)
+        var training_data = []
+
+        var train1s = 0;
+        var train0s = 0;
+        var training_presence = []
+        
+        training.forEach(item => {
+
+          if(!data_request['first_cells'].includes(item['gridid'])){
+            training_data.push(item)
+          }
+
+          if(parseInt(item['occ']) > 0){
+            training_presence.push(item)
+          }
+
+        });
+
+        training_data.forEach(item => {
+
+          if(parseInt(item['occ']) > 0) {
+            train1s += 1;
+          } else {
+            train0s += 1;
+          }
+
+        });
+
+        debug('training presence', training_presence.length)
+        debug('0s:', train0s, '1s:', train1s, 'total:', train0s + train1s)
+
+        Ncells = train0s + train1s
+
         var limits = []
         var bin = data_request['bin']
-        var last_training = 0
         var percentiles = parseInt(data_request['bining_parameter'])
-        
-        if(training.length < parseInt(Ncells/percentiles)){
-
-          last_training = parseInt(Ncells/percentiles)
-
-        } else {
-
-          last_training = training.length - 1 
-
-        }
 
         if(data_request['bining'] == 'percentile') {
 
@@ -274,25 +324,41 @@ exports.generateTarget = function(req, res, next) {
           debug(limits)
 
           var training_cells = []
-          for(var i=0; i<Ncells; i++){
+          if (train1s >= parseInt(Ncells / percentiles)) {
 
-            if(limits[bin-1] <= i && i <= limits[bin]) {
+            for(var i=0; i<Ncells; i++){
 
-              debug(training[i])
-              training_cells.push(training[i]['gridid'])
+              if(limits[bin-1] <= i && i <= limits[bin]) {
 
+                //debug(training[i])
+                training_cells.push(training_data[i]['gridid'])
+
+              }
             }
+
+          } else {
+
+            training_data.forEach(item => {
+
+              if(parseInt(item['occ']) > 0) {
+                training_cells.push(item['gridid']);
+              } 
+
+            });
+
           }
 
         } else {
 
-
-
         }
 
+        debug('celdas en decil 10 del periodo de entrenamiento', training_cells.length)
         data_request['training_cells'] = training_cells
+        training_presence = training_presence.sort(function(a, b) {return  parseInt(b['occ']) - parseInt(a['occ']);})
+        debug('celdas con presencia ', training_presence)
+        data_request['training_occur'] = training_presence
 
-        debug(data_request['training_cells'].length, data_request['training_cells'])
+        //debug(data_request['training_cells'].length, data_request['training_cells'])
         debug('TRAINING PERIOD TRAINING PERIOD  TRAINING PERIOD  TRAINING PERIOD  TRAINING PERIOD  TRAINING PERIOD  TRAINING PERIOD ')
         
         var query = queries.subaoi.getCountriesRegion
@@ -441,7 +507,7 @@ exports.generateTarget = function(req, res, next) {
 
        debug(data.length)
 
-        var query = queries.getTimeValidation.getCountCellValidation
+        var query = queries.getTimeValidation.getCountCellValidationTop
         var where_validation = data_request["where_target"]
 
         if(validation_group.length > 0){
@@ -455,7 +521,9 @@ exports.generateTarget = function(req, res, next) {
           lim_inf: data_request['lim_inf'],
           lim_sup: data_request['lim_sup'],
           lim_inf_validation: data_request['lim_inf_validation'],
-          lim_sup_validation: data_request['lim_sup_validation']
+          lim_sup_validation: data_request['lim_sup_validation'],
+          first_cells : data_request['first_cells'].length ==  0 ? '' : data_request['first_cells'],
+          training_cells : data_request['training_cells'].length == 0 ? '' : data_request['training_cells']
 
         })
         debug(query1)
@@ -467,7 +535,9 @@ exports.generateTarget = function(req, res, next) {
           lim_inf: data_request['lim_inf'],
           lim_sup: data_request['lim_sup'],
           lim_inf_validation: data_request['lim_inf_validation'],
-          lim_sup_validation: data_request['lim_sup_validation']
+          lim_sup_validation: data_request['lim_sup_validation'],
+          first_cells : data_request['first_cells'].length ==  0 ? '' : data_request['first_cells'],
+          training_cells : data_request['training_cells'].length == 0 ? '' : data_request['training_cells']
 
         }).then(validation_data => {
 
@@ -475,56 +545,98 @@ exports.generateTarget = function(req, res, next) {
             debug('VALIDATION PERIOD VALIDATION PERIOD  VALIDATION PERIOD  VALIDATION PERIOD  VALIDATION PERIOD  VALIDATION PERIOD ')
 
             var validation = validation_data
-            debug('validation cells')
-            debug(validation)
+            var validation_data = []
+
+            var val1s = 0;
+            var val0s = 0;
+            var validation_presence = []
+            
+            validation.forEach(item => {
+
+              if(!data_request['first_cells'].includes(item['gridid']) 
+                && !data_request['training_cells'].includes(item['gridid'])){
+
+                validation_data.push(item)
+              }
+
+              if(parseInt(item['occ']) > 0){
+                validation_presence.push(item)
+              }
+
+            });
+
+            validation_data.forEach(item => {
+
+              if(parseInt(item['occ']) > 0) {
+                val1s += 1;
+              } else {
+                val0s += 1;
+              }
+
+            });
+
+            debug('validation presence', validation_presence.length)
+            debug('0s:', val0s, '1s:', val1s, 'total:', val0s + val1s)
+
+            Ncells = val0s + val1s
+
+            //debug('validation cells')
+            //debug(validation)
             var limits = []
             var bin = data_request['bin']
-            var last_validation = 0
             var percentiles = parseInt(data_request['bining_parameter'])
 
-             if(validation.length < parseInt(Ncells/percentiles)){
+            if(data_request['bining'] == 'percentile') {
 
-                last_validation = parseInt(Ncells/percentiles)
+              for(var i=0; i<=percentiles; i++) {
 
-              } else {
-
-                last_validation = validation.length - 1 
+                var val = parseInt(Ncells*i/percentiles) - parseInt(i/percentiles)
+                //limits.push(parseInt(training[val]['occ']))
+                limits.push(val)
 
               }
 
-              if(data_request['bining'] == 'percentile') {
+              debug(limits)
 
-                for(var i=0; i<=percentiles; i++) {
+              var validation_cells = []
 
-                  var val = parseInt(Ncells*i/percentiles) - parseInt(i/percentiles)
-                  //limits.push(parseInt(training[val]['occ']))
-                  limits.push(val)
+              if(val1s >= parseInt(Ncells/percentiles)){
 
-                }
-
-                debug(limits)
-
-                var validation_cells = []
                 for(var i=0; i<Ncells; i++){
 
                   if(limits[bin-1] <= i && i <= limits[bin]) {
 
-                    debug(validation[i])
-                    validation_cells.push(validation[i]['gridid'])
+                    //debug(validation[i])
+                    validation_cells.push(validation_data[i]['gridid'])
 
                   }
                 }
 
               } else {
 
+                validation_data.forEach(item => {
 
+                  if(parseInt(item['occ']) > 0) {
+                    validation_cells.push(item['gridid']);
+                  } 
+
+                });                
 
               }
 
-              data_request['validation_cells'] = validation_cells
+            } else {
 
-              debug(data_request['validation_cells'].length, data_request['validation_cells'])
 
+
+            }
+
+
+            debug('celdas en decil 10 del periodo de validación ', validation_cells.length)
+            data_request['validation_cells'] = validation_cells
+
+            validation_presence = validation_presence.sort(function(a, b) {return  parseInt(b['occ']) - parseInt(a['occ']);})
+            debug('celdas con presencia ', validation_presence)
+            data_request['validation_occur'] = validation_presence
 
             debug('VALIDATION PERIOD VALIDATION PERIOD  VALIDATION PERIOD  VALIDATION PERIOD  VALIDATION PERIOD  VALIDATION PERIOD ')
 
@@ -554,9 +666,16 @@ exports.generateTarget = function(req, res, next) {
             var data_freq_cell = []
             data_freq_cell = verb_utils.processDataForFreqCell(score_array)
 
-            
+            debug('length first_cells     :', data_request['first_cells'].length)
+            debug('length training_cells  :', data_request['training_cells'].length)
+            debug('length validation_cells:', data_request['validation_cells'].length)
 
-            var cell_summary = verb_utils.cellCountSummary(data, first_cells, training_cells, validation_cells)
+            var first_presence = data_request['first_occur']
+            var training_presence = data_request['training_occur']
+            var validation_presence = data_request['validation_occur']
+
+            var cell_summary = verb_utils.cellCountSummary(data, first_cells, training_cells, 
+                                                  first_presence, validation_cells, training_presence, validation_presence)
 
 
             

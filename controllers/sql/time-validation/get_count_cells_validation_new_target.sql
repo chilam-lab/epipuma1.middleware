@@ -6,9 +6,14 @@ FROM (
 		   	WHEN b.occ is null THEN 0
 		   	ELSE b.occ
 		   END AS occ
-	FROM ( 
-			SELECT DISTINCT gridid_${grid_resolution:raw}km AS gridid
-			FROM grid_${grid_resolution:raw}km_aoi 
+	FROM
+		( 
+			SELECT gridid_${grid_resolution:raw}km AS gridid
+			FROM grid_${grid_resolution:raw}km_aoi
+			WHERE (NOT gridid_${grid_resolution:raw}km = ANY(ARRAY[${first_cells:raw}]::integer[]))
+			  AND (NOT gridid_${grid_resolution:raw}km = ANY(ARRAY[${training_cells:raw}]::integer[]))
+			GROUP BY gridid
+			ORDER BY RANDOM()
 		) AS a
 	LEFT JOIN (
 		SELECT t0.gridid,
@@ -17,19 +22,9 @@ FROM (
 			SELECT DISTINCT bar.gridid_${grid_resolution:raw}km AS gridid,
 				   foo.c
 			FROM (
-				SELECT 	gridid_${grid_resolution:raw}km as gridid,
-						1 as c
-				FROM snib_grid_${grid_resolution:raw}km AS a
-				JOIN sp_snib as b
-				ON a.spid = b.spid
-				WHERE a.aniocolecta <> 9999 and 
-					  a.mescolecta <> 99 and
-					  a.diacolecta <> 99 and
-					  a.diacolecta <> -1 and
-					  ${where_target:raw} and
-					  make_date(a.aniocolecta, a.mescolecta, a.diacolecta) < '${lim_inf:raw}'
-				GROUP BY a.gridid_${grid_resolution:raw}km, a.aniocolecta, a.mescolecta, a.diacolecta
-				ORDER BY RANDOM()
+				SELECT unnest(ARRAY[${first_cells:raw}]::text[]) as gridid, 1 as c
+				UNION ALL
+				SELECT unnest(ARRAY[${training_cells:raw}]::text[]) as gridid, 1 as c
 			) as foo
 			RIGHT JOIN grid_${grid_resolution:raw}km_aoi as bar
 			ON foo.gridid::integer = bar.gridid_${grid_resolution:raw}km::integer
@@ -48,7 +43,7 @@ FROM (
 				  a.diacolecta <> 99 and
 				  a.diacolecta <> -1 and
 				  ${where_target:raw} and
-				  make_date(a.aniocolecta, a.mescolecta, a.diacolecta) BETWEEN '${lim_inf:raw}' and '${lim_sup:raw}'
+				  make_date(a.aniocolecta, a.mescolecta, a.diacolecta) BETWEEN '${lim_inf_validation:raw}' and '${lim_sup_validation:raw}'
 			GROUP BY a.gridid_${grid_resolution:raw}km, a.aniocolecta, a.mescolecta, a.diacolecta
 		) as t1
 		ON t0.gridid=t1.gridid::integer
