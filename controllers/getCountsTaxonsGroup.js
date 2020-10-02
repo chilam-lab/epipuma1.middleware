@@ -105,6 +105,7 @@ exports.getTaxonsGroupRequestV2 = function(req, res, next) {
 
   data_request["alpha"] = undefined
   data_request["idtabla"] = verb_utils.getParam(req, 'idtabla', "")
+  //data_request["idtabla"] = 'tbl_'
   data_request["get_grid_species"] = verb_utils.getParam(req, 'get_grid_species', false)
   data_request["apriori"] = verb_utils.getParam(req, 'apriori', false)
   data_request["mapa_prob"] = verb_utils.getParam(req, 'mapa_prob', false)
@@ -346,8 +347,9 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
       // debug("source_cells.length: " +  data_request["source_cells"].length)
       // debug("total_cells.length: " +  data_request["total_cells"].length)
 
+      //debug('ppppppppppppppp', data_request["source_cells"].length)
 
-     var decil_selected = data_request["decil_selected"]
+      var decil_selected = data_request["decil_selected"]
     
       var data_response = {iter: (iter+1), data: data_iteration, test_cells: data_request["source_cells"], target_cells: data_request["target_cells"], apriori: data_request.apriori, mapa_prob: data_request.mapa_prob }
       json_response["data_response"] = json_response["data_response"] === undefined ? [data_response] : json_response["data_response"].concat(data_response)
@@ -394,7 +396,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
           data_freq = data_request.with_data_freq === true ? verb_utils.processDataForFreqSpecie(json_response["data_response"], is_validation) : []
 
           validation_data = data_request.with_data_score_decil === true ? verb_utils.getValidationValues(json_response["data_response"]) : []
-
+          var cell_summary = verb_utils.cellSpatialSummary(data_iteration, dup_array, total_iterations)          
 
         } else{
 
@@ -418,7 +420,7 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
           // Obtiene los 20 rangos de epsilon y score por especie, utilizados para las gráficas en el cliente de frecuencia por especie. 
           // En caso de ser validación se promedia cada rango
           data_freq = data_request.with_data_freq === true ? verb_utils.processDataForFreqSpecie([data], is_validation) : []
-
+          var cell_summary = verb_utils.cellSimpleSummary(data)
           
         }
 
@@ -491,7 +493,6 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
 
         }
 
-
         res.json({
             ok: true,
             data: data,
@@ -501,7 +502,8 @@ function initialProcess(iter, total_iterations, data, res, json_response, req, c
             validation_data: validation_data,
             percentage_avg: percentage_occ,
             decil_cells: decil_cells,
-            info_cell: info_cell
+            info_cell: info_cell,
+            cell_summary: cell_summary
         })
         
       }

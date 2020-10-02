@@ -4164,6 +4164,296 @@ verb_utils.getCountTimeValidation = function(score_map, training_cells, validati
   return time_validation
 }
 
+verb_utils.cellSimpleSummary = function(data){
+
+  debug('cellSimpleSummary')
+
+  var cells_map = {}
+
+  data.forEach(covar => {
+    covar['cells'].forEach(cell => {
+
+      if( cells_map[cell] == null ){
+
+        cells_map[cell] = {'vars': [], 'score': 0, 'positive_score': 0, 'negative_score': 0}
+        
+      }
+
+      var temp_score = parseFloat(covar['score'])
+      cells_map[cell]['score'] += temp_score
+
+      if(temp_score > 0) {
+
+        cells_map[cell]['positive_score'] += temp_score
+
+      } else {
+        
+        cells_map[cell]['negative_score'] += temp_score
+
+      }
+
+      if(covar['tipo'] == 0){
+
+        cells_map[cell]['vars'].push([covar['description'] + ' ' + covar['especieepiteto'], temp_score]) 
+
+      } else {
+
+        cells_map[cell]['vars'].push([covar['description'] + ' ' + covar['tag'], temp_score])
+
+      }
+      
+
+    })
+
+  })
+
+  var all_scores = []
+
+  Object.keys(cells_map).forEach(cell => {
+
+    cells_map[cell]['vars'].sort(function(a, b){return b[1] - a[1];})
+    var N  = cells_map[cell]['vars'].length
+    
+    all_scores.push(cells_map[cell]['score'])
+
+    if(N >= 5){
+
+      cells_map[cell]['best_predictor_1'] = cells_map[cell]['vars'][0]
+      cells_map[cell]['best_predictor_2'] = cells_map[cell]['vars'][1]
+      cells_map[cell]['best_predictor_3'] = cells_map[cell]['vars'][2]
+      cells_map[cell]['best_predictor_4'] = cells_map[cell]['vars'][3]
+      cells_map[cell]['best_predictor_5'] = cells_map[cell]['vars'][4]
+
+      cells_map[cell]['worst_predictor_5'] = cells_map[cell]['vars'][N-5]
+      cells_map[cell]['worst_predictor_4'] = cells_map[cell]['vars'][N-4]
+      cells_map[cell]['worst_predictor_3'] = cells_map[cell]['vars'][N-3]
+      cells_map[cell]['worst_predictor_2'] = cells_map[cell]['vars'][N-2]
+      cells_map[cell]['worst_predictor_1'] = cells_map[cell]['vars'][N-1]
+
+    } else {
+
+      for(var i = 0; i < N ; i++) {
+
+        cells_map[cell]['best_predictor_' + (i+1)] = cells_map[cell]['vars'][i]
+        cells_map[cell]['worst_predictor_' + (i+1)] = ['-', 0]
+
+      }
+
+      for(var i= N; i<5; i++){
+        cells_map[cell]['best_predictor_' + (i+1)] = ['-', 0]
+        cells_map[cell]['worst_predictor_' + (i+1)] = ['-', 0]
+      }
+
+
+
+      var lprint = []
+      for(var i=0; i<5; i++){
+        lprint.push(cells_map[cell]['best_predictor_' + (i+1)])
+        lprint.push(cells_map[cell]['worst_predictor_' + (i+1)])
+      }
+      /*debug(lprint);*/
+    }
+
+    delete cells_map[cell]['vars']
+    
+  })
+
+  all_scores.sort(function(a, b){return b - a;})
+  N = all_scores.length
+  var limits = []
+  var riesgo = ['Muy alto', 'Alto', 'Mediano', 'Bajo', 'Muy bajo']
+
+
+  for (var i=1; i<=5; i++){
+    limits.push([all_scores[parseInt(N*i/5) - parseInt(i/5)], riesgo[i-1]])
+  }
+
+  var cell_summary = []
+  var BreakException = {}
+  
+  debug('===========================Cells map===========================')
+
+  Object.keys(cells_map).forEach(cell => {
+
+    try {
+      limits.forEach(limit => {
+
+        if(cells_map[cell]['score'] >= limit[0]) {
+
+          cells_map[cell]['grupo_riesgo'] = limit[1]
+          cells_map[cell]['gridid'] = cell
+
+          cell_summary.push(cells_map[cell])
+          throw BreakException
+        }
+
+      })
+    } catch (e) {
+      if (e !== BreakException) throw e;
+    }
+
+  })
+
+  return cell_summary
+}
+
+
+verb_utils.cellSpatialSummary = function(data, data_response, iterations){
+
+  debug('cellSpatialSummary')
+  
+  //debug(data_response)
+
+  var cells_map = {}
+  
+  data.forEach(covar => {
+    covar['cells'].forEach(cell => {
+
+      if( cells_map[cell] == null ){
+
+        cells_map[cell] = {'vars': [], 
+                           'score': 0, 
+                           'positive_score': 0, 
+                           'negative_score': 0,
+                            }
+
+        for(var i=0;i<iterations;i++){
+
+          cells_map[cell]['training_iter_' + (i+1)] = 0
+          cells_map[cell]['testing_iter_' + (i+1)] = 0
+        }
+        
+      }
+
+      var temp_score = parseFloat(covar['score'])
+      cells_map[cell]['score'] += temp_score
+
+      if(temp_score > 0) {
+
+        cells_map[cell]['positive_score'] += temp_score
+
+      } else {
+        
+        cells_map[cell]['negative_score'] += temp_score
+
+      }
+
+      if(covar['tipo'] == 0){
+
+        cells_map[cell]['vars'].push([covar['description'] + ' ' + covar['especieepiteto'], temp_score]) 
+
+      } else {
+
+        cells_map[cell]['vars'].push([covar['description'] + ' ' + covar['tag'], temp_score])
+
+      }
+      
+
+    })
+
+  })
+
+  var all_scores = []
+
+  Object.keys(cells_map).forEach(cell => {
+
+    cells_map[cell]['vars'].sort(function(a, b){return b[1] - a[1];})
+    var N  = cells_map[cell]['vars'].length
+    
+    all_scores.push(cells_map[cell]['score'])
+
+    if(N >= 5){
+
+      cells_map[cell]['best_predictor_1'] = cells_map[cell]['vars'][0]
+      cells_map[cell]['best_predictor_2'] = cells_map[cell]['vars'][1]
+      cells_map[cell]['best_predictor_3'] = cells_map[cell]['vars'][2]
+      cells_map[cell]['best_predictor_4'] = cells_map[cell]['vars'][3]
+      cells_map[cell]['best_predictor_5'] = cells_map[cell]['vars'][4]
+
+      cells_map[cell]['worst_predictor_5'] = cells_map[cell]['vars'][N-5]
+      cells_map[cell]['worst_predictor_4'] = cells_map[cell]['vars'][N-4]
+      cells_map[cell]['worst_predictor_3'] = cells_map[cell]['vars'][N-3]
+      cells_map[cell]['worst_predictor_2'] = cells_map[cell]['vars'][N-2]
+      cells_map[cell]['worst_predictor_1'] = cells_map[cell]['vars'][N-1]
+
+    } else {
+
+      for(var i = 0; i < N ; i++) {
+
+        cells_map[cell]['best_predictor_' + (i+1)] = cells_map[cell]['vars'][i]
+        cells_map[cell]['worst_predictor_' + (i+1)] = ['-', 0]
+
+      }
+
+      for(var i= N; i<5; i++){
+        cells_map[cell]['best_predictor_' + (i+1)] = ['-', 0]
+        cells_map[cell]['worst_predictor_' + (i+1)] = ['-', 0]
+      }
+
+
+
+      var lprint = []
+      for(var i=0; i<5; i++){
+        lprint.push(cells_map[cell]['best_predictor_' + (i+1)])
+        lprint.push(cells_map[cell]['worst_predictor_' + (i+1)])
+      }
+      /*debug(lprint);*/
+    }
+
+    delete cells_map[cell]['vars']
+    
+  })
+
+  all_scores.sort(function(a, b){return b - a;})
+  N = all_scores.length
+  var limits = []
+  var riesgo = ['Muy alto', 'Alto', 'Mediano', 'Bajo', 'Muy bajo']
+
+
+  for (var i=1; i<=5; i++){
+    limits.push([all_scores[parseInt(N*i/5) - parseInt(i/5)], riesgo[i-1]])
+  }
+
+  var cell_summary = []
+  var BreakException = {}
+  
+  debug('===========================Cells map===========================')
+
+  Object.keys(cells_map).forEach(cell => {
+
+
+    data_response.forEach(iteration => {
+
+      if(iteration['test_cells'].includes(parseInt(cell))){
+        cells_map[cell]['testing_iter_' + iteration['iter']] = 1
+      } else {
+        cells_map[cell]['training_iter_' + iteration['iter']] = 1
+      }
+
+    })
+
+    try {
+      limits.forEach(limit => {
+
+        if(cells_map[cell]['score'] >= limit[0]) {
+
+          cells_map[cell]['grupo_riesgo'] = limit[1]
+          cells_map[cell]['gridid'] = cell
+
+          cell_summary.push(cells_map[cell])
+          throw BreakException
+        }
+
+      })
+    } catch (e) {
+      if (e !== BreakException) throw e;
+    }
+
+  })
+
+  return cell_summary
+}
+
 
 verb_utils.cellSummary = function(data, first_cells, training_cells, validation_cells){
 

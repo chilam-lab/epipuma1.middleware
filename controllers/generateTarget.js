@@ -163,7 +163,7 @@ exports.generateTarget = function(req, res, next) {
               where_target: where_validation.replace('WHERE', ''),
               grid_resolution: data_request["grid_resolution"],
               lim_inf: data_request['lim_inf'],
-              lim_sup: data_request['lim_sup']
+              
     }).then(resp => {
 
       debug('FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD')
@@ -310,16 +310,22 @@ exports.generateTarget = function(req, res, next) {
         var limits = []
         var bin = data_request['bin']
         var percentiles = parseInt(data_request['bining_parameter'])
+        var width_top = parseInt(2458/percentiles)
 
         if(data_request['bining'] == 'percentile') {
+          
+          var Ncells1 = Ncells - width_top - 1
 
-          for(var i=0; i<=percentiles; i++) {
+          for(var i=0; i<percentiles-1; i++) {
 
-            var val = parseInt(Ncells*i/percentiles) - parseInt(i/percentiles)
+            var val = parseInt(Ncells1*i/percentiles) - parseInt(i/percentiles)
             //limits.push(parseInt(training[val]['occ']))
             limits.push(val)
 
           }
+
+          limits.push(Ncells1)
+          limits.push(Ncells - 1)
 
           debug(limits)
 
@@ -330,7 +336,7 @@ exports.generateTarget = function(req, res, next) {
 
               if(limits[bin-1] <= i && i <= limits[bin]) {
 
-                //debug(training[i])
+                //debug(training_data[i])
                 training_cells.push(training_data[i]['gridid'])
 
               }
@@ -585,16 +591,22 @@ exports.generateTarget = function(req, res, next) {
             var limits = []
             var bin = data_request['bin']
             var percentiles = parseInt(data_request['bining_parameter'])
+            var width_top = parseInt(2458/percentiles)
 
             if(data_request['bining'] == 'percentile') {
 
-              for(var i=0; i<=percentiles; i++) {
+              var Ncells1 = Ncells - width_top - 1
+
+              for(var i=0; i<percentiles-1; i++) {
 
                 var val = parseInt(Ncells*i/percentiles) - parseInt(i/percentiles)
                 //limits.push(parseInt(training[val]['occ']))
                 limits.push(val)
 
               }
+
+              limits.push(Ncells1)
+              limits.push(Ncells - 1)
 
               debug(limits)
 
