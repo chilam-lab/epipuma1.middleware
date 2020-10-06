@@ -3971,6 +3971,8 @@ verb_utils.getCountTimeValidation = function(score_map, training_cells, validati
 
   debug('getCountTimeValidation')
 
+  //debug(score_map)
+
   var time_validation = []
   var score_validation_cells = {}
 
@@ -4660,6 +4662,8 @@ verb_utils.cellCountSummary = function(data, first_cells, training_cells, first_
 
   debug('cellCountSummary')
   //debug(first_cells)
+
+
   debug('===========================Number of first cells===========================')
   debug(first_cells.length)
   debug('===========================Number of training cells===========================')
@@ -4667,6 +4671,8 @@ verb_utils.cellCountSummary = function(data, first_cells, training_cells, first_
   debug('===========================Number of validation cells===========================')
   debug(validation_cells.length, validation_presence.length)
   debug('===========================Comparison cells===========================')
+
+  debug(training_cells)
 
   training_cells.forEach(c1 => {
 

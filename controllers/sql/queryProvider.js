@@ -120,7 +120,14 @@ var queryProvider = {
     getCountCellTrainingNewTarget: sqlPath('time-validation/get_count_cells_training_new_target.sql'),
     getCountCellValidationNewTarget: sqlPath('time-validation/get_count_cells_validation_new_target.sql'),
     getCountCellTrainingTop: sqlPath('time-validation/get_count_cells_training_top.sql'),
-    getCountCellValidationTop: sqlPath('time-validation/get_count_cells_validation_top.sql')
+    getCountCellValidationTop: sqlPath('time-validation/get_count_cells_validation_top.sql'),
+    getCountCellFirstIncidence: sqlPath('time-validation/get_count_cells_first_incidence.sql'),
+    getCountCellTrainingIncidence: sqlPath('time-validation/get_count_cells_training_incidence.sql'),
+    getCountCellValidationIncidence: sqlPath('time-validation/get_count_cells_validation_incidence.sql'),
+    getCountCellFirstPrevalence: sqlPath('time-validation/get_count_cells_first_prevalence.sql'),
+    getCountCellTrainingPrevalence: sqlPath('time-validation/get_count_cells_training_prevalence.sql'),
+    getCountCellValidationPrevalence: sqlPath('time-validation/get_count_cells_validation_prevalence.sql'),
+    getCountsBaseCount: sqlPath("time-validation/get_counts_base_count.sql"),
   },
   getTrafficLight:{
     getHistory: sqlPath('traffic-light/get-history.sql')

@@ -51,6 +51,7 @@ exports.generateTarget = function(req, res, next) {
   var region = parseInt(verb_utils.getParam(req, 'region', verb_utils.region_mx))
   var fosil = verb_utils.getParam(req, 'fosil', true)
   var memory = verb_utils.getParam(req, 'memory', false)
+  var modifier = verb_utils.getParam(req, 'modifier', 'infected')
   
   var date  = false //verb_utils.getParam(req, 'date', true)
 
@@ -83,6 +84,7 @@ exports.generateTarget = function(req, res, next) {
   data_request['lim_sup_validation'] = lim_sup_validation
   data_request['lim_inf'] = lim_inf
   data_request['lim_sup'] = lim_sup
+  data_request['modifier'] = modifier
   
   var target_group = verb_utils.getParam(req, 'target_taxons', [])
   var validation_group = verb_utils.getParam(req, 'validation_taxons', [])
@@ -147,7 +149,15 @@ exports.generateTarget = function(req, res, next) {
 
   pool.task(t => {
 
-    var query  = queries.getTimeValidation.getCountCellFirst
+    debug('MODIFIER', data_request['modifier'])
+    if(data_request['modifier'] == 'infected'){
+      var query  = queries.getTimeValidation.getCountCellFirst
+    } else if (data_request['modifier'] == 'incidence') {
+      var query  = queries.getTimeValidation.getCountCellFirstIncidence
+    } else {
+      var query  = queries.getTimeValidation.getCountCellFirstPrevalence
+    }
+
     var where_validation = data_request["where_target"]
 
     const query1 = pgp.as.format(query, {
@@ -176,7 +186,7 @@ exports.generateTarget = function(req, res, next) {
       
       first.forEach(item => {
 
-        if(parseInt(item['occ']) > 0) {
+        if(parseFloat(item['occ']) > 0) {
           first1s += 1;
 
           first_presence.push(item)
@@ -226,7 +236,7 @@ exports.generateTarget = function(req, res, next) {
 
           first.forEach(item => {
 
-            if(parseInt(item['occ']) > 0) {
+            if(parseFloat(item['occ']) > 0) {
               first_cells.push(item['gridid']);
             } 
 
@@ -242,14 +252,23 @@ exports.generateTarget = function(req, res, next) {
       }
 
       debug('celdas en decil 10 del primer periodo', first_cells.length)
-      first_presence = first_presence.sort(function(a, b) {return  parseInt(b['occ']) - parseInt(a['occ']);})
+      first_presence = first_presence.sort(function(a, b) {return  parseFloat(b['occ']) - parseFloat(a['occ']);})
       debug('celdas con presencia ', first_presence)
       data_request['first_cells'] = first_cells 
       data_request['first_occur'] = first_presence
 
       //debug(data_request['first_cells'].length, data_request['first_cells'])
       debug('FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD')
-      var query = queries.getTimeValidation.getCountCellTrainingTop
+
+      debug('MODIFIER', data_request['modifier'])
+      if(data_request['modifier'] == 'infected'){
+        var query = queries.getTimeValidation.getCountCellTrainingTop
+      } else if (data_request['modifier'] == 'incidence') {
+        var query  = queries.getTimeValidation.getCountCellTrainingIncidence
+      } else {
+        var query  = queries.getTimeValidation.getCountCellTrainingPrevalence
+      }
+
       var where_validation = data_request["where_target"]
 
       const query1 = pgp.as.format(query, {
@@ -286,7 +305,7 @@ exports.generateTarget = function(req, res, next) {
             training_data.push(item)
           }
 
-          if(parseInt(item['occ']) > 0){
+          if(parseFloat(item['occ']) > 0){
             training_presence.push(item)
           }
 
@@ -294,7 +313,7 @@ exports.generateTarget = function(req, res, next) {
 
         training_data.forEach(item => {
 
-          if(parseInt(item['occ']) > 0) {
+          if(parseFloat(item['occ']) > 0) {
             train1s += 1;
           } else {
             train0s += 1;
@@ -346,7 +365,7 @@ exports.generateTarget = function(req, res, next) {
 
             training_data.forEach(item => {
 
-              if(parseInt(item['occ']) > 0) {
+              if(parseFloat(item['occ']) > 0) {
                 training_cells.push(item['gridid']);
               } 
 
@@ -360,7 +379,7 @@ exports.generateTarget = function(req, res, next) {
 
         debug('celdas en decil 10 del periodo de entrenamiento', training_cells.length)
         data_request['training_cells'] = training_cells
-        training_presence = training_presence.sort(function(a, b) {return  parseInt(b['occ']) - parseInt(a['occ']);})
+        training_presence = training_presence.sort(function(a, b) {return  parseFloat(b['occ']) - parseFloat(a['occ']);})
         debug('celdas con presencia ', training_presence)
         data_request['training_occur'] = training_presence
 
@@ -380,7 +399,7 @@ exports.generateTarget = function(req, res, next) {
             data_request["where_filter"] += ' AND gridid_' + grid_resolution + 'km = ANY(ARRAY[' + training_cells.toString() + ']::text[])'
           }
           //debug(data_request["where_filter"])
-
+          data_request["training"] = 'ARRAY[' + training_cells.toString() + ']::integer[]'
         }).then(resp=> {
 
               data_request['source_cells'] = []
@@ -402,7 +421,8 @@ exports.generateTarget = function(req, res, next) {
 
                   debug("N:" + data_request['N'])
 
-                  var query_analysis = queries.countsTaxonGroups.getCountsBase
+                 // var query_analysis = queries.countsTaxonGroups.getCountsBase
+                  var query_analysis = queries.getTimeValidation.getCountsBaseCount
                   data_request['groups'] = verb_utils.getCovarGroupQueries(queries, data_request, covars_groups)
 
                   debug('grupos covariables ' + covars_groups)
@@ -489,8 +509,8 @@ exports.generateTarget = function(req, res, next) {
 
                       debug("analisis basico")
 
-                      //const query1 = pgp.as.format(query_analysis, data_request)
-                      //debug(query1)
+                      const query1 = pgp.as.format(query_analysis, data_request)
+                      debug(query1)
 
                       /*                Se genera analisis
                       */
@@ -512,8 +532,16 @@ exports.generateTarget = function(req, res, next) {
       var first_cells = data_request['first_cells'] 
 
        debug(data.length)
+       //debug(data)
 
-        var query = queries.getTimeValidation.getCountCellValidationTop
+       debug('MODIFIER', data_request['modifier'])
+       if(data_request['modifier'] == 'infected'){
+          var query = queries.getTimeValidation.getCountCellValidationTop
+       } else if (data_request['modifier'] == 'incidence') {
+          var query  = queries.getTimeValidation.getCountCellValidationIncidence
+       } else {
+          var query  = queries.getTimeValidation.getCountCellValidationPrevalence
+       }
         var where_validation = data_request["where_target"]
 
         if(validation_group.length > 0){
@@ -565,7 +593,7 @@ exports.generateTarget = function(req, res, next) {
                 validation_data.push(item)
               }
 
-              if(parseInt(item['occ']) > 0){
+              if(parseFloat(item['occ']) > 0){
                 validation_presence.push(item)
               }
 
@@ -573,7 +601,7 @@ exports.generateTarget = function(req, res, next) {
 
             validation_data.forEach(item => {
 
-              if(parseInt(item['occ']) > 0) {
+              if(parseFloat(item['occ']) > 0) {
                 val1s += 1;
               } else {
                 val0s += 1;
@@ -628,7 +656,7 @@ exports.generateTarget = function(req, res, next) {
 
                 validation_data.forEach(item => {
 
-                  if(parseInt(item['occ']) > 0) {
+                  if(parseFloat(item['occ']) > 0) {
                     validation_cells.push(item['gridid']);
                   } 
 
@@ -646,7 +674,7 @@ exports.generateTarget = function(req, res, next) {
             debug('celdas en decil 10 del periodo de validación ', validation_cells.length)
             data_request['validation_cells'] = validation_cells
 
-            validation_presence = validation_presence.sort(function(a, b) {return  parseInt(b['occ']) - parseInt(a['occ']);})
+            validation_presence = validation_presence.sort(function(a, b) {return  parseFloat(b['occ']) - parseFloat(a['occ']);})
             debug('celdas con presencia ', validation_presence)
             data_request['validation_occur'] = validation_presence
 

@@ -2678,6 +2678,270 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
   
 }
 
+
+exports.getGridGeneratedSpecies = function(req, res) {
+  
+  debug("getGridGeneratedSpecies")
+
+  var date = new Date()
+  var day = date.getDate()
+  var month = date.getMonth() + 1
+  var year = date.getFullYear()
+
+  var target_taxons     = getParam(req, 'target_taxons', [])
+  var sfecha            = getParam(req, 'sfecha', false)
+  var sfosil            = getParam(req, 'sfosil', false)
+  var lim_inf           = getParam(req, 'liminf', verb_utils.formatDate(new Date("1500-01-01")) )
+  var lim_sup           = getParam(req, 'limsup',  year+"-"+month+"-"+day)
+  var grid_res          = getParam(req, 'grid_res', default_resolution)
+  var region            = getParam(req, 'region', 1)
+  var modifier          = getParam(req, 'modifier', 'infected')
+
+  console.log("liminf: " + lim_inf)
+  console.log("limsup: " + lim_sup)
+  console.log("sfecha: " + sfecha)
+  console.log("sfosil: " + sfosil)
+  var Ncells = 2458
+
+  pool.task(t => {
+
+    if(modifier == 'infected'){
+      var query  = queries.getTimeValidation.getCountCellFirst
+    } else if (modifier == 'incidence') {
+      var query  = queries.getTimeValidation.getCountCellFirstIncidence
+    } else {
+      var query  = queries.getTimeValidation.getCountCellFirstPrevalence
+    }
+
+    var where_validation = verb_utils.getWhereClauseFromGroupTaxonArray(target_taxons, true)
+
+    const query1 = pgp.as.format(query, {
+
+      where_target: where_validation.replace('WHERE', ''),
+      grid_resolution: grid_res,
+      lim_inf: lim_inf
+
+    })
+    debug(query1)
+
+    return t.any(query,  {
+
+      where_target: where_validation.replace('WHERE', ''),
+      grid_resolution: grid_res,
+      lim_inf: lim_inf
+
+    }).then(resp => {
+
+        var first = resp
+        
+        var first1s = 0;
+        var first0s = 0;
+        var first_presence = [] 
+        
+        first.forEach(item => {
+
+          if(parseFloat(item['occ']) > 0) {
+            first1s += 1;
+
+            first_presence.push(item)
+
+          } else {
+            first0s += 1;
+          }
+
+        });
+
+        debug('first presence', first_presence.length)
+        debug('0s:', first0s, '1s:', first1s, 'total:', first0s + first1s)
+
+        var bin = 10
+        var percentiles = 10
+        var bining = 'percentile'
+
+        var limits = []
+        
+        if(bining == 'percentile') {
+
+          for(var i=0; i<=percentiles; i++) {
+
+            var val = parseInt(Ncells*i/percentiles) - parseInt(i/percentiles)
+            limits.push(val)
+
+          }
+
+          debug(limits)
+
+          var first_cells = []
+          if(first1s >= parseInt(Ncells / percentiles)){
+
+            for(var i=0; i<Ncells; i++){
+
+              if(limits[bin-1] <= i && i <= limits[bin]) {
+
+                first_cells.push(first[i]['gridid'])
+
+              }
+
+            }
+
+          } else {
+
+            first.forEach(item => {
+
+              if(parseFloat(item['occ']) > 0) {
+                first_cells.push(item['gridid']);
+              } 
+
+            });
+
+          }
+            
+
+        } else {
+        }
+
+        debug('MODIFIER', modifier)
+        if(modifier == 'infected'){
+          var query = queries.getTimeValidation.getCountCellTrainingTop
+        } else if (modifier == 'incidence') {
+          var query  = queries.getTimeValidation.getCountCellTrainingIncidence
+        } else {
+          var query  = queries.getTimeValidation.getCountCellTrainingPrevalence
+        }
+
+        var where_validation = verb_utils.getWhereClauseFromGroupTaxonArray(target_taxons, true)
+
+        const query1 = pgp.as.format(query, {
+
+          where_target: where_validation.replace('WHERE', ''),
+          grid_resolution: grid_res,
+          lim_inf: lim_inf,
+          lim_sup: lim_sup,
+          first_cells: first_cells.length ==  0 ? '' : first_cells 
+
+        })
+        debug(query1)
+
+         return t.any(query,  {
+                where_target: where_validation.replace('WHERE', ''),
+                grid_resolution: grid_res,
+                lim_inf: lim_inf,
+                lim_sup: lim_sup,
+                first_cells: first_cells.length ==  0 ? '' : first_cells
+
+        }).then(resp => {
+
+          var training = resp
+          var training_data = []
+
+          var train1s = 0;
+          var train0s = 0;
+          var training_presence = []
+          
+          training.forEach(item => {
+
+            if(!first_cells.includes(item['gridid'])){
+              training_data.push(item)
+            }
+
+            if(parseFloat(item['occ']) > 0){
+              training_presence.push(item)
+            }
+
+          });
+
+          training_data.forEach(item => {
+
+            if(parseFloat(item['occ']) > 0) {
+              train1s += 1;
+            } else {
+              train0s += 1;
+            }
+
+          });
+
+          debug('training presence', training_presence.length)
+          debug('0s:', train0s, '1s:', train1s, 'total:', train0s + train1s)
+
+          Ncells = train0s + train1s
+
+          var limits = []
+          var bin = 10
+          var percentiles = 10
+          var bining = 'percentile'
+          var width_top = parseInt(2458/percentiles)
+
+          if(bining == 'percentile') {
+            
+            var Ncells1 = Ncells - width_top - 1
+
+            for(var i=0; i<percentiles-1; i++) {
+
+              var val = parseInt(Ncells1*i/percentiles) - parseInt(i/percentiles)
+              //limits.push(parseInt(training[val]['occ']))
+              limits.push(val)
+
+            }
+
+            limits.push(Ncells1)
+            limits.push(Ncells - 1)
+
+            debug(limits)
+
+            var training_cells = []
+            if (train1s >= parseInt(Ncells / percentiles)) {
+
+              for(var i=0; i<Ncells; i++){
+
+                if(limits[bin-1] <= i && i <= limits[bin]) {
+
+                  //debug(training_data[i])
+                  training_cells.push(training_data[i])
+
+                }
+              }
+
+            } else {
+
+              training_data.forEach(item => {
+
+                if(parseFloat(item['occ']) > 0) {
+                  training_cells.push(item)
+                } 
+
+              });
+
+            }
+
+          } else {
+
+          }
+
+
+          return res.json({
+            ok: true,
+            data: training_cells
+          })
+
+        })
+
+    })
+
+
+
+  }).catch(error => {
+
+    res.json({
+        ok: false,
+        message: "Error al ejecutar la petición",
+        data:[],
+        error: error
+      })
+
+  })
+
+}
+
 exports.getCountByYear = function(req, res) {
 
   debug("getCountByYear")
