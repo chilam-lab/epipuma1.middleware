@@ -51,7 +51,7 @@ exports.generateTarget = function(req, res, next) {
   var region = parseInt(verb_utils.getParam(req, 'region', verb_utils.region_mx))
   var fosil = verb_utils.getParam(req, 'fosil', true)
   var memory = verb_utils.getParam(req, 'memory', false)
-  var modifier = verb_utils.getParam(req, 'modifier', 'infected')
+  var modifier = verb_utils.getParam(req, 'modifier', 'cases')
   
   var date  = false //verb_utils.getParam(req, 'date', true)
 
@@ -150,7 +150,7 @@ exports.generateTarget = function(req, res, next) {
   pool.task(t => {
 
     debug('MODIFIER', data_request['modifier'])
-    if(data_request['modifier'] == 'infected'){
+    if(data_request['modifier'] == 'cases'){
       var query  = queries.getTimeValidation.getCountCellFirst
     } else if (data_request['modifier'] == 'incidence') {
       var query  = queries.getTimeValidation.getCountCellFirstIncidence
@@ -261,7 +261,7 @@ exports.generateTarget = function(req, res, next) {
       debug('FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD')
 
       debug('MODIFIER', data_request['modifier'])
-      if(data_request['modifier'] == 'infected'){
+      if(data_request['modifier'] == 'cases'){
         var query = queries.getTimeValidation.getCountCellTrainingTop
       } else if (data_request['modifier'] == 'incidence') {
         var query  = queries.getTimeValidation.getCountCellTrainingIncidence
@@ -535,7 +535,7 @@ exports.generateTarget = function(req, res, next) {
        //debug(data)
 
        debug('MODIFIER', data_request['modifier'])
-       if(data_request['modifier'] == 'infected'){
+       if(data_request['modifier'] == 'cases'){
           var query = queries.getTimeValidation.getCountCellValidationTop
        } else if (data_request['modifier'] == 'incidence') {
           var query  = queries.getTimeValidation.getCountCellValidationIncidence

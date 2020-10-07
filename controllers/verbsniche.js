@@ -2695,7 +2695,7 @@ exports.getGridGeneratedSpecies = function(req, res) {
   var lim_sup           = getParam(req, 'limsup',  year+"-"+month+"-"+day)
   var grid_res          = getParam(req, 'grid_res', default_resolution)
   var region            = getParam(req, 'region', 1)
-  var modifier          = getParam(req, 'modifier', 'infected')
+  var modifier          = getParam(req, 'modifier', 'cases')
 
   console.log("liminf: " + lim_inf)
   console.log("limsup: " + lim_sup)
@@ -2705,7 +2705,7 @@ exports.getGridGeneratedSpecies = function(req, res) {
 
   pool.task(t => {
 
-    if(modifier == 'infected'){
+    if(modifier == 'cases'){
       var query  = queries.getTimeValidation.getCountCellFirst
     } else if (modifier == 'incidence') {
       var query  = queries.getTimeValidation.getCountCellFirstIncidence
@@ -2801,7 +2801,7 @@ exports.getGridGeneratedSpecies = function(req, res) {
         }
 
         debug('MODIFIER', modifier)
-        if(modifier == 'infected'){
+        if(modifier == 'cases'){
           var query = queries.getTimeValidation.getCountCellTrainingTop
         } else if (modifier == 'incidence') {
           var query  = queries.getTimeValidation.getCountCellTrainingIncidence
