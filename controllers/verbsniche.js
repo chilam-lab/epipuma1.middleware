@@ -3081,15 +3081,17 @@ exports.getCellOcurrences = function(req, res) {
   }
 
   
-  /*const query1 = pgp.as.format(queries.basicAnalysis.getCellOcurrences, {'species_filter' : species_filter, 
+  const query1 = pgp.as.format(queries.basicAnalysis.getCellOcurrences, 
+           {'species_filter' : species_filter, 
             'resolution_view': resolution_view,
             'region'         : region,
             'gridid'         : gridid,
             'grid_table'     : grid_table,
             'where_filter'   : where_filter,
             'longitud'       : longitud,
-            'latitud'       : latitud})
-  debug(query1)*/
+            'latitud'       : latitud,
+            'col_name'      : col_name})
+  debug(query1)
 
   debug("region: " + region)
   debug("species_filter: " + species_filter)
