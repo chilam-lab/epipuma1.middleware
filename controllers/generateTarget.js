@@ -87,6 +87,7 @@ exports.generateTarget = function(req, res, next) {
   data_request['modifier'] = modifier
   
   var target_group = verb_utils.getParam(req, 'target_taxons', [])
+  data_request['target_group'] = target_group
   var validation_group = verb_utils.getParam(req, 'validation_taxons', [])
 
   debug(validation_group) 
@@ -421,8 +422,13 @@ exports.generateTarget = function(req, res, next) {
 
                   debug("N:" + data_request['N'])
 
-                 // var query_analysis = queries.countsTaxonGroups.getCountsBase
-                  var query_analysis = queries.getTimeValidation.getCountsBaseCount
+                 // var query_analysis = queries.countsTaxonGroups.getCountsBase                  
+                  if(data_request['target_group'][0]['value'] === 'COVID-19 CONFIRMADO'){
+                    var query_analysis = queries.countsTaxonGroups.getCountsBaseOdds
+                  }else{
+                    var query_analysis = queries.countsTaxonGroups.getCountsBase
+                  }
+
                   data_request['groups'] = verb_utils.getCovarGroupQueries(queries, data_request, covars_groups)
 
                   debug('grupos covariables ' + covars_groups)

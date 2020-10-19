@@ -4514,6 +4514,18 @@ verb_utils.cellSummary = function(data, first_cells, training_cells, validation_
         cells_map[cell]['vars'].push([covar['description'] + ' ' + covar['tag'], temp_score])
 
       }
+
+      if(Object.keys(covar).includes('odd_ratio')){
+
+        cells_map[cell]['odd_ratio'] = covar['odd_ratio']
+
+      }
+
+      if(Object.keys(covar).includes('risk_ratio')){
+
+        cells_map[cell]['risk_ratio'] = covar['risk_ratio']
+
+      }
       
 
     })
@@ -4721,6 +4733,18 @@ verb_utils.cellCountSummary = function(data, first_cells, training_cells, first_
       } else {
 
         cells_map[cell]['vars'].push([covar['description'] + ' ' + covar['tag'], temp_score])
+
+      }
+
+      if(Object.keys(covar).includes('odd_ratio')){
+
+        cells_map[cell]['odd_ratio'] = covar['odd_ratio']
+
+      }
+
+      if(Object.keys(covar).includes('risk_ratio')){
+
+        cells_map[cell]['risk_ratio'] = covar['risk_ratio']
 
       }
       

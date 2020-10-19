@@ -78,6 +78,7 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
   data_request['lim_sup'] = lim_sup
   
   var target_group = verb_utils.getParam(req, 'target_taxons', [])
+  data_request['target_group'] = target_group
   var validation_group = verb_utils.getParam(req, 'validation_taxons', [])
 
   debug(validation_group) 
@@ -219,8 +220,14 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
                 data_request["alpha"] = data_request["alpha"] !== undefined ? data_request["alpha"] : 1.0/data_request['N']
 
                 debug("N:" + data_request['N'])
+                debug(data_request['target_group'])
 
-                var query_analysis = queries.countsTaxonGroups.getCountsBase
+                if(data_request['target_group'][0]['value'] === 'COVID-19 CONFIRMADO'){
+                  var query_analysis = queries.countsTaxonGroups.getCountsBaseOdds
+                }else{
+                  var query_analysis = queries.countsTaxonGroups.getCountsBase
+                }
+
                 data_request['groups'] = verb_utils.getCovarGroupQueries(queries, data_request, covars_groups)
 
                 debug('grupos covariables ' + covars_groups)
