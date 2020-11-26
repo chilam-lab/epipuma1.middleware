@@ -7,7 +7,7 @@
 * @requires module:controllers/verb_utils
 * @requires module:controllers/sql/queryProvider
 **/
-var debug = require('debug')('verbs:countsTaxonsGroupTimeValidation')
+var debug = require('debug')('verbs:generateTarget')
 var moment = require('moment')
 var verb_utils = require('./verb_utils')
 var queries = require('./sql/queryProvider')
@@ -53,7 +53,7 @@ exports.generateTarget = function(req, res, next) {
   var memory = verb_utils.getParam(req, 'memory', false)
   var modifier = verb_utils.getParam(req, 'modifier', 'cases')
   
-  var date  = false //verb_utils.getParam(req, 'date', true)
+  var date  = verb_utils.getParam(req, 'date', true)
 
   var lim_inf = verb_utils.getParam(req, 'lim_inf', verb_utils.formatDate(new Date("1500-01-01")) )
   var lim_sup = verb_utils.getParam(req, 'lim_sup',  year+"-"+month+"-"+day)

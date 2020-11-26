@@ -3702,7 +3702,7 @@ verb_utils.getScoreMap = function(data) {
     covar['cells'].forEach(cell => {
 
       //debug(cell, score_map[cell])
-      if(score_map[cell] == null){
+      if(!score_map.hasOwnProperty(cell)){
 
         score_map[cell] = parseFloat(covar['score'])
         total_cells += 1
@@ -3718,8 +3718,41 @@ verb_utils.getScoreMap = function(data) {
 
   })
 
+  debug('==================> score_map <========================')
   debug('score_map ' + total_cells)
   //debug(score_map)
+  var cells = Object.keys(score_map);
+  debug(cells.length)
+  var values = [];
+
+  cells.forEach(cell => {
+    values.push(score_map[cell]);
+  })
+
+  values.sort(function(a, b){return b-a})
+  debug(values)
+
+  N = values.length
+  for(var i=0;i<10;i++){
+
+    var nl = values.slice(parseInt(N*i/10.0) - parseInt(i/10.0), parseInt(N*(i+1)/10.0) - parseInt((i+1)/10.0))
+    var avg = 0
+    var n = nl.length
+
+    nl.forEach(sc => {
+
+      avg += sc
+
+    })
+
+    avg = avg/n
+
+    debug((10-i) + ' ' + avg)
+
+  }
+
+  debug('==================> score_map <========================')
+
   return score_map;
 
 }
@@ -3735,6 +3768,8 @@ verb_utils.scoreMapToScoreArray = function(score_map){
 
   });
 
+
+  score_array.sort(function(a, b){return b['tscore']-a['tscore']})  
   return score_array;
 
 }
