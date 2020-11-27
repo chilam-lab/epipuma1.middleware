@@ -2709,6 +2709,8 @@ exports.getGridGeneratedSpecies = function(req, res) {
       var query  = queries.getTimeValidation.getCountCellFirst
     } else if (modifier == 'incidence') {
       var query  = queries.getTimeValidation.getCountCellFirstIncidence
+    } else if(modifier == 'lethality'){
+      var query  = queries.getTimeValidation.getCountCellFirstLethality
     } else {
       var query  = queries.getTimeValidation.getCountCellFirstPrevalence
     }
@@ -2805,6 +2807,8 @@ exports.getGridGeneratedSpecies = function(req, res) {
           var query = queries.getTimeValidation.getCountCellTrainingTop
         } else if (modifier == 'incidence') {
           var query  = queries.getTimeValidation.getCountCellTrainingIncidence
+        } else if (modifier == 'lethality') {
+          var query  = queries.getTimeValidation.getCountCellTrainingLethality
         } else {
           var query  = queries.getTimeValidation.getCountCellTrainingPrevalence
         }

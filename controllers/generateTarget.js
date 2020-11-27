@@ -155,6 +155,8 @@ exports.generateTarget = function(req, res, next) {
       var query  = queries.getTimeValidation.getCountCellFirst
     } else if (data_request['modifier'] == 'incidence') {
       var query  = queries.getTimeValidation.getCountCellFirstIncidence
+    } else if(data_request['modifier'] == 'lethality'){
+      var query  = queries.getTimeValidation.getCountCellFirstLethality
     } else {
       var query  = queries.getTimeValidation.getCountCellFirstPrevalence
     }
@@ -266,6 +268,8 @@ exports.generateTarget = function(req, res, next) {
         var query = queries.getTimeValidation.getCountCellTrainingTop
       } else if (data_request['modifier'] == 'incidence') {
         var query  = queries.getTimeValidation.getCountCellTrainingIncidence
+      } else if(data_request['modifier'] == 'lethality'){
+        var query  = queries.getTimeValidation.getCountCellTrainingLethality
       } else {
         var query  = queries.getTimeValidation.getCountCellTrainingPrevalence
       }
@@ -545,6 +549,8 @@ exports.generateTarget = function(req, res, next) {
           var query = queries.getTimeValidation.getCountCellValidationTop
        } else if (data_request['modifier'] == 'incidence') {
           var query  = queries.getTimeValidation.getCountCellValidationIncidence
+       } else if(data_request['modifier'] == 'lethality'){
+          var query  = queries.getTimeValidation.getCountCellValidationLethality
        } else {
           var query  = queries.getTimeValidation.getCountCellValidationPrevalence
        }

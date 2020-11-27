@@ -128,6 +128,9 @@ var queryProvider = {
     getCountCellTrainingPrevalence: sqlPath('time-validation/get_count_cells_training_prevalence.sql'),
     getCountCellValidationPrevalence: sqlPath('time-validation/get_count_cells_validation_prevalence.sql'),
     getCountsBaseCount: sqlPath("time-validation/get_counts_base_count.sql"),
+    getCountCellFirstLethality: sqlPath("time-validation/get_count_cells_first_lethality.sql"),
+    getCountCellTrainingLethality: sqlPath('time-validation/get_count_cells_training_lethality.sql'),
+    getCountCellValidationLethality: sqlPath('time-validation/get_count_cells_validation_lethality.sql')
   },
   getTrafficLight:{
     getHistory: sqlPath('traffic-light/get-history.sql')
