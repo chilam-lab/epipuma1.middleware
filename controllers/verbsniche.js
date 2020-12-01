@@ -2744,7 +2744,7 @@ exports.getGridGeneratedSpecies = function(req, res) {
         
         first.forEach(item => {
 
-          if(data_request['modifier'] == 'negativity'){
+          if(modifier == 'negativity'){
           
             first1s += 1;
             first_presence.push(item)
@@ -2801,7 +2801,7 @@ exports.getGridGeneratedSpecies = function(req, res) {
 
             first.forEach(item => {
 
-              if(data_request['modifier'] == 'negativity'){
+              if(modifier == 'negativity'){
                 
                 first_cells.push(item['gridid']);
 
@@ -2877,7 +2877,7 @@ exports.getGridGeneratedSpecies = function(req, res) {
 
           training_data.forEach(item => {
 
-            if(data_request['modifier'] == 'negativity'){
+            if(modifier == 'negativity'){
 
               train1s += 1;
 
@@ -2938,7 +2938,7 @@ exports.getGridGeneratedSpecies = function(req, res) {
 
               training_data.forEach(item => {
 
-                if(data_request['modifier'] == 'negativity'){
+                if(modifier == 'negativity'){
 
                   training_cells.push(item)
 
