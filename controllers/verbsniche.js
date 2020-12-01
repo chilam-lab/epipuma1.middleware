@@ -2744,13 +2744,22 @@ exports.getGridGeneratedSpecies = function(req, res) {
         
         first.forEach(item => {
 
-          if(parseFloat(item['occ']) > 0) {
+          if(data_request['modifier'] == 'negativity'){
+          
             first1s += 1;
-
             first_presence.push(item)
 
-          } else {
-            first0s += 1;
+          }else {
+
+            if(parseFloat(item['occ']) > 0) {
+              
+              first1s += 1;
+              first_presence.push(item)
+
+            } else {
+              first0s += 1;
+            }
+
           }
 
         });
@@ -2792,9 +2801,17 @@ exports.getGridGeneratedSpecies = function(req, res) {
 
             first.forEach(item => {
 
-              if(parseFloat(item['occ']) > 0) {
+              if(data_request['modifier'] == 'negativity'){
+                
                 first_cells.push(item['gridid']);
-              } 
+
+              } else {
+
+                if(parseFloat(item['occ']) > 0) {
+                  first_cells.push(item['gridid']);
+                } 
+
+              }
 
             });
 
@@ -2860,10 +2877,18 @@ exports.getGridGeneratedSpecies = function(req, res) {
 
           training_data.forEach(item => {
 
-            if(parseFloat(item['occ']) > 0) {
+            if(data_request['modifier'] == 'negativity'){
+
               train1s += 1;
+
             } else {
-              train0s += 1;
+
+              if(parseFloat(item['occ']) > 0) {
+                train1s += 1;
+              } else {
+                train0s += 1;
+              }
+
             }
 
           });
@@ -2913,9 +2938,17 @@ exports.getGridGeneratedSpecies = function(req, res) {
 
               training_data.forEach(item => {
 
-                if(parseFloat(item['occ']) > 0) {
+                if(data_request['modifier'] == 'negativity'){
+
                   training_cells.push(item)
-                } 
+
+                } else {
+
+                  if(parseFloat(item['occ']) > 0) {
+                    training_cells.push(item)
+                  } 
+
+                }
 
               });
 
