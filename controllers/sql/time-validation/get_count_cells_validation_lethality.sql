@@ -95,4 +95,4 @@ SELECT a.gridid,
 FROM fallecidos as a
 LEFT JOIN positivos as b
 ON a.gridid = b.gridid
-ORDER BY occ
+ORDER BY occ, random()

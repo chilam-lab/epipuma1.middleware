@@ -50,4 +50,4 @@ SELECT a.gridid, a.occ::float/b.population::float as occ
 FROM counted as a
 LEFT JOIN population as b 
 ON a.gridid = b.gridid
-ORDER BY occ
+ORDER BY occ, random()

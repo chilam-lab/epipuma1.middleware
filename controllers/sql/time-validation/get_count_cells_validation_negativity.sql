@@ -95,4 +95,4 @@ SELECT a.gridid,
 FROM positivos as a
 LEFT JOIN negativos as b
 ON a.gridid = b.gridid
-ORDER BY occ desc
+ORDER BY occ desc, random()

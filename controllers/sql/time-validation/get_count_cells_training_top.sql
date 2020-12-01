@@ -40,4 +40,4 @@ FROM (
 		) AS b
 	ON a.gridid=b.gridid::integer
 ) as foo
-ORDER BY occ 
+ORDER BY occ, random()
