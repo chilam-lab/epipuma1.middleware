@@ -156,7 +156,9 @@ exports.generateTarget = function(req, res, next) {
     } else if (data_request['modifier'] == 'incidence') {
       var query  = queries.getTimeValidation.getCountCellFirstIncidence
     } else if(data_request['modifier'] == 'lethality'){
-      var query  = queries.getTimeValidation.getCountCellFirstLethality
+      var query = queries.getTimeValidation.getCountCellFirstLethality
+    } else if(data_request['modifier'] == 'negativity'){
+      var query = queries.getTimeValidation.getCountCellFirstNegativity
     } else {
       var query  = queries.getTimeValidation.getCountCellFirstPrevalence
     }
@@ -189,13 +191,22 @@ exports.generateTarget = function(req, res, next) {
       
       first.forEach(item => {
 
-        if(parseFloat(item['occ']) > 0) {
+        if(data_request['modifier'] == 'negativity'){
+            
           first1s += 1;
-
           first_presence.push(item)
 
         } else {
-          first0s += 1;
+
+          if(parseFloat(item['occ']) > 0) {
+            first1s += 1;
+
+            first_presence.push(item)
+
+          } else {
+            first0s += 1;
+          }          
+
         }
 
       });
@@ -239,8 +250,16 @@ exports.generateTarget = function(req, res, next) {
 
           first.forEach(item => {
 
-            if(parseFloat(item['occ']) > 0) {
+            if(data_request['modifier'] == 'negativity'){
+
               first_cells.push(item['gridid']);
+
+            } else {
+
+              if(parseFloat(item['occ']) > 0) {
+                first_cells.push(item['gridid']);
+              }
+
             } 
 
           });
@@ -270,6 +289,8 @@ exports.generateTarget = function(req, res, next) {
         var query  = queries.getTimeValidation.getCountCellTrainingIncidence
       } else if(data_request['modifier'] == 'lethality'){
         var query  = queries.getTimeValidation.getCountCellTrainingLethality
+      } else if(data_request['modifier'] == 'negativity'){
+        var query = queries.getTimeValidation.getCountCellTrainingNegativity
       } else {
         var query  = queries.getTimeValidation.getCountCellTrainingPrevalence
       }
@@ -310,18 +331,33 @@ exports.generateTarget = function(req, res, next) {
             training_data.push(item)
           }
 
-          if(parseFloat(item['occ']) > 0){
+          if(data_request['modifier'] == 'negativity'){
+
             training_presence.push(item)
+
+          } else {
+
+            if(parseFloat(item['occ']) > 0){
+              training_presence.push(item)
+            }
+
           }
 
         });
 
         training_data.forEach(item => {
 
-          if(parseFloat(item['occ']) > 0) {
+          if(data_request['modifier'] == 'negativity'){
+
             train1s += 1;
+
           } else {
-            train0s += 1;
+
+            if(parseFloat(item['occ']) > 0) {
+              train1s += 1;
+            } else {
+              train0s += 1;
+            }
           }
 
         });
@@ -370,9 +406,17 @@ exports.generateTarget = function(req, res, next) {
 
             training_data.forEach(item => {
 
-              if(parseFloat(item['occ']) > 0) {
+              if(data_request['modifier'] == 'negativity'){
+
                 training_cells.push(item['gridid']);
-              } 
+
+              } else {
+
+                if(parseFloat(item['occ']) > 0) {
+                  training_cells.push(item['gridid']);
+                } 
+
+              }
 
             });
 
@@ -402,6 +446,7 @@ exports.generateTarget = function(req, res, next) {
           data_request["where_filter"] = verb_utils.getWhereClauseFilter(fosil, date, lim_inf, lim_sup, cells, data_request["res_celda_snib"], data_request["region"], data_request["gid"])
           if(!memory){
             data_request["where_filter"] += ' AND gridid_' + grid_resolution + 'km = ANY(ARRAY[' + training_cells.toString() + ']::text[])'
+            data_request['training_cells_array'] = 'ARRAY[' + training_cells.toString() + ']::integer[]';
           }
           //debug(data_request["where_filter"])
           data_request["training"] = 'ARRAY[' + training_cells.toString() + ']::integer[]'
@@ -430,7 +475,7 @@ exports.generateTarget = function(req, res, next) {
                   if(data_request['target_group'][0]['value'] === 'COVID-19 CONFIRMADO'){
                     var query_analysis = queries.countsTaxonGroups.getCountsBaseOdds
                   }else{
-                    var query_analysis = queries.countsTaxonGroups.getCountsBase
+                    var query_analysis = queries.getTimeValidation.getCountsBase
                   }
 
                   data_request['groups'] = verb_utils.getCovarGroupQueries(queries, data_request, covars_groups)
@@ -551,6 +596,8 @@ exports.generateTarget = function(req, res, next) {
           var query  = queries.getTimeValidation.getCountCellValidationIncidence
        } else if(data_request['modifier'] == 'lethality'){
           var query  = queries.getTimeValidation.getCountCellValidationLethality
+       } else if(data_request['modifier'] == 'negativity'){
+          var query = queries.getTimeValidation.getCountCellValidationNegativity
        } else {
           var query  = queries.getTimeValidation.getCountCellValidationPrevalence
        }
@@ -605,18 +652,34 @@ exports.generateTarget = function(req, res, next) {
                 validation_data.push(item)
               }
 
-              if(parseFloat(item['occ']) > 0){
+              if(data_request['modifier'] == 'negativity'){
+
                 validation_presence.push(item)
+
+              } else {
+
+                if(parseFloat(item['occ']) > 0){
+                  validation_presence.push(item)
+                }
+
               }
 
             });
 
             validation_data.forEach(item => {
 
-              if(parseFloat(item['occ']) > 0) {
+              if(data_request['modifier'] == 'negativity'){
+
                 val1s += 1;
+
               } else {
-                val0s += 1;
+
+                if(parseFloat(item['occ']) > 0) {
+                  val1s += 1;
+                } else {
+                  val0s += 1;
+                }
+
               }
 
             });
@@ -668,9 +731,17 @@ exports.generateTarget = function(req, res, next) {
 
                 validation_data.forEach(item => {
 
-                  if(parseFloat(item['occ']) > 0) {
+                  if(data_request['modifier'] == 'negativity'){
+                    
                     validation_cells.push(item['gridid']);
-                  } 
+                  
+                  } else {
+
+                    if(parseFloat(item['occ']) > 0) {
+                      validation_cells.push(item['gridid']);
+                    }
+
+                  }
 
                 });                
 

@@ -130,7 +130,11 @@ var queryProvider = {
     getCountsBaseCount: sqlPath("time-validation/get_counts_base_count.sql"),
     getCountCellFirstLethality: sqlPath("time-validation/get_count_cells_first_lethality.sql"),
     getCountCellTrainingLethality: sqlPath('time-validation/get_count_cells_training_lethality.sql'),
-    getCountCellValidationLethality: sqlPath('time-validation/get_count_cells_validation_lethality.sql')
+    getCountCellValidationLethality: sqlPath('time-validation/get_count_cells_validation_lethality.sql'),
+    getCountCellFirstNegativity: sqlPath('time-validation/get_count_cells_first_negativity.sql'),
+    getCountCellTrainingNegativity: sqlPath('time-validation/get_count_cells_training_negativity.sql'),
+    getCountCellValidationNegativity: sqlPath('time-validation/get_count_cells_validation_negativity.sql'),
+    getCountsBase: sqlPath('time-validation/get-counts-base.sql'),
   },
   getTrafficLight:{
     getHistory: sqlPath('traffic-light/get-history.sql')
