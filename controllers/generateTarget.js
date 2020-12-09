@@ -55,7 +55,10 @@ exports.generateTarget = function(req, res, next) {
   
   var date  = verb_utils.getParam(req, 'date', true)
 
+
+  var lim_inf_first = verb_utils.getParam(req, 'lim_inf_first', verb_utils.formatDate(new Date("1499-01-01")) );
   var lim_inf = verb_utils.getParam(req, 'lim_inf', verb_utils.formatDate(new Date("1500-01-01")) )
+  var lim_sup_first = verb_utils.getParam(req, 'lim_sup_first', lim_inf);
   var lim_sup = verb_utils.getParam(req, 'lim_sup',  year+"-"+month+"-"+day)
   var lim_inf_validation = verb_utils.getParam(req, 'lim_inf_validation', verb_utils.formatDate(new Date("1500-01-01")) )
   var lim_sup_validation = verb_utils.getParam(req, 'lim_sup_validation',  year+"-"+month+"-"+day)
@@ -84,6 +87,8 @@ exports.generateTarget = function(req, res, next) {
   data_request['lim_sup_validation'] = lim_sup_validation
   data_request['lim_inf'] = lim_inf
   data_request['lim_sup'] = lim_sup
+  data_request['lim_inf_first'] = lim_inf_first
+  data_request['lim_sup_first'] = lim_sup_first
   data_request['modifier'] = modifier
   
   var target_group = verb_utils.getParam(req, 'target_taxons', [])
@@ -147,6 +152,9 @@ exports.generateTarget = function(req, res, next) {
   data_request["lat"] = verb_utils.getParam(req, 'latitud', 0)  
   var Ncells = 2458;
 
+  debug('First      Period: ', data_request['lim_inf_first'], ' to ', data_request['lim_sup_first'])
+  debug('Training   Period: ', data_request['lim_inf'], ' to ', data_request['lim_sup'])
+  debug('Validation Period: ', data_request['lim_inf_validation'], ' to ', data_request['lim_sup_validation'])
 
   pool.task(t => {
 
@@ -169,15 +177,18 @@ exports.generateTarget = function(req, res, next) {
 
       where_target: where_validation.replace('WHERE', ''),
       grid_resolution: data_request["grid_resolution"],
-      lim_inf: data_request['lim_inf']
+      lim_inf_first: data_request['lim_inf_first'],
+      lim_sup_first: data_request['lim_sup_first']
 
     })
     debug(query1)
 
     return t.any(query,  {
-              where_target: where_validation.replace('WHERE', ''),
-              grid_resolution: data_request["grid_resolution"],
-              lim_inf: data_request['lim_inf'],
+      
+      where_target: where_validation.replace('WHERE', ''),
+      grid_resolution: data_request["grid_resolution"],
+      lim_inf_first: data_request['lim_inf_first'],
+      lim_sup_first: data_request['lim_sup_first']
               
     }).then(resp => {
 
