@@ -38,8 +38,8 @@ WITH aux_negative AS (
 	AND b.${res_celda_snib:raw} is not null
 ), target AS (
 	SELECT '${target_name:raw}' as target_name,
-	   cast( (array_agg(a.cells) - (${excluded_cells:raw}::integer[] + ${source_cells:raw}::integer[])) as integer[]) as cells,
-	   array_length(array_agg(a.cells) - (${excluded_cells:raw}::integer[] + ${source_cells:raw}::integer[]),1) as ni
+	   ${training_cells:raw}::integer[] ${training_operator:raw} cast( (array_agg(a.cells) - (${excluded_cells:raw}::integer[] + ${source_cells:raw}::integer[])) as integer[]) as cells,
+	   array_length(${training_cells:raw}::integer[] ${training_operator:raw} array_agg(a.cells) - (${excluded_cells:raw}::integer[] + ${source_cells:raw}::integer[]),1) as ni
 	FROM aux_target as a
 ),${groups:raw}
 SELECT 	

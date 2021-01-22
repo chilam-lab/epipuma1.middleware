@@ -58,8 +58,9 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
   var lim_inf = verb_utils.getParam(req, 'lim_inf', verb_utils.formatDate(new Date("1500-01-01")) )
   var lim_sup_first = verb_utils.getParam(req, 'lim_sup_first', lim_inf);
   var lim_sup = verb_utils.getParam(req, 'lim_sup',  year+"-"+month+"-"+day)
-  var lim_inf_validation = verb_utils.getParam(req, 'lim_inf_validation', verb_utils.formatDate(new Date("1500-01-01")) )
+  var lim_inf_validation = verb_utils.getParam(req, 'lim_inf_validation', lim_sup)
   var lim_sup_validation = verb_utils.getParam(req, 'lim_sup_validation',  year+"-"+month+"-"+day)
+  var period_config = verb_utils.getParam(req, 'period_config', ['0', '0', '1'])
 
   var cells = verb_utils.getParam(req, 'excluded_cells', [])
 
@@ -80,6 +81,7 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
   data_request['lim_sup'] = lim_sup
   data_request['lim_inf_first'] = lim_inf_first
   data_request['lim_sup_first'] = lim_sup_first
+  data_request['period_config'] = period_config
 
   var target_group = verb_utils.getParam(req, 'target_taxons', [])
   data_request['target_group'] = target_group
@@ -149,6 +151,17 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
 
     var query  = queries.getTimeValidation.getCellFirst
     var where_validation = data_request["where_target"]
+    var first_config = 'true'
+
+    if(data_request['period_config'][0] == '0') {
+
+      var first_config = 'c = 1'      
+
+    } else if(data_request['period_config'][0] == '1') {
+
+      var first_config = 'c is null'
+
+    }
 
     const query1 = pgp.as.format(query, {
 
@@ -156,6 +169,7 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
       grid_resolution: data_request["grid_resolution"],
       lim_inf_first: data_request['lim_inf_first'],
       lim_sup_first: data_request['lim_sup_first'],
+      first_config: first_config
 
     })
     debug(query1)
@@ -165,11 +179,30 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
       where_target: where_validation.replace('WHERE', ''),
       grid_resolution: data_request["grid_resolution"],
       lim_inf_first: data_request['lim_inf_first'],
-      lim_sup_first: data_request['lim_sup_first']
+      lim_sup_first: data_request['lim_sup_first'],
+      first_config: first_config
 
     }).then(resp => {
 
       var first_cells = resp['first_cells']
+
+      var training_config = 'true'
+      data_request['training_operator'] = '|'
+
+      if(data_request['period_config'][1] == '0') {
+
+        var training_config = 't1.c = 1'
+        data_request['training_operator'] = '&'
+
+      } else if(data_request['period_config'][1] == '1') {
+
+        var training_config = 't1.c is null'
+        data_request['training_operator'] = '-'
+
+      }
+
+      debug('First Cells Number: ', first_cells.length)
+      
       var query  = queries.getTimeValidation.getCellTraining
       var where_validation = data_request["where_target"]
 
@@ -178,7 +211,10 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
         where_target: where_validation.replace('WHERE', ''),
         grid_resolution: data_request["grid_resolution"],
         lim_inf: data_request['lim_inf'],
-        lim_sup: data_request['lim_sup']
+        lim_sup: data_request['lim_sup'],
+        lim_inf_first: data_request['lim_inf_first'],
+        lim_sup_first: data_request['lim_sup_first'],
+        training_config: training_config
 
       })
       debug(query1)
@@ -188,22 +224,28 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
           where_target: where_validation.replace('WHERE', ''),
           grid_resolution: data_request["grid_resolution"],
           lim_inf: data_request['lim_inf'],
-          lim_sup: data_request['lim_sup']
+          lim_sup: data_request['lim_sup'],
+          lim_inf_first: data_request['lim_inf_first'],
+          lim_sup_first: data_request['lim_sup_first'],
+          training_config: training_config
 
       }).then(resp => {
 
         var training_cells = resp['training_cells']
+
+        debug('Training Cells Number: ', training_cells.length)
+        
         var query = queries.subaoi.getCountriesRegion
 
-        /*
-          Se obtiene filtro para target 
-        */
         return t.one(query, data_request).then(resp => {
 
           data_request["gid"] = resp.gid
           data_request["where_filter"] = verb_utils.getWhereClauseFilter(fosil, date, lim_inf, lim_sup, cells, data_request["res_celda_snib"], data_request["region"], data_request["gid"])
+          
+
           if(!memory){
             data_request["where_filter"] += ' AND gridid_' + grid_resolution + 'km = ANY(ARRAY[' + training_cells.toString() + ']::text[])'
+            data_request['training_cells'] = training_cells
           }
           //debug(data_request["where_filter"])
 
@@ -321,13 +363,10 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
 
                     debug("analisis basico")
 
-                    //const query1 = pgp.as.format(query_analysis, data_request)
-                    //debug(query1)
+                    const query1 = pgp.as.format(query_analysis, data_request)
+                    debug(query1)
 
-                    /*                Se genera analisis
-                    */
                     return t.any(query_analysis, data_request)
-
 
                   }
                 }
@@ -351,6 +390,8 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
               grid_resolution: data_request["grid_resolution"],
               lim_inf: data_request['lim_inf'],
               lim_sup: data_request['lim_sup'],
+              lim_inf_first: data_request['lim_inf_first'],
+              lim_sup_first: data_request['lim_sup_first'],
               lim_inf_validation: data_request['lim_inf_validation'],
               lim_sup_validation: data_request['lim_sup_validation']
 
@@ -363,6 +404,8 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
               grid_resolution: data_request["grid_resolution"],
               lim_inf: data_request['lim_inf'],
               lim_sup: data_request['lim_sup'],
+              lim_inf_first: data_request['lim_inf_first'],
+              lim_sup_first: data_request['lim_sup_first'],
               lim_inf_validation: data_request['lim_inf_validation'],
               lim_sup_validation: data_request['lim_sup_validation']
 
@@ -372,8 +415,23 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
 
                 validation_data.forEach(item => {
 
-                  if(item['pre'] == true){
+
+                  if(data_request['period_config'][2] == '1'){
+
+                    if(item['pre'] == true){
+                      validation_cells.push(item['gridid'])
+                    }
+
+                  } else if(data_request['period_config'][2] == '0'){
+
+                    if(item['pre'] == false){
+                      validation_cells.push(item['gridid'])
+                    }
+
+                  } else {
+
                     validation_cells.push(item['gridid'])
+
                   }
         
                 })
@@ -381,7 +439,7 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
                 debug('validation cells')
                 debug(validation_cells)
                 var score_map = verb_utils.getScoreMap(data)
-                var time_validation = verb_utils.getTimeValidation(score_map, training_cells, validation_data)
+                var time_validation = verb_utils.getTimeValidation(score_map, training_cells, validation_data, data_request['period_config'][2])
                 var percentage_occ = []
                 var decil_cells = []
                 var info_cell = []

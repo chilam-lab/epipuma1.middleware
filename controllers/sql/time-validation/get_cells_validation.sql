@@ -16,7 +16,10 @@ FROM (
 				  a.diacolecta <> 99 and
 				  a.diacolecta <> -1 and
 				  ${where_target:raw} and
-				  make_date(a.aniocolecta, a.mescolecta, a.diacolecta) < '${lim_inf_validation:raw}'
+				  (('${lim_inf_first:raw}' <= make_date(a.aniocolecta, a.mescolecta, a.diacolecta) and 
+			  		make_date(a.aniocolecta, a.mescolecta, a.diacolecta) < '${lim_sup_first:raw}') or 
+				  ('${lim_inf:raw}' <= make_date(a.aniocolecta, a.mescolecta, a.diacolecta) and 
+			  		make_date(a.aniocolecta, a.mescolecta, a.diacolecta) < '${lim_sup:raw}'))
 			GROUP BY a.gridid_${grid_resolution:raw}km, a.aniocolecta, a.mescolecta, a.diacolecta
 			ORDER BY RANDOM()
 		) as foo
@@ -35,7 +38,8 @@ FROM (
 			  a.diacolecta <> 99 and
 			  a.diacolecta <> -1 and
 			  ${where_target:raw} and
-			  make_date(a.aniocolecta, a.mescolecta, a.diacolecta) BETWEEN '${lim_inf_validation:raw}' and '${lim_sup_validation:raw}'
+			  ('${lim_inf_validation:raw}' <= make_date(a.aniocolecta, a.mescolecta, a.diacolecta) and 
+			  			  make_date(a.aniocolecta, a.mescolecta, a.diacolecta) < '${lim_sup_validation:raw}')
 		GROUP BY a.gridid_${grid_resolution:raw}km, a.aniocolecta, a.mescolecta, a.diacolecta
 		ORDER BY RANDOM()
 	) as t1

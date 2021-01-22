@@ -3774,9 +3774,15 @@ verb_utils.scoreMapToScoreArray = function(score_map){
 
 }
 
-verb_utils.getTimeValidation = function(score_map, training_cells, validation_cells) {
+verb_utils.getTimeValidation = function(score_map, training_cells, validation_cells, validation_config='1') {
 
   debug('getTimeValidation')
+
+  var pre_value = true
+
+  if(validation_config == '0'){
+    var pre_value = false
+  }
 
   var time_validation = []
   var score_validation_cells = {}
@@ -3807,7 +3813,8 @@ verb_utils.getTimeValidation = function(score_map, training_cells, validation_ce
   var tcell_score_map = 0
   validation_cells.forEach(tcell => {
 
-    if(tcell['pre'] == true && score_map[parseInt(tcell['gridid'])] != null){
+    if((tcell['pre'] == pre_value || validation_config == '*') 
+        && score_map[parseInt(tcell['gridid'])] != null){
       tcell_score_map += 1
     }
 
@@ -3817,7 +3824,17 @@ verb_utils.getTimeValidation = function(score_map, training_cells, validation_ce
   debug('===========================+++++===========================')
 
   var scores_per_cell = Object.values(score_map_aux);
-  scores_per_cell = scores_per_cell.sort(function(a,b){return b-a})
+
+  if(validation_config == '1'){
+
+    scores_per_cell = scores_per_cell.sort(function(a,b){return b-a})
+
+  } else {
+
+    scores_per_cell = scores_per_cell.sort(function(a,b){return a-b})
+
+  }
+  
 
   debug('=========================== score_map_aux length ===========================')
   debug(Object.keys(score_map_aux).length)
@@ -3844,7 +3861,8 @@ verb_utils.getTimeValidation = function(score_map, training_cells, validation_ce
   var tcell_score_map = 0
   validation_cells.forEach(tcell => {
 
-    if(tcell['pre'] == true && score_map_aux[parseInt(tcell['gridid'])] != null){
+    if((tcell['pre'] == pre_value || validation_config == '*') 
+        && score_map_aux[parseInt(tcell['gridid'])] != null){
       tcell_score_map += 1
     }
 
@@ -3863,7 +3881,7 @@ verb_utils.getTimeValidation = function(score_map, training_cells, validation_ce
   var tcell_score_map = 0
   validation_cells.forEach(tcell => {
 
-    if(tcell['pre'] == true){
+    if(tcell['pre'] == pre_value || validation_config == '*'){
       score_map_aux_list.forEach(item => {
 
         if(tcell['gridid'] === item[0]){
@@ -3876,9 +3894,15 @@ verb_utils.getTimeValidation = function(score_map, training_cells, validation_ce
   })
   debug(tcell_score_map)
 
-   score_map_aux_list = score_map_aux_list.sort(function(a, b) {
-    return  b[1] - a[1];
-  });
+  if(validation_config == '1'){
+    
+    score_map_aux_list = score_map_aux_list.sort(function(a, b) {return  b[1] - a[1];});
+  
+  } else {
+
+    score_map_aux_list = score_map_aux_list.sort(function(a, b) {return  a[1] - b[1];});
+
+  }
 
   debug(score_map_aux_list)
 
@@ -3897,7 +3921,7 @@ verb_utils.getTimeValidation = function(score_map, training_cells, validation_ce
 
   score_map_aux_list.forEach(item => {
 
-    if(validation_cells_map[item[0]] == true){
+    if(validation_cells_map[item[0]] == pre_value){
       validation_ones += 1
     }
 
@@ -3949,11 +3973,12 @@ verb_utils.getTimeValidation = function(score_map, training_cells, validation_ce
 
           null_freq += 1
 
-        } else if(cell[1] >= limits[i]){
+        } else if((cell[1] >= limits[i] && pre_value) 
+                    || (cell[1] <= limits[i] && !pre_value)){
 
           true_positive += 1
 
-          if(validation_cells_map[parseInt(cell[0])] == true){
+          if(validation_cells_map[parseInt(cell[0])] == pre_value){
 
             total_validation_cells += 1
 
@@ -3967,7 +3992,7 @@ verb_utils.getTimeValidation = function(score_map, training_cells, validation_ce
 
         false_negative += 1
 
-        if(validation_cells_map[parseInt(cell[0])] == true){
+        if(validation_cells_map[parseInt(cell[0])] == pre_value){
 
           total_validation_cells += 1
 
@@ -4002,11 +4027,9 @@ verb_utils.getTimeValidation = function(score_map, training_cells, validation_ce
 }
 
 
-verb_utils.getCountTimeValidation = function(score_map, training_cells, validation_cells) {
+verb_utils.getCountTimeValidation = function(score_map, training_cells, validation_cells, validation_config='1') {
 
   debug('getCountTimeValidation')
-
-  //debug(score_map)
 
   var time_validation = []
   var score_validation_cells = {}
@@ -4043,7 +4066,16 @@ verb_utils.getCountTimeValidation = function(score_map, training_cells, validati
   debug('===========================+++++===========================')
 
   var scores_per_cell = Object.values(score_map_aux)
-  scores_per_cell = scores_per_cell.sort(function(a,b){return b-a})
+
+  if(validation_config == '1'){
+
+    scores_per_cell = scores_per_cell.sort(function(a,b){return b-a})
+
+  } else {
+  
+    scores_per_cell = scores_per_cell.sort(function(a,b){return a-b})
+
+  }
 
   var number_scored_cells = scores_per_cell.length
   var limits = []
@@ -4086,7 +4118,13 @@ verb_utils.getCountTimeValidation = function(score_map, training_cells, validati
   })
   debug(tcell_score_map)
 
-  score_map_aux_list = score_map_aux_list.sort(function(a, b) {return b[1]-a[1];});
+  if(validation_config == '1'){
+    score_map_aux_list = score_map_aux_list.sort(function(a, b) {return b[1]-a[1];});
+  } else {
+
+    score_map_aux_list = score_map_aux_list.sort(function(a, b) {return a[1]-b[1];});
+
+  }
 
   //debug(score_map_aux_list)
 
@@ -4148,7 +4186,8 @@ verb_utils.getCountTimeValidation = function(score_map, training_cells, validati
 
           null_freq += 1
 
-        } else if(cell[1] >= limits[i]){
+        } else if((cell[1] >= limits[i] && validation_config == '1')
+                    || (cell[1] <= limits[i] && validation_config == '0')){
 
           true_positive += 1
 

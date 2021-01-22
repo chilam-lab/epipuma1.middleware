@@ -62,6 +62,7 @@ exports.generateTarget = function(req, res, next) {
   var lim_sup = verb_utils.getParam(req, 'lim_sup',  year+"-"+month+"-"+day)
   var lim_inf_validation = verb_utils.getParam(req, 'lim_inf_validation', verb_utils.formatDate(new Date("1500-01-01")) )
   var lim_sup_validation = verb_utils.getParam(req, 'lim_sup_validation',  year+"-"+month+"-"+day)
+  var period_config = verb_utils.getParam(req, 'period_config', ['0', '0', '1'])
 
   var cells = verb_utils.getParam(req, 'excluded_cells', [])
   var bining = verb_utils.getParam(req, 'bining', 'percentile')
@@ -90,6 +91,7 @@ exports.generateTarget = function(req, res, next) {
   data_request['lim_inf_first'] = lim_inf_first
   data_request['lim_sup_first'] = lim_sup_first
   data_request['modifier'] = modifier
+  data_request['period_config'] = period_config
   
   var target_group = verb_utils.getParam(req, 'target_taxons', [])
   data_request['target_group'] = target_group
@@ -202,14 +204,15 @@ exports.generateTarget = function(req, res, next) {
       
       first.forEach(item => {
 
-        if(data_request['modifier'] == 'negativity'){
+        if(data_request['modifier'] == 'negativity' || data_request['period_config'][0] == '*'){
             
           first1s += 1;
           first_presence.push(item)
 
         } else {
 
-          if(parseFloat(item['occ']) > 0) {
+          if((parseFloat(item['occ']) > 0 && data_request['period_config'][0] == '0') 
+              || (parseFloat(item['occ']) == 0 && data_request['period_config'][0] == '1')) {
             first1s += 1;
 
             first_presence.push(item)
@@ -230,14 +233,12 @@ exports.generateTarget = function(req, res, next) {
 
       var limits = []
       var bin = data_request['bin']
-      //var bin = 7
       
       if(data_request['bining'] == 'percentile') {
 
         for(var i=0; i<=percentiles; i++) {
 
           var val = parseInt(Ncells*i/percentiles) - parseInt(i/percentiles)
-          //limits.push(parseInt(training[val]['occ']))
           limits.push(val)
 
         }
@@ -261,13 +262,14 @@ exports.generateTarget = function(req, res, next) {
 
           first.forEach(item => {
 
-            if(data_request['modifier'] == 'negativity'){
+            if(data_request['modifier'] == 'negativity' || data_request['period_config'][0] == '*'){
 
               first_cells.push(item['gridid']);
 
             } else {
 
-              if(parseFloat(item['occ']) > 0) {
+              if((parseFloat(item['occ']) > 0 && data_request['period_config'][0] == '0') 
+                  || (parseFloat(item['occ']) == 0 && data_request['period_config'][0] == '1')) {
                 first_cells.push(item['gridid']);
               }
 
@@ -289,9 +291,6 @@ exports.generateTarget = function(req, res, next) {
       debug('celdas con presencia ', first_presence)
       data_request['first_cells'] = first_cells 
       data_request['first_occur'] = first_presence
-
-      //debug(data_request['first_cells'].length, data_request['first_cells'])
-      debug('FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD')
 
       debug('MODIFIER', data_request['modifier'])
       if(data_request['modifier'] == 'cases'){
@@ -320,11 +319,12 @@ exports.generateTarget = function(req, res, next) {
       debug(query1)
 
       return t.any(query,  {
-                where_target: where_validation.replace('WHERE', ''),
-                grid_resolution: data_request["grid_resolution"],
-                lim_inf: data_request['lim_inf'],
-                lim_sup: data_request['lim_sup'],
-                first_cells: data_request['first_cells'].length ==  0 ? '' : data_request['first_cells']
+
+        where_target: where_validation.replace('WHERE', ''),
+        grid_resolution: data_request["grid_resolution"],
+        lim_inf: data_request['lim_inf'],
+        lim_sup: data_request['lim_sup'],
+        first_cells: data_request['first_cells'].length ==  0 ? '' : data_request['first_cells']
 
       }).then(resp => {
 
@@ -335,6 +335,18 @@ exports.generateTarget = function(req, res, next) {
         var train1s = 0;
         var train0s = 0;
         var training_presence = []
+
+        data_request['training_operator'] = '|'
+
+        if(data_request['period_config'][1] == '0') {
+
+          data_request['training_operator'] = '&'
+
+        } else if(data_request['period_config'][1] == '1') {
+
+          data_request['training_operator'] = '-'
+
+        }
         
         training.forEach(item => {
 
@@ -342,13 +354,14 @@ exports.generateTarget = function(req, res, next) {
             training_data.push(item)
           }
 
-          if(data_request['modifier'] == 'negativity'){
+          if(data_request['modifier'] == 'negativity' || data_request['period_config'][1] == '*'){
 
             training_presence.push(item)
 
           } else {
 
-            if(parseFloat(item['occ']) > 0){
+            if((parseFloat(item['occ']) > 0 && data_request['period_config'][1] == '0') 
+                || (parseFloat(item['occ']) == 0 && data_request['period_config'][1] == '1')){
               training_presence.push(item)
             }
 
@@ -358,13 +371,14 @@ exports.generateTarget = function(req, res, next) {
 
         training_data.forEach(item => {
 
-          if(data_request['modifier'] == 'negativity'){
+          if(data_request['modifier'] == 'negativity' || data_request['period_config'][1] == '*'){
 
             train1s += 1;
 
           } else {
 
-            if(parseFloat(item['occ']) > 0) {
+            if((parseFloat(item['occ']) > 0 && data_request['period_config'][1] == '0') 
+                || (parseFloat(item['occ']) == 0 && data_request['period_config'][1] == '1')) {
               train1s += 1;
             } else {
               train0s += 1;
@@ -417,13 +431,14 @@ exports.generateTarget = function(req, res, next) {
 
             training_data.forEach(item => {
 
-              if(data_request['modifier'] == 'negativity'){
+              if(data_request['modifier'] == 'negativity' || data_request['period_config'][1] == '*'){
 
                 training_cells.push(item['gridid']);
 
               } else {
 
-                if(parseFloat(item['occ']) > 0) {
+                if((parseFloat(item['occ']) > 0 && data_request['period_config'][1] == '0') 
+                    || (parseFloat(item['occ']) == 0 && data_request['period_config'][1] == '1')) {
                   training_cells.push(item['gridid']);
                 } 
 
@@ -443,9 +458,6 @@ exports.generateTarget = function(req, res, next) {
         debug('celdas con presencia ', training_presence)
         data_request['training_occur'] = training_presence
 
-        //debug(data_request['training_cells'].length, data_request['training_cells'])
-        debug('TRAINING PERIOD TRAINING PERIOD  TRAINING PERIOD  TRAINING PERIOD  TRAINING PERIOD  TRAINING PERIOD  TRAINING PERIOD ')
-        
         var query = queries.subaoi.getCountriesRegion
 
         /*
@@ -663,13 +675,14 @@ exports.generateTarget = function(req, res, next) {
                 validation_data.push(item)
               }
 
-              if(data_request['modifier'] == 'negativity'){
+              if(data_request['modifier'] == 'negativity' || data_request['period_config'][2] == '*'){
 
                 validation_presence.push(item)
 
               } else {
 
-                if(parseFloat(item['occ']) > 0){
+                if((parseFloat(item['occ']) > 0 && data_request['period_config'][2] == '0') 
+                    || (parseFloat(item['occ']) == 0 && data_request['period_config'][2] == '1')){
                   validation_presence.push(item)
                 }
 
@@ -679,13 +692,14 @@ exports.generateTarget = function(req, res, next) {
 
             validation_data.forEach(item => {
 
-              if(data_request['modifier'] == 'negativity'){
+              if(data_request['modifier'] == 'negativity' || data_request['period_config'][2] == '*'){
 
                 val1s += 1;
 
               } else {
 
-                if(parseFloat(item['occ']) > 0) {
+                if((parseFloat(item['occ']) > 0 && data_request['period_config'][2] == '0') 
+                    || (parseFloat(item['occ']) == 0 && data_request['period_config'][2] == '1')) {
                   val1s += 1;
                 } else {
                   val0s += 1;
@@ -732,7 +746,6 @@ exports.generateTarget = function(req, res, next) {
 
                   if(limits[bin-1] <= i && i <= limits[bin]) {
 
-                    //debug(validation[i])
                     validation_cells.push(validation_data[i]['gridid'])
 
                   }
@@ -742,13 +755,14 @@ exports.generateTarget = function(req, res, next) {
 
                 validation_data.forEach(item => {
 
-                  if(data_request['modifier'] == 'negativity'){
+                  if(data_request['modifier'] == 'negativity' || data_request['period_config'][2] == '*'){
                     
                     validation_cells.push(item['gridid']);
                   
                   } else {
 
-                    if(parseFloat(item['occ']) > 0) {
+                    if((parseFloat(item['occ']) > 0 && data_request['period_config'][2] == '0') 
+                        || (parseFloat(item['occ']) == 0 && data_request['period_config'][2] == '1')) {
                       validation_cells.push(item['gridid']);
                     }
 
@@ -775,7 +789,7 @@ exports.generateTarget = function(req, res, next) {
             debug('VALIDATION PERIOD VALIDATION PERIOD  VALIDATION PERIOD  VALIDATION PERIOD  VALIDATION PERIOD  VALIDATION PERIOD ')
 
             score_map = verb_utils.getScoreMap(data)
-            time_validation = verb_utils.getCountTimeValidation(score_map, training_cells, validation_cells)
+            time_validation = verb_utils.getCountTimeValidation(score_map, training_cells, validation_cells, data_request['period_config'][2])
             var percentage_occ = []
             var decil_cells = []
             var info_cell = []
