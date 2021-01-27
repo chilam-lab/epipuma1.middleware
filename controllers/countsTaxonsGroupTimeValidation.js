@@ -58,7 +58,7 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
   var lim_inf = verb_utils.getParam(req, 'lim_inf', verb_utils.formatDate(new Date("1500-01-01")) )
   var lim_sup_first = verb_utils.getParam(req, 'lim_sup_first', lim_inf);
   var lim_sup = verb_utils.getParam(req, 'lim_sup',  year+"-"+month+"-"+day)
-  var lim_inf_validation = verb_utils.getParam(req, 'lim_inf_validation', verb_utils.formatDate(new Date("1500-01-01")) )
+  var lim_inf_validation = verb_utils.getParam(req, 'lim_inf_validation', lim_sup )
   var lim_sup_validation = verb_utils.getParam(req, 'lim_sup_validation',  year+"-"+month+"-"+day)
 
   var cells = verb_utils.getParam(req, 'excluded_cells', [])
@@ -355,7 +355,9 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
               lim_sup_validation: data_request['lim_sup_validation']
 
             })
+            debug('QUERY VALIDATION')
             debug(query1)
+            debug('QUERY VALIDATION')
 
             return t.any(query, {
 
@@ -387,7 +389,6 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
                 var info_cell = []
 
                 var score_array = verb_utils.scoreMapToScoreArray(score_map)
-                //debug(time_validation)
 
                 var data_freq = verb_utils.processDataForFreqSpecie([data], false)
 
@@ -420,6 +421,7 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
                   nom_mun: data_request.nom_mun
                 })
 
+                debug('TIME VALIDATION:  ')
                 debug(time_validation)
 
                 res.json({
@@ -436,6 +438,8 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
                   validation_data: validation_data,
                   info_cell: info_cell
                 })
+
+                debug('TIME VALIDATION:  ')
 
             })
 
