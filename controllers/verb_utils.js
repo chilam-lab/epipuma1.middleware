@@ -3778,6 +3778,10 @@ verb_utils.getTimeValidation = function(score_map, training_cells, validation_ce
 
   debug('getTimeValidation')
 
+  debug('Score map length: ' + Object.keys(score_map).length)
+  debug('Training cells length: ' + training_cells.length)
+  debug('Validation cells length:' + validation_cells.length)
+
   var time_validation = []
   var score_validation_cells = {}
 
@@ -3800,7 +3804,6 @@ verb_utils.getTimeValidation = function(score_map, training_cells, validation_ce
 
   })
 
-  debug(Object.keys(score_map).length)
   debug(ttraining)
   debug('===========================Validation cells in score map===========================')  
 
