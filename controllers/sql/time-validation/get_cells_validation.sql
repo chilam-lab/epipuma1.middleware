@@ -22,7 +22,7 @@ FROM (
 		) as foo
 		RIGHT JOIN grid_${grid_resolution:raw}km_aoi as bar
 		ON foo.gridid::integer = bar.gridid_${grid_resolution:raw}km::integer
-		WHERE c is null
+		WHERE ${training_period_condition:raw}
 	) as t0
 	LEFT JOIN (
 		SELECT 	gridid_${grid_resolution:raw}km as gridid,

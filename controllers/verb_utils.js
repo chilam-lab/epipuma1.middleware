@@ -4646,34 +4646,21 @@ verb_utils.cellSummary = function(data, first_cells, training_cells, validation_
 
   Object.keys(cells_map).forEach(cell => {
 
+    cells_map[cell]['first_period'] = 0
+    cells_map[cell]['training_period'] = 0
+    cells_map[cell]['validation_period'] = 0
+
     if(first_cells.includes(parseInt(cell)) == true){
-      
       cells_map[cell]['first_period'] = 1
+    } 
+
+    if(training_cells.includes(parseInt(cell)) == true) {
       cells_map[cell]['training_period'] = 1
-      cells_map[cell]['validation_period'] = 1
-    
-    } else {
-      cells_map[cell]['first_period'] = 0
+    }
 
-      if(training_cells.includes(parseInt(cell)) == true) {
-
-        cells_map[cell]['training_period'] = 1
+    if(validation_cells.includes(cell) == true) {
         cells_map[cell]['validation_period'] = 1
-        detected_tcells += 1
-
-      } else {
-
-        if(validation_cells.includes(cell) == true) {
-          cells_map[cell]['training_period'] = 0
-          cells_map[cell]['validation_period'] = 1
-          //debug(cell+','+cells_map[cell]['score'])
-          total_validation_cells += 1
-        } else {
-          cells_map[cell]['training_period'] = 0
-          cells_map[cell]['validation_period'] = 0
-        }
-
-      }
+        total_validation_cells += 1
     }
 
     try {
