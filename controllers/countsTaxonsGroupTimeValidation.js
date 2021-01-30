@@ -176,6 +176,8 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
       var first_period_condition = 'true'
       if(data_request['period_config'][0] == '0'){
         first_period_condition = 'c is null'
+      } else if(data_request['period_config'][0] == '1') {
+        first_period_condition = 'c = 1'
       }
 
       var query  = queries.getTimeValidation.getCellTraining
@@ -359,6 +361,8 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
             var training_period_condition = 'true'
             if(data_request['period_config'][1] == '0'){
               training_period_condition = 'c is null'
+            }else if(data_request['period_config'][1] == '1'){
+              training_period_condition = 'c = 1'
             }
 
             const query1 = pgp.as.format(query, {

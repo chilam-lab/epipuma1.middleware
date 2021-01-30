@@ -338,6 +338,8 @@ exports.generateTarget = function(req, res, next) {
 
           if(data_request['period_config'][0] == '0' && !data_request['first_cells'].includes(item['gridid'])){
             training_data.push(item)
+          } else if(data_request['period_config'][0] == '1' && data_request['first_cells'].includes(item['gridid'])){
+            training_data.push(item)
           } else if(data_request['period_config'][0] == '*'){
             training_data.push(item)
           }
@@ -659,6 +661,9 @@ exports.generateTarget = function(req, res, next) {
 
               if(data_request['period_config'][1] == '0' && !data_request['first_cells'].includes(item['gridid']) 
                 && !data_request['training_cells'].includes(item['gridid'])){
+
+                validation_data.push(item)
+              } else if(data_request['period_config'][1] == '1' && data_request['training_cells'].includes(item['gridid'])) {
 
                 validation_data.push(item)
               } else if(data_request['period_config'][1] == '*'){
