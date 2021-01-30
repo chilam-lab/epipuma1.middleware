@@ -62,6 +62,7 @@ exports.generateTarget = function(req, res, next) {
   var lim_sup = verb_utils.getParam(req, 'lim_sup',  year+"-"+month+"-"+day)
   var lim_inf_validation = verb_utils.getParam(req, 'lim_inf_validation', verb_utils.formatDate(new Date("1500-01-01")) )
   var lim_sup_validation = verb_utils.getParam(req, 'lim_sup_validation',  year+"-"+month+"-"+day)
+  var period_config = verb_utils.getParam(req, 'period_config', ['0', '0', '1'])
 
   var cells = verb_utils.getParam(req, 'excluded_cells', [])
   var bining = verb_utils.getParam(req, 'bining', 'percentile')
@@ -90,6 +91,7 @@ exports.generateTarget = function(req, res, next) {
   data_request['lim_inf_first'] = lim_inf_first
   data_request['lim_sup_first'] = lim_sup_first
   data_request['modifier'] = modifier
+  data_request['period_config'] = period_config
   
   var target_group = verb_utils.getParam(req, 'target_taxons', [])
   data_request['target_group'] = target_group
@@ -314,8 +316,6 @@ exports.generateTarget = function(req, res, next) {
         grid_resolution: data_request["grid_resolution"],
         lim_inf: data_request['lim_inf'],
         lim_sup: data_request['lim_sup'],
-        first_cells: data_request['first_cells'].length ==  0 ? '' : data_request['first_cells'] 
-
       })
       debug(query1)
 
@@ -324,8 +324,6 @@ exports.generateTarget = function(req, res, next) {
                 grid_resolution: data_request["grid_resolution"],
                 lim_inf: data_request['lim_inf'],
                 lim_sup: data_request['lim_sup'],
-                first_cells: data_request['first_cells'].length ==  0 ? '' : data_request['first_cells']
-
       }).then(resp => {
 
         debug('TRAINING PERIOD TRAINING PERIOD  TRAINING PERIOD  TRAINING PERIOD  TRAINING PERIOD  TRAINING PERIOD  TRAINING PERIOD ')
@@ -338,7 +336,11 @@ exports.generateTarget = function(req, res, next) {
         
         training.forEach(item => {
 
-          if(!data_request['first_cells'].includes(item['gridid'])){
+          if(data_request['period_config'][0] == '0' && !data_request['first_cells'].includes(item['gridid'])){
+            training_data.push(item)
+          } else if(data_request['period_config'][0] == '1' && data_request['first_cells'].includes(item['gridid'])){
+            training_data.push(item)
+          } else if(data_request['period_config'][0] == '*'){
             training_data.push(item)
           }
 
@@ -657,9 +659,14 @@ exports.generateTarget = function(req, res, next) {
             
             validation.forEach(item => {
 
-              if(!data_request['first_cells'].includes(item['gridid']) 
+              if(data_request['period_config'][1] == '0' && !data_request['first_cells'].includes(item['gridid']) 
                 && !data_request['training_cells'].includes(item['gridid'])){
 
+                validation_data.push(item)
+              } else if(data_request['period_config'][1] == '1' && data_request['training_cells'].includes(item['gridid'])) {
+
+                validation_data.push(item)
+              } else if(data_request['period_config'][1] == '*'){
                 validation_data.push(item)
               }
 

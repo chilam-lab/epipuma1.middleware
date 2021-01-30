@@ -60,6 +60,7 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
   var lim_sup = verb_utils.getParam(req, 'lim_sup',  year+"-"+month+"-"+day)
   var lim_inf_validation = verb_utils.getParam(req, 'lim_inf_validation', lim_sup )
   var lim_sup_validation = verb_utils.getParam(req, 'lim_sup_validation',  year+"-"+month+"-"+day)
+  var period_config = verb_utils.getParam(req, 'period_config', ['0', '0', '1'])
 
   var cells = verb_utils.getParam(req, 'excluded_cells', [])
 
@@ -80,6 +81,7 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
   data_request['lim_sup'] = lim_sup
   data_request['lim_inf_first'] = lim_inf_first
   data_request['lim_sup_first'] = lim_sup_first
+  data_request['period_config'] = period_config
 
   var target_group = verb_utils.getParam(req, 'target_taxons', [])
   data_request['target_group'] = target_group
@@ -170,6 +172,14 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
     }).then(resp => {
 
       var first_cells = resp['first_cells']
+
+      var first_period_condition = 'true'
+      if(data_request['period_config'][0] == '0'){
+        first_period_condition = 'c is null'
+      } else if(data_request['period_config'][0] == '1') {
+        first_period_condition = 'c = 1'
+      }
+
       var query  = queries.getTimeValidation.getCellTraining
       var where_validation = data_request["where_target"]
 
@@ -178,7 +188,8 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
         where_target: where_validation.replace('WHERE', ''),
         grid_resolution: data_request["grid_resolution"],
         lim_inf: data_request['lim_inf'],
-        lim_sup: data_request['lim_sup']
+        lim_sup: data_request['lim_sup'],
+        first_period_condition: first_period_condition
 
       })
       debug(query1)
@@ -188,7 +199,8 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
           where_target: where_validation.replace('WHERE', ''),
           grid_resolution: data_request["grid_resolution"],
           lim_inf: data_request['lim_inf'],
-          lim_sup: data_request['lim_sup']
+          lim_sup: data_request['lim_sup'],
+          first_period_condition: first_period_condition
 
       }).then(resp => {
 
@@ -321,8 +333,8 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
 
                     debug("analisis basico")
 
-                    //const query1 = pgp.as.format(query_analysis, data_request)
-                    //debug(query1)
+                    const query1 = pgp.as.format(query_analysis, data_request)
+                    debug(query1)
 
                     /*                Se genera analisis
                     */
@@ -345,6 +357,14 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
               where_validation = data_request["where_validation"]      
             }
 
+
+            var training_period_condition = 'true'
+            if(data_request['period_config'][1] == '0'){
+              training_period_condition = 'c is null'
+            }else if(data_request['period_config'][1] == '1'){
+              training_period_condition = 'c = 1'
+            }
+
             const query1 = pgp.as.format(query, {
 
               where_target: where_validation.replace('WHERE', ''),
@@ -352,7 +372,8 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
               lim_inf: data_request['lim_inf'],
               lim_sup: data_request['lim_sup'],
               lim_inf_validation: data_request['lim_inf_validation'],
-              lim_sup_validation: data_request['lim_sup_validation']
+              lim_sup_validation: data_request['lim_sup_validation'],
+              training_period_condition: training_period_condition
 
             })
             debug('QUERY VALIDATION')
@@ -366,7 +387,8 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
               lim_inf: data_request['lim_inf'],
               lim_sup: data_request['lim_sup'],
               lim_inf_validation: data_request['lim_inf_validation'],
-              lim_sup_validation: data_request['lim_sup_validation']
+              lim_sup_validation: data_request['lim_sup_validation'],
+              training_period_condition: training_period_condition
 
             }).then(validation_data => {
 

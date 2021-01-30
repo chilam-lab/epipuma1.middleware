@@ -23,7 +23,7 @@ SELECT
 				) as foo
 				RIGHT JOIN grid_${grid_resolution:raw}km_aoi as bar
 				ON foo.gridid::integer = bar.gridid_${grid_resolution:raw}km::integer
-				WHERE c is null
+				WHERE ${first_period_condition:raw}
 			) as t0
 			LEFT JOIN (
 				SELECT 	gridid_${grid_resolution:raw}km as gridid,
@@ -37,7 +37,7 @@ SELECT
 					  a.diacolecta <> -1 and
 					  ${where_target:raw} and
 					  make_date(a.aniocolecta, a.mescolecta, a.diacolecta) BETWEEN '${lim_inf:raw}' and '${lim_sup:raw}'
-				GROUP BY a.gridid_${grid_resolution:raw}km, a.aniocolecta, a.mescolecta, a.diacolecta
+				GROUP BY a.gridid_${grid_resolution:raw}km
 				ORDER BY RANDOM()
 			) as t1
 			ON t0.gridid=t1.gridid::integer
