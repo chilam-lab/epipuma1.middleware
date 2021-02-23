@@ -61,6 +61,7 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
   var lim_inf_validation = verb_utils.getParam(req, 'lim_inf_validation', lim_sup )
   var lim_sup_validation = verb_utils.getParam(req, 'lim_sup_validation',  year+"-"+month+"-"+day)
   var period_config = verb_utils.getParam(req, 'period_config', ['0', '0', '1'])
+  var traffic_light = verb_utils.getParam(req, 'traffic_light', 'red')
 
   var cells = verb_utils.getParam(req, 'excluded_cells', [])
 
@@ -82,6 +83,7 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
   data_request['lim_inf_first'] = lim_inf_first
   data_request['lim_sup_first'] = lim_sup_first
   data_request['period_config'] = period_config
+  data_request['traffic_light'] = traffic_light
 
   var target_group = verb_utils.getParam(req, 'target_taxons', [])
   data_request['target_group'] = target_group
@@ -172,11 +174,31 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
     }).then(resp => {
 
       var first_cells = resp['first_cells']
+      var first_cells_aux = []
+
+      if(data_request['traffic_light'] == 'green'){
+
+        debug('================> FIRST PERIOD- BEGIN: Traffic Light GREEN <===================')
+
+        for(var i = 1; i <= 2458; i++){
+
+          if(!first_cells.includes(i)){
+            first_cells_aux.push(i)
+          }
+
+        }
+
+        first_cells = first_cells_aux
+
+        debug(first_cells.length + ' cells ')
+        debug('================> FIRST PERIOD- END:   Traffic Light GREEN <===================')
+
+      }
 
       var first_period_condition = 'true'
-      if(data_request['period_config'][0] == '0'){
+      if(data_request['period_config'][0] == '0' && data_request['traffic_light'] != 'green'){
         first_period_condition = 'c is null'
-      } else if(data_request['period_config'][0] == '1') {
+      } else if(data_request['period_config'][0] == '1' && data_request['traffic_light'] != 'green') {
         first_period_condition = 'c = 1'
       }
 
@@ -205,6 +227,29 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
       }).then(resp => {
 
         var training_cells = resp['training_cells']
+        var training_cells_aux = []
+
+        if(data_request['traffic_light'] == 'green'){
+
+          debug('================> TRAINING PERIOD- BEGIN: Traffic Light GREEN <===================')
+          debug(training_cells.length + ' initial cells')
+
+          for(var i = 1; i <= 2458; i++){
+
+            if(!training_cells.includes(i)){
+              training_cells_aux.push(i)
+            }
+
+          }
+
+          training_cells = training_cells_aux
+
+          debug(training_cells.length + ' cells ')
+          debug('================> TRAINING PERIOD- END:   Traffic Light GREEN <===================')
+
+        }
+
+
         var query = queries.subaoi.getCountriesRegion
 
         /*
@@ -216,6 +261,12 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
           data_request["where_filter"] = verb_utils.getWhereClauseFilter(fosil, date, lim_inf, lim_sup, cells, data_request["res_celda_snib"], data_request["region"], data_request["gid"])
           if(!memory){
             data_request["where_filter"] += ' AND gridid_' + grid_resolution + 'km = ANY(ARRAY[' + training_cells.toString() + ']::text[])'
+            
+            if(data_request['traffic_light'] == 'green'){
+
+              data_request["green_cells"] = 'ARRAY[' + training_cells.toString() + ']::integer[]'
+
+            }
           }
           //debug(data_request["where_filter"])
 
@@ -241,8 +292,13 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
                 debug("N:" + data_request['N'])
                 debug(data_request['target_group'])
 
-                if(data_request['target_group'][0]['value'] === 'COVID-19 CONFIRMADO'){
+                if(data_request['target_group'][0]['value'] === 'COVID-19 CONFIRMADO' 
+                        && data_request['traffic_light'] != 'green'){
                   var query_analysis = queries.countsTaxonGroups.getCountsBaseOdds
+                } else if(data_request['traffic_light'] == 'green'){
+
+                  var query_analysis = queries.countsTaxonGroups.getCountsBaseGreen
+
                 }else{
                   var query_analysis = queries.countsTaxonGroups.getCountsBase
                 }
@@ -359,9 +415,9 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
 
 
             var training_period_condition = 'true'
-            if(data_request['period_config'][1] == '0'){
+            if(data_request['period_config'][1] == '0' && data_request['traffic_light'] != 'green'){
               training_period_condition = 'c is null'
-            }else if(data_request['period_config'][1] == '1'){
+            }else if(data_request['period_config'][1] == '1' && data_request['traffic_light'] != 'green'){
               training_period_condition = 'c = 1'
             }
 
@@ -393,6 +449,18 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
             }).then(validation_data => {
 
                 var validation_cells = []
+                
+                if(data_request['traffic_light'] == 'green'){
+                  
+                  debug('================> VALIDATION PERIOD- BEGIN: Traffic Light GREEN <===================')
+                  debug(validation_data.length + ' initial cells')
+
+                  for(var i = 0; i < validation_data.length; i++){
+                    validation_data[i]['pre'] = !validation_data[i]['pre']
+                  }
+
+                  debug('================> VALIDATION PERIOD- END:   Traffic Light GREEN <===================')
+                }
 
                 validation_data.forEach(item => {
 

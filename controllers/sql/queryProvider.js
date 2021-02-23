@@ -134,7 +134,7 @@ var queryProvider = {
     getCountCellFirstNegativity: sqlPath('time-validation/get_count_cells_first_negativity.sql'),
     getCountCellTrainingNegativity: sqlPath('time-validation/get_count_cells_training_negativity.sql'),
     getCountCellValidationNegativity: sqlPath('time-validation/get_count_cells_validation_negativity.sql'),
-    getCountsBase: sqlPath('time-validation/get-counts-base.sql'),
+    getCountsBase: sqlPath('time-validation/get-counts-base.sql')
   },
   getTrafficLight:{
     getHistory: sqlPath('traffic-light/get-history.sql')
@@ -358,7 +358,8 @@ var queryProvider = {
     getCellsByGroupBio: tmplPath("taxons-group/get-cells-group-bio.tmpl"),
     getCellsByGroupAbio: tmplPath("taxons-group/get-cells-group-abio.tmpl"),
     getCellSincePoint: sqlPath("taxons-group/get-cell-since-point.sql"),
-    getCountsBaseGivenPoints: sqlPath("taxons-group/get-counts-base-given-points.sql")
+    getCountsBaseGivenPoints: sqlPath("taxons-group/get-counts-base-given-points.sql"),
+    getCountsBaseGreen: sqlPath('taxons-group/get-counts-green.sql'),
   },
 
   taxonsGroupNodes:{
