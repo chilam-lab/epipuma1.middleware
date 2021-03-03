@@ -360,6 +360,7 @@ var queryProvider = {
     getCellSincePoint: sqlPath("taxons-group/get-cell-since-point.sql"),
     getCountsBaseGivenPoints: sqlPath("taxons-group/get-counts-base-given-points.sql"),
     getCountsBaseGreen: sqlPath('taxons-group/get-counts-green.sql'),
+    getModifiersByTarget: sqlPath('taxons-group/get-modifiers-target.sql'),
   },
 
   taxonsGroupNodes:{

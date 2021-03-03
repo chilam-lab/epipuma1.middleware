@@ -3548,6 +3548,76 @@ exports.getGivenPointaValidationTables = function(req, res, next){
 }
 
 
+exports.getModifiersByTarget = function(req, res, next){
 
+  debug('getModifiersByTarget');
+
+  var target_taxons = getParam(req, 'target_taxons', [])
+
+  if(target_taxons.length == 0){
+
+    res.json({"modifiers": []})
+
+  } else {
+
+    const query = queries.countsTaxonGroups.getModifiersByTarget
+    var especievalidabusqueda = ''
+    var es_pruebas = 'false'
+
+    if(target_taxons.length == 1){
+
+      especievalidabusqueda = target_taxons[0].value
+
+    } else if(target_taxons.length == 2){
+
+      if((target_taxons[0].value == 'COVID-19 CONFIRMADO' && target_taxons[1].value == 'COVID-19 NEGATIVO') 
+        || (target_taxons[1].value == 'COVID-19 CONFIRMADO' && target_taxons[0].value == 'COVID-19 NEGATIVO')) {
+
+        es_pruebas = 'true'
+
+      } else {
+        res.json({"modifiers": []})
+      }
+
+    }
+
+    pool.task(t => {
+
+      return t.any(query, {
+
+        especievalidabusqueda: especievalidabusqueda,
+        es_pruebas: es_pruebas
+
+      }).then(data => {
+
+        res.json({'modifiers': data})
+
+      }).catch(error => {
+
+        debug(error)
+        
+        res.json({
+              ok: false,
+              message: "Error al ejecutar la petición",
+              data:[],
+              error: error
+            })
+      });
+
+    }).catch(error => {
+
+      debug(error)
+      
+      res.json({
+            ok: false,
+            message: "Error al ejecutar la petición",
+            data:[],
+            error: error
+          })
+    });
+
+  }
+
+}
 
 
