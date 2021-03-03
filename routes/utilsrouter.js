@@ -183,8 +183,10 @@ router.route('/especie/getIDCellFromCoordinates')
   .get(verbsCtrl.getIDCellFromCoordinates)
   .post(verbsCtrl.getIDCellFromCoordinates)
 
-
 router.route('/especie/getColumnsGrid')
   .post(verbsCtrl.getColumnsGrid)
+
+router.route('/especie/getModifiersByTarget')
+  .post(verbsCtrl.getModifiersByTarget)
 
 module.exports = router

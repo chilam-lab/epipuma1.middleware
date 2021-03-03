@@ -63,6 +63,7 @@ exports.generateTarget = function(req, res, next) {
   var lim_inf_validation = verb_utils.getParam(req, 'lim_inf_validation', verb_utils.formatDate(new Date("1500-01-01")) )
   var lim_sup_validation = verb_utils.getParam(req, 'lim_sup_validation',  year+"-"+month+"-"+day)
   var period_config = verb_utils.getParam(req, 'period_config', ['0', '0', '1'])
+  var traffic_light = verb_utils.getParam(req, 'traffic_light', 'red')
 
   var cells = verb_utils.getParam(req, 'excluded_cells', [])
   var bining = verb_utils.getParam(req, 'bining', 'percentile')
@@ -92,6 +93,7 @@ exports.generateTarget = function(req, res, next) {
   data_request['lim_sup_first'] = lim_sup_first
   data_request['modifier'] = modifier
   data_request['period_config'] = period_config
+  data_request['traffic_light'] = traffic_light
   
   var target_group = verb_utils.getParam(req, 'target_taxons', [])
   data_request['target_group'] = target_group
@@ -197,6 +199,16 @@ exports.generateTarget = function(req, res, next) {
       debug('FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD')
 
       var first = resp
+
+      if(data_request['traffic_light'] == 'green'){
+
+        debug('================> FIRST PERIOD- BEGIN: Traffic Light GREEN <===================')
+
+        
+
+        debug('================> FIRST PERIOD- END:   Traffic Light GREEN <===================')
+
+      }
       
       var first1s = 0;
       var first0s = 0;
