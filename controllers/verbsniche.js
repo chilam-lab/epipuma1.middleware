@@ -2596,7 +2596,11 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
   var limsup            = getParam(req, 'limsup',  year+"-"+month+"-"+day)
   var grid_res          = getParam(req, 'grid_res', default_resolution)
   var region            = getParam(req, 'region', 1)
-
+  var traffic_light     = getParam(req, 'traffic_light', 'none')
+  
+  var casos_periodo = 0
+  var target_cells = 0
+  var cells_excluded = 0
   console.log("liminf: " + liminf)
   console.log("limsup: " + limsup)
   console.log("sfecha: " + sfecha)
@@ -2637,9 +2641,15 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
   // debug("liminf: " + liminf)
   // debug("limsup: " + limsup)
 
+  var query = queries.getGridSpeciesNiche.getGridSpeciesTaxons
 
+  if(traffic_light == 'red' || traffic_light == 'green'){
 
-  const query1 = pgp.as.format(queries.getGridSpeciesNiche.getGridSpeciesTaxons, {'species_filter' : species_filter, 
+    query = queries.getGridSpeciesNiche.getGridSpeciesTaxonsTrafficLight
+
+  } 
+
+  const query1 = pgp.as.format(query, {'species_filter' : species_filter, 
             'resolution_view': resolution_view,
             'region'         : region,
             'gridid'         : gridid,
@@ -2651,7 +2661,7 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
 
   debug(query1)
 
-  pool.any(queries.getGridSpeciesNiche.getGridSpeciesTaxons, {
+  pool.any(query, {
             'species_filter' : species_filter, 
             'resolution_view': resolution_view,
             'region'         : region,
@@ -2663,9 +2673,72 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
       ).then(function (data) {
 
         debug(data.length + ' ocurrence cells')
+        var processed_data = {}
+
+        data.forEach(item =>{
+          if(processed_data[item['gridid']] == null){
+
+            processed_data[item['gridid']] = {'gridid':item['gridid'], 'fp': 0, 'tp': 0, 'occ': 0, 'target': false}
+            
+          }
+
+          if(item['p'] == 'f' && item['occ'] > 0){
+
+             processed_data[item['gridid']]['fp'] = 1
+
+          } else if(item['p'] == 't' && item['occ'] > 0){
+
+            processed_data[item['gridid']]['tp'] = 1
+            processed_data[item['gridid']]['occ'] = item['occ']
+            casos_periodo += parseInt(item['occ'])
+
+          } else {
+            
+            processed_data[item['gridid']]['target'] = true
+            processed_data[item['gridid']]['occ'] = item['occ']
+            casos_periodo += parseInt(item['occ'])
+            target_cells += 1
+
+          }
+
+        })
+
+
+        processed_data = Object.values(processed_data)
+
+        processed_data.forEach(item => {
+
+          if(traffic_light == 'red'){
+
+            if(item['fp'] == 0 && item['tp'] == 1){
+              item['target'] = true
+              target_cells += 1
+            } else {
+              cells_excluded += 1
+            }
+
+
+          } else if(traffic_light == 'green'){
+
+            if(item['fp'] == 1 && item['tp'] == 0) {
+              item['target'] = true
+              target_cells += 1
+            } else {
+              cells_excluded += 1
+            }           
+
+          } else if(!item['target']){
+            cells_excluded += 1
+          }
+
+        })
+
         res.json({
           ok: true,
-          'data': data
+          'data': processed_data,
+          'training_cases': casos_periodo,
+          'target_cells': target_cells,
+          'excluded_cells': cells_excluded
         })
 
     }).catch(function (error) {
