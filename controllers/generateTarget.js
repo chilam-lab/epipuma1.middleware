@@ -199,16 +199,6 @@ exports.generateTarget = function(req, res, next) {
       debug('FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD')
 
       var first = resp
-
-      if(data_request['traffic_light'] == 'green'){
-
-        debug('================> FIRST PERIOD- BEGIN: Traffic Light GREEN <===================')
-
-        
-
-        debug('================> FIRST PERIOD- END:   Traffic Light GREEN <===================')
-
-      }
       
       var first1s = 0;
       var first0s = 0;
@@ -448,6 +438,43 @@ exports.generateTarget = function(req, res, next) {
           }
 
         } else {
+
+        }
+
+        var training_cells_aux = training_cells
+        training_cells = []
+
+        if(data_request['traffic_light'] == 'green'){
+
+          debug('================> TRAINING PERIOD: Traffic Light GREEN <===================')
+
+          data_request['first_cells'].forEach(first_cell => {
+
+            if(training_cells_aux.includes(first_cell)){
+
+              training_cells.push(first_cells);
+
+            }
+
+          })
+
+        } else if(data_request['traffic_light'] == 'red'){
+
+          debug('================> TRAINING PERIOD: Traffic Light RED  <===================')
+
+          training_cells_aux.forEach(training_cell => {
+
+            if(!data_request['first_cells'].includes(training_cell)){
+
+              training_cells.push(training_cell);
+
+            }
+
+          })          
+
+        } else {
+
+          training_cells = training_cells_aux
 
         }
 
@@ -780,6 +807,45 @@ exports.generateTarget = function(req, res, next) {
             } else {
 
 
+
+            }
+
+            var validation_cells_aux = validation_cells
+            validation_cells = []
+            if(data_request['traffic_light'] == 'green'){
+
+              debug('================> VALIDATION PERIOD: Traffic Light GREEN <===================')
+
+              data_request['first_cells'].forEach(first_cell => {
+
+                if(data_request['training_cells'].includes(first_cell) && 
+                    !validation_cells_aux.includes(first_cell)){
+
+                  validation_cells.push(first_cell)
+
+                }
+
+              })
+
+            
+            } else if(data_request['traffic_light'] == 'red'){
+
+              debug('================> VALIDATION PERIOD: Traffic Light RED   <===================')
+
+              validation_cells_aux.forEach(validation_cell => {
+
+                if(!data_request['first_cells'].includes(validation_cell) && 
+                    !data_request['training_cells'].includes(validation_cell)){
+
+                  validation_cells.push(validation_cell)
+
+                }
+
+              })
+
+            } else {
+
+              validation_cells = validation_cells_aux
 
             }
 
