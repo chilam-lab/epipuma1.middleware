@@ -2601,10 +2601,10 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
   var casos_periodo = 0
   var target_cells = 0
   var cells_excluded = 0
-  console.log("liminf: " + liminf)
-  console.log("limsup: " + limsup)
-  console.log("sfecha: " + sfecha)
-  // console.log("sfosil: " + sfosil)
+  debug("liminf: " + liminf)
+  debug("limsup: " + limsup)
+  debug("sfecha: " + sfecha)
+  // debug("sfosil: " + sfosil)
 
   var species_filter  = verb_utils.getWhereClauseFromGroupTaxonArray(target_taxons, true)
   var resolution_view = 'grid_geojson_' + grid_res + 'km_aoi'
@@ -2769,11 +2769,18 @@ exports.getGridGeneratedSpecies = function(req, res) {
   var grid_res          = getParam(req, 'grid_res', default_resolution)
   var region            = getParam(req, 'region', 1)
   var modifier          = getParam(req, 'modifier', 'cases')
+  var traffic_light     = getParam(req, 'traffic_light', 'none')
+  var lim_inf_first     = getParam(req, 'liminf_first', verb_utils.formatDate(new Date("1500-01-01")) )
+  var lim_sup_first     = getParam(req, 'limsup_first',  lim_inf)
 
-  console.log("liminf: " + lim_inf)
-  console.log("limsup: " + lim_sup)
-  console.log("sfecha: " + sfecha)
-  console.log("sfosil: " + sfosil)
+
+  debug("==> liminf: " + lim_inf)
+  debug("==> limsup: " + lim_sup)
+  debug("==> sfecha: " + sfecha)
+  debug("==> sfosil: " + sfosil)
+  debug("==> target_taxons", target_taxons)
+
+
   var Ncells = 2458
 
   pool.task(t => {
@@ -2792,11 +2799,14 @@ exports.getGridGeneratedSpecies = function(req, res) {
 
     var where_validation = verb_utils.getWhereClauseFromGroupTaxonArray(target_taxons, true)
 
+    debug('==> where_validation =  ' + where_validation);
+
     const query1 = pgp.as.format(query, {
 
       where_target: where_validation.replace('WHERE', ''),
       grid_resolution: grid_res,
-      lim_inf: lim_inf
+      lim_inf_first: lim_inf_first,
+      lim_sup_first: lim_sup_first
 
     })
     debug(query1)
@@ -2805,7 +2815,9 @@ exports.getGridGeneratedSpecies = function(req, res) {
 
       where_target: where_validation.replace('WHERE', ''),
       grid_resolution: grid_res,
-      lim_inf: lim_inf
+      grid_resolution: grid_res,
+      lim_inf_first: lim_inf_first,
+      lim_sup_first: lim_sup_first
 
     }).then(resp => {
 
@@ -2858,6 +2870,7 @@ exports.getGridGeneratedSpecies = function(req, res) {
           debug(limits)
 
           var first_cells = []
+          var first_cells_values = []
           if(first1s >= parseInt(Ncells / percentiles)){
 
             for(var i=0; i<Ncells; i++){
@@ -2865,6 +2878,7 @@ exports.getGridGeneratedSpecies = function(req, res) {
               if(limits[bin-1] <= i && i <= limits[bin]) {
 
                 first_cells.push(first[i]['gridid'])
+                first_cells_values.push(first[i]['occ'])
 
               }
 
@@ -2876,12 +2890,14 @@ exports.getGridGeneratedSpecies = function(req, res) {
 
               if(modifier == 'negativity'){
                 
-                first_cells.push(item['gridid']);
+                first_cells.push(item['gridid'])
+                first_cells_values.push(item['occ'])
 
               } else {
 
                 if(parseFloat(item['occ']) > 0) {
                   first_cells.push(item['gridid']);
+                  first_cells_values.push(item['occ'])
                 } 
 
               }
@@ -2938,9 +2954,11 @@ exports.getGridGeneratedSpecies = function(req, res) {
           
           training.forEach(item => {
 
-            if(!first_cells.includes(item['gridid'])){
+            /*if(!first_cells.includes(item['gridid'])){
               training_data.push(item)
-            }
+            }*/
+
+            training_data.push(item)
 
             if(parseFloat(item['occ']) > 0){
               training_presence.push(item)
@@ -2995,14 +3013,15 @@ exports.getGridGeneratedSpecies = function(req, res) {
             debug(limits)
 
             var training_cells = []
+            var training_cells_values = []
             if (train1s >= parseInt(Ncells / percentiles)) {
 
               for(var i=0; i<Ncells; i++){
 
                 if(limits[bin-1] <= i && i <= limits[bin]) {
 
-                  //debug(training_data[i])
-                  training_cells.push(training_data[i])
+                  training_cells.push(training_data[i]['gridid'])
+                  training_cells_values.push(training_data[i]['occ'])
 
                 }
               }
@@ -3013,12 +3032,14 @@ exports.getGridGeneratedSpecies = function(req, res) {
 
                 if(modifier == 'negativity'){
 
-                  training_cells.push(item)
+                  training_cells.push(item['gridid'])
+                  training_cells_values.push(item['occ'])
 
                 } else {
 
                   if(parseFloat(item['occ']) > 0) {
-                    training_cells.push(item)
+                    training_cells.push(item['gridid'])
+                    training_cells_values.push(item['occ'])
                   } 
 
                 }
@@ -3031,10 +3052,181 @@ exports.getGridGeneratedSpecies = function(req, res) {
 
           }
 
+          var cells = {}
+          var limits = []
+
+
+          for(var i=0; i<percentiles+1; i++) {
+
+            var val = parseInt(Ncells*i/percentiles) - parseInt(i/percentiles)
+            limits.push(val)
+
+          }
+
+          debug(limits)
+
+          var index_bin = 1
+
+          for(var i=0; i<Ncells; i++){
+
+            if(i <= limits[index_bin]){
+              first[i]['bin'] = index_bin
+              training[i]['bin'] = index_bin
+            }
+
+            if(i == limits[index_bin]){
+              index_bin += 1
+            }
+
+          }
+
+          first.forEach(item => {
+
+            cells[item['gridid']] = {
+              gridid: item['gridid'],
+              fp: 0,
+              tp: 0,
+              fv: parseFloat(item['occ']),
+              tv: 0,
+              fb: item['bin'],
+              tb: 1,
+              target: false
+            }
+
+          })
+
+          training.forEach(item => {
+
+            if(cells[item['gridid']] == null){
+              cells[item['gridid']] = {
+                gridid: item['gridid'],
+                fp: 0,
+                tp: 0,
+                fv: 0,
+                tv: parseFloat(item['occ']),
+                fb: 1, 
+                tb: item['bin'],
+                target: false
+              }
+            } else {
+              cells[item['gridid']]['tv'] = parseFloat(item['occ'])
+              cells[item['gridid']]['tb'] = parseFloat(item['bin'])
+            }
+
+          })
+
+          var n_fp = first_cells.length
+          var n_tp = training_cells.length
+
+          debug('First period cells ' + n_fp)
+          debug('Training period cells ' + n_tp)
+
+
+          for(var i = 0; i < n_fp; i++) {
+
+            if(cells[first_cells[i]] == null){
+              cells[first_cells[i]] = {
+                gridid: first_cells[i],
+                fp: 1,
+                tp: 0,
+                fv: first_cells_values[i],
+                tv: 0,
+                target: false
+              }
+            } else {
+              cells[training_cells[i]]['fp'] = 1
+              cells[training_cells[i]]['fv'] = first_cells_values[i]
+            }
+
+          }
+
+          for(var i = 0; i < n_tp; i++){
+
+            if(cells[training_cells[i]] == null){
+              cells[training_cells[i]] = {
+                gridid: training_cells[i],
+                fp: 0,
+                tp: 1,
+                fv: 0, 
+                tv: training_cells_values[i],
+                target: false
+              } 
+            } else {
+              cells[training_cells[i]]['tp'] = 1
+              cells[training_cells[i]]['tv'] = training_cells_values[i]
+            }
+
+          }
+
+          //debug(training_cells)
+          //debug(cells)
+
+          var target_cells = 0
+          var no_target_cells = 0
+          var excluded_cells = 0
+          cells = Object.values(cells)
+
+          if(traffic_light == 'red'){
+
+            cells.forEach(item => {
+
+              if(item['fp'] == 0 && item['tp'] == 1){
+
+                item['target'] = true
+                target_cells += 1
+
+              } else if(item['fp'] == 0 ){
+
+                excluded_cells += 1
+                no_target_cells += 1
+
+              } else {
+
+                no_target_cells += 1
+
+              }
+
+            })
+
+          } else if(traffic_light == 'green'){
+
+            cells.forEach(item => {
+
+              if(item['fp'] == 1 && item['tp'] == 0) {
+                item['target'] = true
+                target_cells += 1
+              } else if(item['fp'] == 1) {
+
+                excluded_cells += 1
+                no_target_cells += 1
+
+              } else {
+                no_target_cells += 1
+              }
+            
+            })
+
+          } else {
+
+            cells.forEach(item => {
+
+              if(item['tp'] == 1) {
+                item['target'] = true
+                target_cells += 1
+              } else {
+                no_target_cells += 1
+              }
+            
+            })
+
+          }
 
           return res.json({
             ok: true,
-            data: training_cells
+            data: cells,
+            target_cells: target_cells,
+            no_target_cells: no_target_cells,
+            excluded_cells: excluded_cells
           })
 
         })
