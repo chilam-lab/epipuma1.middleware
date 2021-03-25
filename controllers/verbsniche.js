@@ -2790,6 +2790,7 @@ exports.getGridGeneratedSpecies = function(req, res) {
     } else if (modifier == 'incidence') {
       var query  = queries.getTimeValidation.getCountCellFirstIncidence
     } else if(modifier == 'lethality'){
+      debug('Modificador: ' + modifier)
       var query  = queries.getTimeValidation.getCountCellFirstLethality
     } else if(modifier == 'negativity'){
       var query  = queries.getTimeValidation.getCountCellFirstNegativity
@@ -2814,7 +2815,6 @@ exports.getGridGeneratedSpecies = function(req, res) {
     return t.any(query,  {
 
       where_target: where_validation.replace('WHERE', ''),
-      grid_resolution: grid_res,
       grid_resolution: grid_res,
       lim_inf_first: lim_inf_first,
       lim_sup_first: lim_sup_first
