@@ -53,7 +53,7 @@ WITH positivos as (
 				  a.diacolecta <> 99 and
 				  a.diacolecta <> -1 and
 				  ((generovalido = 'COVID-19' AND especieepiteto = 'FALLECIDO')) and 
-				  make_date(a.aniocolecta, a.mescolecta, a.diacolecta) < '${lim_inf:raw}'
+				  make_date(a.aniocolecta, a.mescolecta, a.diacolecta) < '${lim_sup_first:raw}'
 			GROUP BY a.gridid_${grid_resolution:raw}km
 		) AS b
 		ON a.gridid=b.gridid::integer
