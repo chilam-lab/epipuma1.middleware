@@ -75,6 +75,7 @@ exports.generateTarget = function(req, res, next) {
   data_request['bin'] = bin
 
   debug("grid_resolution: " + grid_resolution)
+  debug('traffic_light ' + traffic_light)
 
   data_request["excluded_cells"] = cells
   data_request["region"] = region

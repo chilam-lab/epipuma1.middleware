@@ -2779,6 +2779,7 @@ exports.getGridGeneratedSpecies = function(req, res) {
   debug("==> sfecha: " + sfecha)
   debug("==> sfosil: " + sfosil)
   debug("==> target_taxons", target_taxons)
+  debug("==> traffic_light", traffic_light)
 
 
   var Ncells = 2458
@@ -3086,7 +3087,7 @@ exports.getGridGeneratedSpecies = function(req, res) {
               gridid: item['gridid'],
               fp: 0,
               tp: 0,
-              fv: parseFloat(item['occ']),
+              fv: parseFloat(item['occ'])*(modifier=='cases' ? 1: 1000),
               tv: 0,
               fb: item['bin'],
               tb: 1,
@@ -3103,13 +3104,13 @@ exports.getGridGeneratedSpecies = function(req, res) {
                 fp: 0,
                 tp: 0,
                 fv: 0,
-                tv: parseFloat(item['occ']),
+                tv: parseFloat(item['occ'])*(modifier=='cases' ? 1: 1000),
                 fb: 1, 
                 tb: item['bin'],
                 target: false
               }
             } else {
-              cells[item['gridid']]['tv'] = parseFloat(item['occ'])
+              cells[item['gridid']]['tv'] = parseFloat(item['occ'])*(modifier=='cases' ? 1: 1000)
               cells[item['gridid']]['tb'] = parseFloat(item['bin'])
             }
 
@@ -3134,8 +3135,9 @@ exports.getGridGeneratedSpecies = function(req, res) {
                 target: false
               }
             } else {
-              cells[training_cells[i]]['fp'] = 1
-              cells[training_cells[i]]['fv'] = first_cells_values[i]
+
+              cells[first_cells[i]]['fp'] = 1
+              cells[first_cells[i]]['fv'] = first_cells_values[i]*(modifier=='cases' ? 1: 1000)
             }
 
           }
@@ -3153,7 +3155,7 @@ exports.getGridGeneratedSpecies = function(req, res) {
               } 
             } else {
               cells[training_cells[i]]['tp'] = 1
-              cells[training_cells[i]]['tv'] = training_cells_values[i]
+              cells[training_cells[i]]['tv'] = training_cells_values[i]*(modifier=='cases' ? 1: 1000)
             }
 
           }
