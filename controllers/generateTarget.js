@@ -62,7 +62,7 @@ exports.generateTarget = function(req, res, next) {
   var lim_sup = verb_utils.getParam(req, 'lim_sup',  year+"-"+month+"-"+day)
   var lim_inf_validation = verb_utils.getParam(req, 'lim_inf_validation', verb_utils.formatDate(new Date("1500-01-01")) )
   var lim_sup_validation = verb_utils.getParam(req, 'lim_sup_validation',  year+"-"+month+"-"+day)
-  var period_config = verb_utils.getParam(req, 'period_config', ['0', '0', '1'])
+  var period_config = verb_utils.getParam(req, 'period_config', ['*', '*', '1'])
   var traffic_light = verb_utils.getParam(req, 'traffic_light', 'red')
 
   var cells = verb_utils.getParam(req, 'excluded_cells', [])
@@ -207,6 +207,8 @@ exports.generateTarget = function(req, res, next) {
       
       first.forEach(item => {
 
+        item['occ'] = item['occ']*(data_request['modifier'] == 'cases' ? 1 : 1000)
+
         if(data_request['modifier'] == 'negativity'){
             
           first1s += 1;
@@ -338,6 +340,8 @@ exports.generateTarget = function(req, res, next) {
         var training_presence = []
         
         training.forEach(item => {
+
+          item['occ'] = item['occ']*(data_request['modifier'] == 'cases' ? 1 : 1000)
 
           if(data_request['period_config'][0] == '0' && !data_request['first_cells'].includes(item['gridid'])){
             training_data.push(item)
@@ -699,6 +703,8 @@ exports.generateTarget = function(req, res, next) {
             
             validation.forEach(item => {
 
+              item['occ'] = item['occ']*(data_request['modifier'] == 'cases' ? 1 : 1000)
+
               if(data_request['period_config'][1] == '0' && !data_request['first_cells'].includes(item['gridid']) 
                 && !data_request['training_cells'].includes(item['gridid'])){
 
@@ -898,8 +904,6 @@ exports.generateTarget = function(req, res, next) {
                                                   first_presence, validation_cells, training_presence, validation_presence)
 
 
-            
-            
             info_cell.push({
               cve_ent: data_request.cve_ent,
               nom_ent: data_request.nom_ent,

@@ -4041,7 +4041,7 @@ verb_utils.getCountTimeValidation = function(score_map, training_cells, validati
 
   })
 
-  debug(validation_cells.length)
+  debug('Validation cells length ', validation_cells.length)
   debug(tcell_score_map)
   debug('===========================+++++===========================')
 
@@ -4087,11 +4087,11 @@ verb_utils.getCountTimeValidation = function(score_map, training_cells, validati
     
 
   })
-  debug(tcell_score_map)
+  debug('Validation cells with score ' + tcell_score_map)
 
   score_map_aux_list = score_map_aux_list.sort(function(a, b) {return b[1]-a[1];});
 
-  //debug(score_map_aux_list)
+  debug('Total Cells with score ', score_map_aux_list.length)
 
   var decil = 10
 
@@ -4102,7 +4102,7 @@ verb_utils.getCountTimeValidation = function(score_map, training_cells, validati
   
   })
 
-  //debug(validation_cells_map)
+  debug('Marked Validation Cells Length ', Object.keys(validation_cells_map).length)
 
   score_map_aux_list.forEach(item => {
 
@@ -4112,7 +4112,7 @@ verb_utils.getCountTimeValidation = function(score_map, training_cells, validati
 
   })
 
-  debug(validation_ones)
+  debug('Double Check Marked Validation Cells Length ', validation_ones)
 
   var Nscores = score_map_aux_list.length
   
@@ -4126,6 +4126,7 @@ verb_utils.getCountTimeValidation = function(score_map, training_cells, validati
   }
 
   debug(score_indexes)
+  //debug(score_map_aux_list)
 
   indexes.forEach(i => {
 
@@ -4145,6 +4146,7 @@ verb_utils.getCountTimeValidation = function(score_map, training_cells, validati
 
       score_index += 1
 
+
       if(score_index <= score_indexes[i]){
 
         if(cell[1] == null){
@@ -4160,6 +4162,8 @@ verb_utils.getCountTimeValidation = function(score_map, training_cells, validati
             total_validation_cells += 1
 
             pre += 1
+
+            debug(score_indexes[i], cell)
           }
 
         }
