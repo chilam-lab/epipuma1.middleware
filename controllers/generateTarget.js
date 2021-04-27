@@ -62,7 +62,7 @@ exports.generateTarget = function(req, res, next) {
   var lim_sup = verb_utils.getParam(req, 'lim_sup',  year+"-"+month+"-"+day)
   var lim_inf_validation = verb_utils.getParam(req, 'lim_inf_validation', verb_utils.formatDate(new Date("1500-01-01")) )
   var lim_sup_validation = verb_utils.getParam(req, 'lim_sup_validation',  year+"-"+month+"-"+day)
-  var period_config = verb_utils.getParam(req, 'period_config', ['*', '*', '1'])
+  var period_config = ['*', '*', '1']
   var traffic_light = verb_utils.getParam(req, 'traffic_light', 'red')
 
   var cells = verb_utils.getParam(req, 'excluded_cells', [])
@@ -200,7 +200,9 @@ exports.generateTarget = function(req, res, next) {
       debug('FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD')
 
       var first = resp
-      
+
+      var first_decils = verb_utils.getDecils(first)
+
       var first1s = 0;
       var first0s = 0;
       var first_presence = [] 
@@ -296,6 +298,7 @@ exports.generateTarget = function(req, res, next) {
       debug('celdas con presencia ', first_presence)
       data_request['first_cells'] = first_cells 
       data_request['first_occur'] = first_presence
+      data_request['first_decils'] = first_decils
 
       //debug(data_request['first_cells'].length, data_request['first_cells'])
       debug('FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD')
@@ -338,18 +341,22 @@ exports.generateTarget = function(req, res, next) {
         var train1s = 0;
         var train0s = 0;
         var training_presence = []
+
+        var training_decils = verb_utils.getDecils(training)
         
         training.forEach(item => {
 
           item['occ'] = item['occ']*(data_request['modifier'] == 'cases' ? 1 : 1000)
 
-          if(data_request['period_config'][0] == '0' && !data_request['first_cells'].includes(item['gridid'])){
+          /*if(data_request['period_config'][0] == '0' && !data_request['first_cells'].includes(item['gridid'])){
             training_data.push(item)
           } else if(data_request['period_config'][0] == '1' && data_request['first_cells'].includes(item['gridid'])){
             training_data.push(item)
           } else if(data_request['period_config'][0] == '*'){
             training_data.push(item)
-          }
+          }*/
+
+          training_data.push(item)
 
           if(data_request['modifier'] == 'negativity'){
 
@@ -455,7 +462,7 @@ exports.generateTarget = function(req, res, next) {
 
           data_request['first_cells'].forEach(first_cell => {
 
-            if(training_cells_aux.includes(first_cell)){
+            if(!training_cells_aux.includes(first_cell)){
 
               training_cells.push(first_cells);
 
@@ -488,6 +495,8 @@ exports.generateTarget = function(req, res, next) {
         training_presence = training_presence.sort(function(a, b) {return  parseFloat(b['occ']) - parseFloat(a['occ']);})
         debug('celdas con presencia ', training_presence)
         data_request['training_occur'] = training_presence
+        data_request['top_decil_training'] = training_cells_aux
+        data_request['training_decils'] = training_decils
 
         //debug(data_request['training_cells'].length, data_request['training_cells'])
         debug('TRAINING PERIOD TRAINING PERIOD  TRAINING PERIOD  TRAINING PERIOD  TRAINING PERIOD  TRAINING PERIOD  TRAINING PERIOD ')
@@ -697,6 +706,8 @@ exports.generateTarget = function(req, res, next) {
             var validation = validation_data
             var validation_data = []
 
+            var validation_decils = verb_utils.getDecils(validation)
+
             var val1s = 0;
             var val0s = 0;
             var validation_presence = []
@@ -705,16 +716,16 @@ exports.generateTarget = function(req, res, next) {
 
               item['occ'] = item['occ']*(data_request['modifier'] == 'cases' ? 1 : 1000)
 
-              if(data_request['period_config'][1] == '0' && !data_request['first_cells'].includes(item['gridid']) 
-                && !data_request['training_cells'].includes(item['gridid'])){
+             /* if(data_request['traffic_light'] == 'green' && data_request['training_cells'].includes(item['gridid'])){
 
                 validation_data.push(item)
-              } else if(data_request['period_config'][1] == '1' && data_request['training_cells'].includes(item['gridid'])) {
+              } else if(data_request['traffic_light'] == 'red' && !data_request['training_cells'].includes(item['gridid'])) {
 
                 validation_data.push(item)
               } else if(data_request['period_config'][1] == '*'){
                 validation_data.push(item)
-              }
+              }*/
+
 
               if(data_request['modifier'] == 'negativity'){
 
@@ -729,6 +740,8 @@ exports.generateTarget = function(req, res, next) {
               }
 
             });
+
+            validation_data = validation
 
             validation_data.forEach(item => {
 
@@ -819,16 +832,21 @@ exports.generateTarget = function(req, res, next) {
 
             var validation_cells_aux = validation_cells
             validation_cells = []
+            
+            debug(data_request['top_decil_training'].length)
+            debug(validation_cells_aux.length)
+            
             if(data_request['traffic_light'] == 'green'){
 
               debug('================> VALIDATION PERIOD: Traffic Light GREEN <===================')
 
-              data_request['first_cells'].forEach(first_cell => {
 
-                if(data_request['training_cells'].includes(first_cell) && 
-                    !validation_cells_aux.includes(first_cell)){
+              validation_data.forEach(item => {
 
-                  validation_cells.push(first_cell)
+                if(data_request['top_decil_training'].includes(item['gridid']) && 
+                    !validation_cells_aux.includes(item['gridid'])){
+
+                  validation_cells.push(item['gridid'])
 
                 }
 
@@ -839,12 +857,12 @@ exports.generateTarget = function(req, res, next) {
 
               debug('================> VALIDATION PERIOD: Traffic Light RED   <===================')
 
-              validation_cells_aux.forEach(validation_cell => {
+              validation_data.forEach(item => {
 
-                if(!data_request['first_cells'].includes(validation_cell) && 
-                    !data_request['training_cells'].includes(validation_cell)){
+                if(!data_request['top_decil_training'].includes(item['gridid']) && 
+                    validation_cells_aux.includes(item['gridid'])){
 
-                  validation_cells.push(validation_cell)
+                  validation_cells.push(item['gridid'])
 
                 }
 
@@ -863,6 +881,7 @@ exports.generateTarget = function(req, res, next) {
             validation_presence = validation_presence.sort(function(a, b) {return  parseFloat(b['occ']) - parseFloat(a['occ']);})
             debug('celdas con presencia ', validation_presence)
             data_request['validation_occur'] = validation_presence
+            data_request['validation_decils'] = validation_decils
 
             debug('VALIDATION PERIOD VALIDATION PERIOD  VALIDATION PERIOD  VALIDATION PERIOD  VALIDATION PERIOD  VALIDATION PERIOD ')
 
@@ -901,7 +920,8 @@ exports.generateTarget = function(req, res, next) {
             var validation_presence = data_request['validation_occur']
 
             var cell_summary = verb_utils.cellCountSummary(data, first_cells, training_cells, 
-                                                  first_presence, validation_cells, training_presence, validation_presence)
+                                                  first_presence, validation_cells, training_presence, validation_presence,
+                                                  data_request['first_decils'], data_request['training_decils'], data_request['validation_decils'])
 
 
             info_cell.push({

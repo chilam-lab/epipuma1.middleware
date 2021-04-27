@@ -60,7 +60,7 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
   var lim_sup = verb_utils.getParam(req, 'lim_sup',  year+"-"+month+"-"+day)
   var lim_inf_validation = verb_utils.getParam(req, 'lim_inf_validation', lim_sup )
   var lim_sup_validation = verb_utils.getParam(req, 'lim_sup_validation',  year+"-"+month+"-"+day)
-  var period_config = verb_utils.getParam(req, 'period_config', ['0', '0', '1'])
+  var period_config = ['*', '*', '1']
   var traffic_light = verb_utils.getParam(req, 'traffic_light', 'red')
 
   var cells = verb_utils.getParam(req, 'excluded_cells', [])
@@ -415,9 +415,9 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
 
 
             var training_period_condition = 'true'
-            if(data_request['period_config'][1] == '0' && data_request['traffic_light'] != 'green'){
+            if(data_request['traffic_light'] == 'red'){
               training_period_condition = 'c is null'
-            }else if(data_request['period_config'][1] == '1' && data_request['traffic_light'] != 'green'){
+            }else if(data_request['traffic_light'] == 'green'){
               training_period_condition = 'c = 1'
             }
 
