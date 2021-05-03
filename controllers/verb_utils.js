@@ -4163,7 +4163,7 @@ verb_utils.getCountTimeValidation = function(score_map, training_cells, validati
 
             pre += 1
 
-            debug(score_indexes[i], cell)
+            //debug(score_indexes[i], cell)
           }
 
         }
@@ -4499,7 +4499,7 @@ verb_utils.cellSpatialSummary = function(data, data_response, iterations){
 }
 
 
-verb_utils.cellSummary = function(data, first_cells, training_cells, validation_cells){
+verb_utils.cellSummary = function(data, first_cells, training_cells, validation_cells, cases_by_mun){
 
   debug('cellSummary')
   debug(validation_cells)
@@ -4507,21 +4507,16 @@ verb_utils.cellSummary = function(data, first_cells, training_cells, validation_
   debug(training_cells.length)
   debug('===========================Number of validation cells===========================')
   debug(validation_cells.length)
-  debug('===========================Comparison cells===========================')
+  debug('===========================cases list to cases map===========================')
 
-  /*training_cells.forEach(c1 => {
+  var cases_map = {}
 
-    validation_cells.forEach(c2 => {
+  cases_by_mun.forEach(item => {
 
-      if(c1 === c2) {
-        //debug(c1)
-      }
+    cases_map[item['gridid']] = item['cases']
 
-    })
+  })
 
-  })*/
-
-  debug('===========================+++++++++++++===========================')
 
   var cells_map = {}
 
@@ -4653,6 +4648,11 @@ verb_utils.cellSummary = function(data, first_cells, training_cells, validation_
     cells_map[cell]['first_period'] = 0
     cells_map[cell]['training_period'] = 0
     cells_map[cell]['validation_period'] = 0
+    cells_map[cell]['cases_training'] = 0
+
+    if(Object.keys(cases_map).includes(cell)){
+      cells_map[cell]['cases_training'] = cases_map[cell]
+    }
 
     if(first_cells.includes(parseInt(cell)) == true){
       cells_map[cell]['first_period'] = 1
@@ -4699,7 +4699,8 @@ verb_utils.cellSummary = function(data, first_cells, training_cells, validation_
 
 
 verb_utils.cellCountSummary = function(data, first_cells, training_cells, first_presence,
-                              validation_cells, training_presence, validation_presence){
+                              validation_cells, training_presence, validation_presence,
+                              first_decils, training_decils, validation_decils, cases_by_mun){
 
   debug('cellCountSummary')
   //debug(first_cells)
@@ -4711,7 +4712,15 @@ verb_utils.cellCountSummary = function(data, first_cells, training_cells, first_
   debug(training_cells.length, training_presence.length)
   debug('===========================Number of validation cells===========================')
   debug(validation_cells.length, validation_presence.length)
-  debug('===========================Comparison cells===========================')
+  debug('===========================cases list to cases map===========================')
+
+  var cases_map = {}
+
+  cases_by_mun.forEach(item => {
+
+    cases_map[item['gridid']] = item['cases']
+
+  })
 
   debug(training_cells)
 
@@ -4850,57 +4859,43 @@ verb_utils.cellCountSummary = function(data, first_cells, training_cells, first_
   var total_validation_cells = 0
 
   debug('===========================Cells map===========================')
-  //debug(Object.keys(cells_map))
+  debug('Cells in Summary ', Object.keys(cells_map).length)
   //debug(training_cells)
   var detected_tcells = 0
   debug('===========================+++++++++++++===========================')
 
-  var percentile_size = parseInt(N/10)
+  first_decils.forEach(item => {
 
-  var len_first = first_presence.length
-  var decil  = 10
-  for(var i = 1; i<=len_first; i++){
+    if(Object.keys(cells_map).includes(item[0])) {
 
-    if(Object.keys(cells_map).includes(first_presence[i-1]['gridid'])){
-      cells_map[first_presence[i-1]['gridid']]['first_decile'] = decil
-      cells_map[first_presence[i-1]['gridid']]['first_cases'] = first_presence[i-1]['occ']
+      cells_map[item[0]]['first_cases'] = item[1]
+      cells_map[item[0]]['first_decile'] = item[2]      
+
     }
 
-    if(i % percentile_size == 0) {
-      decil -= 1
+  })
+
+  training_decils.forEach(item => {
+
+    if(Object.keys(cells_map).includes(item[0])) {
+
+      cells_map[item[0]]['training_cases'] = item[1]
+      cells_map[item[0]]['training_decile'] = item[2]      
+
     }
 
-  }
+  })
 
-  var len_training = training_presence.length
-  var decil  = 10
-  for(var i = 1; i<=len_training; i++){
+  validation_decils.forEach(item => {
 
-    if(Object.keys(cells_map).includes(training_presence[i-1]['gridid'])){
-      cells_map[training_presence[i-1]['gridid']]['training_decile'] = decil
-      cells_map[training_presence[i-1]['gridid']]['training_cases'] = training_presence[i-1]['occ']
+    if(Object.keys(cells_map).includes(item[0])) {
+
+      cells_map[item[0]]['validation_cases'] = item[1]
+      cells_map[item[0]]['validation_decile'] = item[2]      
+
     }
 
-    if(i % percentile_size == 0) {
-      decil -= 1
-    }
-
-  }
-
-  var len_validation = validation_presence.length
-  var decil  = 10
-  for(var i = 1; i<=len_validation; i++){
-
-    if(Object.keys(cells_map).includes(validation_presence[i-1]['gridid'])){
-      cells_map[validation_presence[i-1]['gridid']]['validation_decile'] = decil
-      cells_map[validation_presence[i-1]['gridid']]['validation_cases'] = validation_presence[i-1]['occ']
-    }
-    
-    if(i % percentile_size == 0) {
-      decil -= 1
-    }
-
-  }
+  })
 
   Object.keys(cells_map).forEach(cell => {
 
@@ -4908,20 +4903,26 @@ verb_utils.cellCountSummary = function(data, first_cells, training_cells, first_
     cells_map[cell]['training_period'] = 0
     cells_map[cell]['validation_period'] = 0
 
-    if(first_cells.includes(cell) == true){
+    cells_map[cell]['cases_training'] = 0
+
+    if(Object.keys(cases_map).includes(cell)){
+      cells_map[cell]['cases_training'] = cases_map[cell]
+    }
+
+    if(first_cells.includes(cell)){
       
       cells_map[cell]['first_period'] = 1
 
     }
       
-    if(training_cells.includes(cell) == true) {
+    if(training_cells.includes(cell)) {
 
       cells_map[cell]['training_period'] = 1
       detected_tcells += 1
 
     } 
 
-    if(validation_cells.includes(cell) == true) {
+    if(validation_cells.includes(cell)) {
       cells_map[cell]['validation_period'] = 1
       //debug(cell+','+cells_map[cell]['score'])
       total_validation_cells += 1
@@ -4958,6 +4959,66 @@ verb_utils.cellCountSummary = function(data, first_cells, training_cells, first_
   return cell_summary
 
 
+}
+
+
+
+verb_utils.getDecils = function(cells){
+
+  var N = cells.length
+
+  var cells_deciles = []
+
+  var limits = []
+  var percentiles = 10
+
+
+  for(var i=1; i<=percentiles; i++) {
+
+    var val = parseInt(N*i/percentiles) - parseInt(i/percentiles)
+    limits.push(val)
+
+  }
+
+  var index_limit = 0
+
+  for(var i =0 ; i< N; i++){
+
+    if(i < limits[index_limit]){
+
+      cells_deciles.push([cells[i]['gridid'], cells[i]['occ'], index_limit+1])
+
+    } else {
+
+      cells_deciles.push([cells[i]['gridid'], cells[i]['occ'], index_limit+1])
+      index_limit += 1
+
+    }
+
+  }
+
+  return cells_deciles
+
+}
+
+verb_utils.getCOVID19Cases = function(queries, lim_inf, lim_sup) {
+  
+  debug("getCOVID19Cases")
+
+  var query = queries.getGridSpeciesNiche.getCOVID19Cases
+
+  return verb_utils.pool.any(query, {
+
+    lim_inf: lim_inf,
+    lim_sup: lim_sup
+
+  }).then(resp => {
+
+    
+    
+    return resp
+    
+  })
 }
 
 module.exports = verb_utils

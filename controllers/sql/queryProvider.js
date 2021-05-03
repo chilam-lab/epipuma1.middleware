@@ -185,7 +185,9 @@ var queryProvider = {
     getTargetCells: sqlPath('getGridSpecies/get_target_cells.sql'),
     getGridSpeciesTaxons: sqlPath('especie/get_grid_species_taxons.sql'),
 
-    getGridSpeciesTaxonsTrafficLight: sqlPath('especie/get_grid_species_taxons_traffic_light.sql')
+    getGridSpeciesTaxonsTrafficLight: sqlPath('especie/get_grid_species_taxons_traffic_light.sql'),
+
+    getCOVID19Cases: sqlPath('getGridSpecies/get_covid19_cases.sql'),
 
   },
   getGeoRelNiche: {

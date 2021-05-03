@@ -60,7 +60,7 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
   var lim_sup = verb_utils.getParam(req, 'lim_sup',  year+"-"+month+"-"+day)
   var lim_inf_validation = verb_utils.getParam(req, 'lim_inf_validation', lim_sup )
   var lim_sup_validation = verb_utils.getParam(req, 'lim_sup_validation',  year+"-"+month+"-"+day)
-  var period_config = verb_utils.getParam(req, 'period_config', ['0', '0', '1'])
+  var period_config = ['*', '*', '1']
   var traffic_light = verb_utils.getParam(req, 'traffic_light', 'red')
 
   var cells = verb_utils.getParam(req, 'excluded_cells', [])
@@ -151,72 +151,75 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
 
   pool.task(t => {
 
-    var query  = queries.getTimeValidation.getCellFirst
-    var where_validation = data_request["where_target"]
+    var query = queries.getGridSpeciesNiche.getCOVID19Cases
 
-    const query1 = pgp.as.format(query, {
+    return t.any(query, {
 
-      where_target: where_validation.replace('WHERE', ''),
-      grid_resolution: data_request["grid_resolution"],
-      lim_inf_first: data_request['lim_inf_first'],
-      lim_sup_first: data_request['lim_sup_first'],
+    lim_inf: data_request['lim_inf'],
+    lim_sup: data_request['lim_sup']
 
-    })
-    debug(query1)
+    }).then(cases_by_mun => {
 
-    return t.one(query,  {
+      //debug("CASES BY MUN")
+      //debug(cases_by_mun)
 
-      where_target: where_validation.replace('WHERE', ''),
-      grid_resolution: data_request["grid_resolution"],
-      lim_inf_first: data_request['lim_inf_first'],
-      lim_sup_first: data_request['lim_sup_first']
+      data_request['cases'] = cases_by_mun
 
-    }).then(resp => {
-
-      var first_cells = resp['first_cells']
-      var first_cells_aux = []
-
-      if(data_request['traffic_light'] == 'green'){
-
-        debug('================> FIRST PERIOD- BEGIN: Traffic Light GREEN <===================')
-
-        for(var i = 1; i <= 2458; i++){
-
-          if(!first_cells.includes(i)){
-            first_cells_aux.push(i)
-          }
-
-        }
-
-        first_cells = first_cells_aux
-
-        debug(first_cells.length + ' cells ')
-        debug('================> FIRST PERIOD- END:   Traffic Light GREEN <===================')
-
-      }
-
-      var first_period_condition = 'true'
-      if(data_request['period_config'][0] == '0' && data_request['traffic_light'] != 'green'){
-        first_period_condition = 'c is null'
-      } else if(data_request['period_config'][0] == '1' && data_request['traffic_light'] != 'green') {
-        first_period_condition = 'c = 1'
-      }
-
-      var query  = queries.getTimeValidation.getCellTraining
+      var query  = queries.getTimeValidation.getCellFirst
       var where_validation = data_request["where_target"]
 
       const query1 = pgp.as.format(query, {
 
         where_target: where_validation.replace('WHERE', ''),
         grid_resolution: data_request["grid_resolution"],
-        lim_inf: data_request['lim_inf'],
-        lim_sup: data_request['lim_sup'],
-        first_period_condition: first_period_condition
+        lim_inf_first: data_request['lim_inf_first'],
+        lim_sup_first: data_request['lim_sup_first'],
 
       })
       debug(query1)
 
       return t.one(query,  {
+
+        where_target: where_validation.replace('WHERE', ''),
+        grid_resolution: data_request["grid_resolution"],
+        lim_inf_first: data_request['lim_inf_first'],
+        lim_sup_first: data_request['lim_sup_first']
+
+      }).then(resp => {
+
+        var first_cells = resp['first_cells']
+        var first_cells_aux = []
+
+        if(data_request['traffic_light'] == 'green'){
+
+          debug('================> FIRST PERIOD- BEGIN: Traffic Light GREEN <===================')
+
+          for(var i = 1; i <= 2458; i++){
+
+            if(!first_cells.includes(i)){
+              first_cells_aux.push(i)
+            }
+
+          }
+
+          first_cells = first_cells_aux
+
+          debug(first_cells.length + ' cells ')
+          debug('================> FIRST PERIOD- END:   Traffic Light GREEN <===================')
+
+        }
+
+        var first_period_condition = 'true'
+        if(data_request['period_config'][0] == '0' && data_request['traffic_light'] != 'green'){
+          first_period_condition = 'c is null'
+        } else if(data_request['period_config'][0] == '1' && data_request['traffic_light'] != 'green') {
+          first_period_condition = 'c = 1'
+        }
+
+        var query  = queries.getTimeValidation.getCellTraining
+        var where_validation = data_request["where_target"]
+
+        const query1 = pgp.as.format(query, {
 
           where_target: where_validation.replace('WHERE', ''),
           grid_resolution: data_request["grid_resolution"],
@@ -224,320 +227,335 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
           lim_sup: data_request['lim_sup'],
           first_period_condition: first_period_condition
 
-      }).then(resp => {
+        })
+        debug(query1)
 
-        var training_cells = resp['training_cells']
-        var training_cells_aux = []
+        return t.one(query,  {
 
-        if(data_request['traffic_light'] == 'green'){
+            where_target: where_validation.replace('WHERE', ''),
+            grid_resolution: data_request["grid_resolution"],
+            lim_inf: data_request['lim_inf'],
+            lim_sup: data_request['lim_sup'],
+            first_period_condition: first_period_condition
 
-          debug('================> TRAINING PERIOD- BEGIN: Traffic Light GREEN <===================')
-          debug(training_cells.length + ' initial cells')
+        }).then(resp => {
 
-          for(var i = 1; i <= 2458; i++){
+          var training_cells = resp['training_cells']
+          var training_cells_aux = []
 
-            if(!training_cells.includes(i)){
-              training_cells_aux.push(i)
+          if(data_request['traffic_light'] == 'green'){
+
+            debug('================> TRAINING PERIOD- BEGIN: Traffic Light GREEN <===================')
+            debug(training_cells.length + ' initial cells')
+
+            for(var i = 1; i <= 2458; i++){
+
+              if(!training_cells.includes(i)){
+                training_cells_aux.push(i)
+              }
+
             }
+
+            training_cells = training_cells_aux
+
+            debug(training_cells.length + ' cells ')
+            debug('================> TRAINING PERIOD- END:   Traffic Light GREEN <===================')
 
           }
 
-          training_cells = training_cells_aux
 
-          debug(training_cells.length + ' cells ')
-          debug('================> TRAINING PERIOD- END:   Traffic Light GREEN <===================')
+          var query = queries.subaoi.getCountriesRegion
 
-        }
+          /*
+            Se obtiene filtro para target 
+          */
+          return t.one(query, data_request).then(resp => {
 
+            data_request["gid"] = resp.gid
+            data_request["where_filter"] = verb_utils.getWhereClauseFilter(fosil, date, lim_inf, lim_sup, cells, data_request["res_celda_snib"], data_request["region"], data_request["gid"])
+            if(!memory){
+              data_request["where_filter"] += ' AND gridid_' + grid_resolution + 'km = ANY(ARRAY[' + training_cells.toString() + ']::text[])'
+              
+              if(data_request['traffic_light'] == 'green'){
 
-        var query = queries.subaoi.getCountriesRegion
+                data_request["green_cells"] = 'ARRAY[' + training_cells.toString() + ']::integer[]'
 
-        /*
-          Se obtiene filtro para target 
-        */
-        return t.one(query, data_request).then(resp => {
-
-          data_request["gid"] = resp.gid
-          data_request["where_filter"] = verb_utils.getWhereClauseFilter(fosil, date, lim_inf, lim_sup, cells, data_request["res_celda_snib"], data_request["region"], data_request["gid"])
-          if(!memory){
-            data_request["where_filter"] += ' AND gridid_' + grid_resolution + 'km = ANY(ARRAY[' + training_cells.toString() + ']::text[])'
-            
-            if(data_request['traffic_light'] == 'green'){
-
-              data_request["green_cells"] = 'ARRAY[' + training_cells.toString() + ']::integer[]'
-
+              }
             }
-          }
-          //debug(data_request["where_filter"])
+            //debug(data_request["where_filter"])
 
-        }).then(resp=> {
+          }).then(resp=> {
 
-            data_request['source_cells'] = []
-            data_request['total_cells'] = []
+              data_request['source_cells'] = []
+              data_request['total_cells'] = []
 
-            /*
-              Se obtiene el numero de celdas totales
-            */
-            return t.one(queries.basicAnalysis.getN, {
+              /*
+                Se obtiene el numero de celdas totales
+              */
+              return t.one(queries.basicAnalysis.getN, {
 
-                grid_resolution: data_request['grid_resolution'],
-                footprint_region: data_request['region']
-            
-            }).then(data => {
-
-
-                data_request['N'] = data['n']
-                data_request["alpha"] = data_request["alpha"] !== undefined ? data_request["alpha"] : 1.0/data_request['N']
-
-                debug("N:" + data_request['N'])
-                debug(data_request['target_group'])
-
-                if(data_request['target_group'][0]['value'] === 'COVID-19 CONFIRMADO' 
-                        && data_request['traffic_light'] != 'green'){
-                  var query_analysis = queries.countsTaxonGroups.getCountsBaseOdds
-                } else if(data_request['traffic_light'] == 'green'){
-
-                  var query_analysis = queries.countsTaxonGroups.getCountsBaseGreen
-
-                }else{
-                  var query_analysis = queries.countsTaxonGroups.getCountsBase
-                }
-
-                data_request['groups'] = verb_utils.getCovarGroupQueries(queries, data_request, covars_groups)
-
-                debug('grupos covariables ' + covars_groups)
-
-                data_request["cell_id"] = 0
-
-                if(JSON.parse(data_request.apriori) === true || JSON.parse(data_request.mapa_prob) === true) {
+                  grid_resolution: data_request['grid_resolution'],
+                  footprint_region: data_request['region']
+              
+              }).then(data => {
 
 
-                  return t.one(queries.basicAnalysis.getAllGridId, data_request).then(data => {
+                  data_request['N'] = data['n']
+                  data_request["alpha"] = data_request["alpha"] !== undefined ? data_request["alpha"] : 1.0/data_request['N']
 
-                    data_request.all_cells = data
-                    return t.any(query_analysis, data_request)
+                  debug("N:" + data_request['N'])
+                  debug(data_request['target_group'])
 
-                  })
+                  if(data_request['target_group'][0]['value'] === 'COVID-19 CONFIRMADO' 
+                          && data_request['traffic_light'] != 'green'){
+                    var query_analysis = queries.countsTaxonGroups.getCountsBaseOdds
+                  } else if(data_request['traffic_light'] == 'green'){
 
+                    var query_analysis = queries.countsTaxonGroups.getCountsBaseGreen
 
-                } else {
+                  }else{
+                    var query_analysis = queries.countsTaxonGroups.getCountsBase
+                  }
 
+                  data_request['groups'] = verb_utils.getCovarGroupQueries(queries, data_request, covars_groups)
 
-                  if( data_request["get_grid_species"] !== false ) {
+                  debug('grupos covariables ' + covars_groups)
 
-                    debug('--------------------------------------------------')
+                  data_request["cell_id"] = 0
 
-                    debug("analisis en celda")
-
-                    debug("long: " + data_request.long)
-                    debug("lat: " + data_request.lat)
-
-                    var extra_columns = ""
-                    if(data_request.grid_resolution == "mun"){
-                      extra_columns = ', "CVE_MUN" as cve_mun, "NOM_MUN" as nom_mun '
-                    }
-
-                    data_temp = {
-                      'res_celda_snib'    : data_request.res_celda_snib, 
-                      'res_celda_snib_tb' : data_request.res_grid_tbl,
-                      'long'              : data_request.long,
-                      'lat'               : data_request.lat,
-                      'extra_columns' : extra_columns
-                    }
-
-                    //const query1 = pgp.as.format(queries.basicAnalysis.getGridIdByLatLong, data_temp)
-                    //debug(query1)
-
-                    return t.one(queries.basicAnalysis.getGridIdByLatLong, data_temp).then(resp => {
-
-                          data_request["cell_id"] = resp.gridid
-                          debug("cell_id: " + data_request.cell_id)
-
-                          // valores de la celda seleccionada
-                          data_request["cell_id"] = resp.gridid
-                          data_request["cve_ent"] = resp.cve_ent
-                          data_request["nom_ent"] = resp.nom_ent
-                          data_request["cve_mun"] = resp.cve_mun
-                          data_request["nom_mun"] = resp.nom_mun
-                          
-                          return t.any(query_analysis, data_request).then(covars => {
+                  if(JSON.parse(data_request.apriori) === true || JSON.parse(data_request.mapa_prob) === true) {
 
 
-                            var new_covars = []
+                    return t.one(queries.basicAnalysis.getAllGridId, data_request).then(data => {
 
-                            var score = 0;
-                            covars.forEach(covar => {
-
-                              if(covar['cells'].includes(parseInt(data_request["cell_id"])) ) {
-
-                                score += parseFloat(covar.score);
-                                new_covars.push(covar)
-                            
-                              }
-
-                            })
-
-                            debug(score)
-                            return new_covars;
-
-
-                          })  
+                      data_request.all_cells = data
+                      return t.any(query_analysis, data_request)
 
                     })
 
+
                   } else {
 
-                    debug("analisis basico")
 
-                    const query1 = pgp.as.format(query_analysis, data_request)
-                    debug(query1)
+                    if( data_request["get_grid_species"] !== false ) {
 
-                    /*                Se genera analisis
-                    */
-                    return t.any(query_analysis, data_request)
+                      debug('--------------------------------------------------')
+
+                      debug("analisis en celda")
+
+                      debug("long: " + data_request.long)
+                      debug("lat: " + data_request.lat)
+
+                      var extra_columns = ""
+                      if(data_request.grid_resolution == "mun"){
+                        extra_columns = ', "CVE_MUN" as cve_mun, "NOM_MUN" as nom_mun '
+                      }
+
+                      data_temp = {
+                        'res_celda_snib'    : data_request.res_celda_snib, 
+                        'res_celda_snib_tb' : data_request.res_grid_tbl,
+                        'long'              : data_request.long,
+                        'lat'               : data_request.lat,
+                        'extra_columns' : extra_columns
+                      }
+
+                      //const query1 = pgp.as.format(queries.basicAnalysis.getGridIdByLatLong, data_temp)
+                      //debug(query1)
+
+                      return t.one(queries.basicAnalysis.getGridIdByLatLong, data_temp).then(resp => {
+
+                            data_request["cell_id"] = resp.gridid
+                            debug("cell_id: " + data_request.cell_id)
+
+                            // valores de la celda seleccionada
+                            data_request["cell_id"] = resp.gridid
+                            data_request["cve_ent"] = resp.cve_ent
+                            data_request["nom_ent"] = resp.nom_ent
+                            data_request["cve_mun"] = resp.cve_mun
+                            data_request["nom_mun"] = resp.nom_mun
+                            
+                            return t.any(query_analysis, data_request).then(covars => {
 
 
+                              var new_covars = []
+
+                              var score = 0;
+                              covars.forEach(covar => {
+
+                                if(covar['cells'].includes(parseInt(data_request["cell_id"])) ) {
+
+                                  score += parseFloat(covar.score);
+                                  new_covars.push(covar)
+                              
+                                }
+
+                              })
+
+                              debug(score)
+                              return new_covars;
+
+
+                            })  
+
+                      })
+
+                    } else {
+
+                      debug("analisis basico")
+
+                      const query1 = pgp.as.format(query_analysis, data_request)
+                      debug(query1)
+
+                      /*                Se genera analisis
+                      */
+                      return t.any(query_analysis, data_request)
+
+
+                    }
                   }
-                }
 
-          })  
+            })  
 
-    }).then(data => {
+      }).then(data => {
 
-            debug(data.length)
+              debug(data.length)
 
-            var query = queries.getTimeValidation.getCellValidation
-            var where_validation = data_request["where_target"]
+              var query = queries.getTimeValidation.getCellValidation
+              var where_validation = data_request["where_target"]
 
-            if(validation_group.length > 0){
-              where_validation = data_request["where_validation"]      
-            }
+              if(validation_group.length > 0){
+                where_validation = data_request["where_validation"]      
+              }
 
 
-            var training_period_condition = 'true'
-            if(data_request['period_config'][1] == '0' && data_request['traffic_light'] != 'green'){
-              training_period_condition = 'c is null'
-            }else if(data_request['period_config'][1] == '1' && data_request['traffic_light'] != 'green'){
-              training_period_condition = 'c = 1'
-            }
+              var training_period_condition = 'true'
+              if(data_request['traffic_light'] == 'red'){
+                training_period_condition = 'c is null'
+              }else if(data_request['traffic_light'] == 'green'){
+                training_period_condition = 'c = 1'
+              }
 
-            const query1 = pgp.as.format(query, {
+              const query1 = pgp.as.format(query, {
 
-              where_target: where_validation.replace('WHERE', ''),
-              grid_resolution: data_request["grid_resolution"],
-              lim_inf: data_request['lim_inf'],
-              lim_sup: data_request['lim_sup'],
-              lim_inf_validation: data_request['lim_inf_validation'],
-              lim_sup_validation: data_request['lim_sup_validation'],
-              training_period_condition: training_period_condition
+                where_target: where_validation.replace('WHERE', ''),
+                grid_resolution: data_request["grid_resolution"],
+                lim_inf: data_request['lim_inf'],
+                lim_sup: data_request['lim_sup'],
+                lim_inf_validation: data_request['lim_inf_validation'],
+                lim_sup_validation: data_request['lim_sup_validation'],
+                training_period_condition: training_period_condition
 
-            })
-            debug('QUERY VALIDATION')
-            debug(query1)
-            debug('QUERY VALIDATION')
+              })
+              debug('QUERY VALIDATION')
+              debug(query1)
+              debug('QUERY VALIDATION')
 
-            return t.any(query, {
+              return t.any(query, {
 
-              where_target: where_validation.replace('WHERE', ''),
-              grid_resolution: data_request["grid_resolution"],
-              lim_inf: data_request['lim_inf'],
-              lim_sup: data_request['lim_sup'],
-              lim_inf_validation: data_request['lim_inf_validation'],
-              lim_sup_validation: data_request['lim_sup_validation'],
-              training_period_condition: training_period_condition
+                where_target: where_validation.replace('WHERE', ''),
+                grid_resolution: data_request["grid_resolution"],
+                lim_inf: data_request['lim_inf'],
+                lim_sup: data_request['lim_sup'],
+                lim_inf_validation: data_request['lim_inf_validation'],
+                lim_sup_validation: data_request['lim_sup_validation'],
+                training_period_condition: training_period_condition
 
-            }).then(validation_data => {
+              }).then(validation_data => {
 
-                var validation_cells = []
-                
-                if(data_request['traffic_light'] == 'green'){
+                  var validation_cells = []
                   
-                  debug('================> VALIDATION PERIOD- BEGIN: Traffic Light GREEN <===================')
-                  debug(validation_data.length + ' initial cells')
+                  if(data_request['traffic_light'] == 'green'){
+                    
+                    debug('================> VALIDATION PERIOD- BEGIN: Traffic Light GREEN <===================')
+                    debug(validation_data.length + ' initial cells')
 
-                  for(var i = 0; i < validation_data.length; i++){
-                    validation_data[i]['pre'] = !validation_data[i]['pre']
+                    for(var i = 0; i < validation_data.length; i++){
+                      validation_data[i]['pre'] = !validation_data[i]['pre']
+                    }
+
+                    debug('================> VALIDATION PERIOD- END:   Traffic Light GREEN <===================')
                   }
 
-                  debug('================> VALIDATION PERIOD- END:   Traffic Light GREEN <===================')
-                }
+                  validation_data.forEach(item => {
 
-                validation_data.forEach(item => {
+                    if(item['pre'] == true){
+                      validation_cells.push(item['gridid'])
+                    }
+          
+                  })
 
-                  if(item['pre'] == true){
-                    validation_cells.push(item['gridid'])
+                  debug('validation cells')
+                  debug(validation_cells)
+                  var score_map = verb_utils.getScoreMap(data)
+                  var time_validation = verb_utils.getTimeValidation(score_map, training_cells, validation_data)
+                  var percentage_occ = []
+                  var decil_cells = []
+                  var info_cell = []
+
+                  var score_array = verb_utils.scoreMapToScoreArray(score_map)
+
+                  var data_freq = verb_utils.processDataForFreqSpecie([data], false)
+
+                  if(data_request.with_data_score_decil === true ){
+
+                    debug("Calcula valores decil")
+
+                    var data_response = {iter: 1, data: data, test_cells: data_request["source_cells"], target_cells: data_request["target_cells"], apriori: data_request.apriori, mapa_prob: data_request.mapa_prob }
+
+                    var decilper_iter = verb_utils.processCellDecilPerIter([data_response], JSON.parse(data_request.apriori), JSON.parse(data_request.mapa_prob), data_request.all_cells, true, data_request['decil_selected']) 
+                    percentage_occ = decilper_iter.result_datapercentage
+                    decil_cells = decilper_iter.decil_cells
+
                   }
-        
-                })
 
-                debug('validation cells')
-                debug(validation_cells)
-                var score_map = verb_utils.getScoreMap(data)
-                var time_validation = verb_utils.getTimeValidation(score_map, training_cells, validation_data)
-                var percentage_occ = []
-                var decil_cells = []
-                var info_cell = []
+                  var data_freq_cell = []
+                  data_freq_cell = verb_utils.processDataForFreqCell(score_array)
 
-                var score_array = verb_utils.scoreMapToScoreArray(score_map)
+                  
 
-                var data_freq = verb_utils.processDataForFreqSpecie([data], false)
-
-                if(data_request.with_data_score_decil === true ){
-
-                  debug("Calcula valores decil")
-
-                  var data_response = {iter: 1, data: data, test_cells: data_request["source_cells"], target_cells: data_request["target_cells"], apriori: data_request.apriori, mapa_prob: data_request.mapa_prob }
-
-                  var decilper_iter = verb_utils.processCellDecilPerIter([data_response], JSON.parse(data_request.apriori), JSON.parse(data_request.mapa_prob), data_request.all_cells, true, data_request['decil_selected']) 
-                  percentage_occ = decilper_iter.result_datapercentage
-                  decil_cells = decilper_iter.decil_cells
-
-                }
-
-                var data_freq_cell = []
-                data_freq_cell = verb_utils.processDataForFreqCell(score_array)
-
-                
-
-                var cell_summary = verb_utils.cellSummary(data, first_cells, training_cells, validation_cells)
+                  var cell_summary = verb_utils.cellSummary(data, first_cells, training_cells, validation_cells, data_request['cases'])
 
 
-                
-                
-                info_cell.push({
-                  cve_ent: data_request.cve_ent,
-                  nom_ent: data_request.nom_ent,
-                  cve_mun: data_request.cve_mun,
-                  nom_mun: data_request.nom_mun
-                })
+                  
+                  
+                  info_cell.push({
+                    cve_ent: data_request.cve_ent,
+                    nom_ent: data_request.nom_ent,
+                    cve_mun: data_request.cve_mun,
+                    nom_mun: data_request.nom_mun
+                  })
 
-                debug('TIME VALIDATION:  ')
-                debug(time_validation)
+                  debug('TIME VALIDATION:  ')
+                  debug(time_validation)
 
-                res.json({
-                  ok: true,
-                  data: data,
-                  data_score_cell: data_request.with_data_score_cell ? score_array : [],
-                  data_freq_cell: data_request.with_data_freq_cell ? data_freq_cell : [],
-                  data_freq: data_request.with_data_freq ? data_freq : [],
-                  percentage_avg: percentage_occ,
-                  decil_cells: decil_cells,
-                  cell_summary: cell_summary,
-                  time_validation: time_validation,
-                  training_cells: training_cells,
-                  validation_data: validation_data,
-                  info_cell: info_cell
-                })
+                  res.json({
+                    ok: true,
+                    data: data,
+                    data_score_cell: data_request.with_data_score_cell ? score_array : [],
+                    data_freq_cell: data_request.with_data_freq_cell ? data_freq_cell : [],
+                    data_freq: data_request.with_data_freq ? data_freq : [],
+                    percentage_avg: percentage_occ,
+                    decil_cells: decil_cells,
+                    cell_summary: cell_summary,
+                    time_validation: time_validation,
+                    training_cells: training_cells,
+                    validation_data: validation_data,
+                    info_cell: info_cell
+                  })
 
-                debug('TIME VALIDATION:  ')
+                  debug('TIME VALIDATION:  ')
+
+              })
 
             })
+            
+        })
 
-          })
-          
       })
 
+
     })
+
 
   }).catch(error => {
     

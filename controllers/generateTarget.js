@@ -62,7 +62,7 @@ exports.generateTarget = function(req, res, next) {
   var lim_sup = verb_utils.getParam(req, 'lim_sup',  year+"-"+month+"-"+day)
   var lim_inf_validation = verb_utils.getParam(req, 'lim_inf_validation', verb_utils.formatDate(new Date("1500-01-01")) )
   var lim_sup_validation = verb_utils.getParam(req, 'lim_sup_validation',  year+"-"+month+"-"+day)
-  var period_config = verb_utils.getParam(req, 'period_config', ['*', '*', '1'])
+  var period_config = ['*', '*', '1']
   var traffic_light = verb_utils.getParam(req, 'traffic_light', 'red')
 
   var cells = verb_utils.getParam(req, 'excluded_cells', [])
@@ -163,154 +163,28 @@ exports.generateTarget = function(req, res, next) {
 
   pool.task(t => {
 
-    debug('MODIFIER', data_request['modifier'])
-    if(data_request['modifier'] == 'cases'){
-      var query  = queries.getTimeValidation.getCountCellFirst
-    } else if (data_request['modifier'] == 'incidence') {
-      var query  = queries.getTimeValidation.getCountCellFirstIncidence
-    } else if(data_request['modifier'] == 'lethality'){
-      var query = queries.getTimeValidation.getCountCellFirstLethality
-    } else if(data_request['modifier'] == 'negativity'){
-      var query = queries.getTimeValidation.getCountCellFirstNegativity
-    } else {
-      var query  = queries.getTimeValidation.getCountCellFirstPrevalence
-    }
+    var query = queries.getGridSpeciesNiche.getCOVID19Cases
 
-    var where_validation = data_request["where_target"]
+    return t.any(query, {
 
-    const query1 = pgp.as.format(query, {
+    lim_inf: data_request['lim_inf'],
+    lim_sup: data_request['lim_sup']
 
-      where_target: where_validation.replace('WHERE', ''),
-      grid_resolution: data_request["grid_resolution"],
-      lim_inf_first: data_request['lim_inf_first'],
-      lim_sup_first: data_request['lim_sup_first']
+    }).then(cases_by_mun => {
 
-    })
-    debug(query1)
-
-    return t.any(query,  {
-      
-      where_target: where_validation.replace('WHERE', ''),
-      grid_resolution: data_request["grid_resolution"],
-      lim_inf_first: data_request['lim_inf_first'],
-      lim_sup_first: data_request['lim_sup_first']
-              
-    }).then(resp => {
-
-      debug('FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD')
-
-      var first = resp
-      
-      var first1s = 0;
-      var first0s = 0;
-      var first_presence = [] 
-      
-      first.forEach(item => {
-
-        item['occ'] = item['occ']*(data_request['modifier'] == 'cases' ? 1 : 1000)
-
-        if(data_request['modifier'] == 'negativity'){
-            
-          first1s += 1;
-          first_presence.push(item)
-
-        } else {
-
-          if(parseFloat(item['occ']) > 0) {
-            first1s += 1;
-
-            first_presence.push(item)
-
-          } else {
-            first0s += 1;
-          }          
-
-        }
-
-      });
-
-      debug('first presence', first_presence.length)
-      debug('0s:', first0s, '1s:', first1s, 'total:', first0s + first1s)
-
-      var bin = data_request['bin']
-      var percentiles = parseInt(data_request['bining_parameter'])
-
-      var limits = []
-      var bin = data_request['bin']
-      //var bin = 7
-      
-      if(data_request['bining'] == 'percentile') {
-
-        for(var i=0; i<=percentiles; i++) {
-
-          var val = parseInt(Ncells*i/percentiles) - parseInt(i/percentiles)
-          //limits.push(parseInt(training[val]['occ']))
-          limits.push(val)
-
-        }
-
-        debug(limits)
-
-        var first_cells = []
-        if(first1s >= parseInt(Ncells / percentiles)){
-
-          for(var i=0; i<Ncells; i++){
-
-            if(limits[bin-1] <= i && i <= limits[bin]) {
-
-              first_cells.push(first[i]['gridid'])
-
-            }
-
-          }
-
-        } else {
-
-          first.forEach(item => {
-
-            if(data_request['modifier'] == 'negativity'){
-
-              first_cells.push(item['gridid']);
-
-            } else {
-
-              if(parseFloat(item['occ']) > 0) {
-                first_cells.push(item['gridid']);
-              }
-
-            } 
-
-          });
-
-        }
-          
-
-      } else {
-
-
-
-      }
-
-      debug('celdas en decil 10 del primer periodo', first_cells.length)
-      first_presence = first_presence.sort(function(a, b) {return  parseFloat(b['occ']) - parseFloat(a['occ']);})
-      debug('celdas con presencia ', first_presence)
-      data_request['first_cells'] = first_cells 
-      data_request['first_occur'] = first_presence
-
-      //debug(data_request['first_cells'].length, data_request['first_cells'])
-      debug('FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD')
+      data_request['cases'] = cases_by_mun
 
       debug('MODIFIER', data_request['modifier'])
       if(data_request['modifier'] == 'cases'){
-        var query = queries.getTimeValidation.getCountCellTrainingTop
+        var query  = queries.getTimeValidation.getCountCellFirst
       } else if (data_request['modifier'] == 'incidence') {
-        var query  = queries.getTimeValidation.getCountCellTrainingIncidence
+        var query  = queries.getTimeValidation.getCountCellFirstIncidence
       } else if(data_request['modifier'] == 'lethality'){
-        var query  = queries.getTimeValidation.getCountCellTrainingLethality
+        var query = queries.getTimeValidation.getCountCellFirstLethality
       } else if(data_request['modifier'] == 'negativity'){
-        var query = queries.getTimeValidation.getCountCellTrainingNegativity
+        var query = queries.getTimeValidation.getCountCellFirstNegativity
       } else {
-        var query  = queries.getTimeValidation.getCountCellTrainingPrevalence
+        var query  = queries.getTimeValidation.getCountCellFirstPrevalence
       }
 
       var where_validation = data_request["where_target"]
@@ -319,350 +193,141 @@ exports.generateTarget = function(req, res, next) {
 
         where_target: where_validation.replace('WHERE', ''),
         grid_resolution: data_request["grid_resolution"],
-        lim_inf: data_request['lim_inf'],
-        lim_sup: data_request['lim_sup'],
+        lim_inf_first: data_request['lim_inf_first'],
+        lim_sup_first: data_request['lim_sup_first']
+
       })
       debug(query1)
 
       return t.any(query,  {
-                where_target: where_validation.replace('WHERE', ''),
-                grid_resolution: data_request["grid_resolution"],
-                lim_inf: data_request['lim_inf'],
-                lim_sup: data_request['lim_sup'],
+        
+        where_target: where_validation.replace('WHERE', ''),
+        grid_resolution: data_request["grid_resolution"],
+        lim_inf_first: data_request['lim_inf_first'],
+        lim_sup_first: data_request['lim_sup_first']
+                
       }).then(resp => {
 
-        debug('TRAINING PERIOD TRAINING PERIOD  TRAINING PERIOD  TRAINING PERIOD  TRAINING PERIOD  TRAINING PERIOD  TRAINING PERIOD ')
-        var training = resp
-        var training_data = []
+        debug('FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD')
 
-        var train1s = 0;
-        var train0s = 0;
-        var training_presence = []
+        var first = resp
+
+        var first_decils = verb_utils.getDecils(first)
+
+        var first1s = 0;
+        var first0s = 0;
+        var first_presence = [] 
         
-        training.forEach(item => {
+        first.forEach(item => {
 
           item['occ'] = item['occ']*(data_request['modifier'] == 'cases' ? 1 : 1000)
 
-          if(data_request['period_config'][0] == '0' && !data_request['first_cells'].includes(item['gridid'])){
-            training_data.push(item)
-          } else if(data_request['period_config'][0] == '1' && data_request['first_cells'].includes(item['gridid'])){
-            training_data.push(item)
-          } else if(data_request['period_config'][0] == '*'){
-            training_data.push(item)
-          }
-
           if(data_request['modifier'] == 'negativity'){
-
-            training_presence.push(item)
-
-          } else {
-
-            if(parseFloat(item['occ']) > 0){
-              training_presence.push(item)
-            }
-
-          }
-
-        });
-
-        training_data.forEach(item => {
-
-          if(data_request['modifier'] == 'negativity'){
-
-            train1s += 1;
+              
+            first1s += 1;
+            first_presence.push(item)
 
           } else {
 
             if(parseFloat(item['occ']) > 0) {
-              train1s += 1;
+              first1s += 1;
+
+              first_presence.push(item)
+
             } else {
-              train0s += 1;
-            }
+              first0s += 1;
+            }          
+
           }
 
         });
 
-        debug('training presence', training_presence.length)
-        debug('0s:', train0s, '1s:', train1s, 'total:', train0s + train1s)
+        debug('first presence', first_presence.length)
+        debug('0s:', first0s, '1s:', first1s, 'total:', first0s + first1s)
 
-        Ncells = train0s + train1s
+        var bin = data_request['bin']
+        var percentiles = parseInt(data_request['bining_parameter'])
 
         var limits = []
         var bin = data_request['bin']
-        var percentiles = parseInt(data_request['bining_parameter'])
-        var width_top = parseInt(2458/percentiles)
-
+        //var bin = 7
+        
         if(data_request['bining'] == 'percentile') {
-          
-          var Ncells1 = Ncells - width_top - 1
 
-          for(var i=0; i<percentiles-1; i++) {
+          for(var i=0; i<=percentiles; i++) {
 
-            var val = parseInt(Ncells1*i/percentiles) - parseInt(i/percentiles)
+            var val = parseInt(Ncells*i/percentiles) - parseInt(i/percentiles)
             //limits.push(parseInt(training[val]['occ']))
             limits.push(val)
 
           }
 
-          limits.push(Ncells1)
-          limits.push(Ncells - 1)
-
           debug(limits)
 
-          var training_cells = []
-          if (train1s >= parseInt(Ncells / percentiles)) {
+          var first_cells = []
+          if(first1s >= parseInt(Ncells / percentiles)){
 
             for(var i=0; i<Ncells; i++){
 
               if(limits[bin-1] <= i && i <= limits[bin]) {
 
-                //debug(training_data[i])
-                training_cells.push(training_data[i]['gridid'])
+                first_cells.push(first[i]['gridid'])
 
               }
+
             }
 
           } else {
 
-            training_data.forEach(item => {
+            first.forEach(item => {
 
               if(data_request['modifier'] == 'negativity'){
 
-                training_cells.push(item['gridid']);
+                first_cells.push(item['gridid']);
 
               } else {
 
                 if(parseFloat(item['occ']) > 0) {
-                  training_cells.push(item['gridid']);
-                } 
+                  first_cells.push(item['gridid']);
+                }
 
-              }
+              } 
 
             });
 
           }
+            
 
         } else {
 
+
+
         }
 
-        var training_cells_aux = training_cells
-        training_cells = []
+        debug('celdas en decil 10 del primer periodo', first_cells.length)
+        first_presence = first_presence.sort(function(a, b) {return  parseFloat(b['occ']) - parseFloat(a['occ']);})
+        debug('celdas con presencia ', first_presence)
+        data_request['first_cells'] = first_cells 
+        data_request['first_occur'] = first_presence
+        data_request['first_decils'] = first_decils
 
-        if(data_request['traffic_light'] == 'green'){
+        //debug(data_request['first_cells'].length, data_request['first_cells'])
+        debug('FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD FIRST PERIOD')
 
-          debug('================> TRAINING PERIOD: Traffic Light GREEN <===================')
-
-          data_request['first_cells'].forEach(first_cell => {
-
-            if(training_cells_aux.includes(first_cell)){
-
-              training_cells.push(first_cells);
-
-            }
-
-          })
-
-        } else if(data_request['traffic_light'] == 'red'){
-
-          debug('================> TRAINING PERIOD: Traffic Light RED  <===================')
-
-          training_cells_aux.forEach(training_cell => {
-
-            if(!data_request['first_cells'].includes(training_cell)){
-
-              training_cells.push(training_cell);
-
-            }
-
-          })          
-
+        debug('MODIFIER', data_request['modifier'])
+        if(data_request['modifier'] == 'cases'){
+          var query = queries.getTimeValidation.getCountCellTrainingTop
+        } else if (data_request['modifier'] == 'incidence') {
+          var query  = queries.getTimeValidation.getCountCellTrainingIncidence
+        } else if(data_request['modifier'] == 'lethality'){
+          var query  = queries.getTimeValidation.getCountCellTrainingLethality
+        } else if(data_request['modifier'] == 'negativity'){
+          var query = queries.getTimeValidation.getCountCellTrainingNegativity
         } else {
-
-          training_cells = training_cells_aux
-
+          var query  = queries.getTimeValidation.getCountCellTrainingPrevalence
         }
 
-        debug('celdas en decil 10 del periodo de entrenamiento', training_cells.length)
-        data_request['training_cells'] = training_cells
-        training_presence = training_presence.sort(function(a, b) {return  parseFloat(b['occ']) - parseFloat(a['occ']);})
-        debug('celdas con presencia ', training_presence)
-        data_request['training_occur'] = training_presence
-
-        //debug(data_request['training_cells'].length, data_request['training_cells'])
-        debug('TRAINING PERIOD TRAINING PERIOD  TRAINING PERIOD  TRAINING PERIOD  TRAINING PERIOD  TRAINING PERIOD  TRAINING PERIOD ')
-        
-        var query = queries.subaoi.getCountriesRegion
-
-        /*
-          Se obtiene filtro para target 
-        */
-        return t.one(query, data_request).then(resp => {
-
-          data_request["gid"] = resp.gid
-          data_request["where_filter"] = verb_utils.getWhereClauseFilter(fosil, date, lim_inf, lim_sup, cells, data_request["res_celda_snib"], data_request["region"], data_request["gid"])
-          if(!memory){
-            data_request["where_filter"] += ' AND gridid_' + grid_resolution + 'km = ANY(ARRAY[' + training_cells.toString() + ']::text[])'
-            data_request['training_cells_array'] = 'ARRAY[' + training_cells.toString() + ']::integer[]';
-          }
-          //debug(data_request["where_filter"])
-          data_request["training"] = 'ARRAY[' + training_cells.toString() + ']::integer[]'
-        }).then(resp=> {
-
-              data_request['source_cells'] = []
-              data_request['total_cells'] = []
-
-              /*
-                Se obtiene el numero de celdas totales
-              */
-              return t.one(queries.basicAnalysis.getN, {
-
-                  grid_resolution: data_request['grid_resolution'],
-                  footprint_region: data_request['region']
-              
-              }).then(data => {
-
-
-                  data_request['N'] = data['n']
-                  data_request["alpha"] = data_request["alpha"] !== undefined ? data_request["alpha"] : 1.0/data_request['N']
-
-                  debug("N:" + data_request['N'])
-
-                 // var query_analysis = queries.countsTaxonGroups.getCountsBase                  
-                  if(data_request['target_group'][0]['value'] === 'COVID-19 CONFIRMADO'){
-                    var query_analysis = queries.countsTaxonGroups.getCountsBaseOdds
-                  }else{
-                    var query_analysis = queries.getTimeValidation.getCountsBase
-                  }
-
-                  data_request['groups'] = verb_utils.getCovarGroupQueries(queries, data_request, covars_groups)
-
-                  debug('grupos covariables ' + covars_groups)
-
-                  data_request["cell_id"] = 0
-
-                  if(JSON.parse(data_request.apriori) === true || JSON.parse(data_request.mapa_prob) === true) {
-
-
-                    return t.one(queries.basicAnalysis.getAllGridId, data_request).then(data => {
-
-                      data_request.all_cells = data
-                      return t.any(query_analysis, data_request)
-
-                    })
-
-
-                  } else {
-
-
-                    if( data_request["get_grid_species"] !== false ) {
-
-                      debug('--------------------------------------------------')
-
-                      debug("analisis en celda")
-
-                      debug("long: " + data_request.long)
-                      debug("lat: " + data_request.lat)
-
-                      var extra_columns = ""
-                      if(data_request.grid_resolution == "mun"){
-                        extra_columns = ', "CVE_MUN" as cve_mun, "NOM_MUN" as nom_mun '
-                      }
-
-                      data_temp = {
-                        'res_celda_snib'    : data_request.res_celda_snib, 
-                        'res_celda_snib_tb' : data_request.res_grid_tbl,
-                        'long'              : data_request.long,
-                        'lat'               : data_request.lat,
-                        'extra_columns' : extra_columns
-                      }
-
-                      //const query1 = pgp.as.format(queries.basicAnalysis.getGridIdByLatLong, data_temp)
-                      //debug(query1)
-
-                      return t.one(queries.basicAnalysis.getGridIdByLatLong, data_temp).then(resp => {
-
-                            data_request["cell_id"] = resp.gridid
-                            debug("cell_id: " + data_request.cell_id)
-
-                            // valores de la celda seleccionada
-                            data_request["cell_id"] = resp.gridid
-                            data_request["cve_ent"] = resp.cve_ent
-                            data_request["nom_ent"] = resp.nom_ent
-                            data_request["cve_mun"] = resp.cve_mun
-                            data_request["nom_mun"] = resp.nom_mun
-                            
-                            return t.any(query_analysis, data_request).then(covars => {
-
-
-                              var new_covars = []
-
-                              var score = 0;
-                              covars.forEach(covar => {
-
-                                if(covar['cells'].includes(parseInt(data_request["cell_id"])) ) {
-
-                                  score += parseFloat(covar.score);
-                                  new_covars.push(covar)
-                              
-                                }
-
-                              })
-
-                              debug(score)
-                              return new_covars;
-
-
-                            })  
-
-                      })
-
-                    } else {
-
-                      debug("analisis basico")
-
-                      const query1 = pgp.as.format(query_analysis, data_request)
-                      debug(query1)
-
-                      /*                Se genera analisis
-                      */
-                      return t.any(query_analysis, data_request)
-
-
-                    }
-                  }
-
-            })
-
-          })
-
-        })
-
-    }).then(data => {
-
-      var training_cells = data_request['training_cells']
-      var first_cells = data_request['first_cells'] 
-
-       debug(data.length)
-       //debug(data)
-
-       debug('MODIFIER', data_request['modifier'])
-       if(data_request['modifier'] == 'cases'){
-          var query = queries.getTimeValidation.getCountCellValidationTop
-       } else if (data_request['modifier'] == 'incidence') {
-          var query  = queries.getTimeValidation.getCountCellValidationIncidence
-       } else if(data_request['modifier'] == 'lethality'){
-          var query  = queries.getTimeValidation.getCountCellValidationLethality
-       } else if(data_request['modifier'] == 'negativity'){
-          var query = queries.getTimeValidation.getCountCellValidationNegativity
-       } else {
-          var query  = queries.getTimeValidation.getCountCellValidationPrevalence
-       }
         var where_validation = data_request["where_target"]
-
-        if(validation_group.length > 0){
-          where_validation = data_request["where_validation"]      
-        }
 
         const query1 = pgp.as.format(query, {
 
@@ -670,267 +335,638 @@ exports.generateTarget = function(req, res, next) {
           grid_resolution: data_request["grid_resolution"],
           lim_inf: data_request['lim_inf'],
           lim_sup: data_request['lim_sup'],
-          lim_inf_validation: data_request['lim_inf_validation'],
-          lim_sup_validation: data_request['lim_sup_validation'],
-          first_cells : data_request['first_cells'].length ==  0 ? '' : data_request['first_cells'],
-          training_cells : data_request['training_cells'].length == 0 ? '' : data_request['training_cells']
-
         })
         debug(query1)
 
-        return t.any(query, {
+        return t.any(query,  {
+                  where_target: where_validation.replace('WHERE', ''),
+                  grid_resolution: data_request["grid_resolution"],
+                  lim_inf: data_request['lim_inf'],
+                  lim_sup: data_request['lim_sup'],
+        }).then(resp => {
 
-          where_target: where_validation.replace('WHERE', ''),
-          grid_resolution: data_request["grid_resolution"],
-          lim_inf: data_request['lim_inf'],
-          lim_sup: data_request['lim_sup'],
-          lim_inf_validation: data_request['lim_inf_validation'],
-          lim_sup_validation: data_request['lim_sup_validation'],
-          first_cells : data_request['first_cells'].length ==  0 ? '' : data_request['first_cells'],
-          training_cells : data_request['training_cells'].length == 0 ? '' : data_request['training_cells']
+          debug('TRAINING PERIOD TRAINING PERIOD  TRAINING PERIOD  TRAINING PERIOD  TRAINING PERIOD  TRAINING PERIOD  TRAINING PERIOD ')
+          var training = resp
+          var training_data = []
 
-        }).then(validation_data => {
+          var train1s = 0;
+          var train0s = 0;
+          var training_presence = []
 
+          var training_decils = verb_utils.getDecils(training)
+          
+          training.forEach(item => {
 
-            debug('VALIDATION PERIOD VALIDATION PERIOD  VALIDATION PERIOD  VALIDATION PERIOD  VALIDATION PERIOD  VALIDATION PERIOD ')
+            item['occ'] = item['occ']*(data_request['modifier'] == 'cases' ? 1 : 1000)
 
-            var validation = validation_data
-            var validation_data = []
+            /*if(data_request['period_config'][0] == '0' && !data_request['first_cells'].includes(item['gridid'])){
+              training_data.push(item)
+            } else if(data_request['period_config'][0] == '1' && data_request['first_cells'].includes(item['gridid'])){
+              training_data.push(item)
+            } else if(data_request['period_config'][0] == '*'){
+              training_data.push(item)
+            }*/
 
-            var val1s = 0;
-            var val0s = 0;
-            var validation_presence = []
+            training_data.push(item)
+
+            if(data_request['modifier'] == 'negativity'){
+
+              training_presence.push(item)
+
+            } else {
+
+              if(parseFloat(item['occ']) > 0){
+                training_presence.push(item)
+              }
+
+            }
+
+          });
+
+          training_data.forEach(item => {
+
+            if(data_request['modifier'] == 'negativity'){
+
+              train1s += 1;
+
+            } else {
+
+              if(parseFloat(item['occ']) > 0) {
+                train1s += 1;
+              } else {
+                train0s += 1;
+              }
+            }
+
+          });
+
+          debug('training presence', training_presence.length)
+          debug('0s:', train0s, '1s:', train1s, 'total:', train0s + train1s)
+
+          Ncells = train0s + train1s
+
+          var limits = []
+          var bin = data_request['bin']
+          var percentiles = parseInt(data_request['bining_parameter'])
+          var width_top = parseInt(2458/percentiles)
+
+          if(data_request['bining'] == 'percentile') {
             
-            validation.forEach(item => {
+            var Ncells1 = Ncells - width_top - 1
 
-              item['occ'] = item['occ']*(data_request['modifier'] == 'cases' ? 1 : 1000)
+            for(var i=0; i<percentiles-1; i++) {
 
-              if(data_request['period_config'][1] == '0' && !data_request['first_cells'].includes(item['gridid']) 
-                && !data_request['training_cells'].includes(item['gridid'])){
+              var val = parseInt(Ncells1*i/percentiles) - parseInt(i/percentiles)
+              //limits.push(parseInt(training[val]['occ']))
+              limits.push(val)
 
-                validation_data.push(item)
-              } else if(data_request['period_config'][1] == '1' && data_request['training_cells'].includes(item['gridid'])) {
+            }
 
-                validation_data.push(item)
-              } else if(data_request['period_config'][1] == '*'){
-                validation_data.push(item)
-              }
+            limits.push(Ncells1)
+            limits.push(Ncells - 1)
 
-              if(data_request['modifier'] == 'negativity'){
+            debug(limits)
 
-                validation_presence.push(item)
+            var training_cells = []
+            if (train1s >= parseInt(Ncells / percentiles)) {
 
-              } else {
+              for(var i=0; i<Ncells; i++){
 
-                if(parseFloat(item['occ']) > 0){
-                  validation_presence.push(item)
+                if(limits[bin-1] <= i && i <= limits[bin]) {
+
+                  //debug(training_data[i])
+                  training_cells.push(training_data[i]['gridid'])
+
                 }
-
               }
 
-            });
+            } else {
 
-            validation_data.forEach(item => {
+              training_data.forEach(item => {
 
-              if(data_request['modifier'] == 'negativity'){
+                if(data_request['modifier'] == 'negativity'){
 
-                val1s += 1;
+                  training_cells.push(item['gridid']);
 
-              } else {
-
-                if(parseFloat(item['occ']) > 0) {
-                  val1s += 1;
                 } else {
-                  val0s += 1;
+
+                  if(parseFloat(item['occ']) > 0) {
+                    training_cells.push(item['gridid']);
+                  } 
+
                 }
 
-              }
+              });
 
-            });
+            }
 
-            debug('validation presence', validation_presence.length)
-            debug('0s:', val0s, '1s:', val1s, 'total:', val0s + val1s)
+          } else {
 
-            Ncells = val0s + val1s
+          }
 
-            //debug('validation cells')
-            //debug(validation)
-            var limits = []
-            var bin = data_request['bin']
-            var percentiles = parseInt(data_request['bining_parameter'])
-            var width_top = parseInt(2458/percentiles)
+          var training_cells_aux = training_cells
+          training_cells = []
 
-            if(data_request['bining'] == 'percentile') {
+          if(data_request['traffic_light'] == 'green'){
 
-              var Ncells1 = Ncells - width_top - 1
+            debug('================> TRAINING PERIOD: Traffic Light GREEN <===================')
 
-              for(var i=0; i<percentiles-1; i++) {
+            data_request['first_cells'].forEach(first_cell => {
 
-                var val = parseInt(Ncells*i/percentiles) - parseInt(i/percentiles)
-                //limits.push(parseInt(training[val]['occ']))
-                limits.push(val)
+              if(!training_cells_aux.includes(first_cell)){
+
+                training_cells.push(first_cells);
 
               }
 
-              limits.push(Ncells1)
-              limits.push(Ncells - 1)
+            })
 
-              debug(limits)
+          } else if(data_request['traffic_light'] == 'red'){
 
-              var validation_cells = []
+            debug('================> TRAINING PERIOD: Traffic Light RED  <===================')
 
-              if(val1s >= parseInt(Ncells/percentiles)){
+            training_cells_aux.forEach(training_cell => {
 
-                for(var i=0; i<Ncells; i++){
+              if(!data_request['first_cells'].includes(training_cell)){
 
-                  if(limits[bin-1] <= i && i <= limits[bin]) {
+                training_cells.push(training_cell);
 
-                    //debug(validation[i])
-                    validation_cells.push(validation_data[i]['gridid'])
+              }
 
+            })          
+
+          } else {
+
+            training_cells = training_cells_aux
+
+          }
+
+          debug('celdas en decil 10 del periodo de entrenamiento', training_cells.length)
+          data_request['training_cells'] = training_cells
+          training_presence = training_presence.sort(function(a, b) {return  parseFloat(b['occ']) - parseFloat(a['occ']);})
+          debug('celdas con presencia ', training_presence)
+          data_request['training_occur'] = training_presence
+          data_request['top_decil_training'] = training_cells_aux
+          data_request['training_decils'] = training_decils
+
+          //debug(data_request['training_cells'].length, data_request['training_cells'])
+          debug('TRAINING PERIOD TRAINING PERIOD  TRAINING PERIOD  TRAINING PERIOD  TRAINING PERIOD  TRAINING PERIOD  TRAINING PERIOD ')
+          
+          var query = queries.subaoi.getCountriesRegion
+
+          /*
+            Se obtiene filtro para target 
+          */
+          return t.one(query, data_request).then(resp => {
+
+            data_request["gid"] = resp.gid
+            data_request["where_filter"] = verb_utils.getWhereClauseFilter(fosil, date, lim_inf, lim_sup, cells, data_request["res_celda_snib"], data_request["region"], data_request["gid"])
+            if(!memory){
+              data_request["where_filter"] += ' AND gridid_' + grid_resolution + 'km = ANY(ARRAY[' + training_cells.toString() + ']::text[])'
+              data_request['training_cells_array'] = 'ARRAY[' + training_cells.toString() + ']::integer[]';
+            }
+            //debug(data_request["where_filter"])
+            data_request["training"] = 'ARRAY[' + training_cells.toString() + ']::integer[]'
+          }).then(resp=> {
+
+                data_request['source_cells'] = []
+                data_request['total_cells'] = []
+
+                /*
+                  Se obtiene el numero de celdas totales
+                */
+                return t.one(queries.basicAnalysis.getN, {
+
+                    grid_resolution: data_request['grid_resolution'],
+                    footprint_region: data_request['region']
+                
+                }).then(data => {
+
+
+                    data_request['N'] = data['n']
+                    data_request["alpha"] = data_request["alpha"] !== undefined ? data_request["alpha"] : 1.0/data_request['N']
+
+                    debug("N:" + data_request['N'])
+
+                   // var query_analysis = queries.countsTaxonGroups.getCountsBase                  
+                    if(data_request['target_group'][0]['value'] === 'COVID-19 CONFIRMADO'){
+                      var query_analysis = queries.countsTaxonGroups.getCountsBaseOdds
+                    }else{
+                      var query_analysis = queries.getTimeValidation.getCountsBase
+                    }
+
+                    data_request['groups'] = verb_utils.getCovarGroupQueries(queries, data_request, covars_groups)
+
+                    debug('grupos covariables ' + covars_groups)
+
+                    data_request["cell_id"] = 0
+
+                    if(JSON.parse(data_request.apriori) === true || JSON.parse(data_request.mapa_prob) === true) {
+
+
+                      return t.one(queries.basicAnalysis.getAllGridId, data_request).then(data => {
+
+                        data_request.all_cells = data
+                        return t.any(query_analysis, data_request)
+
+                      })
+
+
+                    } else {
+
+
+                      if( data_request["get_grid_species"] !== false ) {
+
+                        debug('--------------------------------------------------')
+
+                        debug("analisis en celda")
+
+                        debug("long: " + data_request.long)
+                        debug("lat: " + data_request.lat)
+
+                        var extra_columns = ""
+                        if(data_request.grid_resolution == "mun"){
+                          extra_columns = ', "CVE_MUN" as cve_mun, "NOM_MUN" as nom_mun '
+                        }
+
+                        data_temp = {
+                          'res_celda_snib'    : data_request.res_celda_snib, 
+                          'res_celda_snib_tb' : data_request.res_grid_tbl,
+                          'long'              : data_request.long,
+                          'lat'               : data_request.lat,
+                          'extra_columns' : extra_columns
+                        }
+
+                        //const query1 = pgp.as.format(queries.basicAnalysis.getGridIdByLatLong, data_temp)
+                        //debug(query1)
+
+                        return t.one(queries.basicAnalysis.getGridIdByLatLong, data_temp).then(resp => {
+
+                              data_request["cell_id"] = resp.gridid
+                              debug("cell_id: " + data_request.cell_id)
+
+                              // valores de la celda seleccionada
+                              data_request["cell_id"] = resp.gridid
+                              data_request["cve_ent"] = resp.cve_ent
+                              data_request["nom_ent"] = resp.nom_ent
+                              data_request["cve_mun"] = resp.cve_mun
+                              data_request["nom_mun"] = resp.nom_mun
+                              
+                              return t.any(query_analysis, data_request).then(covars => {
+
+
+                                var new_covars = []
+
+                                var score = 0;
+                                covars.forEach(covar => {
+
+                                  if(covar['cells'].includes(parseInt(data_request["cell_id"])) ) {
+
+                                    score += parseFloat(covar.score);
+                                    new_covars.push(covar)
+                                
+                                  }
+
+                                })
+
+                                debug(score)
+                                return new_covars;
+
+
+                              })  
+
+                        })
+
+                      } else {
+
+                        debug("analisis basico")
+
+                        const query1 = pgp.as.format(query_analysis, data_request)
+                        debug(query1)
+
+                        /*                Se genera analisis
+                        */
+                        return t.any(query_analysis, data_request)
+
+
+                      }
+                    }
+
+              })
+
+            })
+
+          })
+
+      }).then(data => {
+
+        var training_cells = data_request['training_cells']
+        var first_cells = data_request['first_cells'] 
+
+         debug(data.length)
+         //debug(data)
+
+         debug('MODIFIER', data_request['modifier'])
+         if(data_request['modifier'] == 'cases'){
+            var query = queries.getTimeValidation.getCountCellValidationTop
+         } else if (data_request['modifier'] == 'incidence') {
+            var query  = queries.getTimeValidation.getCountCellValidationIncidence
+         } else if(data_request['modifier'] == 'lethality'){
+            var query  = queries.getTimeValidation.getCountCellValidationLethality
+         } else if(data_request['modifier'] == 'negativity'){
+            var query = queries.getTimeValidation.getCountCellValidationNegativity
+         } else {
+            var query  = queries.getTimeValidation.getCountCellValidationPrevalence
+         }
+          var where_validation = data_request["where_target"]
+
+          if(validation_group.length > 0){
+            where_validation = data_request["where_validation"]      
+          }
+
+          const query1 = pgp.as.format(query, {
+
+            where_target: where_validation.replace('WHERE', ''),
+            grid_resolution: data_request["grid_resolution"],
+            lim_inf: data_request['lim_inf'],
+            lim_sup: data_request['lim_sup'],
+            lim_inf_validation: data_request['lim_inf_validation'],
+            lim_sup_validation: data_request['lim_sup_validation'],
+            first_cells : data_request['first_cells'].length ==  0 ? '' : data_request['first_cells'],
+            training_cells : data_request['training_cells'].length == 0 ? '' : data_request['training_cells']
+
+          })
+          debug(query1)
+
+          return t.any(query, {
+
+            where_target: where_validation.replace('WHERE', ''),
+            grid_resolution: data_request["grid_resolution"],
+            lim_inf: data_request['lim_inf'],
+            lim_sup: data_request['lim_sup'],
+            lim_inf_validation: data_request['lim_inf_validation'],
+            lim_sup_validation: data_request['lim_sup_validation'],
+            first_cells : data_request['first_cells'].length ==  0 ? '' : data_request['first_cells'],
+            training_cells : data_request['training_cells'].length == 0 ? '' : data_request['training_cells']
+
+          }).then(validation_data => {
+
+
+              debug('VALIDATION PERIOD VALIDATION PERIOD  VALIDATION PERIOD  VALIDATION PERIOD  VALIDATION PERIOD  VALIDATION PERIOD ')
+
+              var validation = validation_data
+              var validation_data = []
+
+              var validation_decils = verb_utils.getDecils(validation)
+
+              var val1s = 0;
+              var val0s = 0;
+              var validation_presence = []
+              
+              validation.forEach(item => {
+
+                item['occ'] = item['occ']*(data_request['modifier'] == 'cases' ? 1 : 1000)
+
+               /* if(data_request['traffic_light'] == 'green' && data_request['training_cells'].includes(item['gridid'])){
+
+                  validation_data.push(item)
+                } else if(data_request['traffic_light'] == 'red' && !data_request['training_cells'].includes(item['gridid'])) {
+
+                  validation_data.push(item)
+                } else if(data_request['period_config'][1] == '*'){
+                  validation_data.push(item)
+                }*/
+
+
+                if(data_request['modifier'] == 'negativity'){
+
+                  validation_presence.push(item)
+
+                } else {
+
+                  if(parseFloat(item['occ']) > 0){
+                    validation_presence.push(item)
                   }
+
+                }
+
+              });
+
+              validation_data = validation
+
+              validation_data.forEach(item => {
+
+                if(data_request['modifier'] == 'negativity'){
+
+                  val1s += 1;
+
+                } else {
+
+                  if(parseFloat(item['occ']) > 0) {
+                    val1s += 1;
+                  } else {
+                    val0s += 1;
+                  }
+
+                }
+
+              });
+
+              debug('validation presence', validation_presence.length)
+              debug('0s:', val0s, '1s:', val1s, 'total:', val0s + val1s)
+
+              Ncells = val0s + val1s
+
+              //debug('validation cells')
+              //debug(validation)
+              var limits = []
+              var bin = data_request['bin']
+              var percentiles = parseInt(data_request['bining_parameter'])
+              var width_top = parseInt(2458/percentiles)
+
+              if(data_request['bining'] == 'percentile') {
+
+                var Ncells1 = Ncells - width_top - 1
+
+                for(var i=0; i<percentiles-1; i++) {
+
+                  var val = parseInt(Ncells*i/percentiles) - parseInt(i/percentiles)
+                  //limits.push(parseInt(training[val]['occ']))
+                  limits.push(val)
+
+                }
+
+                limits.push(Ncells1)
+                limits.push(Ncells - 1)
+
+                debug(limits)
+
+                var validation_cells = []
+
+                if(val1s >= parseInt(Ncells/percentiles)){
+
+                  for(var i=0; i<Ncells; i++){
+
+                    if(limits[bin-1] <= i && i <= limits[bin]) {
+
+                      //debug(validation[i])
+                      validation_cells.push(validation_data[i]['gridid'])
+
+                    }
+                  }
+
+                } else {
+
+                  validation_data.forEach(item => {
+
+                    if(data_request['modifier'] == 'negativity'){
+                      
+                      validation_cells.push(item['gridid']);
+                    
+                    } else {
+
+                      if(parseFloat(item['occ']) > 0) {
+                        validation_cells.push(item['gridid']);
+                      }
+
+                    }
+
+                  });                
+
                 }
 
               } else {
+
+
+
+              }
+
+              var validation_cells_aux = validation_cells
+              validation_cells = []
+              
+              debug(data_request['top_decil_training'].length)
+              debug(validation_cells_aux.length)
+              
+              if(data_request['traffic_light'] == 'green'){
+
+                debug('================> VALIDATION PERIOD: Traffic Light GREEN <===================')
+
 
                 validation_data.forEach(item => {
 
-                  if(data_request['modifier'] == 'negativity'){
-                    
-                    validation_cells.push(item['gridid']);
-                  
-                  } else {
+                  if(data_request['top_decil_training'].includes(item['gridid']) && 
+                      !validation_cells_aux.includes(item['gridid'])){
 
-                    if(parseFloat(item['occ']) > 0) {
-                      validation_cells.push(item['gridid']);
-                    }
+                    validation_cells.push(item['gridid'])
 
                   }
 
-                });                
+                })
+
+              
+              } else if(data_request['traffic_light'] == 'red'){
+
+                debug('================> VALIDATION PERIOD: Traffic Light RED   <===================')
+
+                validation_data.forEach(item => {
+
+                  if(!data_request['top_decil_training'].includes(item['gridid']) && 
+                      validation_cells_aux.includes(item['gridid'])){
+
+                    validation_cells.push(item['gridid'])
+
+                  }
+
+                })
+
+              } else {
+
+                validation_cells = validation_cells_aux
 
               }
 
-            } else {
+
+              debug('celdas en decil 10 del periodo de validación ', validation_cells.length)
+              data_request['validation_cells'] = validation_cells
+
+              validation_presence = validation_presence.sort(function(a, b) {return  parseFloat(b['occ']) - parseFloat(a['occ']);})
+              debug('celdas con presencia ', validation_presence)
+              data_request['validation_occur'] = validation_presence
+              data_request['validation_decils'] = validation_decils
+
+              debug('VALIDATION PERIOD VALIDATION PERIOD  VALIDATION PERIOD  VALIDATION PERIOD  VALIDATION PERIOD  VALIDATION PERIOD ')
+
+              score_map = verb_utils.getScoreMap(data)
+              time_validation = verb_utils.getCountTimeValidation(score_map, training_cells, validation_cells)
+              var percentage_occ = []
+              var decil_cells = []
+              var info_cell = []
+
+              var score_array = verb_utils.scoreMapToScoreArray(score_map)
+              //debug(time_validation)
+
+              var data_freq = verb_utils.processDataForFreqSpecie([data], false)
+
+              if(data_request.with_data_score_decil === true ){
+
+                debug("Calcula valores decil")
+
+                var data_response = {iter: 1, data: data, test_cells: data_request["source_cells"], target_cells: data_request["target_cells"], apriori: data_request.apriori, mapa_prob: data_request.mapa_prob }
+
+                var decilper_iter = verb_utils.processCellDecilPerIter([data_response], JSON.parse(data_request.apriori), JSON.parse(data_request.mapa_prob), data_request.all_cells, true, data_request['decil_selected']) 
+                percentage_occ = decilper_iter.result_datapercentage
+                decil_cells = decilper_iter.decil_cells
+
+              }
+
+              var data_freq_cell = []
+              data_freq_cell = verb_utils.processDataForFreqCell(score_array)
+
+              debug('length first_cells     :', data_request['first_cells'].length)
+              debug('length training_cells  :', data_request['training_cells'].length)
+              debug('length validation_cells:', data_request['validation_cells'].length)
+
+              var first_presence = data_request['first_occur']
+              var training_presence = data_request['training_occur']
+              var validation_presence = data_request['validation_occur']
+
+              var cell_summary = verb_utils.cellCountSummary(data, first_cells, training_cells, 
+                                                    first_presence, validation_cells, training_presence, validation_presence,
+                                                    data_request['first_decils'], data_request['training_decils'], data_request['validation_decils'], 
+                                                    data_request['cases'])
 
 
-
-            }
-
-            var validation_cells_aux = validation_cells
-            validation_cells = []
-            if(data_request['traffic_light'] == 'green'){
-
-              debug('================> VALIDATION PERIOD: Traffic Light GREEN <===================')
-
-              data_request['first_cells'].forEach(first_cell => {
-
-                if(data_request['training_cells'].includes(first_cell) && 
-                    !validation_cells_aux.includes(first_cell)){
-
-                  validation_cells.push(first_cell)
-
-                }
-
+              info_cell.push({
+                cve_ent: data_request.cve_ent,
+                nom_ent: data_request.nom_ent,
+                cve_mun: data_request.cve_mun,
+                nom_mun: data_request.nom_mun
               })
 
-            
-            } else if(data_request['traffic_light'] == 'red'){
+              debug(time_validation)
 
-              debug('================> VALIDATION PERIOD: Traffic Light RED   <===================')
-
-              validation_cells_aux.forEach(validation_cell => {
-
-                if(!data_request['first_cells'].includes(validation_cell) && 
-                    !data_request['training_cells'].includes(validation_cell)){
-
-                  validation_cells.push(validation_cell)
-
-                }
-
+              res.json({
+                ok: true,
+                data: data,
+                data_score_cell: data_request.with_data_score_cell ? score_array : [],
+                data_freq_cell: data_request.with_data_freq_cell ? data_freq_cell : [],
+                data_freq: data_request.with_data_freq ? data_freq : [],
+                percentage_avg: percentage_occ,
+                decil_cells: decil_cells,
+                cell_summary: cell_summary,
+                time_validation: time_validation,
+                training_cells: training_cells,
+                validation_data: validation_data,
+                info_cell: info_cell
               })
 
-            } else {
+          })
 
-              validation_cells = validation_cells_aux
-
-            }
+      })      
 
 
-            debug('celdas en decil 10 del periodo de validación ', validation_cells.length)
-            data_request['validation_cells'] = validation_cells
+    })
 
-            validation_presence = validation_presence.sort(function(a, b) {return  parseFloat(b['occ']) - parseFloat(a['occ']);})
-            debug('celdas con presencia ', validation_presence)
-            data_request['validation_occur'] = validation_presence
-
-            debug('VALIDATION PERIOD VALIDATION PERIOD  VALIDATION PERIOD  VALIDATION PERIOD  VALIDATION PERIOD  VALIDATION PERIOD ')
-
-            score_map = verb_utils.getScoreMap(data)
-            time_validation = verb_utils.getCountTimeValidation(score_map, training_cells, validation_cells)
-            var percentage_occ = []
-            var decil_cells = []
-            var info_cell = []
-
-            var score_array = verb_utils.scoreMapToScoreArray(score_map)
-            //debug(time_validation)
-
-            var data_freq = verb_utils.processDataForFreqSpecie([data], false)
-
-            if(data_request.with_data_score_decil === true ){
-
-              debug("Calcula valores decil")
-
-              var data_response = {iter: 1, data: data, test_cells: data_request["source_cells"], target_cells: data_request["target_cells"], apriori: data_request.apriori, mapa_prob: data_request.mapa_prob }
-
-              var decilper_iter = verb_utils.processCellDecilPerIter([data_response], JSON.parse(data_request.apriori), JSON.parse(data_request.mapa_prob), data_request.all_cells, true, data_request['decil_selected']) 
-              percentage_occ = decilper_iter.result_datapercentage
-              decil_cells = decilper_iter.decil_cells
-
-            }
-
-            var data_freq_cell = []
-            data_freq_cell = verb_utils.processDataForFreqCell(score_array)
-
-            debug('length first_cells     :', data_request['first_cells'].length)
-            debug('length training_cells  :', data_request['training_cells'].length)
-            debug('length validation_cells:', data_request['validation_cells'].length)
-
-            var first_presence = data_request['first_occur']
-            var training_presence = data_request['training_occur']
-            var validation_presence = data_request['validation_occur']
-
-            var cell_summary = verb_utils.cellCountSummary(data, first_cells, training_cells, 
-                                                  first_presence, validation_cells, training_presence, validation_presence)
-
-
-            info_cell.push({
-              cve_ent: data_request.cve_ent,
-              nom_ent: data_request.nom_ent,
-              cve_mun: data_request.cve_mun,
-              nom_mun: data_request.nom_mun
-            })
-
-            debug(time_validation)
-
-            res.json({
-              ok: true,
-              data: data,
-              data_score_cell: data_request.with_data_score_cell ? score_array : [],
-              data_freq_cell: data_request.with_data_freq_cell ? data_freq_cell : [],
-              data_freq: data_request.with_data_freq ? data_freq : [],
-              percentage_avg: percentage_occ,
-              decil_cells: decil_cells,
-              cell_summary: cell_summary,
-              time_validation: time_validation,
-              training_cells: training_cells,
-              validation_data: validation_data,
-              info_cell: info_cell
-            })
-
-        })
-
-    })      
 
   }).catch(error => {
     
