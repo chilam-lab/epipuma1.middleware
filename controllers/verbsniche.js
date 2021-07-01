@@ -2592,7 +2592,9 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
   var target_taxons     = getParam(req, 'target_taxons')
   var sfecha            = false // getParam(req, 'sfecha', false)
   // var sfosil            = getParam(req, 'sfosil', false)
-  var liminf            = getParam(req, 'liminf', verb_utils.formatDate(new Date("1500-01-01")) )
+  var liminf_first      = getParam(req, 'liminf_first', verb_utils.formatDate(new Date("1500-01-01")) )
+  var liminf            = getParam(req, 'liminf', verb_utils.formatDate(new Date("2000-01-01")) )
+  var limsup_first      = getParam(req, 'limsup_first',  liminf)
   var limsup            = getParam(req, 'limsup',  year+"-"+month+"-"+day)
   var grid_res          = getParam(req, 'grid_res', default_resolution)
   var region            = getParam(req, 'region', 1)
@@ -2621,8 +2623,8 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
                 + " and mescolecta <> 99 and mescolecta <> -1"
                 + " and aniocolecta <> 9999 and aniocolecta <> -1)"
 
-  where_filter_first = "(make_date(aniocolecta, mescolecta, diacolecta) < "
-                + "'" + liminf + "'" 
+  where_filter_first = "(make_date(aniocolecta, mescolecta, diacolecta) >= '" + liminf_first + "'" 
+                + " and (make_date(aniocolecta, mescolecta, diacolecta) < '" + limsup_first + "'" 
                 + " and diacolecta <> 99 and diacolecta <> -1"
                 + " and mescolecta <> 99 and mescolecta <> -1"
                 + " and aniocolecta <> 9999 and aniocolecta <> -1) "
