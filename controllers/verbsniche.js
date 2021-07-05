@@ -2720,6 +2720,19 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
 
           })
 
+          var c = 1
+
+          cases_by_mun.forEach(item => {
+
+            c += 1
+
+            if(processed_data[item['gridid']] == null){
+
+              processed_data[item['gridid']] = {'gridid':item['gridid'], 'fp': 0, 'tp': 0, 'occ': 0, 'target': false, 'population': item['population']}
+
+            }
+
+          })
 
           processed_data = Object.values(processed_data)
 
@@ -2752,12 +2765,16 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
 
 
           var cases_map = {}
+          var population_map = {}
 
           cases_by_mun.forEach(item => {
 
             cases_map[item['gridid']] = item['cases']
+            population_map[item['gridid']] = item['population']
 
           })
+
+          //debug(population_map)
 
 
           processed_data.forEach(item => {
@@ -2768,6 +2785,7 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
               item['cases_trainig'] = 0
             }
 
+            item['population'] = population_map[item['gridid']]
           })
 
           //debug(processed_data)
