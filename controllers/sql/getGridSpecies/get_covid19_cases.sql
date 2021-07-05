@@ -10,7 +10,7 @@ left join (
 	  mescolecta <> 99 and
 	  diacolecta <> 99 and
 	  diacolecta <> -1 and
-	'2020-03-01' <= make_date(aniocolecta, mescolecta, diacolecta) and 
-	make_date(aniocolecta, mescolecta, diacolecta) < '2020-03-31'
+	'${lim_inf:raw}' <= make_date(aniocolecta, mescolecta, diacolecta) and 
+	make_date(aniocolecta, mescolecta, diacolecta) < '${lim_sup:raw}'
 	group by gridid_munkm) as c 
 on a.gridid_munkm = c.gridid_munkm::integer;
