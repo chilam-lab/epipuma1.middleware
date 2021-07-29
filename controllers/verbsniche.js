@@ -2769,14 +2769,14 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
 
           cases_by_mun.forEach(item => {
 
-            cases_map[item['gridid']] = item['cases']
+            cases_map[item['gridid']] = item['c']
             population_map[item['gridid']] = item['population']
 
           })
 
           //debug(population_map)
 
-
+          //debug(cases_map)
           processed_data.forEach(item => {
 
             if(cases_map[item['gridid']] != null){
@@ -3311,9 +3311,13 @@ exports.getGridGeneratedSpecies = function(req, res) {
 
             cells.forEach(item => {
 
+              debug(item)
+
               if(cases_map[item['gridid']] != null){
+                debug('if')
                 item['cases_trainig'] = cases_map[item['gridid']]
               } else {
+                debug('else')
                 item['cases_trainig'] = 0
               }
 
