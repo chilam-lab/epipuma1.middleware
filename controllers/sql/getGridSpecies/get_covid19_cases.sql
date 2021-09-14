@@ -6,7 +6,7 @@ from (select distinct b.gridid_munkm, b.population from grid_munkm_aoi as b) as 
 left join (
 	select gridid_munkm, count(*) as c 
 	from snib 
-	WHERE especievalidabusqueda = 'COVID-19 CONFIRMADO' and aniocolecta <> 9999 and 
+	WHERE especievalidabusqueda = '${class:raw}' and aniocolecta <> 9999 and 
 	  mescolecta <> 99 and
 	  diacolecta <> 99 and
 	  diacolecta <> -1 and

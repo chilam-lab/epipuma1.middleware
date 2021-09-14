@@ -4095,6 +4095,8 @@ verb_utils.getCountTimeValidation = function(score_map, training_cells, validati
 
   var decil = 10
 
+  debug('VALIDATION CELLS LIST => ', validation_cells)
+
   var validation_cells_map = {}
   var validation_ones = 0
   validation_cells.forEach(cell => {
@@ -4127,6 +4129,7 @@ verb_utils.getCountTimeValidation = function(score_map, training_cells, validati
 
   debug(score_indexes)
   //debug(score_map_aux_list)
+  debug('VALIDATION CELLS => ', validation_cells_map)
 
   indexes.forEach(i => {
 
@@ -4141,6 +4144,7 @@ verb_utils.getCountTimeValidation = function(score_map, training_cells, validati
 
     //debug(score_map_aux_list.length, i, score_indexes[i])
     var score_index = -1;
+
 
     score_map_aux_list.forEach(cell => {
 

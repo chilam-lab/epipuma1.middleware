@@ -2848,20 +2848,22 @@ exports.getGridGeneratedSpecies = function(req, res) {
   var Ncells = 2458
 
   pool.task(t => {
-
+    
     var query = queries.getGridSpeciesNiche.getCOVID19Cases
 
     return t.any(query, {
 
-    lim_inf: lim_inf,
-    lim_sup: lim_sup
+      lim_inf: lim_inf,
+      lim_sup: lim_sup,
+      class: target_taxons[0]['value']
+
 
     }).then(cases_by_mun => {
 
       //debug("CASES BY MUN")
-      //debug(cases_by_mun)
+      debug('CASES BY MUN => ', cases_by_mun)
 
-      cases = cases_by_mun
+      //cases = cases_by_mun
 
       if(modifier == 'cases'){
         var query  = queries.getTimeValidation.getCountCellFirst
@@ -3304,20 +3306,20 @@ exports.getGridGeneratedSpecies = function(req, res) {
 
             cases_by_mun.forEach(item => {
 
-              cases_map[item['gridid']] = item['cases']
+              cases_map[item['gridid']] = item['population']
 
             })
 
-
+            debug('==================================')
+            debug(cases_by_mun)
+            debug('==================================')
             cells.forEach(item => {
 
-              debug(item)
+              //debug(item)
 
               if(cases_map[item['gridid']] != null){
-                debug('if')
                 item['cases_trainig'] = cases_map[item['gridid']]
               } else {
-                debug('else')
                 item['cases_trainig'] = 0
               }
 
