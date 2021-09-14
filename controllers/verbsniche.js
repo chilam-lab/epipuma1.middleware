@@ -3306,7 +3306,7 @@ exports.getGridGeneratedSpecies = function(req, res) {
 
             cases_by_mun.forEach(item => {
 
-              cases_map[item['gridid']] = item['population']
+              cases_map[item['gridid']] = parseInt(item['c'])
 
             })
 
