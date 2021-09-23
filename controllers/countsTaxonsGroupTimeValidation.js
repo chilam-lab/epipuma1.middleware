@@ -156,12 +156,12 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
     return t.any(query, {
 
     lim_inf: data_request['lim_inf'],
-    lim_sup: data_request['lim_sup']
+    lim_sup: data_request['lim_sup'],
+    class: data_request['target_group'][0]['value']
 
     }).then(cases_by_mun => {
 
-      //debug("CASES BY MUN")
-      //debug(cases_by_mun)
+      debug("CASES BY MUN ==> ", cases_by_mun)
 
       data_request['cases'] = cases_by_mun
 

@@ -946,6 +946,11 @@ exports.generateTarget = function(req, res, next) {
 
               debug(time_validation)
 
+              data.forEach(covar => {
+                covar['Pij'] = covar['nij']/covar['n']
+                covar['Pi'] = covar['ni']/covar['n']
+              })
+
               res.json({
                 ok: true,
                 data: data,

@@ -13,4 +13,5 @@ left join (
 	'${lim_inf:raw}' <= make_date(aniocolecta, mescolecta, diacolecta) and 
 	make_date(aniocolecta, mescolecta, diacolecta) < '${lim_sup:raw}'
 	group by gridid_munkm) as c 
-on a.gridid_munkm = c.gridid_munkm::integer;
+on a.gridid_munkm = c.gridid_munkm::integer
+order by c desc
