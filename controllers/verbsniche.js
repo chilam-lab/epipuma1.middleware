@@ -2636,10 +2636,12 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
 
     var query = queries.getGridSpeciesNiche.getCOVID19Cases
 
+
     return t.any(query, {
 
       lim_inf: liminf,
-      lim_sup: limsup
+      lim_sup: limsup, 
+      class: target_taxons[0]['value']
 
     }).then(cases_by_mun => {
 
