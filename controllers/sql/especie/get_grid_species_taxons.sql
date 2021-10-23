@@ -24,7 +24,8 @@ JOIN gids_countries AS c
 ON a.gid = c.gid
 LEFT JOIN first_period AS d
 ON a.$<gridid:raw> = d.gridid
-WHERE 	d.fp is null AND 
+WHERE 	
+		--d.fp is null AND 
 		a.$<gridid:raw> is not null
 		$<where_filter:raw> 
 GROUP BY a.$<gridid:raw>

@@ -24,8 +24,6 @@ SELECT a.especievalidabusqueda AS species,
 FROM snib AS a 
 JOIN spids_species AS b
 ON a.spid = b.spid
-JOIN gids_countries AS c
-ON a.gid = c.gid
 JOIN grid_ids AS d
 ON d.gridid = a.$<gridid:raw>
 WHERE 	a.$<gridid:raw> is not null
