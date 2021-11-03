@@ -4129,7 +4129,37 @@ verb_utils.getCountTimeValidation = function(score_map, training_cells, validati
 
   debug(score_indexes)
   //debug(score_map_aux_list)
-  debug('VALIDATION CELLS => ', validation_cells_map)
+  debug('VALIDATION CELLS number => ', validation_cells.length)
+
+
+  var auxindex = 1
+
+  score_map_aux_list.forEach(cell =>{
+    if(validation_cells.includes(cell[0])){
+      
+      debug(auxindex, cell)
+      auxindex += 1
+
+    }
+
+  })
+
+  var validation_nulls = 0
+
+  validation_cells.forEach(cell => {
+    var hasscore = false
+    score_map_aux_list.forEach(cell_score => {
+      if(cell == cell_score[0]) {
+        hasscore = true
+      }
+    })
+
+    if(!hasscore) {
+      debug('cells validation without score', cell)
+      validation_nulls += 1
+    }
+
+  })
 
   indexes.forEach(i => {
 
@@ -4168,7 +4198,7 @@ verb_utils.getCountTimeValidation = function(score_map, training_cells, validati
             pre += 1
 
             //debug(score_indexes[i], cell)
-          }
+          } 
 
         }
 
@@ -4182,13 +4212,15 @@ verb_utils.getCountTimeValidation = function(score_map, training_cells, validati
           total_validation_cells += 1
 
             fre += 1
-        }
+        } 
 
       }
 
       
 
     })
+
+    debug('TOTAL VALIDATION CELLS IN TIME VALIDATION', total_validation_cells)
 
     debug(i, null_freq, pre, fre)
     time_validation.push({
@@ -4200,6 +4232,7 @@ verb_utils.getCountTimeValidation = function(score_map, training_cells, validati
       recall: true_positive/(true_positive + false_negative),
       vvp: pre,
       vfn: fre,
+      vnull: validation_nulls,
       vrecall: pre/(fre + pre)
 
     })
