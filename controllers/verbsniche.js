@@ -3496,19 +3496,6 @@ exports.getCellOcurrences = function(req, res) {
     where_filter += " or (true and a.gridid_"+grid_res+"km is not null)"
   }
 
-  
-  const query1 = pgp.as.format(queries.basicAnalysis.getCellOcurrences, 
-           {'species_filter' : species_filter, 
-            'resolution_view': resolution_view,
-            'region'         : region,
-            'gridid'         : gridid,
-            'grid_table'     : grid_table,
-            'where_filter'   : where_filter,
-            'longitud'       : longitud,
-            'latitud'       : latitud,
-            'col_name'      : col_name})
-  debug(query1)
-
   debug("region: " + region)
   debug("species_filter: " + species_filter)
   debug("resolution_view: " + resolution_view)
@@ -3519,30 +3506,74 @@ exports.getCellOcurrences = function(req, res) {
   debug("latitud: " + latitud)
   debug("col_name: " + col_name)
   
+  pool.task(t => {
 
-  pool.any(queries.basicAnalysis.getCellOcurrences, {
-            'species_filter' : species_filter, 
-            'resolution_view': resolution_view,
-            'region'         : region,
-            'gridid'         : gridid,
-            'grid_table'     : grid_table,
-            'where_filter'   : where_filter,
-            'longitud'       : longitud,
-            'latitud'       : latitud,
-            'col_name'      : col_name}
-      ).then(function (data) {
-        debug(data.length + ' ocurrences')
-        res.json({
-          ok: true,
-          'data': data
-        })
-    }).catch(function (error) {
-      return res.json({
-        err: error,
-        ok: false,
-        message: "Error al procesar la query"
-      })
+    var query = queries.basicAnalysis.getGridIdByCoordinates
+
+    return t.any(query, {
+
+      'gridid'         : gridid,
+      'grid_table'     : grid_table,
+      'longitud'       : longitud,
+      'latitud'        : latitud
+
+    }).then(data => {
+
+
+      var gridid_cell = data[0].gridid
+      debug('From coordinates, gridid: ' + gridid_cell)
+
+      const query1 = pgp.as.format(queries.basicAnalysis.getCellOcurrences, 
+               {'species_filter' : species_filter, 
+                'resolution_view': resolution_view,
+                'region'         : region,
+                'gridid'         : gridid,
+                'grid_table'     : grid_table,
+                'where_filter'   : where_filter,
+                'longitud'       : longitud,
+                'latitud'       : latitud,
+                'col_name'      : col_name})
+      debug(query1)
+
+      return t.any(queries.basicAnalysis.getCellOcurrences, {
+                    'species_filter' : species_filter, 
+                    'resolution_view': resolution_view,
+                    'region'         : region,
+                    'gridid'         : gridid,
+                    'grid_table'     : grid_table,
+                    'where_filter'   : where_filter,
+                    'longitud'       : longitud,
+                    'latitud'       : latitud,
+                    'col_name'      : col_name}
+              ).then(function (data) {
+                debug(data.length + ' ocurrences')
+                res.json({
+                  ok: true,
+                  'data': data,
+                  'gridid': gridid_cell
+                })
+            }).catch(function (error) {
+              return res.json({
+                err: error,
+                ok: false,
+                message: "Error al procesar la query"
+              })
+            })
+
     })
+
+  }).catch(error => {
+
+      debug(error)
+    
+      res.json({
+          ok: false,
+          message: "Error al ejecutar la petición",
+          data:[],
+          error: error
+      })      
+
+  })
 
 }
 
