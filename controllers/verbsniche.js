@@ -3515,12 +3515,14 @@ exports.getCellOcurrences = function(req, res) {
       'gridid'         : gridid,
       'grid_table'     : grid_table,
       'longitud'       : longitud,
-      'latitud'        : latitud
+      'latitud'        : latitud,
+      'col_name'      : col_name
 
     }).then(data => {
 
 
       var gridid_cell = data[0].gridid
+      var name = data[0].name
       debug('From coordinates, gridid: ' + gridid_cell)
 
       const query1 = pgp.as.format(queries.basicAnalysis.getCellOcurrences, 
@@ -3550,7 +3552,8 @@ exports.getCellOcurrences = function(req, res) {
                 res.json({
                   ok: true,
                   'data': data,
-                  'gridid': gridid_cell
+                  'gridid': gridid_cell,
+                  'name': name
                 })
             }).catch(function (error) {
               return res.json({
