@@ -2634,8 +2634,13 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
 
   pool.task(t => {
 
-    var query = queries.getGridSpeciesNiche.getCOVID19Cases
-
+    if(target_taxons.length == 2){
+      var query = queries.getGridSpeciesNiche.getCOVID19Pruebas
+      debug('Pruebas')
+    }else {
+      var query = queries.getGridSpeciesNiche.getCOVID19Cases
+      debug('Cases')
+    }
 
     return t.any(query, {
 
@@ -2851,7 +2856,13 @@ exports.getGridGeneratedSpecies = function(req, res) {
 
   pool.task(t => {
     
-    var query = queries.getGridSpeciesNiche.getCOVID19Cases
+    if(target_taxons.length == 2){
+      var query = queries.getGridSpeciesNiche.getCOVID19Pruebas
+      debug('Pruebas Generated Target')
+    }else {
+      var query = queries.getGridSpeciesNiche.getCOVID19Cases
+      debug('Cases Generated Target')
+    }
 
     return t.any(query, {
 

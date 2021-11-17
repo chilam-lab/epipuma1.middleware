@@ -189,6 +189,8 @@ var queryProvider = {
 
     getCOVID19Cases: sqlPath('getGridSpecies/get_covid19_cases.sql'),
 
+    getCOVID19Pruebas: sqlPath('getGridSpecies/get_covid19_pruebas.sql'),
+
   },
   getGeoRelNiche: {
     getGeoRel: sqlPath('getGeoRel/get_geo_rel.sql'),
