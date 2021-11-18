@@ -161,8 +161,6 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
 
     }).then(cases_by_mun => {
 
-      debug("CASES BY MUN ==> ", cases_by_mun)
-
       data_request['cases'] = cases_by_mun
 
       var query  = queries.getTimeValidation.getCellFirst
@@ -176,7 +174,10 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
         lim_sup_first: data_request['lim_sup_first'],
 
       })
+
+      debug('=======================> First Period Query <=======================')
       debug(query1)
+      debug('=======================> First Period Query <=======================')
 
       return t.one(query,  {
 
@@ -187,34 +188,11 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
 
       }).then(resp => {
 
+        debug('=======================> Cells With Cases in First Period  <=======================')
+        debug(resp['first_cells'].length)
+        debug('=======================> Cells With Cases in First Period  <=======================')
+
         var first_cells = resp['first_cells']
-        var first_cells_aux = []
-
-        if(data_request['traffic_light'] == 'green'){
-
-          debug('================> FIRST PERIOD- BEGIN: Traffic Light GREEN <===================')
-
-          for(var i = 1; i <= 2458; i++){
-
-            if(!first_cells.includes(i)){
-              first_cells_aux.push(i)
-            }
-
-          }
-
-          first_cells = first_cells_aux
-
-          debug(first_cells.length + ' cells ')
-          debug('================> FIRST PERIOD- END:   Traffic Light GREEN <===================')
-
-        }
-
-        var first_period_condition = 'true'
-        if(data_request['period_config'][0] == '0' && data_request['traffic_light'] != 'green'){
-          first_period_condition = 'c is null'
-        } else if(data_request['period_config'][0] == '1' && data_request['traffic_light'] != 'green') {
-          first_period_condition = 'c = 1'
-        }
 
         var query  = queries.getTimeValidation.getCellTraining
         var where_validation = data_request["where_target"]
@@ -224,33 +202,67 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
           where_target: where_validation.replace('WHERE', ''),
           grid_resolution: data_request["grid_resolution"],
           lim_inf: data_request['lim_inf'],
-          lim_sup: data_request['lim_sup'],
-          first_period_condition: first_period_condition
-
+          lim_sup: data_request['lim_sup']
         })
+
+        debug('=======================> Training Period Query <=======================')
         debug(query1)
+        debug('=======================> Training Period Query <=======================')
 
         return t.one(query,  {
 
             where_target: where_validation.replace('WHERE', ''),
             grid_resolution: data_request["grid_resolution"],
             lim_inf: data_request['lim_inf'],
-            lim_sup: data_request['lim_sup'],
-            first_period_condition: first_period_condition
+            lim_sup: data_request['lim_sup']
 
         }).then(resp => {
 
+          debug('=======================> Cells With Cases in Training Period  <=======================')
+          debug(resp['training_cells'].length)
+          debug('=======================> Cells With Cases in Training Period  <=======================')
+
+          var training_occur = resp['training_cells']
           var training_cells = resp['training_cells']
           var training_cells_aux = []
+
+          var m11 = 0
+          var m01 = 0
+          var m10 = 0
+          var m00 = 0
+
+          for(var i = 1; i <= 2458; i++){
+
+            if(first_cells.includes(i) && training_cells.includes(i)){
+              m11 += 1 
+            }
+
+            if(!first_cells.includes(i) && training_cells.includes(i)){
+              m01 += 1 
+            }
+
+            if(first_cells.includes(i) && !training_cells.includes(i)){
+              m10 += 1 
+            }
+
+            if(!first_cells.includes(i) && !training_cells.includes(i)){
+              m00 += 1 
+            }
+
+          }
+
+          debug('=======================> Matrix 1s and 0s <=======================')
+          debug(m00, m01)
+          debug(m10, m11)
+          debug('=======================> Matrix 1s and 0s <=======================')
 
           if(data_request['traffic_light'] == 'green'){
 
             debug('================> TRAINING PERIOD- BEGIN: Traffic Light GREEN <===================')
-            debug(training_cells.length + ' initial cells')
-
+            
             for(var i = 1; i <= 2458; i++){
 
-              if(!training_cells.includes(i)){
+              if(first_cells.includes(i) && !training_cells.includes(i)){
                 training_cells_aux.push(i)
               }
 
@@ -261,9 +273,26 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
             debug(training_cells.length + ' cells ')
             debug('================> TRAINING PERIOD- END:   Traffic Light GREEN <===================')
 
+          } else if(data_request['traffic_light'] == 'red'){
+
+            debug('================> TRAINING PERIOD- BEGIN: Traffic Light RED <===================')
+
+            for(var i = 1; i <= 2458; i++){
+
+              if(!first_cells.includes(i) && training_cells.includes(i)){
+                training_cells_aux.push(i)
+              }
+
+            }
+
+            training_cells = training_cells_aux
+
+            debug(training_cells.length + ' cells ')
+
+            debug('================> TRAINING PERIOD- BEGIN: Traffic Light RED <===================')
+
           }
-
-
+          
           var query = queries.subaoi.getCountriesRegion
 
           /*
@@ -273,15 +302,18 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
 
             data_request["gid"] = resp.gid
             data_request["where_filter"] = verb_utils.getWhereClauseFilter(fosil, date, lim_inf, lim_sup, cells, data_request["res_celda_snib"], data_request["region"], data_request["gid"])
-            if(!memory){
-              data_request["where_filter"] += ' AND gridid_' + grid_resolution + 'km = ANY(ARRAY[' + training_cells.toString() + ']::text[])'
+            
+            
+            if(data_request['traffic_light'] == 'green'){
+
+              data_request["green_cells"] = 'ARRAY[' + training_cells.toString() + ']::integer[]'
+
+            } else if(data_request['traffic_light'] == 'red'){
               
-              if(data_request['traffic_light'] == 'green'){
+              data_request["where_filter"] += ' AND gridid_' + grid_resolution + 'km = ANY(ARRAY[' + training_cells.toString() + ']::text[])'
 
-                data_request["green_cells"] = 'ARRAY[' + training_cells.toString() + ']::integer[]'
-
-              }
             }
+            
             //debug(data_request["where_filter"])
 
           }).then(resp=> {
@@ -306,15 +338,18 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
                   debug("N:" + data_request['N'])
                   debug(data_request['target_group'])
 
-                  if(data_request['target_group'][0]['value'] === 'COVID-19 CONFIRMADO' 
-                          && data_request['traffic_light'] != 'green'){
-                    var query_analysis = queries.countsTaxonGroups.getCountsBaseOdds
-                  } else if(data_request['traffic_light'] == 'green'){
+                  if(data_request['traffic_light'] == 'green'){
 
                     var query_analysis = queries.countsTaxonGroups.getCountsBaseGreen
 
-                  }else{
+                  }else if(data_request['target_group'][0]['value'] === 'COVID-19 CONFIRMADO'){
+
+                    var query_analysis = queries.countsTaxonGroups.getCountsBaseOdds
+
+                  } else{
+
                     var query_analysis = queries.countsTaxonGroups.getCountsBase
+                  
                   }
 
                   data_request['groups'] = verb_utils.getCovarGroupQueries(queries, data_request, covars_groups)
@@ -339,12 +374,12 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
 
                     if( data_request["get_grid_species"] !== false ) {
 
-                      debug('--------------------------------------------------')
+                      /*debug('--------------------------------------------------')
 
                       debug("analisis en celda")
 
                       debug("long: " + data_request.long)
-                      debug("lat: " + data_request.lat)
+                      debug("lat: " + data_request.lat)*/
 
                       var extra_columns = ""
                       if(data_request.grid_resolution == "mun"){
@@ -401,10 +436,11 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
 
                     } else {
 
-                      debug("analisis basico")
-
                       const query1 = pgp.as.format(query_analysis, data_request)
+                      
+                      debug('=======================> Analysis Query <=======================')
                       debug(query1)
+                      debug('=======================> Analysis Query <=======================')
 
                       /*                Se genera analisis
                       */
@@ -418,76 +454,65 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
 
       }).then(data => {
 
-              debug(data.length)
-
-              var query = queries.getTimeValidation.getCellValidation
+              var query = queries.getTimeValidation.getCellTraining
               var where_validation = data_request["where_target"]
 
               if(validation_group.length > 0){
                 where_validation = data_request["where_validation"]      
               }
 
-
-              var training_period_condition = 'true'
-              if(data_request['traffic_light'] == 'red'){
-                training_period_condition = 'c is null'
-              }else if(data_request['traffic_light'] == 'green'){
-                training_period_condition = 'c = 1'
-              }
-
               const query1 = pgp.as.format(query, {
 
                 where_target: where_validation.replace('WHERE', ''),
                 grid_resolution: data_request["grid_resolution"],
-                lim_inf: data_request['lim_inf'],
-                lim_sup: data_request['lim_sup'],
-                lim_inf_validation: data_request['lim_inf_validation'],
-                lim_sup_validation: data_request['lim_sup_validation'],
-                training_period_condition: training_period_condition
+                lim_inf: data_request['lim_inf_validation'],
+                lim_sup: data_request['lim_sup_validation']
 
               })
-              debug('QUERY VALIDATION')
+              debug('=======================> Validation Period Query <=======================')
               debug(query1)
-              debug('QUERY VALIDATION')
+              debug('=======================> Validation Period Query <=======================')
 
-              return t.any(query, {
+              return t.one(query, {
 
                 where_target: where_validation.replace('WHERE', ''),
                 grid_resolution: data_request["grid_resolution"],
-                lim_inf: data_request['lim_inf'],
-                lim_sup: data_request['lim_sup'],
-                lim_inf_validation: data_request['lim_inf_validation'],
-                lim_sup_validation: data_request['lim_sup_validation'],
-                training_period_condition: training_period_condition
+                lim_inf: data_request['lim_inf_validation'],
+                lim_sup: data_request['lim_sup_validation']
 
               }).then(validation_data => {
 
-                  var validation_cells = []
+                  var validation_cells = validation_data['training_cells']
+                  var validation_cells_aux = []
+
+                  debug('=======================> Cells With Cases in Validation Period  <=======================')
+                  debug(validation_cells.length)
+                  debug('=======================> Cells With Cases in Validation Period  <=======================')
                   
                   if(data_request['traffic_light'] == 'green'){
-                    
                     debug('================> VALIDATION PERIOD- BEGIN: Traffic Light GREEN <===================')
-                    debug(validation_data.length + ' initial cells')
-
-                    for(var i = 0; i < validation_data.length; i++){
-                      validation_data[i]['pre'] = !validation_data[i]['pre']
+                     for(var i = 1; i <= 2458; i++){
+                      if(training_cells.includes(i) && !validation_cells.includes(i)){
+                        validation_cells_aux.push(i)   
+                      }
                     }
-
+                    validation_cells = validation_cells_aux
+                    debug(validation_cells.length)
                     debug('================> VALIDATION PERIOD- END:   Traffic Light GREEN <===================')
-                  }
-
-                  validation_data.forEach(item => {
-
-                    if(item['pre'] == true){
-                      validation_cells.push(item['gridid'])
+                  } else if(data_request['traffic_light'] == 'red'){
+                    debug('================> VALIDATION PERIOD- BEGIN: Traffic Light RED <===================')
+                     for(var i = 1; i <= 2458; i++){
+                      if(!training_cells.includes(i) && validation_cells.includes(i)){
+                        validation_cells_aux.push(i)   
+                      }
                     }
-          
-                  })
+                    validation_cells = validation_cells_aux
+                    debug(validation_cells.length)
+                    debug('================> VALIDATION PERIOD- END:   Traffic Light RED <===================')
+                  } 
 
-                  debug('validation cells')
-                  debug(validation_cells)
                   var score_map = verb_utils.getScoreMap(data)
-                  var time_validation = verb_utils.getTimeValidation(score_map, training_cells, validation_data)
+                  var time_validation = verb_utils.getTimeValidation(score_map, training_cells, validation_cells)
                   var percentage_occ = []
                   var decil_cells = []
                   var info_cell = []
@@ -539,7 +564,7 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
                     cell_summary: cell_summary,
                     time_validation: time_validation,
                     training_cells: training_cells,
-                    validation_data: validation_data,
+                    validation_data: validation_cells,
                     info_cell: info_cell
                   })
 

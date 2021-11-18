@@ -3776,11 +3776,9 @@ verb_utils.scoreMapToScoreArray = function(score_map){
 
 verb_utils.getTimeValidation = function(score_map, training_cells, validation_cells) {
 
-  debug('getTimeValidation')
-
-  debug('Score map length: ' + Object.keys(score_map).length)
-  debug('Training cells length: ' + training_cells.length)
-  debug('Validation cells length:' + validation_cells.length)
+  debug('getCountTimeValidation ==> score map length: ' +  Object.keys(score_map).length)
+  debug('getCountTimeValidation ==> training cells list length: ' + training_cells.length)
+  debug('getCountTimeValidation => validation cells list length: ' + validation_cells.length)
 
   var time_validation = []
   var score_validation_cells = {}
@@ -3788,47 +3786,37 @@ verb_utils.getTimeValidation = function(score_map, training_cells, validation_ce
   var score_map_aux = {}
 
 
-  debug('===========================Deleting training cells===========================')  
 
   var ttraining = 0
-  debug(training_cells.length)
 
   Object.keys(score_map).forEach(cell => {
 
-    if(!training_cells.includes(parseInt(cell))){
+    //if(!training_cells.includes(parseInt(cell))){
 
       ttraining += 1
       score_map_aux[parseInt(cell)] = score_map[cell]      
 
-    }
+    //}
 
   })
 
-  debug(ttraining)
-  debug('===========================Validation cells in score map===========================')  
+  debug('getCountTimeValidation => scored AND not training cells: ' +  ttraining)
+
 
   var tcell_score_map = 0
   validation_cells.forEach(tcell => {
 
-    if(tcell['pre'] == true && score_map[parseInt(tcell['gridid'])] != null){
+    if(score_map[parseInt(tcell)] != null){
       tcell_score_map += 1
     }
 
   })
-  debug(tcell_score_map)
 
-  debug('===========================+++++===========================')
+  debug('getCountTimeValidation => scored AND validation cells: ' + tcell_score_map)
+
 
   var scores_per_cell = Object.values(score_map_aux);
   scores_per_cell = scores_per_cell.sort(function(a,b){return b-a})
-
-  debug('=========================== score_map_aux length ===========================')
-  debug(Object.keys(score_map_aux).length)
-  debug('=========================== Number of validation ===========================')
-  debug(validation_cells.length)
-  debug('=========================== scores_per_cell ===========================')
-  debug(scores_per_cell)
-  debug('=========================== Position scores_per_cell ===========================')
 
   var number_scored_cells = scores_per_cell.length
   var limits = []
@@ -3847,7 +3835,7 @@ verb_utils.getTimeValidation = function(score_map, training_cells, validation_ce
   var tcell_score_map = 0
   validation_cells.forEach(tcell => {
 
-    if(tcell['pre'] == true && score_map_aux[parseInt(tcell['gridid'])] != null){
+    if(score_map_aux[parseInt(tcell)] != null){
       tcell_score_map += 1
     }
 
@@ -3866,15 +3854,14 @@ verb_utils.getTimeValidation = function(score_map, training_cells, validation_ce
   var tcell_score_map = 0
   validation_cells.forEach(tcell => {
 
-    if(tcell['pre'] == true){
-      score_map_aux_list.forEach(item => {
+    score_map_aux_list.forEach(item => {
 
-        if(tcell['gridid'] === item[0]){
-          tcell_score_map += 1
-        }
+      if(tcell['gridid'] === item[0]){
+        tcell_score_map += 1
+      }
 
-      })
-    }
+    })
+    
 
   })
   debug(tcell_score_map)
@@ -3890,7 +3877,7 @@ verb_utils.getTimeValidation = function(score_map, training_cells, validation_ce
   var validation_cells_map = {}
   var validation_ones = 0
   validation_cells.forEach(cell => {
-    validation_cells_map[cell['gridid']] = cell['pre']
+    validation_cells_map[cell] = true
   
   })
 
@@ -3921,10 +3908,24 @@ verb_utils.getTimeValidation = function(score_map, training_cells, validation_ce
 
   }
 
-  debug(score_indexes)
+  //debug(score_indexes)
 
+  var validation_nulls = 0
 
+  validation_cells.forEach(cell => {
+    var hasscore = false
+    score_map_aux_list.forEach(cell_score => {
+      if(cell == cell_score[0]) {
+        hasscore = true
+      }
+    })
 
+    if(!hasscore) {
+      debug('cells validation without score', cell)
+      validation_nulls += 1
+    }
+
+  })
 
   indexes.forEach(i => {
     //debug(i)
@@ -3986,13 +3987,10 @@ verb_utils.getTimeValidation = function(score_map, training_cells, validation_ce
     time_validation.push({
 
       decil: decil,
-      vp: true_positive,
-      fn: false_negative,
-      null: null_freq,
-      recall: true_positive/(true_positive + false_negative),
-      vvp: pre,
-      vfn: fre,
-      vrecall: pre/(fre + pre)
+      vp: pre,
+      fn: fre,
+      null: validation_nulls,
+      recall: pre/(fre + pre)
 
     })
 
