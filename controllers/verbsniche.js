@@ -2618,13 +2618,13 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
 
 
   where_filter = " and (make_date(aniocolecta, mescolecta, diacolecta) >= '" + liminf + "'"
-                + " and make_date(aniocolecta, mescolecta, diacolecta) <  '" + limsup + "'"
+                + " and make_date(aniocolecta, mescolecta, diacolecta) <=  '" + limsup + "'"
                 + " and diacolecta <> 99 and diacolecta <> -1"
                 + " and mescolecta <> 99 and mescolecta <> -1"
                 + " and aniocolecta <> 9999 and aniocolecta <> -1)"
 
   where_filter_first = "(make_date(aniocolecta, mescolecta, diacolecta) >= '" + liminf_first + "'" 
-                + " and make_date(aniocolecta, mescolecta, diacolecta) < '" + limsup_first + "'" 
+                + " and make_date(aniocolecta, mescolecta, diacolecta) <= '" + limsup_first + "'" 
                 + " and diacolecta <> 99 and diacolecta <> -1"
                 + " and mescolecta <> 99 and mescolecta <> -1"
                 + " and aniocolecta <> 9999 and aniocolecta <> -1) "
