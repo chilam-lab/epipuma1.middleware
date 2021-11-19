@@ -492,7 +492,7 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
                   if(data_request['traffic_light'] == 'green'){
                     debug('================> VALIDATION PERIOD- BEGIN: Traffic Light GREEN <===================')
                      for(var i = 1; i <= 2458; i++){
-                      if(training_cells.includes(i) && !validation_cells.includes(i)){
+                      if(training_occur.includes(i) && !validation_cells.includes(i)){
                         validation_cells_aux.push(i)   
                       }
                     }
@@ -502,7 +502,7 @@ exports.countsTaxonsGroupTimeValidation = function(req, res, next) {
                   } else if(data_request['traffic_light'] == 'red'){
                     debug('================> VALIDATION PERIOD- BEGIN: Traffic Light RED <===================')
                      for(var i = 1; i <= 2458; i++){
-                      if(!training_cells.includes(i) && validation_cells.includes(i)){
+                      if(!training_occur.includes(i) && validation_cells.includes(i)){
                         validation_cells_aux.push(i)   
                       }
                     }
