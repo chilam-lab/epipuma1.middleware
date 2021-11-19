@@ -472,11 +472,13 @@ exports.generateTarget = function(req, res, next) {
 
             debug('================> TRAINING PERIOD: Traffic Light GREEN <===================')
 
+
             data_request['first_cells'].forEach(first_cell => {
 
               if(!training_cells_aux.includes(first_cell)){
 
-                training_cells.push(first_cells);
+                //debug(first_cell)
+                training_cells.push(first_cell);
 
               }
 
@@ -503,6 +505,9 @@ exports.generateTarget = function(req, res, next) {
           }
 
           debug('celdas en decil 10 del periodo de entrenamiento', training_cells.length)
+          debug(training_cells)
+          debug('training_cells_array   = >', data_request['training_cells_array'])
+
           data_request['training_cells'] = training_cells
           training_presence = training_presence.sort(function(a, b) {return  parseFloat(b['occ']) - parseFloat(a['occ']);})
           debug('celdas con presencia ', training_presence)
@@ -519,15 +524,14 @@ exports.generateTarget = function(req, res, next) {
             Se obtiene filtro para target 
           */
           return t.one(query, data_request).then(resp => {
+            data_request["training"] = 'ARRAY[' + data_request['training_cells'].toString() + ']::integer[]'
+            data_request['training_cells_array'] = 'ARRAY[' + training_cells.toString() + ']::integer[]';
 
             data_request["gid"] = resp.gid
             data_request["where_filter"] = verb_utils.getWhereClauseFilter(fosil, date, lim_inf, lim_sup, cells, data_request["res_celda_snib"], data_request["region"], data_request["gid"])
-            if(!memory){
-              data_request["where_filter"] += ' AND gridid_' + grid_resolution + 'km = ANY(ARRAY[' + training_cells.toString() + ']::text[])'
-              data_request['training_cells_array'] = 'ARRAY[' + training_cells.toString() + ']::integer[]';
-            }
-            //debug(data_request["where_filter"])
-            data_request["training"] = 'ARRAY[' + training_cells.toString() + ']::integer[]'
+            
+            data_request["where_filter"] += ' AND gridid_' + grid_resolution + 'km = ANY(ARRAY[' + data_request['training_cells'].toString() + ']::text[])'
+
           }).then(resp=> {
 
                 data_request['source_cells'] = []
@@ -641,6 +645,7 @@ exports.generateTarget = function(req, res, next) {
                       } else {
 
                         debug("analisis basico")
+
 
                         const query1 = pgp.as.format(query_analysis, data_request)
                         debug(query1)
