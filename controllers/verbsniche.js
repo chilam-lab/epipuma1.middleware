@@ -2592,15 +2592,21 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
   var target_taxons     = getParam(req, 'target_taxons')
   var sfecha            = false // getParam(req, 'sfecha', false)
   // var sfosil            = getParam(req, 'sfosil', false)
-  var liminf            = getParam(req, 'liminf', verb_utils.formatDate(new Date("1500-01-01")) )
+  var liminf_first      = getParam(req, 'liminf_first', verb_utils.formatDate(new Date("1500-01-01")) )
+  var liminf            = getParam(req, 'liminf', verb_utils.formatDate(new Date("2000-01-01")) )
+  var limsup_first      = getParam(req, 'limsup_first',  liminf)
   var limsup            = getParam(req, 'limsup',  year+"-"+month+"-"+day)
   var grid_res          = getParam(req, 'grid_res', default_resolution)
   var region            = getParam(req, 'region', 1)
-
-  console.log("liminf: " + liminf)
-  console.log("limsup: " + limsup)
-  console.log("sfecha: " + sfecha)
-  // console.log("sfosil: " + sfosil)
+  var traffic_light     = getParam(req, 'traffic_light', 'none')
+  
+  var casos_periodo = 0
+  var target_cells = 0
+  var cells_excluded = 0
+  debug("liminf: " + liminf)
+  debug("limsup: " + limsup)
+  debug("sfecha: " + sfecha)
+  // debug("sfosil: " + sfosil)
 
   var species_filter  = verb_utils.getWhereClauseFromGroupTaxonArray(target_taxons, true)
   var resolution_view = 'grid_geojson_' + grid_res + 'km_aoi'
@@ -2608,65 +2614,201 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
   var snib_grid_xxkm  = 'snib_grid_' + grid_res + 'km'
   var where_filter    = ''
   var where_filter_first = ''
+  var cases = []
 
 
-  where_filter = " and (make_date(aniocolecta, mescolecta, diacolecta) between "
-                + "'" + liminf + "' and '" + limsup + "'"
+  where_filter = " and (make_date(aniocolecta, mescolecta, diacolecta) >= '" + liminf + "'"
+                + " and make_date(aniocolecta, mescolecta, diacolecta) <=  '" + limsup + "'"
                 + " and diacolecta <> 99 and diacolecta <> -1"
                 + " and mescolecta <> 99 and mescolecta <> -1"
                 + " and aniocolecta <> 9999 and aniocolecta <> -1)"
 
-  where_filter_first = "(make_date(aniocolecta, mescolecta, diacolecta) < "
-                + "'" + liminf + "'" 
+  where_filter_first = "(make_date(aniocolecta, mescolecta, diacolecta) >= '" + liminf_first + "'" 
+                + " and make_date(aniocolecta, mescolecta, diacolecta) <= '" + limsup_first + "'" 
                 + " and diacolecta <> 99 and diacolecta <> -1"
                 + " and mescolecta <> 99 and mescolecta <> -1"
                 + " and aniocolecta <> 9999 and aniocolecta <> -1) "
 
   debug(where_filter_first)
 
-  if(sfecha === true){
-    where_filter += " or (true and a.gridid_statekm is not null)"
-  }
 
-  // debug("species_filter: " + species_filter)
-  // debug("resolution_view: " + resolution_view)
-  // debug("region: " + region)
-  // debug("gridid: " + gridid)
-  // debug("snib_grid_xxkm: " + snib_grid_xxkm)
-  // debug("where_filter: " + where_filter)
-  // debug("liminf: " + liminf)
-  // debug("limsup: " + limsup)
+  pool.task(t => {
 
+    if(target_taxons.length == 2){
+      var query = queries.getGridSpeciesNiche.getCOVID19Pruebas
+      debug('Pruebas')
+    }else {
+      var query = queries.getGridSpeciesNiche.getCOVID19Cases
+      debug('Cases')
+    }
 
+    return t.any(query, {
 
-  const query1 = pgp.as.format(queries.getGridSpeciesNiche.getGridSpeciesTaxons, {'species_filter' : species_filter, 
-            'resolution_view': resolution_view,
-            'region'         : region,
-            'gridid'         : gridid,
-            'snib_grid_xxkm' : snib_grid_xxkm,
-            'where_filter'   : where_filter,
-            'where_filter_first': where_filter_first
+      lim_inf: liminf,
+      lim_sup: limsup, 
+      class: target_taxons[0]['value']
+
+    }).then(cases_by_mun => {
+
+      if(sfecha === true){
+        where_filter += " or (true and a.gridid_statekm is not null)"
+      }
+
+      // debug("species_filter: " + species_filter)
+      // debug("resolution_view: " + resolution_view)
+      // debug("region: " + region)
+      // debug("gridid: " + gridid)
+      // debug("snib_grid_xxkm: " + snib_grid_xxkm)
+      // debug("where_filter: " + where_filter)
+      // debug("liminf: " + liminf)
+      // debug("limsup: " + limsup)
+
+      var query = queries.getGridSpeciesNiche.getGridSpeciesTaxons
+
+      if(traffic_light == 'red' || traffic_light == 'green'){
+
+        query = queries.getGridSpeciesNiche.getGridSpeciesTaxonsTrafficLight
+
+      } 
+
+      const query1 = pgp.as.format(query, {'species_filter' : species_filter, 
+                'resolution_view': resolution_view,
+                'region'         : region,
+                'gridid'         : gridid,
+                'snib_grid_xxkm' : snib_grid_xxkm,
+                'where_filter'   : where_filter,
+                'where_filter_first': where_filter_first
+              })
+      
+
+      debug(query1)
+      cases = cases_by_mun
+      //debug(cases)
+
+      return t.any(query, {
+              'species_filter' : species_filter, 
+              'resolution_view': resolution_view,
+              'region'         : region,
+              'gridid'         : gridid,
+              'snib_grid_xxkm' : snib_grid_xxkm,
+              'where_filter'   : where_filter,
+              'where_filter_first': where_filter_first
+            }
+        ).then(function (data) {
+
+          debug(data.length + ' ocurrence cells')
+          var processed_data = {}
+
+          data.forEach(item =>{
+            if(processed_data[item['gridid']] == null){
+
+              processed_data[item['gridid']] = {'gridid':item['gridid'], 'fp': 0, 'tp': 0, 'occ': 0, 'target': false}
+              
+            }
+
+            if(item['p'] == 'f' && item['occ'] > 0){
+
+               processed_data[item['gridid']]['fp'] = 1
+
+            } else if(item['p'] == 't' && item['occ'] > 0){
+
+              processed_data[item['gridid']]['tp'] = 1
+              processed_data[item['gridid']]['occ'] = item['occ']
+              casos_periodo += parseInt(item['occ'])
+
+            } else {
+              
+              processed_data[item['gridid']]['target'] = true
+              processed_data[item['gridid']]['occ'] = item['occ']
+              casos_periodo += parseInt(item['occ'])
+              target_cells += 1
+
+            }
+
           })
-  
 
-  debug(query1)
+          var c = 1
 
-  pool.any(queries.getGridSpeciesNiche.getGridSpeciesTaxons, {
-            'species_filter' : species_filter, 
-            'resolution_view': resolution_view,
-            'region'         : region,
-            'gridid'         : gridid,
-            'snib_grid_xxkm' : snib_grid_xxkm,
-            'where_filter'   : where_filter,
-            'where_filter_first': where_filter_first
-          }
-      ).then(function (data) {
+          cases_by_mun.forEach(item => {
 
-        debug(data.length + ' ocurrence cells')
-        res.json({
-          ok: true,
-          'data': data
+            c += 1
+
+            if(processed_data[item['gridid']] == null){
+
+              processed_data[item['gridid']] = {'gridid':item['gridid'], 'fp': 0, 'tp': 0, 'occ': 0, 'target': false, 'population': item['population']}
+
+            }
+
+          })
+
+          processed_data = Object.values(processed_data)
+
+          processed_data.forEach(item => {
+
+            if(traffic_light == 'red'){
+
+              if(item['fp'] == 0 && item['tp'] == 1){
+                item['target'] = true
+                target_cells += 1
+              } else {
+                cells_excluded += 1
+              }
+
+
+            } else if(traffic_light == 'green'){
+
+              if(item['fp'] == 1 && item['tp'] == 0) {
+                item['target'] = true
+                target_cells += 1
+              } else {
+                cells_excluded += 1
+              }           
+
+            } else if(!item['target']){
+              cells_excluded += 1
+            }
+
+          })
+
+
+          var cases_map = {}
+          var population_map = {}
+
+          cases_by_mun.forEach(item => {
+
+            cases_map[item['gridid']] = item['c']
+            population_map[item['gridid']] = item['population']
+
+          })
+
+          //debug(population_map)
+
+          //debug(cases_map)
+          processed_data.forEach(item => {
+
+            if(cases_map[item['gridid']] != null){
+              item['cases_trainig'] = cases_map[item['gridid']]
+            } else {
+              item['cases_trainig'] = 0
+            }
+
+            item['population'] = population_map[item['gridid']]
+          })
+
+          //debug(processed_data)
+
+          res.json({
+            ok: true,
+            'data': processed_data,
+            'training_cases': casos_periodo,
+            'target_cells': target_cells,
+            'excluded_cells': cells_excluded
+          })
+
         })
+
+
+      })
 
     }).catch(function (error) {
       return res.json({
@@ -2676,6 +2818,555 @@ exports.getGridSpeciesTaxonNiche = function (req, res, next) {
       })
     })
   
+}
+
+
+exports.getGridGeneratedSpecies = function(req, res) {
+  
+  debug("getGridGeneratedSpecies")
+
+  var date = new Date()
+  var day = date.getDate()
+  var month = date.getMonth() + 1
+  var year = date.getFullYear()
+
+  var target_taxons     = getParam(req, 'target_taxons', [])
+  var sfecha            = getParam(req, 'sfecha', false)
+  var sfosil            = getParam(req, 'sfosil', false)
+  var lim_inf           = getParam(req, 'liminf', verb_utils.formatDate(new Date("1500-01-01")) )
+  var lim_sup           = getParam(req, 'limsup',  year+"-"+month+"-"+day)
+  var grid_res          = getParam(req, 'grid_res', 'mun')
+  var region            = getParam(req, 'region', 1)
+  var modifier          = getParam(req, 'modifier', 'cases')
+  var traffic_light     = getParam(req, 'traffic_light', 'none')
+  var lim_inf_first     = getParam(req, 'liminf_first', verb_utils.formatDate(new Date("1500-01-01")) )
+  var lim_sup_first     = getParam(req, 'limsup_first',  lim_inf)
+
+  var cases = []
+
+  debug("==> liminf: " + lim_inf)
+  debug("==> limsup: " + lim_sup)
+  debug("==> sfecha: " + sfecha)
+  debug("==> sfosil: " + sfosil)
+  debug("==> target_taxons", target_taxons)
+  debug("==> traffic_light", traffic_light)
+
+
+  var Ncells = 2458
+
+  pool.task(t => {
+    
+    if(target_taxons.length == 2){
+      var query = queries.getGridSpeciesNiche.getCOVID19Pruebas
+      debug('Pruebas Generated Target')
+    }else {
+      var query = queries.getGridSpeciesNiche.getCOVID19Cases
+      debug('Cases Generated Target')
+    }
+
+    return t.any(query, {
+
+      lim_inf: lim_inf,
+      lim_sup: lim_sup,
+      class: target_taxons[0]['value']
+
+
+    }).then(cases_by_mun => {
+
+      //debug("CASES BY MUN")
+      debug('CASES BY MUN => ', cases_by_mun)
+
+      //cases = cases_by_mun
+
+      if(modifier == 'cases'){
+        var query  = queries.getTimeValidation.getCountCellFirst
+      } else if (modifier == 'incidence') {
+        var query  = queries.getTimeValidation.getCountCellFirstIncidence
+      } else if(modifier == 'lethality'){
+        debug('Modificador: ' + modifier)
+        var query  = queries.getTimeValidation.getCountCellFirstLethality
+      } else if(modifier == 'negativity'){
+        var query  = queries.getTimeValidation.getCountCellFirstNegativity
+      } else {
+        var query  = queries.getTimeValidation.getCountCellFirstPrevalence
+      }
+
+      var where_validation = verb_utils.getWhereClauseFromGroupTaxonArray(target_taxons, true)
+
+      debug('==> where_validation =  ' + where_validation);
+
+      const query1 = pgp.as.format(query, {
+
+        where_target: where_validation.replace('WHERE', ''),
+        grid_resolution: grid_res,
+        lim_inf_first: lim_inf_first,
+        lim_sup_first: lim_sup_first
+
+      })
+      debug(query1)
+
+      return t.any(query,  {
+
+        where_target: where_validation.replace('WHERE', ''),
+        grid_resolution: grid_res,
+        lim_inf_first: lim_inf_first,
+        lim_sup_first: lim_sup_first
+
+      }).then(resp => {
+
+          var first = resp
+          
+          var first1s = 0;
+          var first0s = 0;
+          var first_presence = [] 
+          
+          first.forEach(item => {
+
+            if(modifier == 'negativity'){
+            
+              first1s += 1;
+              first_presence.push(item)
+
+            }else {
+
+              if(parseFloat(item['occ']) > 0) {
+                
+                first1s += 1;
+                first_presence.push(item)
+
+              } else {
+                first0s += 1;
+              }
+
+            }
+
+          });
+
+          debug('first presence', first_presence.length)
+          debug('0s:', first0s, '1s:', first1s, 'total:', first0s + first1s)
+
+          var bin = 10
+          var percentiles = 10
+          var bining = 'percentile'
+
+          var limits = []
+          
+          if(bining == 'percentile') {
+
+            for(var i=0; i<=percentiles; i++) {
+
+              var val = parseInt(Ncells*i/percentiles) - parseInt(i/percentiles)
+              limits.push(val)
+
+            }
+
+            debug(limits)
+
+            var first_cells = []
+            var first_cells_values = []
+            if(first1s >= parseInt(Ncells / percentiles)){
+
+              for(var i=0; i<Ncells; i++){
+
+                if(limits[bin-1] <= i && i <= limits[bin]) {
+
+                  first_cells.push(first[i]['gridid'])
+                  first_cells_values.push(first[i]['occ'])
+
+                }
+
+              }
+
+            } else {
+
+              first.forEach(item => {
+
+                if(modifier == 'negativity'){
+                  
+                  first_cells.push(item['gridid'])
+                  first_cells_values.push(item['occ'])
+
+                } else {
+
+                  if(parseFloat(item['occ']) > 0) {
+                    first_cells.push(item['gridid']);
+                    first_cells_values.push(item['occ'])
+                  } 
+
+                }
+
+              });
+
+            }
+              
+
+          } else {
+          }
+
+          debug('MODIFIER', modifier)
+          if(modifier == 'cases'){
+            var query = queries.getTimeValidation.getCountCellTrainingTop
+          } else if (modifier == 'incidence') {
+            var query  = queries.getTimeValidation.getCountCellTrainingIncidence
+          } else if (modifier == 'lethality') {
+            var query  = queries.getTimeValidation.getCountCellTrainingLethality
+          } else if (modifier == 'negativity') {
+            var query  = queries.getTimeValidation.getCountCellTrainingNegativity
+          } else {
+            var query  = queries.getTimeValidation.getCountCellTrainingPrevalence
+          }
+
+          var where_validation = verb_utils.getWhereClauseFromGroupTaxonArray(target_taxons, true)
+
+          const query1 = pgp.as.format(query, {
+
+            where_target: where_validation.replace('WHERE', ''),
+            grid_resolution: grid_res,
+            lim_inf: lim_inf,
+            lim_sup: lim_sup,
+            first_cells: first_cells.length ==  0 ? '' : first_cells 
+
+          })
+          debug(query1)
+
+           return t.any(query,  {
+                  where_target: where_validation.replace('WHERE', ''),
+                  grid_resolution: grid_res,
+                  lim_inf: lim_inf,
+                  lim_sup: lim_sup,
+                  first_cells: first_cells.length ==  0 ? '' : first_cells
+
+          }).then(resp => {
+
+            var training = resp
+            var training_data = []
+
+            var train1s = 0;
+            var train0s = 0;
+            var training_presence = []
+            
+            training.forEach(item => {
+
+              /*if(!first_cells.includes(item['gridid'])){
+                training_data.push(item)
+              }*/
+
+              training_data.push(item)
+
+              if(parseFloat(item['occ']) > 0){
+                training_presence.push(item)
+              }
+
+            });
+
+            training_data.forEach(item => {
+
+              if(modifier == 'negativity'){
+
+                train1s += 1;
+
+              } else {
+
+                if(parseFloat(item['occ']) > 0) {
+                  train1s += 1;
+                } else {
+                  train0s += 1;
+                }
+
+              }
+
+            });
+
+            debug('training presence', training_presence.length)
+            debug('0s:', train0s, '1s:', train1s, 'total:', train0s + train1s)
+
+            Ncells = train0s + train1s
+
+            var limits = []
+            var bin = 10
+            var percentiles = 10
+            var bining = 'percentile'
+            var width_top = parseInt(2458/percentiles)
+
+            if(bining == 'percentile') {
+              
+              var Ncells1 = Ncells - width_top - 1
+
+              for(var i=0; i<percentiles-1; i++) {
+
+                var val = parseInt(Ncells1*i/percentiles) - parseInt(i/percentiles)
+                //limits.push(parseInt(training[val]['occ']))
+                limits.push(val)
+
+              }
+
+              limits.push(Ncells1)
+              limits.push(Ncells - 1)
+
+              debug(limits)
+
+              var training_cells = []
+              var training_cells_values = []
+              if (train1s >= parseInt(Ncells / percentiles)) {
+
+                for(var i=0; i<Ncells; i++){
+
+                  if(limits[bin-1] <= i && i <= limits[bin]) {
+
+                    training_cells.push(training_data[i]['gridid'])
+                    training_cells_values.push(training_data[i]['occ'])
+
+                  }
+                }
+
+              } else {
+
+                training_data.forEach(item => {
+
+                  if(modifier == 'negativity'){
+
+                    training_cells.push(item['gridid'])
+                    training_cells_values.push(item['occ'])
+
+                  } else {
+
+                    if(parseFloat(item['occ']) > 0) {
+                      training_cells.push(item['gridid'])
+                      training_cells_values.push(item['occ'])
+                    } 
+
+                  }
+
+                });
+
+              }
+
+            } else {
+
+            }
+
+            var cells = {}
+            var limits = []
+
+
+            for(var i=0; i<percentiles+1; i++) {
+
+              var val = parseInt(Ncells*i/percentiles) - parseInt(i/percentiles)
+              limits.push(val)
+
+            }
+
+            debug(limits)
+
+            var index_bin = 1
+
+            for(var i=0; i<Ncells; i++){
+
+              if(i <= limits[index_bin]){
+                first[i]['bin'] = index_bin
+                training[i]['bin'] = index_bin
+              }
+
+              if(i == limits[index_bin]){
+                index_bin += 1
+              }
+
+            }
+
+            first.forEach(item => {
+
+              cells[item['gridid']] = {
+                gridid: item['gridid'],
+                fp: 0,
+                tp: 0,
+                fv: parseFloat(item['occ'])*(modifier=='cases' ? 1: 1000),
+                tv: 0,
+                fb: item['bin'],
+                tb: 1,
+                target: false
+              }
+
+            })
+
+            training.forEach(item => {
+
+              if(cells[item['gridid']] == null){
+                cells[item['gridid']] = {
+                  gridid: item['gridid'],
+                  fp: 0,
+                  tp: 0,
+                  fv: 0,
+                  tv: parseFloat(item['occ'])*(modifier=='cases' ? 1: 1000),
+                  fb: 1, 
+                  tb: item['bin'],
+                  target: false
+                }
+              } else {
+                cells[item['gridid']]['tv'] = parseFloat(item['occ'])*(modifier=='cases' ? 1: 1000)
+                cells[item['gridid']]['tb'] = parseFloat(item['bin'])
+              }
+
+            })
+
+            var n_fp = first_cells.length
+            var n_tp = training_cells.length
+
+            debug('First period cells ' + n_fp)
+            debug('Training period cells ' + n_tp)
+
+
+            for(var i = 0; i < n_fp; i++) {
+
+              if(cells[first_cells[i]] == null){
+                cells[first_cells[i]] = {
+                  gridid: first_cells[i],
+                  fp: 1,
+                  tp: 0,
+                  fv: first_cells_values[i],
+                  tv: 0,
+                  target: false
+                }
+              } else {
+
+                cells[first_cells[i]]['fp'] = 1
+                cells[first_cells[i]]['fv'] = first_cells_values[i]*(modifier=='cases' ? 1: 1000)
+              }
+
+            }
+
+            for(var i = 0; i < n_tp; i++){
+
+              if(cells[training_cells[i]] == null){
+                cells[training_cells[i]] = {
+                  gridid: training_cells[i],
+                  fp: 0,
+                  tp: 1,
+                  fv: 0, 
+                  tv: training_cells_values[i],
+                  target: false
+                } 
+              } else {
+                cells[training_cells[i]]['tp'] = 1
+                cells[training_cells[i]]['tv'] = training_cells_values[i]*(modifier=='cases' ? 1: 1000)
+              }
+
+            }
+
+            //debug(training_cells)
+            //debug(cells)
+
+            var target_cells = 0
+            var no_target_cells = 0
+            var excluded_cells = 0
+            cells = Object.values(cells)
+
+            if(traffic_light == 'red'){
+
+              cells.forEach(item => {
+
+                if(item['fp'] == 0 && item['tp'] == 1){
+
+                  item['target'] = true
+                  target_cells += 1
+
+                } else if(item['fp'] == 0 ){
+
+                  excluded_cells += 1
+                  no_target_cells += 1
+
+                } else {
+
+                  no_target_cells += 1
+
+                }
+
+              })
+
+            } else if(traffic_light == 'green'){
+
+              cells.forEach(item => {
+
+                if(item['fp'] == 1 && item['tp'] == 0) {
+                  item['target'] = true
+                  target_cells += 1
+                } else if(item['fp'] == 1) {
+
+                  excluded_cells += 1
+                  no_target_cells += 1
+
+                } else {
+                  no_target_cells += 1
+                }
+              
+              })
+
+            } else {
+
+              cells.forEach(item => {
+
+                if(item['tp'] == 1) {
+                  item['target'] = true
+                  target_cells += 1
+                } else {
+                  no_target_cells += 1
+                }
+              
+              })
+
+            }
+
+            var cases_map = {}
+
+            cases_by_mun.forEach(item => {
+
+              cases_map[item['gridid']] = parseInt(item['c'])
+
+            })
+
+            debug('==================================')
+            debug(cases_by_mun)
+            debug('==================================')
+            cells.forEach(item => {
+
+              //debug(item)
+
+              if(cases_map[item['gridid']] != null){
+                item['cases_trainig'] = cases_map[item['gridid']]
+              } else {
+                item['cases_trainig'] = 0
+              }
+
+            })
+
+            return res.json({
+              ok: true,
+              data: cells,
+              target_cells: target_cells,
+              no_target_cells: no_target_cells,
+              excluded_cells: excluded_cells
+            })
+
+          })
+
+      })
+
+
+    })
+
+
+
+
+  }).catch(error => {
+
+    res.json({
+        ok: false,
+        message: "Error al ejecutar la petición",
+        data:[],
+        error: error
+      })
+
+  })
+
 }
 
 exports.getCountByYear = function(req, res) {
@@ -2816,17 +3507,6 @@ exports.getCellOcurrences = function(req, res) {
     where_filter += " or (true and a.gridid_"+grid_res+"km is not null)"
   }
 
-  
-  /*const query1 = pgp.as.format(queries.basicAnalysis.getCellOcurrences, {'species_filter' : species_filter, 
-            'resolution_view': resolution_view,
-            'region'         : region,
-            'gridid'         : gridid,
-            'grid_table'     : grid_table,
-            'where_filter'   : where_filter,
-            'longitud'       : longitud,
-            'latitud'       : latitud})
-  debug(query1)*/
-
   debug("region: " + region)
   debug("species_filter: " + species_filter)
   debug("resolution_view: " + resolution_view)
@@ -2837,30 +3517,77 @@ exports.getCellOcurrences = function(req, res) {
   debug("latitud: " + latitud)
   debug("col_name: " + col_name)
   
+  pool.task(t => {
 
-  pool.any(queries.basicAnalysis.getCellOcurrences, {
-            'species_filter' : species_filter, 
-            'resolution_view': resolution_view,
-            'region'         : region,
-            'gridid'         : gridid,
-            'grid_table'     : grid_table,
-            'where_filter'   : where_filter,
-            'longitud'       : longitud,
-            'latitud'       : latitud,
-            'col_name'      : col_name}
-      ).then(function (data) {
-        debug(data.length + ' ocurrences')
-        res.json({
-          ok: true,
-          'data': data
-        })
-    }).catch(function (error) {
-      return res.json({
-        err: error,
-        ok: false,
-        message: "Error al procesar la query"
-      })
+    var query = queries.basicAnalysis.getGridIdByCoordinates
+
+    return t.any(query, {
+
+      'gridid'         : gridid,
+      'grid_table'     : grid_table,
+      'longitud'       : longitud,
+      'latitud'        : latitud,
+      'col_name'      : col_name
+
+    }).then(data => {
+
+
+      var gridid_cell = data[0].gridid
+      var name = data[0].name
+      debug('From coordinates, gridid: ' + gridid_cell)
+
+      const query1 = pgp.as.format(queries.basicAnalysis.getCellOcurrences, 
+               {'species_filter' : species_filter, 
+                'resolution_view': resolution_view,
+                'region'         : region,
+                'gridid'         : gridid,
+                'grid_table'     : grid_table,
+                'where_filter'   : where_filter,
+                'longitud'       : longitud,
+                'latitud'       : latitud,
+                'col_name'      : col_name})
+      debug(query1)
+
+      return t.any(queries.basicAnalysis.getCellOcurrences, {
+                    'species_filter' : species_filter, 
+                    'resolution_view': resolution_view,
+                    'region'         : region,
+                    'gridid'         : gridid,
+                    'grid_table'     : grid_table,
+                    'where_filter'   : where_filter,
+                    'longitud'       : longitud,
+                    'latitud'       : latitud,
+                    'col_name'      : col_name}
+              ).then(function (data) {
+                debug(data.length + ' ocurrences')
+                res.json({
+                  ok: true,
+                  'data': data,
+                  'gridid': gridid_cell,
+                  'name': name
+                })
+            }).catch(function (error) {
+              return res.json({
+                err: error,
+                ok: false,
+                message: "Error al procesar la query"
+              })
+            })
+
     })
+
+  }).catch(error => {
+
+      debug(error)
+    
+      res.json({
+          ok: false,
+          message: "Error al ejecutar la petición",
+          data:[],
+          error: error
+      })      
+
+  })
 
 }
 
@@ -3241,6 +3968,76 @@ exports.getGivenPointaValidationTables = function(req, res, next){
 }
 
 
+exports.getModifiersByTarget = function(req, res, next){
 
+  debug('getModifiersByTarget');
+
+  var target_taxons = getParam(req, 'target_taxons', [])
+
+  if(target_taxons.length == 0){
+
+    res.json({"modifiers": []})
+
+  } else {
+
+    const query = queries.countsTaxonGroups.getModifiersByTarget
+    var especievalidabusqueda = ''
+    var es_pruebas = 'false'
+
+    if(target_taxons.length == 1){
+
+      especievalidabusqueda = target_taxons[0].value
+
+    } else if(target_taxons.length == 2){
+
+      if((target_taxons[0].value == 'COVID-19 CONFIRMADO' && target_taxons[1].value == 'COVID-19 NEGATIVO') 
+        || (target_taxons[1].value == 'COVID-19 CONFIRMADO' && target_taxons[0].value == 'COVID-19 NEGATIVO')) {
+
+        es_pruebas = 'true'
+
+      } else {
+        res.json({"modifiers": []})
+      }
+
+    }
+
+    pool.task(t => {
+
+      return t.any(query, {
+
+        especievalidabusqueda: especievalidabusqueda,
+        es_pruebas: es_pruebas
+
+      }).then(data => {
+
+        res.json({'modifiers': data})
+
+      }).catch(error => {
+
+        debug(error)
+        
+        res.json({
+              ok: false,
+              message: "Error al ejecutar la petición",
+              data:[],
+              error: error
+            })
+      });
+
+    }).catch(error => {
+
+      debug(error)
+      
+      res.json({
+            ok: false,
+            message: "Error al ejecutar la petición",
+            data:[],
+            error: error
+          })
+    });
+
+  }
+
+}
 
 

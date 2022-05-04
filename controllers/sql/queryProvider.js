@@ -113,7 +113,28 @@ var queryProvider = {
   getTimeValidation: {
     getCellValidation: sqlPath('time-validation/get_cells_validation.sql'),
     getCellTraining: sqlPath('time-validation/get_cells_training.sql'),
-    getCellFirst: sqlPath('time-validation/get_cells_first.sql')
+    getCellFirst: sqlPath('time-validation/get_cells_first.sql'),
+    getCountCellFirst: sqlPath('time-validation/get_count_cells_first.sql'),
+    getCountCellTraining: sqlPath('time-validation/get_count_cells_training.sql'),
+    getCountCellValidation: sqlPath('time-validation/get_count_cells_validation.sql'),
+    getCountCellTrainingNewTarget: sqlPath('time-validation/get_count_cells_training_new_target.sql'),
+    getCountCellValidationNewTarget: sqlPath('time-validation/get_count_cells_validation_new_target.sql'),
+    getCountCellTrainingTop: sqlPath('time-validation/get_count_cells_training_top.sql'),
+    getCountCellValidationTop: sqlPath('time-validation/get_count_cells_validation_top.sql'),
+    getCountCellFirstIncidence: sqlPath('time-validation/get_count_cells_first_incidence.sql'),
+    getCountCellTrainingIncidence: sqlPath('time-validation/get_count_cells_training_incidence.sql'),
+    getCountCellValidationIncidence: sqlPath('time-validation/get_count_cells_validation_incidence.sql'),
+    getCountCellFirstPrevalence: sqlPath('time-validation/get_count_cells_first_prevalence.sql'),
+    getCountCellTrainingPrevalence: sqlPath('time-validation/get_count_cells_training_prevalence.sql'),
+    getCountCellValidationPrevalence: sqlPath('time-validation/get_count_cells_validation_prevalence.sql'),
+    getCountsBaseCount: sqlPath("time-validation/get_counts_base_count.sql"),
+    getCountCellFirstLethality: sqlPath("time-validation/get_count_cells_first_lethality.sql"),
+    getCountCellTrainingLethality: sqlPath('time-validation/get_count_cells_training_lethality.sql'),
+    getCountCellValidationLethality: sqlPath('time-validation/get_count_cells_validation_lethality.sql'),
+    getCountCellFirstNegativity: sqlPath('time-validation/get_count_cells_first_negativity.sql'),
+    getCountCellTrainingNegativity: sqlPath('time-validation/get_count_cells_training_negativity.sql'),
+    getCountCellValidationNegativity: sqlPath('time-validation/get_count_cells_validation_negativity.sql'),
+    getCountsBase: sqlPath('time-validation/get-counts-base.sql')
   },
   getTrafficLight:{
     getHistory: sqlPath('traffic-light/get-history.sql')
@@ -162,7 +183,13 @@ var queryProvider = {
     getGridSpeciesM: sqlPath('getGridSpecies/get_grid_species_M.sql'),
 
     getTargetCells: sqlPath('getGridSpecies/get_target_cells.sql'),
-    getGridSpeciesTaxons: sqlPath('especie/get_grid_species_taxons.sql')
+    getGridSpeciesTaxons: sqlPath('especie/get_grid_species_taxons.sql'),
+
+    getGridSpeciesTaxonsTrafficLight: sqlPath('especie/get_grid_species_taxons_traffic_light.sql'),
+
+    getCOVID19Cases: sqlPath('getGridSpecies/get_covid19_cases.sql'),
+
+    getCOVID19Pruebas: sqlPath('getGridSpecies/get_covid19_pruebas.sql'),
 
   },
   getGeoRelNiche: {
@@ -234,7 +261,8 @@ var queryProvider = {
 
     getCountsGroupBio: sqlPath("basic-analysis/get-counts-group-bio.sql"),
     getCountByYear: sqlPath("especie/get-count-by-year.sql"),
-    getCellOcurrences: sqlPath("especie/get-cell-ocurrences.sql")
+    getCellOcurrences: sqlPath("especie/get-cell-ocurrences.sql"),
+    getGridIdByCoordinates: sqlPath("especie/get-gridid-by-coordinates.sql")
 
     // getSource: sqlPath("basic-analysis/get-source.sql"),
     // getSourceFossil: sqlPath("basic-analysis/get-source-fossil.sql"),
@@ -332,11 +360,14 @@ var queryProvider = {
     covarBioGroup: tmplPath("taxons-group/get-counts-covar-bio.tmpl"),
     covarAbioGroup: tmplPath("taxons-group/get-counts-covar-abio.tmpl"),
     getCountsBase: sqlPath("taxons-group/get-counts-base.sql"),
+    getCountsBaseOdds: sqlPath("taxons-group/get-counts-base-odds.sql"),
     getCountsCovars: tmplPath("taxons-group/get-counts-covars.tmpl"),
     getCellsByGroupBio: tmplPath("taxons-group/get-cells-group-bio.tmpl"),
     getCellsByGroupAbio: tmplPath("taxons-group/get-cells-group-abio.tmpl"),
     getCellSincePoint: sqlPath("taxons-group/get-cell-since-point.sql"),
-    getCountsBaseGivenPoints: sqlPath("taxons-group/get-counts-base-given-points.sql")
+    getCountsBaseGivenPoints: sqlPath("taxons-group/get-counts-base-given-points.sql"),
+    getCountsBaseGreen: sqlPath('taxons-group/get-counts-green.sql'),
+    getModifiersByTarget: sqlPath('taxons-group/get-modifiers-target.sql'),
   },
 
   taxonsGroupNodes:{

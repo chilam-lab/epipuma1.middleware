@@ -30,6 +30,7 @@ var countsTaxonsGroupGivenPoints = require('../controllers/countsTaxonsGroupGive
 var countsTaxonsGroupTimeValidation = require('../controllers/countsTaxonsGroupTimeValidation.js')
 var countsTaxonsGroupTrafficLight = require('../controllers/countsTaxonsGroupTrafficLight.js')
 var generateTarget = require('../controllers/generateTarget.js')
+var generateTargetBasicAnalysis = require('../controllers/generateTargetBasicAnalysis.js')
 
 /**
  * Ruta que muestra un mensaje de bienvenida 
@@ -254,5 +255,9 @@ router.route('/countsTaxonsGroupTrafficLight')
 
 router.route('/generateTarget')
   .post(generateTarget.generateTarget)
+
+
+router.route('/generateTargetBasicAnalysis')
+  .post(generateTargetBasicAnalysis.generateTargetBasicAnalysis)
 
 module.exports = router

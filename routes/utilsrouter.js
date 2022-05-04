@@ -137,6 +137,10 @@ router.route('/especie/getGridSpeciesTaxon')
   .get(verbsCtrl.getGridSpeciesTaxonNiche)
   .post(verbsCtrl.getGridSpeciesTaxonNiche)
 
+router.route('/especie/getGridGeneratedSpecies')
+  .get(verbsCtrl.getGridGeneratedSpecies)
+  .post(verbsCtrl.getGridGeneratedSpecies)
+
 
   router.route('/especie/getGridGivenPoints')
   .get(verbsCtrl.getGridGivenPoints)
@@ -179,8 +183,10 @@ router.route('/especie/getIDCellFromCoordinates')
   .get(verbsCtrl.getIDCellFromCoordinates)
   .post(verbsCtrl.getIDCellFromCoordinates)
 
-
 router.route('/especie/getColumnsGrid')
   .post(verbsCtrl.getColumnsGrid)
+
+router.route('/especie/getModifiersByTarget')
+  .post(verbsCtrl.getModifiersByTarget)
 
 module.exports = router
